@@ -1,0 +1,682 @@
+@import "spectre";
+@import "spectre-icons";
+@import "spectre-exp";
+@import "variables";
+@import "normalize";
+@import "minimalect";
+
+.btn{
+    background-color: $siteOrange;
+    color: #fff;
+    font-family: $fontRaleway;
+    text-transform: uppercase;
+    border-color: $siteOrange;
+    font-weight: 500;
+    letter-spacing: 1px;
+    padding-left:20px;
+    padding-right:20px;
+}
+
+
+#wrapper{
+    background-color: #fff;
+
+    font-family: $bodyFont;
+
+    header.main{
+        height: 90px;
+        position: relative;
+
+        #logo{
+            position: absolute;
+            top:0;
+            bottom:0;
+            left: 12px;
+            width: 207px;
+            height: 57px;            
+            margin: auto;
+
+            #betabadge{
+                position: absolute;
+                bottom: -5px;
+                right: -25px;
+                font-size: 0.5em;
+                display: block;
+                padding:3px;
+                background-color: #fff;
+                color: $siteOrange2;
+            }
+        }
+
+        #mobilemenubtn{
+            position: absolute;
+            top:0;
+            bottom:0;
+            margin:auto;
+            right:0;
+            width: 65px;
+            height: 45px;
+            text-align: center;
+            line-height: 45px;
+            cursor:pointer;
+        }
+
+        nav.main{display: none;}
+        
+        nav.main.mobile{
+            position: absolute;
+            top:90px;
+            left:0;
+            width: 100%;
+            box-sizing: border-box;
+            display: block;
+            background-color: #fff;
+            font-family: $fontRaleway;
+            z-index: 1000;
+            padding:20px;
+            box-shadow: 0 15px 10px rgba(0, 0, 0, 0.11);
+
+            .button{
+                width: 100%;
+                margin:0;
+            }
+
+            .user_menu{
+                background-color: $siteGray2;
+                padding: 20px;
+                font-family: $defaultFont;
+
+                .userinfo{
+                    display: flex;
+                    margin-bottom: 15px;
+                    font-size: 1.25em;
+                    line-height: 1.4em;
+
+                    img{
+                        margin-right:10px;
+                        border-radius: 50px;
+                    }
+                }
+
+                ul{
+                    list-style: none;
+                    margin:0;
+                    padding:0;
+
+                    li{
+                        text-transform: uppercase;
+                        margin-bottom:10px;
+
+                        a{
+                            transition: all 0.2s ease-in-out;
+                            letter-spacing: 1.7px;
+                            font-weight: 600;
+                            text-decoration: none;
+                            color: #000;
+                        }
+
+                        a:hover{
+                            color:$siteOrange;
+                        }
+                    }
+
+                    li:last-of-type{
+                        margin-bottom: 0;
+                    }
+                }
+            }
+
+            #btn_vendorlogin{
+                display: block;
+                width: 100%;
+                height: 32px;
+                line-height: 32px;
+                color: #fff;
+                text-align: center;
+                background-color: $siteOrange1;
+                letter-spacing: 1.7px;
+                font-weight: 500;
+                text-decoration: none;
+                color: #fff;
+                font-size: 1em;
+            }
+
+            > ul{
+                margin:0;
+                list-style: none;
+                text-transform: uppercase;
+                margin-bottom: 20px;
+
+                li{
+                    margin-bottom: 20px;
+                    a{
+                        transition: all 0.2s ease-in-out;
+                        letter-spacing: 1.7px;
+                        font-weight: 500;
+                        text-decoration: none;
+                        color: #000;
+                    }
+
+                    a:hover{
+                        color:$siteOrange;
+                    }
+                }
+
+                li.current-menu-item{
+                    a{
+                        color: $siteOrange;
+                    }
+                }
+            }
+        }
+    }
+
+    #page{
+        div.page{
+            header.pageheader{
+                min-height: 200px;
+				width: 100%;
+				position: relative;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				margin-bottom:40px;
+                background-image: url("/img/herobg1.jpg");
+				
+				.overlay{
+					position: absolute;
+					height: 100%;
+					width: 100%;    
+					top:0;
+					left:0;
+					background-color: $siteOrangeTransparent;
+				}
+				
+				h1{
+					z-index: 100;
+					font-size: 2em;
+					font-weight: 300;
+					color:#fff;
+					margin:0;
+                    line-height: 1.2em;
+                    text-align: center;
+					text-transform: uppercase;
+				}
+            }
+
+            #pagebody{
+                min-height: 500px;
+
+                .innerwrapper{
+                    padding-left:25px;
+                    padding-right:25px;
+                }
+
+                form.form, div.form{
+                    margin-bottom: 0;
+                    > h1{
+                        text-align: center;
+                        font-weight: normal;
+                        line-height: 1em;
+                        font-size: 2.2em;
+                        margin-bottom: 55px;
+                    }
+                    
+                    .btn{
+                        background-color: $siteOrange;
+                        color: #fff;
+                        border-radius: 0;
+                        border:0;
+                        font-size: 0.85em;
+                        font-family: $fontRaleway;
+                        text-transform: uppercase;
+                        font-weight: 500;
+                        letter-spacing: 1px;
+                        line-height: 1.2rem;
+                    }
+                    .btn.block{
+                        display: block;
+                        margin-bottom: 10px;
+                    }
+
+                    .formsection{
+                        margin-bottom:65px;
+
+                        a.link{
+                            text-transform: uppercase;
+                            cursor: pointer;
+                            color: $siteDarkOrange1;
+                            font-family: $fontRaleway;;
+                            display: block;
+                            margin-top: 10px;
+                            margin-bottom: 10px;
+                            text-decoration: none;
+                        }
+
+                        > h3{
+                            text-transform: uppercase;
+                            font-weight: 500;
+                            font-family: $fontRaleway;
+                            font-size:1.30em;
+                            letter-spacing: 3px;
+                            margin-bottom: 30px;
+                            
+                            span{
+                                color: $siteOrange;
+                            }
+                            
+                            span.categoryname{
+                                color: #000;
+                            }
+                        }
+                    }
+
+                    .row{
+                        align-items: flex-start;
+                        .columns{
+                            position: relative;
+                            margin-bottom: 6px;
+                            margin-left:0;
+                            margin-right:0;                            
+                            
+                            span.error{
+                                position: relative;
+                                top: -18px;
+                                margin:0;
+                                padding:0;
+                                color: red;
+                                font-size: 0.9em;
+                                list-style: none;
+                            }
+                        }
+                        
+                        
+                        label{
+                            text-transform: uppercase;
+                            font-weight: 500;
+                            font-family: $fontRaleway;
+                            font-size:1em;
+                            letter-spacing: 0.5px;
+                        }
+                        
+                        input, select{
+                            font-size: 1em;
+                        }
+                        
+                        select[multiple=multiple]{
+                            height: 150px;
+                            margin-bottom:3px;
+                        }
+
+                        .Select{
+                            margin-bottom:10px;
+                        }
+                        
+                        small{
+                            margin-bottom:25px;
+                            font-size: 0.75em;
+                            color: $siteGray1;
+                            display: block;
+                        }
+                        
+                        input.error{
+                            border:1px solid red;
+                        }
+
+                        input[type=text], input[type=password]{
+                            border-radius: 0px;
+                        }
+                        
+                        .slider-container{
+                            margin:auto;
+                            height: 40px;
+                            margin-top:20px;
+                            
+                            .scale{
+                                ins{
+                                    font-size: 12px;
+                                }
+                            }
+                        }
+                        
+                        textarea{
+                            height: 250px;
+                        }
+                    }
+                    
+                    .form-group{
+                        margin-bottom: 15px;
+                        
+                        
+                    }
+                    
+                    .faqrow{
+                        > a.button{
+                            display: inline-block;
+                            cursor: pointer;
+                        }
+                        textarea{
+                            height: 150px;
+                        }
+                    }
+
+                    .category_questions{
+                        .row{
+                            margin-bottom: 20px;
+                        }
+                        ul{
+                            margin:0;
+                            padding:0;
+                            list-style: none;
+
+                            li{                                       
+                                font-family: $fontFutura;
+
+                                input{
+                                    margin-bottom:0;
+                                }
+
+                                strong{
+                                    font-weight: normal;
+                                }
+                            }
+                        }
+                    }                
+                }
+            }
+        }
+    }
+
+    footer.main{
+        margin-bottom: 35px;
+        padding-bottom: 35px;
+        margin-top: 15px;
+        
+        #copyright{
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        nav{
+            ul{
+                font-family: $fontFutura;
+                padding: 0;
+                margin:0;
+                list-style: none;
+                text-align: center;
+
+                li{
+                    display: inline-block;
+                    margin-right:7px;
+                    margin-top:0;
+                    a{
+                        text-decoration: none;
+                        color: #000;
+                    }
+                }
+
+                li:after{
+                    content: "|";
+                    padding-left: 7px;
+                }
+
+                li:last-of-type{
+                    margin-right:0;
+                }
+
+                li:last-of-type:after{
+                    padding-left:0;
+                    content: none;
+                }
+            }
+        }
+    }
+}
+
+
+
+@media only screen and (min-width: 48em){
+    #wrapper{
+        .innerwrapper{
+            position: relative;
+            max-width: 1100px;
+            height: 100%;
+            width: 90%;
+            margin: auto;
+        }
+
+        header.main{
+            height: 90px;
+            width: 100%;
+            background-color: #fff;
+
+            #logo{
+                img{
+                    width: 100%;
+                    height: auto;
+                }
+            }
+        }
+
+        #page{
+            div.page{
+                header.pageheader{
+                    height: 300px;
+                }
+
+                #pagebody{
+                    .innerwrapper{
+                        padding-left:0;
+                        padding-right:0;
+                    }
+                }
+            }
+        }
+
+        footer.main{
+            margin-top: 25px;
+        }
+    }
+}
+
+@media only screen and (min-width: 55em){
+    #wrapper{
+        header.main{
+            #mobilemenubtn{
+                display: none;
+            }
+
+            nav.main{
+
+                display: block;
+                position: absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                margin:auto;
+                height: 26px;
+                width: 70%;
+                max-width: 670px;               
+                font-size: 0.875em;
+                text-transform: uppercase;
+                font-family: $fontRaleway;
+
+                #btn_vendorlogin{
+                    display: block;
+                    width: 170px;
+                    height: 26px;
+                    
+                    position: absolute;
+                    top:0;
+                    right:0;
+                    line-height: 27px;
+                    color: #fff;
+                    text-align: center;
+                    background-color: $siteOrange1;
+                    letter-spacing: 1.7px;
+                    font-weight: 600;
+                    text-decoration: none;
+                    color: #fff;
+                    font-size: 1em;
+                }
+
+                #btn_vendoraccount{
+                    width: 160px;
+                    height: 26px;
+                    display: block;
+                    position: absolute;
+                    top:0;
+                    right:0;
+                    line-height: 27px;
+                    color: #fff;
+                    text-align: center;
+                    background-color: $siteOrange1;
+                    letter-spacing: 1.7px;
+                    font-weight: 600;
+                    text-decoration: none;
+                    color: #fff;
+                }
+
+                .user_menu{
+                    font-family: $defaultFont;
+                    width: 200px;                    
+                    display: block;
+                    position: absolute;
+                    z-index: 100;
+                    background-color: #fff;
+                    top:-15px;
+                    right:0;
+
+                    
+                    
+
+                    .userinfo{
+                        display: flex;
+                        padding-top:7px;
+
+                        img{
+                            order:2;
+                            border-radius: 50px;
+                        }
+
+                        .name{
+                            font-weight: bold;
+                        }
+
+                        div{
+                            order:1;
+                            width: 70%;
+                            text-align:right;
+                            padding-right:10px;
+                            display: flex;
+                            align-content: center;
+                            justify-content: flex-end;
+                            font-size: 1.1em;
+                            text-transform: uppercase;
+                            line-height: 1.2em;
+                            font-weight: 400;
+
+                            > span{
+                                padding-top:7px;
+                            }
+                        }
+
+                    }
+
+                    > ul{
+                        position: relative;
+                        top:0;
+                        right:0;
+                        padding:17px;
+                        margin-top:20px;
+
+                        li{
+                            text-align: right;
+                            margin:0;                            
+                            line-height: 1.35em;
+                            display: block;
+                            margin-bottom: 8px;
+                            span.name{
+                                font-size: 1.2em;
+                                font-weight: bold;
+                            }
+                        }
+
+                        li.useraccount{
+                            margin-bottom: 25px;
+
+                            img{
+                                float:left;
+                                border-radius: 60px;
+                                position: relative;
+                                top:-5px;
+                            }
+                        }
+                    }
+                }
+
+                ul{
+                    position: absolute;
+                    left:0;
+                    top:0;
+                    right: 200px;
+                    margin:0;
+                    padding:0;
+                    list-style: none;                
+                    line-height: 27px;
+                    text-align: right;
+
+                    li{
+                        display: inline-block;
+                        margin-right: 30px;
+                        margin-top:0;
+                        a{
+                            transition: all 0.2s ease-in-out;
+                            letter-spacing: 1.7px;
+                            font-weight: 500;
+                            text-decoration: none;
+                            color: #000;
+                        }
+
+                        a:hover{
+							color:$siteOrange;
+						}
+                    }
+
+                    li.current-menu-item {
+                        a{
+                            color: $siteOrange;
+                        }
+                    }
+
+                    li:last-of-type{
+                        margin-right:0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 64em){
+    #wrapper{
+        header.main{
+            #mobilemenubtn{
+                display: none;
+            }            
+        }
+    }
+}
+
+@import '_homepage';
+@import '_login';
+@import '_registration';
+@import '_subscriptions';
+@import '_mediauploader';
+@import '_account';
+@import '_profile';
+@import '_vendors';
+
+

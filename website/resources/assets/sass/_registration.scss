@@ -1,0 +1,386 @@
+#vendorregister.page{    
+    .react-spinner{
+        left: 16px;
+        top: 26px;
+        margin-left: 10px;
+
+        .react-spinner_bar{
+            background-color: $siteOrange;
+        }
+    }
+
+    #pagebody{
+        position: relative;
+
+        #btn_submit{
+            margin-top: 15px;
+        }
+    }
+    
+    .multi-step{
+        .footer-buttons{
+            text-align: center;
+            a.btn{
+                 margin:auto;
+                 margin-bottom: 8px;
+            }
+        }
+
+        .step{            
+            margin-bottom: 55px;
+        }
+    }
+
+    #firstrunapp{
+        .multi-step{
+            .footer-buttons{
+                .btn-prev{display: none;}
+            }
+        }
+    }
+
+    .pagination{
+        a{
+            width: 100%;
+        }
+    }
+
+    #page1{
+        .formsection{
+            margin-bottom:0;
+        }
+    }
+
+    #verification_message{
+        text-align: center;
+    }
+
+    #vendorpackage{
+        > h2{
+            text-align: center;
+            margin:0;
+            font-size: 1.75em;
+            font-weight: normal;   
+            line-height: 1em; 
+            margin-bottom: 40px;        
+        }
+
+        a.cancelBtn{
+            background-color: $siteDarkOrange2;
+            color: #fff;
+        }
+
+        > .subduration{
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.25em;
+
+            .duration{
+                margin-bottom: 7px;
+                input{
+                    margin:0;
+                    display: inline-block;
+                    vertical-align: middle;
+                    margin-left:10px;
+                }
+            }
+        }       
+
+        #packages, #addons{
+            section.package{                                    
+                background-color: #fff;                                
+                header{
+                    position: relative;
+                    height:75px;                                                
+                    background-color: $siteOrange4;
+                    color:#fff;
+                    box-sizing: border-box;
+                    padding:9px;
+                    
+                    h1{
+                        margin:0;
+                        font-size: 1.6em;
+                        font-family: $fontFutura;
+                        text-transform: uppercase;
+                        position: absolute;
+                        font-weight: 400;
+                        bottom:11px;
+                        left:10px;
+                        line-height: 1em;
+                    }
+                    
+                    .price{
+                        position: absolute;
+                        top:9px;
+                        right:10px;
+                        text-align: right;   
+                        line-height: 1em;                                                 
+                        font-size: 1em;
+                        color: #fff;
+                        font-family: $fontRaleway;
+                    }
+                }
+                
+                .details{
+                    padding:10px;
+                    
+                    ul{
+                        display: block;
+                        margin:0;
+                        list-style: none;
+                        padding:0;
+                        font-size: 1.1em;
+                        
+                        li{
+                            position: relative;
+                            margin-bottom: 5px;
+                            
+                            i{
+                                margin-right:10px;
+                            }
+
+                            input[type=radio]{
+                                margin-right:6px;
+                                margin-left:3px;
+                                margin-bottom:0;
+                            }
+                        }
+                        
+                    }
+                }
+                
+                .selection{
+                    padding:13px;
+                    font-size: 0.65em;
+                    font-family: $fontRaleway;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                    color: $siteGray3;
+                    text-align: center;
+                    padding-bottom:18px;
+                }
+            }
+        }
+
+        #packages{
+            margin-bottom: 55px;
+        }
+    }
+
+    #vendorpayment{
+        .formsection{
+            max-width: 650px;
+            margin:auto;
+
+            table.totals{
+                font-size: 1.15em;
+                width: 100%;                
+                margin:auto;
+
+                .totalsline{
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+}
+
+@media 
+only screen and (max-width: 760px),
+(min-device-width: 768px) and (max-device-width: 1024px)  {
+    #vendorregister.page{
+        #vendorpackage{
+            #packagedetails{            
+                table{
+                    font-size: 1.2em;
+                }
+                table, thead, tbody, th, td, tr{
+                    display: block;
+                }
+
+                thead tr { 
+                    position: absolute;
+                    top: -9999px;
+                    left: -9999px;
+                }
+
+                tr { border: 1px solid $siteOrange1; }
+
+                td { 
+                    /* Behave  like a "row" */
+                    border: none;
+                    position: relative;
+                    padding-left: 50%; 
+
+                    input{
+                        margin:0;
+                    }
+                }
+                
+                td:before { 
+                    /* Now like a table header */
+                    position: absolute;
+                    /* Top/left values mimic padding */
+                    top: 10px;
+                    left: 15px;
+                    width: 45%; 
+                    padding-right: 10px; 
+                    white-space: nowrap;
+                    font-weight: bold;
+                    color: $siteOrange1;
+                    font-family: $fontRaleway;
+                    text-transform: uppercase;
+                }
+
+                tr.heading{
+                    background-color: $siteOrange1;
+                    color: #fff;
+                }
+
+                tr.subs{
+                    td:nth-of-type(1):before { content: ""; }
+                    td:nth-of-type(2):before { content: "Free"; }
+                    td:nth-of-type(3):before { content: "Bronze"; }
+                    td:nth-of-type(4):before { content: "Silver"; }
+                    td:nth-of-type(5):before { content: "Gold"; }
+                    td:nth-of-type(6):before { content: ""; }
+                }
+
+                tr.addons{
+                    td:nth-of-type(1):before { content: "Addon"; }
+                    td:nth-of-type(2):before { content: "Pricing"; }
+                    td:nth-of-type(3):before { content: "Description"; }
+                }
+
+                
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 48em){
+    #vendorregister.page{
+        .pagination{
+            text-align: center;
+            a{
+                width: 250px;
+            }
+        }
+        .multi-step{
+            .footer-buttons{
+                button.btn{
+                    background-color: $siteOrange;
+                    border-color: $siteOrange;
+                    font-size: 1em;
+                    width: 100%;
+                    display: inline-block;
+                    max-width: 150px;
+                    margin-bottom: 0;
+                }
+            }
+            .progtrckr{
+                text-align: center;
+
+                li{
+                    display: inline-block;
+                    margin-right: 25px;
+                }
+
+                li:last-of-type{
+                    margin-right:0;
+                }
+            }
+        }
+        #vendorpackage{
+            > .subduration{
+                text-align: center;
+                margin-bottom: 40px;
+                font-size: 1.4em;
+                text-align: center;
+                display: flex;
+                justify-content: space-between;
+
+                .duration{
+                    width: 30%;
+                    margin-bottom: 7px;
+                    display: inline-block;
+                    line-height: 1.1em;
+                    input{
+                        margin:0;
+                        display: block;                        
+                        margin:auto;
+                        margin-top:6px;
+                    }
+                }
+            }
+
+            #packagedetails{
+                table{
+                    width: 100%;
+                    font-size: 1em;
+                    thead{
+                        tr{
+                            th{
+                                font-family: $fontRaleway;
+                                font-size: 1.3em;
+                                text-transform: uppercase;
+                                font-weight: normal;
+                            }
+                        }                        
+                    }
+
+                    tbody{
+                        tr.price{
+                            td{
+                                font-size:2em;
+                            }
+                        }
+                        tr.heading{
+                            background-color: $siteOrange1;
+                            color: #fff;
+                            td{
+                                padding-left:10px;
+                            }
+                        }
+
+                        tr.subs{
+                            input{
+                                margin:0;
+                            }
+                        }
+
+                        tr.addons{
+                            td{
+                                padding-left:10px;
+
+                                input{
+                                    margin:0;
+                                    margin-left:6px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+
+
+            #packages, #addons{
+                display: flex;
+                justify-content: space-between;
+                section.package{
+                    width: 26%;
+                }
+            }
+
+            #addons{
+                section.package{
+                    width: 32%;
+                }
+            }
+        }
+    }
+}

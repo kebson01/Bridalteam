@@ -1,0 +1,424 @@
+#vendors{
+    .pageheader{
+        h1{
+            text-align: center;            
+            span{
+                display: block;
+                width: 100%;
+                line-height: 1.2em;
+                font-size: 1em;
+                margin:auto;
+                margin-top:20px;
+                font-family: $fontWisdomScript;
+                text-transform: capitalize;
+            }
+        }
+    }
+}
+
+#vendorcategories{
+    max-width: 1022px;
+    margin: auto;
+
+    article.category{
+        width: 100%;
+        height: 200px;
+        background-image: url('/img/cat_bg.jpg');                        
+        display: block;
+        margin-bottom: 25px;
+        
+        a{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            text-decoration: none;
+            
+            .inner{
+                height: 60%;
+                width: 85%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            
+            span.categoryname{
+                font-size: 2.2em;
+                text-align: center;
+                color: #fff;
+                display: block;
+                width: 90%;
+                margin:auto;
+                font-family: $fontWisdomScript;
+                line-height: 1.2em;
+                
+            }
+            
+            span.categorylabel{
+                color: #fff;
+                font-size: 1.25em;
+                text-transform: uppercase;
+                text-align: center;
+                display: block;
+                width: 100%;
+                margin:auto;
+            }
+            
+            
+        }
+    }
+}
+
+#vendorlisting{
+    .clear{
+        clear:both;
+    }
+    #mobilevendorfilterbtn{
+        position: relative;
+        height: 52px;
+        line-height: 32px;
+        padding:10px;
+        color: #fff;
+        text-transform: uppercase;
+        background-color: $siteOrange;
+        display: block;
+        margin-bottom:25px;
+        cursor: pointer;
+        text-decoration: none;
+        
+        svg{
+            position: absolute;
+            top:18px;
+            right:18px;
+            path{
+                fill: #fff;
+            }
+        }
+    }
+    #vendor_filters{    
+        display: none;                    
+        #filter_bylocation{
+            border:1px solid $siteGray2;
+            padding:20px;
+            margin-bottom:25px;
+            h1{
+                margin:0; 	 
+                margin-bottom: 26px;
+            }
+            
+            label{
+                display: block;
+                color: $siteGray3;
+                font-weight: $fontRaleway;
+                font-size: 0.875em;
+                letter-spacing: 1px;
+                margin-bottom: 6px;
+            }
+            
+            input[type=text]{
+                border: 1px solid $siteGray3;
+                height: 32px;
+                width: 100%;
+                padding:3px;
+                display: block;
+                box-sizing: border-box;
+            }
+        }
+        
+        .filter_module{
+            margin-bottom: 35px;
+            
+            h1{
+                height: 47px;
+                background-color: $siteOrange4;
+                color: #fff;
+                font-size: 1.375em;
+                text-align: center;
+                font-family: $fontFutura;
+                margin:0;
+                font-weight: normal;
+                line-height: 47px;
+                text-transform: uppercase;
+                margin-bottom:15px;
+            }
+            
+            .options{
+                width:80%;
+                margin:auto;
+                
+                .option{
+                    margin-bottom: 10px;
+                    label{
+                        font-size: 0.975em;
+                        font-family: $fontRaleway;
+                        font-weight: 500;
+                    }
+                    
+                    input{
+                        margin-right: 10px;
+                    }
+                }
+                
+                .clearradio{
+                    color: $siteOrange2;
+                    text-transform: uppercase;
+                    cursor:pointer;
+                    font-size: 0.85em;
+                }
+            }
+            
+            .options.inline{
+                input[type=text]{
+                    border: 1px solid $siteGray3;
+                    height: 32px;
+                    width: 100%;
+                    padding:3px;
+                    display: block;
+                    box-sizing: border-box;
+                    margin-bottom:20px;
+                    outline: none;
+                }
+                
+                input[type=text]:focus{
+                    outline: none;
+                }
+                
+                select{
+                    width: 100%;
+                    display: block;
+                    margin-bottom: 16px;
+                }
+                
+                a.button{
+                    width: 100%;
+                }
+            }
+        }
+    }
+
+    #vendor_filters.mobileactive{
+        position: absolute;
+        display: block;
+        z-index: 100;
+        background-color: #fff;
+        max-width: 320px;
+        width: 85%;
+        box-shadow: 0px 20px 10px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+    }
+    
+    #vendor_list{
+        article.media{
+            margin-bottom:15px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+            
+            a{
+                display: block;
+            }
+            
+            img{
+                width: 100%;
+                height: auto;
+            }
+        }
+        div.empty{
+            text-align: center;
+            font-size: 1.4em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 120px;
+        }
+        article.vendor{
+            border:1px solid $siteGray2;
+            margin-bottom:27px;
+            position: relative;            
+
+            .vendorflag{
+                position: absolute;
+                top:0;
+                left:0;
+                width: 100%;
+                box-sizing: border-box;
+                background-color: $siteOrange2; 
+                color: #fff;
+                padding:6px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                text-align: center;
+                font-size: 0.875em;   
+            }
+            
+            img{
+                width: 100%;
+                height: auto;
+            }
+            header{
+                height: auto;
+                display: block;
+                padding:17px;
+                width:auto;
+                margin-bottom:0;
+                
+                h1{
+                    margin:0;
+                    font-size: 1.375em;
+                    line-height: 1.2em;
+                    font-family: $fontRaleway;
+                    font-weight: 500; 
+                    margin-bottom:5px;
+                    text-transform: none;
+                    
+                    a{
+                        text-decoration: none;                                         
+                        color: $siteOrange2;  
+                    }                                                                    
+                }
+                
+                .rating{
+                    margin-bottom: 6px;
+                    color: $siteOrange2;
+                    
+                    i{
+                        padding-right:4px;
+                    }
+                }
+                
+                .address{
+                    font-size: 0.875em;
+                    color: $siteGray3;
+                    font-weight: $fontFutura;
+                }
+            }
+        }
+
+        article.vendor.featured{
+            border:2px solid $siteOrange2;
+        }
+    }
+}
+
+@media only screen and (min-width: 48em){
+    #vendorcategories{
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        
+        article.category{
+            width: 48.5%;
+        }
+    }
+    #vendorlisting{
+        #mobilevendorfilterbtn{
+            display: block;
+            max-width: 320px;
+        }
+        
+        #vendor_list{
+            display: flex;
+            justify-content: space-between;          
+            width: 100%;
+            height: auto;
+            flex-wrap: wrap;
+            
+            article.vendor{
+                width: 31%;
+            }
+            
+            article.media{
+                width: 32%;
+                                                
+                img{
+                    width: 100%;
+                    height: auto;
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (min-width: 68.75em){
+    #vendors{
+        .pageheader{
+            h1{
+                text-align: center;            
+                span{
+                    display: block;
+                    width: 100%;
+                    line-height: 1.2em;
+                    font-size: 1.6em;
+                    margin:auto;
+                    margin-top:10px;
+                    font-family: $fontWisdomScript;
+                    text-transform: capitalize;
+                }
+            }
+        }
+    }
+    #vendorcategories{
+        article.category{
+            width:314px;
+            height: 314px;
+            margin-bottom: 35px;
+            
+            a{
+                .inner{
+                    height: auto;
+                    
+                    span.categoryname{
+                        margin-bottom:10px;
+                    }
+                } 
+            }
+        }
+    }
+    #vendorlisting{        
+        padding:20px;
+        padding-top:0px;
+        
+        #mobilevendorfilterbtn{
+            display: none;
+        }
+        
+        #vendor_filters{
+            display: inline-block;
+            width: 28%;
+            vertical-align: top;
+
+            .filter_module{
+                .options{
+                    input{
+                        margin-bottom: 0;
+                    }
+                    label{
+                        display: inline;
+                    }
+                }
+            }
+        }
+        
+        #vendor_list{
+            display: inline-flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            width: 70%;
+            vertical-align: top;
+            float:right;
+            
+            article.vendor{
+                max-width: 283px;
+                max-height: 393px;
+                width: 31%;
+            }
+            
+            article.vendor:nth-child(3n){
+                margin-right:0;
+            }
+        }
+    }
+}

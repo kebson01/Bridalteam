@@ -1,0 +1,34 @@
+$siteBlack: #222222;
+$siteBlack1: #010101;
+$siteBlack2: #303030;
+$siteOrange: #ff8c1c;
+$siteOrange1: #FF9000;
+$siteOrange2: #F36705;
+$siteOrange3: #eb5f22;
+$siteOrange4: #ff9000;
+$siteOrange5: #f5ad00;
+$siteDarkOrange1: #f36705;
+$siteDarkOrange2: #ec5400;
+$siteGray1: #7b7b7b;
+$siteGray2: #EAEAEA;
+$siteGray3: #9C9C9D;
+$siteGray4: #f4f4f4;
+$siteOrangeTransparent: rgba(243,103,5,0.75);
+
+$bodyFont: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+$fontFutura: "futura-pt", sans-serif;
+$fontRaleway: "raleway", sans-serif;
+$fontWisdomScript: 'wisdom_scriptregular';
+$defaultFont: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+body{
+    font-family: $bodyFont;
+}
+
+h1{
+    font-family: $defaultFont;
+}
+
+h2{
+    font-family: $fontFutura;
+}
