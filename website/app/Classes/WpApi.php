@@ -2,7 +2,11 @@
 namespace App\Classes;
 
 class WpApi{
-    protected $url = 'http://admin.bridalteam.dev/wp-json/';
+    protected $url = "";
+
+    public function __construct(){
+        $this->url = env('ALLOW_ORIGIN') . "/wp-json/";
+    }
 
     public function getMenu($id){
         $endpoint = $this->url . 'menus/v1/menus/' . $id;
