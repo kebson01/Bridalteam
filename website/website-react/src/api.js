@@ -4,7 +4,7 @@ export default class Api{
     constructor(){
         this.apiendpoint = "";
         if(process.env.NODE_ENV == "production"){
-            this.apiendpoint = "http://api.bridalteam.com";
+            this.apiendpoint = "http://bridalteam.projectdev.site";
         }else{
             this.apiendpoint = "http://bridalteam.dev";
         }

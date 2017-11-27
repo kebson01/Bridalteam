@@ -2,7 +2,11 @@ import axios from "axios";
 
 export default class Api{
     constructor(){
-        this.apiendpoint = 'http://bridalteam.dev';
+        if(process.env.NODE_ENV == "production"){
+            this.apiendpoint = "http://bridalteam.projectdev.site";
+        }else{
+            this.apiendpoint = "http://bridalteam.dev";
+        }
         
         this.client = null;   
 
