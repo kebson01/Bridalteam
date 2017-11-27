@@ -19,7 +19,7 @@ web.config
 *.mp4
 node_modules
 .htaccess
-vendor
+/website/vendor
 *.DS_Store
 *Thumbs.db
 *.sass-cache*
