@@ -1,6 +1,8 @@
 <?php
 namespace App\Classes;
 
+use GuzzleHttp\Client;
+
 class WpApi{
     protected $url = "";
 
@@ -27,7 +29,9 @@ class WpApi{
 
 
     private function getData($endpoint){
-        $response = file_get_contents($endpoint, false);
-        return json_decode($response);
+        $client = new Client();
+        $response = $client->get($endpoint);
+        $jsonresponse = (string) $response->getBody();
+        return json_decode($jsonresponse);
     }
 }

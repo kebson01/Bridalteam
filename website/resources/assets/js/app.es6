@@ -1,6 +1,22 @@
 $(document).ready(function(){
     "use strict";
 
+    var grid = $('#gallerygrid .grid').imagesLoaded(function(){
+        grid.isotope({
+            // options
+            itemSelector: '.item',
+            masonry: {
+                columnWidth: 275
+            }
+        });
+    })
+
+    /*var grid = $('#gallerygrid .grid').isotope({
+        // options
+        itemSelector: '.item',
+        layoutMode: 'masonry'
+    });*/
+
     $("#homepage #heroimage select").minimalect({
         placeholder: "Select a category to begin",
         searchable: false,

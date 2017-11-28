@@ -16,7 +16,8 @@
         <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
         <script type="text/javascript">
             Stripe.setPublishableKey('pk_test_zaJ3Zvbdy2m0aPUwPvjudqly');
-        </script>
+        </script>        
+        
         <script src="/js/all.js"></script>
         @yield('head')
     </head>

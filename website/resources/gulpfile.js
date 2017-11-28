@@ -24,7 +24,10 @@ gulp.task('sass', function(){
 });
 
 gulp.task('js', function(){
-    return gulp.src([
+    return gulp.src([        
+        "./assets/js/imagesloaded.pkgd.min.es6",
+        "./assets/js/isotope.pkgd.min.es6",
+        "./assets/js/fit-columns.es6",
         "./assets/js/jquery.minimalect.min.es6",
         "./assets/js/js.cookie.es6",
         "./assets/js/jquery.payment.min.es6",
