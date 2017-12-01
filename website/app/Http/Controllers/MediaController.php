@@ -12,6 +12,7 @@ use App\MediaColor;
 use App\MediaTheme;
 use App\Media;
 use App\Vendor;
+use App\MediaReview;
 
 use Log;
 
@@ -128,6 +129,17 @@ class MediaController extends Controller
         }        
         
         return response()->json(["status" => "OK", "media" => $allmedia]);
+    }
+
+    public function getPublicMedia($id){
+        $media = MediaReview::with('media')->find($id);
+        if($media){
+            return response()->json(["status" => "OK", "media" => $media]);
+        }else{
+            return response()->json([
+                "status" => "Failed"
+            ]);
+        }
     }
 
     public function getVendorMedia($id = null){

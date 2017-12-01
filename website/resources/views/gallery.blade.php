@@ -17,7 +17,7 @@
                             <div class="grid">
                                 @foreach($media as $m)
                                     <?php $tags = explode(",", $m->media->keyword); ?>
-                                    <div class="item">
+                                    <div class="item" data-id="<?php print $m->id; ?>">
                                         <div class="item-content">
                                             <div class="image"><img src="/storage<?php print $m->media->thumbnailpath; ?>" /></div>
                                             <div class="tags">
@@ -149,10 +149,22 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>                        
                     </div>
                 </div>	
             </div>			
         </div>
     </div>    
+    <div id="imagedisplay">
+        <div class="imagecover"></div>
+        <div class="imagecontainer">
+            <div class="innerwrapper">
+                <header><a id="imagedisplay_close"><i class="fa fa-times" aria-hidden="true"></i></a></header>
+                <div class="imagecontent">
+                    <div class="image"><img src="" /></div>
+                    <div class="tags"></div>
+                </div>                
+            </div>
+        </div>
+    </div>
 @endsection

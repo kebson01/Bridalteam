@@ -1,6 +1,32 @@
 $(document).ready(function(){
     "use strict";
 
+    $("#gallerygrid .item").on("click", function(){
+        var mediaid = $(this).data('id');
+        console.log(mediaid);
+        $("#imagedisplay").fadeIn(300, function(){
+            $.get("http://bridalteam.dev/api/v1/media/public/" + mediaid, function(res){
+                console.log(res);
+                $("#imagedisplay .imagecontainer .image img").attr('src', "/storage" + res.media.media.urlpath);
+                $("#imagedisplay .imagecontainer .tags").empty();
+
+                var keywords = res.media.media.keyword.split(",");
+                keywords.forEach((function(val, index){
+                    console.log(val);
+                    $("#imagedisplay .imagecontainer .tags").append("<span><a>" + val + "</a></span>");
+                }));
+                $("#imagedisplay .imagecontainer").fadeIn(400);
+            });
+            
+        });
+    });
+
+    $("#imagedisplay_close").on("click", function(){
+        $("#imagedisplay").fadeOut(300, function(){
+            $("#imagedisplay .imagecontainer").hide();
+        });
+    });
+
     var grid = $('#gallerygrid .grid').imagesLoaded(function(){
         grid.isotope({
             // options
@@ -9,13 +35,7 @@ $(document).ready(function(){
                 columnWidth: 275
             }
         });
-    })
-
-    /*var grid = $('#gallerygrid .grid').isotope({
-        // options
-        itemSelector: '.item',
-        layoutMode: 'masonry'
-    });*/
+    });
 
     $("#homepage #heroimage select").minimalect({
         placeholder: "Select a category to begin",
@@ -25,7 +45,6 @@ $(document).ready(function(){
         }
     });
     
-
     $("#mobilemenubtn").click(function(){
         if($("nav#mainmenu").hasClass('mobile')){
             $("nav#mainmenu").removeClass('mobile');

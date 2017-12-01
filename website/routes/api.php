@@ -66,6 +66,8 @@ Route::group(['prefix' => 'v1'], function(){
             Route::delete('vendormedia/{id}', 'MediaController@deleteVendorMedia');
             Route::post('submitvendormedia/{id}', 'MediaController@submitVendorMedia');
         });
+
+        Route::get('public/{id}', 'MediaController@getPublicMedia');
     });
 
     Route::group(['prefix' => 'admin'], function(){
