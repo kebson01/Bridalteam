@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 
 use App\Vendor;
 use App\VendorClaim;
+use App\VendorCategory;
+use App\VendorRegion;
 
 use App\Media;
 use App\MediaCategory;
@@ -24,6 +26,19 @@ class AdminController extends Controller{
             'status' => "OK",
             'vendors' => $vendors,
             'claims' => array()
+        ]);
+    }
+
+    public function getVendor($id){
+        $vendor = Vendor::find($id);
+        $categories = VendorCategory::all();
+        $regions = VendorRegion::all();
+
+        return response()->json([
+            'status' => 'OK',
+            'vendor' => $vendor,
+            'regions' => $regions,
+            'categories' => $categories
         ]);
     }
 

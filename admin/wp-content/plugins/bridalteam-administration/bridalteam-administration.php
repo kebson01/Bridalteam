@@ -32,7 +32,7 @@ function bridalteam_load_scripts(){
 function bridalteam_render_editvendor_admin(){
     ?>
         <div class="wrap">
-            <h1 class="wp-heading-inline">Edit Vendor</h1>
+            <h1 class="wp-heading-inline">Edit Vendor #ID <?php print $_GET['id']; ?></h1>
             <div id="bridalteamadmin_editvendor">Editing a vendor</div>            
         </div>
     <?php

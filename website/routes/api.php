@@ -76,6 +76,7 @@ Route::group(['prefix' => 'v1'], function(){
         Route::get('/media/{id}', 'AdminController@getMedia');        
         Route::post('/media/{id}', 'AdminController@saveMedia');
         Route::post('/media/{id}/review', 'AdminController@approveMedia');
+        Route::get('/vendors/{id}', 'AdminController@getVendor');
         Route::get('/vendors', 'AdminController@getAllVendors');
         Route::get('/mediareview', 'AdminController@getAllMediaReview');        
         Route::post('/importVendors', 'VendorController@importVendors');
