@@ -1,24 +1,39 @@
 #gallerysearch{
     margin-bottom: 35px;
-    input{
-        width: 100%;
-        font-size: 1.45em;
-        padding:12px;
-        border-radius: 10px;
-        outline: none;
-        background-color: $siteGray2;
-        border:2px solid #fff;
-        transition: all 0.3s ease-in-out;
+
+    .keywords{
+        .selectize-input{
+            background-color: $siteGray2;
+            border:2px solid #fff;
+            border-radius: 10px;
+            outline: none;
+            box-shadow: none;
+        }
+        .selectize-control input {
+            width: 100%;
+            font-size: 1.45em;
+            padding:12px;
+            transition: all 0.3s ease-in-out;
+        }
+    
+        ::-webkit-input-placeholder{
+            font-style: italic;
+        }
+    
+        input:focus{
+            background-color: #fff;
+            border:2px solid $siteDarkOrange1;
+        }
     }
 
-    ::-webkit-input-placeholder{
-        font-style: italic;
-    }
+    .categories{
+        margin-bottom: 12px;
 
-    input:focus{
-        background-color: #fff;
-        border:2px solid $siteDarkOrange1;
+        .selectize-input{
+            border-radius: 10px;
+        }
     }
+    
 }
 #gallerygrid{
     height: 90%;
@@ -26,6 +41,8 @@
     .grid {
         position: relative;
         height: 90%;
+        opacity: 0;
+        transition: all 0.4s ease-in-out;
 
         .item {
             display: block;           
@@ -185,6 +202,18 @@
 }
 
 @media only screen and (min-width: 48em){
+    #gallerysearch{
+        display: flex;
+        justify-content: space-between;
+
+        > div.categories{
+            width: 30%;
+        }
+
+        > div.keywords{
+            width: 68%;
+        }
+    }
     #gallerygrid{
         .grid {
             position: relative;

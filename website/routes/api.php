@@ -68,6 +68,7 @@ Route::group(['prefix' => 'v1'], function(){
         });
 
         Route::get('public/{id}', 'MediaController@getPublicMedia');
+        Route::post('public/filter', 'MediaController@getFilteredMedia');
     });
 
     Route::group(['prefix' => 'admin'], function(){

@@ -76,13 +76,37 @@ class MediaController extends Controller
         }        
     }
 
+    public function getFilteredMedia(Request $request){
+        $categoryid = $request->category;
+        $keywords = $request->keywords;
+
+        $query = Media::where("status", "=", 2);
+        $queryCount = 0;
+
+        if(!empty($categoryid)){
+            $query->where('category', '=', $categoryid);
+            $queryCount++;
+        }
+
+        if(!empty($keywords)){
+            $keywordarr = explode(",", $keywords);
+            foreach($keywordarr as $word){
+                $query->orWhere('keyword', 'LIKE', $word);
+            }
+        }
+
+        $media = $query->get();
+
+        return response()->json(["status" => "OK", "media" => $media]);        
+    }
+
 
     public function getAllMedia(Request $request){
         $categories = $request->categories;
         $searchterms = $request->search;
         $allmedia = array();
         if(count($categories) > 0){
-            $query = Media::query();
+            $query = Media::where();
             $count = 0;
             foreach($categories as $cat){
                 if($count == 0){                    
@@ -132,8 +156,8 @@ class MediaController extends Controller
     }
 
     public function getPublicMedia($id){
-        $media = MediaReview::with('media')->find($id);
-        if($media){
+        $media = Media::find($id);
+        if($media && $media->status == 2){
             return response()->json(["status" => "OK", "media" => $media]);
         }else{
             return response()->json([

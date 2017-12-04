@@ -16,6 +16,8 @@ use App\Vendor;
 use App\Page;
 
 use App\MediaReview;
+use App\MediaCategory;
+use App\Media;
 
 
 use JWTAuth;
@@ -48,8 +50,14 @@ class PageController extends Controller{
     }
 
     public function showGalleryPage(){
-        $initialmedia = MediaReview::with('media')->where('approved', '=', true)->get();
+        $initialmedia = Media::where('status', '=', 2)->get();
+        $mediacats = MediaCategory::where('parent_category', '=', 0)->get();
+
+        foreach($mediacats as $media){
+            $media->subcats = $media->getChildCategories();
+        }
         return view('gallery', [
+            'categories' => $mediacats,
             'media' => $initialmedia
         ]);
     }

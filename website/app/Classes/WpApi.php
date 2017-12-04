@@ -14,6 +14,13 @@ class WpApi{
         $endpoint = $this->url . 'menus/v1/menus/' . $id;
         $menudata = $this->getData($endpoint);
 
+        //Remove admin url from menu URLs
+        foreach($menudata->items as $item){
+            if(strpos($item->url, env("ALLOW_ORIGIN")) !== false){
+                $item->url = str_replace(env("ALLOW_ORIGIN"), "", $item->url);
+            }
+        }
+
         return $menudata->items;
     }
 

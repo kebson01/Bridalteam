@@ -25,6 +25,7 @@ gulp.task('sass', function(){
 
 gulp.task('js', function(){
     return gulp.src([        
+        "./assets/js/selectize.es6",
         "./assets/js/imagesloaded.pkgd.min.es6",
         "./assets/js/isotope.pkgd.min.es6",
         "./assets/js/fit-columns.es6",

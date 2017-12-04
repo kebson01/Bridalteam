@@ -11,15 +11,29 @@
                 <div class="innerwrapper">
                     <div class="content">
                         <div id="gallerysearch">
-                            <input type="search" placeholder="Search for inspiration..." />
+                            <div class="categories">
+                                <select id="gallerycats">
+                                    <option value="">No Category</option>
+                                    @foreach($categories as $cat)
+                                        <optgroup label="Category: {{$cat->name}}">
+                                            <option value="{{$cat->id}}">{{$cat->name}}</option>
+                                            @foreach($cat->subcats as $subcat)
+                                                <option value="{{$subcat->id}}">{{$subcat->name}}</option>
+                                            @endforeach
+                                        </optgroup>
+                                        
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="keywords"><input type="search" id="gallerykeywords" placeholder="Search for inspiration..." /></div>
                         </div>
                         <div id="gallerygrid">
                             <div class="grid">
                                 @foreach($media as $m)
-                                    <?php $tags = explode(",", $m->media->keyword); ?>
+                                    <?php $tags = explode(",", $m->keyword); ?>
                                     <div class="item" data-id="<?php print $m->id; ?>">
                                         <div class="item-content">
-                                            <div class="image"><img src="/storage<?php print $m->media->thumbnailpath; ?>" /></div>
+                                            <div class="image"><img src="/storage<?php print $m->thumbnailpath; ?>" /></div>
                                             <div class="tags">
                                                 @foreach($tags as $tag)
                                                 <span><a>{{$tag}}</a></span>
