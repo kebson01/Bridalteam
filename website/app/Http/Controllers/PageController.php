@@ -17,6 +17,8 @@ use App\Page;
 
 use App\MediaReview;
 use App\MediaCategory;
+use App\MediaTheme;
+use App\MediaColor;
 use App\Media;
 
 
@@ -50,15 +52,19 @@ class PageController extends Controller{
     }
 
     public function showGalleryPage(){
-        $initialmedia = Media::where('status', '=', 2)->get();
+        $initialmedia = Media::where('status', '=', 2)->orderBy('published_on', 'desc')->get();
         $mediacats = MediaCategory::where('parent_category', '=', 0)->get();
+        $mediathemes = MediaTheme::all();
+        $mediacolor = MediaColor::all();
 
         foreach($mediacats as $media){
             $media->subcats = $media->getChildCategories();
         }
         return view('gallery', [
             'categories' => $mediacats,
-            'media' => $initialmedia
+            'themes' => $mediathemes,
+            'media' => $initialmedia,
+            'colors' => json_encode($mediacolor)
         ]);
     }
 

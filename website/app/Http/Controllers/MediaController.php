@@ -15,7 +15,7 @@ use App\Vendor;
 use App\MediaReview;
 
 use Log;
-
+use DB;
 use Image;
 use File;
 use JWTAuth;
@@ -78,22 +78,28 @@ class MediaController extends Controller
 
     public function getFilteredMedia(Request $request){
         $categoryid = $request->category;
-        $keywords = $request->keywords;
+        $keywords = $request->keyword;
+        $theme = $request->theme;
+        $color = $request->color;
 
         $query = Media::where("status", "=", 2);
-        $queryCount = 0;
-
-        if(!empty($categoryid)){
-            $query->where('category', '=', $categoryid);
-            $queryCount++;
-        }
-
-        if(!empty($keywords)){
-            $keywordarr = explode(",", $keywords);
-            foreach($keywordarr as $word){
-                $query->orWhere('keyword', 'LIKE', $word);
+        $query->where(function ($q) use($categoryid, $keywords, $theme, $color) {            
+            if(!empty($categoryid)){
+                $q->where('category', '=', $categoryid);
             }
-        }
+
+            if(!empty($theme)){
+                $q->where('theme', '=', $theme);
+            }
+
+            if(!empty($color)){
+                $q->where('color', '=', $color);
+            }
+
+            if(!empty($keywords)){                
+                $q->whereRaw("MATCH(keyword) AGAINST(? IN BOOLEAN MODE)", $keywords);                
+            }
+        });        
 
         $media = $query->get();
 

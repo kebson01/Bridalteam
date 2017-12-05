@@ -1,5 +1,9 @@
 @extends('layouts.main')
 
+@section('head')
+<script>var colorsjson = <?php print $colors; ?>;</script>
+@endsection
+
 @section('page')
 	<div id="page">		
         <div class="page">				
@@ -25,6 +29,17 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="themes">
+                                <select id="gallerytheme">
+                                    <option value="">No Theme</option>
+                                    @foreach($themes as $theme)
+                                        <option value="{{$theme->id}}">{{$theme->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="colors">
+                                <select id="gallerycolor" placeholder="No Color"></select>
+                            </div>
                             <div class="keywords"><input type="search" id="gallerykeywords" placeholder="Search for inspiration..." /></div>
                         </div>
                         <div id="gallerygrid">
@@ -41,127 +56,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                @endforeach
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/640/480/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/550/1024/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/720/480/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/640/480/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/550/1024/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/720/480/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/640/480/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/550/1024/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/720/480/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/640/480/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/550/1024/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item">
-                                    <div class="item-content">
-                                        <div class="image"><img src="http://placeimg.com/720/480/any" /></div>
-                                        <div class="tags">
-                                            <span><a>Test</a></span>
-                                            <span><a>Testing</a></span>
-                                            <span><a>FPO</a></span>
-                                        </div>
-                                    </div>
-                                </div>
+                                @endforeach                                
                             </div>
                         </div>                        
                     </div>

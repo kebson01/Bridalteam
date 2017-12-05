@@ -17,16 +17,26 @@ $(document).ready(function(){
     });
 
     $("#gallerykeywords").on('change', function(e){        
-        getFilteredMedia($("#gallerycats").val(), e.target.value);
+        getFilteredMedia();
     })
 
-    $("#gallerycats").selectize({
+    $("#gallerycats, #gallerytheme").selectize({
         sortField: 'value'
     });
 
-    $("#gallerycats").on('change', function(e){
-        console.log(e.target.value);
-        getFilteredMedia(e.target.value, $("#gallerykeywords").val());
+    $("#gallerycolor").selectize({
+        options: colorsjson,
+        valueField: "id",
+        labelField: 'name',        
+        render: {
+            option: function(item, escape) {                
+                return '<div><span style="vertical-align:middle;margin-right:10px;display:inline-block;width: 25px;height:25px;background-color:' + escape(item.color) + ';"></span><span class="title">' + escape(item.name) + '</span></div>';
+            }
+        }
+    })
+
+    $("#gallerycats, #gallerycolor, #gallerytheme").on('change', function(e){        
+        getFilteredMedia();
     });
 
     $("#homepage #heroimage select").minimalect({
@@ -82,15 +92,23 @@ $(document).ready(function(){
 });
 
 function getFilteredMedia(category, keywords){
+    var category = $("#gallerycats").val();
+    var keywords = $("#gallerykeywords").val();
+    var theme = $("#gallerytheme").val();;
+    var color = $("#gallerycolor").val();;;
+
+    $('#gallerygrid .grid').css({opacity: 0});
     $.ajax({
         url: "/api/v1/media/public/filter",
         method: "POST",
         data: {
             category: category,
-            keyword: keywords
+            keyword: keywords,
+            theme: theme,
+            color: color
         },
         success: function(response){            
-            $('#gallerygrid .grid').css({opacity: 0});
+            
 
             var fullhtml = "";
             response.media.forEach(function(media, index){
