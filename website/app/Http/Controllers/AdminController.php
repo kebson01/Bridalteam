@@ -18,6 +18,8 @@ use App\MediaColor;
 use App\MediaTheme;
 use App\MediaReview;
 
+use Carbon\Carbon;
+
 class AdminController extends Controller{
     public function getAllVendors(){
         $vendors = Vendor::all();
@@ -34,12 +36,100 @@ class AdminController extends Controller{
         $categories = VendorCategory::all();
         $regions = VendorRegion::all();
 
+        $vendormedia = $vendor->getMedia();
+        $imagecount = 0;
+        $videocount = 0;
+
+        foreach($vendormedia as $media){
+            if($media->type == "image"){
+                $imagecount++;
+            }
+
+            if($media->type == "video"){
+                $videocount++;
+            }
+        }
+
         return response()->json([
             'status' => 'OK',
             'vendor' => $vendor,
             'regions' => $regions,
-            'categories' => $categories
+            'categories' => $categories,
+            'currentsub' => $vendor->getSubscription(),
+            'imagecount' => $imagecount,
+            'videocount' => $videocount
         ]);
+    }
+
+    public function saveVendor($id, Request $request){
+        $vendor = Vendor::find($id);
+        if($vendor){
+            $vendor->pcfirstname = $request->pcfirstname;
+            $vendor->pclastname = $request->pclastname;
+            $vendor->pcphone = $request->pcphone;
+            $vendor->pcemail = $request->pcemail;
+            
+            $vendor->ownerfirstname = $request->ownerfirstname;
+            $vendor->ownerlastname = $request->ownerlastname;
+            $vendor->ownerphone = $request->ownerphone;
+            $vendor->owneremail = $request->owneremail;
+            
+            $vendor->address = $request->address;
+            $vendor->address2 = $request->address2;
+            $vendor->city = $request->city;
+            $vendor->state = $request->state;
+            $vendor->zip = $request->zipcode;
+            $vendor->country = $request->country;
+
+            $vendor->businessname = $request->businessname;
+            $vendor->url = $request->url;
+            $vendor->about = $request->about;
+            $vendor->services = $request->services;
+            $vendor->minbudget = $request->minbudget;
+            $vendor->maxbudget = $request->maxbudget;
+
+            $vendor->category = intval($request->category);
+            $vendor->secondarycategory = intval($request->secondarycategory);
+
+            $vendor->region = $request->region;
+            $vendor->save();
+
+            return response()->json([
+                'status' => 'OK',
+            ]);
+        }else{
+            return response()->json(["status" => "Error", "message" => "Could not find vendor account."]);
+        }
+    }
+
+    public function approveVendor($id){
+        $vendor = Vendor::find($id);
+        if($vendor){
+            $vendor->approved = true;
+            $vendor->approved_on = Carbon::now();
+            $vendor->save();
+
+            return response()->json([
+                'status' => 'OK',
+            ]);
+        }else{
+            return response()->json(["status" => "Error", "message" => "Could not find vendor account."]);
+        }
+    }
+
+    public function disableVendor($id){
+        $vendor = Vendor::find($id);
+        if($vendor){
+            $vendor->approved = false;
+            $vendor->approved_on = null;
+            $vendor->save();
+
+            return response()->json([
+                'status' => 'OK',
+            ]);
+        }else{
+            return response()->json(["status" => "Error", "message" => "Could not find vendor account."]);
+        }
     }
 
     public function getAllMedia(){

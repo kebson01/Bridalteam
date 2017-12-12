@@ -5189,35 +5189,37 @@ $(document).ready(function () {
 
     initGalleryGrid();
 
-    $("#gallerykeywords").selectize({
-        delimited: ',',
-        persist: false,
-        create: function (input) {
-            return {
-                value: input,
-                text: input
-            };
-        }
-    });
-
-    $("#gallerykeywords").on('change', function (e) {
-        getFilteredMedia();
-    });
-
-    $("#gallerycats, #gallerytheme").selectize({
-        sortField: 'value'
-    });
-
-    $("#gallerycolor").selectize({
-        options: colorsjson,
-        valueField: "id",
-        labelField: 'name',
-        render: {
-            option: function (item, escape) {
-                return '<div><span style="vertical-align:middle;margin-right:10px;display:inline-block;width: 25px;height:25px;background-color:' + escape(item.color) + ';"></span><span class="title">' + escape(item.name) + '</span></div>';
+    if ($("#gallerysearch").length != 0) {
+        $("#gallerykeywords").selectize({
+            delimited: ',',
+            persist: false,
+            create: function (input) {
+                return {
+                    value: input,
+                    text: input
+                };
             }
-        }
-    });
+        });
+
+        $("#gallerykeywords").on('change', function (e) {
+            getFilteredMedia();
+        });
+
+        $("#gallerycats, #gallerytheme").selectize({
+            sortField: 'value'
+        });
+
+        $("#gallerycolor").selectize({
+            options: colorsjson,
+            valueField: "id",
+            labelField: 'name',
+            render: {
+                option: function (item, escape) {
+                    return '<div><span style="vertical-align:middle;margin-right:10px;display:inline-block;width: 25px;height:25px;background-color:' + escape(item.color) + ';"></span><span class="title">' + escape(item.name) + '</span></div>';
+                }
+            }
+        });
+    }
 
     $("#gallerycats, #gallerycolor, #gallerytheme").on('change', function (e) {
         getFilteredMedia();
@@ -5321,7 +5323,7 @@ function initGalleryGrid() {
         var mediaid = $(this).data('id');
         console.log(mediaid);
         $("#imagedisplay").fadeIn(300, function () {
-            $.get("http://bridalteam.dev/api/v1/media/public/" + mediaid, function (res) {
+            $.get("/api/v1/media/public/" + mediaid, function (res) {
                 console.log(res);
                 $("#imagedisplay .imagecontainer .image img").attr('src', "/storage" + res.media.urlpath);
                 $("#imagedisplay .imagecontainer .tags").empty();

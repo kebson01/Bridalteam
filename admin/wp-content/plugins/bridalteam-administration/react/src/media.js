@@ -59,10 +59,17 @@ export default class MediaManagement extends React.Component{
                                 return (
                                     <tr key={index}>
                                         <td>{media.id}</td>
-                                        <td>
-                                            <img width="100px" src={"http://bridalteam.dev/storage" + media.media.square_thumbnailpath} /><br/>
-                                            <a href={"admin.php?page=bridalteamadmin_editmedia&id=" + media.id }>Review</a>
-                                        </td>
+                                        {media.media.square_thumbnailpath != null ?
+                                            <td>
+                                                <img width="100px" src={"http://bridalteam.dev/storage" + media.media.square_thumbnailpath} /><br/>
+                                                <a href={"admin.php?page=bridalteamadmin_editmedia&id=" + media.id }>Review</a>
+                                            </td> :
+                                            <td>
+                                                No Thumbnail<br/>
+                                                <a href={"admin.php?page=bridalteamadmin_editmedia&id=" + media.id }>Review</a>
+                                            </td>
+                                        }
+                                        
                                         <td>{this.isMediaApproved(media.approved)}</td>
                                         <td>{media.vendor.businessname}</td>
                                         <td>{media.media.type}</td>                                        

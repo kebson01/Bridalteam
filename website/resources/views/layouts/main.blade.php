@@ -6,6 +6,7 @@
         <title>Bridal Team</title>   
         <meta name="viewport" content="width=device-width">        
         
+        <link rel="stylesheet" href="https://use.typekit.net/gzu0qvd.css">
         <link href="https://fonts.googleapis.com/css?family=Catamaran" rel="stylesheet">
         <link href="/css/app.css" rel="stylesheet">
 
