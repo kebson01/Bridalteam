@@ -32,6 +32,8 @@ gulp.task('js', function(){
         "./assets/js/jquery.minimalect.min.es6",
         "./assets/js/js.cookie.es6",
         "./assets/js/jquery.payment.min.es6",
+        "./assets/js/parsley.min.es6",
+        "./assets/js/jquery.serializejson.min.es6",
         "./assets/js/app.es6"
     ])
     .pipe(babel().on('error',console.log))

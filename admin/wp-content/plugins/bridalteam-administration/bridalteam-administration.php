@@ -20,6 +20,7 @@ add_action('admin_enqueue_scripts', 'bridalteam_load_scripts');
 function bridalteam_admin_menus(){
     add_menu_page("Vendors", "Vendors", "edit_posts", "bridalteamadmin_vendors", "bridalteam_render_vendor_admin");    
     add_submenu_page(null, "Edit Vendor", "Edit Vendor", "edit_posts", "bridalteamadmin_editvendor", "bridalteam_render_editvendor_admin" );
+    add_submenu_page(null, "Review Claim", "Review Claim", "edit_posts", "bridalteamadmin_reviewclaim", "bridalteam_render_reviewclaim_admin" );
 
     add_menu_page("Media Review", "Media Review", "edit_posts", "bridalteamadmin_media", "bridalteam_render_media_review");
     add_submenu_page(null, 'Review Media', 'Review Media', 'edit_posts', 'bridalteamadmin_editmedia', 'bridalteam_render_editmedia_admin' );
@@ -34,6 +35,15 @@ function bridalteam_render_editvendor_admin(){
         <div class="wrap">
             <h1 class="wp-heading-inline">Edit Vendor #ID <?php print $_GET['id']; ?></h1>
             <div id="bridalteamadmin_editvendor">Editing a vendor</div>            
+        </div>
+    <?php
+}
+
+function bridalteam_render_reviewclaim_admin(){
+    ?>
+        <div class="wrap">
+            <h1 class="wp-heading-inline">Review Vendor Claim #ID <?php print $_GET['id']; ?></h1>
+            <div id="bridalteamadmin_reviewclaim">Reviewing a vendor claim</div>            
         </div>
     <?php
 }

@@ -55,6 +55,15 @@ export default class VendorCategoryListing extends Component{
                             <Vendor key={index} vendor={vendor} />
                         )
                     })}
+                    {this.state.vendors.length == 0 ?
+                        <div className="empty">
+                            <div className="empty-icon">
+                                <i className="icon icon-stop"></i>
+                            </div>
+                            <p className="empty-title h5">No vendors found.</p>
+                            <p className="empty-subtitle">Adjust your search filters, or select a different category.</p>                            
+                        </div> : null
+                    }
                 </div>
                 <div className="clear"></div>
             </div>

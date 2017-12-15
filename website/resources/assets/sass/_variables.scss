@@ -15,6 +15,19 @@ $siteGray3: #9C9C9D;
 $siteGray4: #f4f4f4;
 $siteOrangeTransparent: rgba(243,103,5,0.75);
 
+@font-face {
+    font-family: 'wisdom_scriptregular';
+    src: url('/webfonts/wisdom_script_aj-webfont.eot');
+    src: url('/webfonts/wisdom_script_aj-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/webfonts/wisdom_script_aj-webfont.woff2') format('woff2'),
+         url('/webfonts/wisdom_script_aj-webfont.woff') format('woff'),
+         url('/webfonts/wisdom_script_aj-webfont.ttf') format('truetype'),
+         url('/webfonts/wisdom_script_aj-webfont.svg#wisdom_scriptregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
 $bodyFont: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
 $fontFutura: "futura-pt", sans-serif;
 $fontRaleway: "raleway", sans-serif;

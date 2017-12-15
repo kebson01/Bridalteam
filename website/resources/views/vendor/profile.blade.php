@@ -96,7 +96,7 @@
                                     <li><a data-tab="tab_faq">FAQ</a></li>
                                 </ul>
 
-                                <a id="mobile_btn_about">About</a>
+                                <a id="mobile_btn_about" data-tab="tab_about">About</a>
                                 <div id="tab_about">
                                     <?php print $vendor->about; ?>
                                     <br/><br/>
@@ -110,7 +110,7 @@
                                     </ul>
                                 </div>
 
-                                <a id="mobile_btn_portfolio">Portfolio</a>
+                                <a id="mobile_btn_portfolio" data-tab="tab_portfolio">Portfolio</a>
                                 <div id="tab_portfolio">                                
                                     <ul>
                                         <?php foreach($vendor->media as $media): ?>
@@ -121,13 +121,13 @@
                                     </ul>
                                 </div>
 
-                                <a id="mobile_btn_services">Services</a>
+                                <a id="mobile_btn_services" data-tab="tab_services">Services</a>
                                 <div id="tab_services">
                                     <?php print $vendor->services; ?>                               
                                     <br/>
                                 </div>
 
-                                <a id="mobile_btn_faq">FAQ</a>
+                                <a id="mobile_btn_faq"  data-tab="tab_faq">FAQ</a>
                                 <div id="tab_faq">
                                     <ul>     
                                         <?php if(count($vendor->faqs) > 0): ?>

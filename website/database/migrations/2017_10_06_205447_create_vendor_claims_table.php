@@ -49,8 +49,7 @@ class CreateVendorClaimsTable extends Migration
             $table->decimal('minbudget', 6, 2)->nullable();
             $table->decimal('maxbudget', 6, 2)->nullable();
 
-            $table->integer('region')->nullable();
-            $table->integer('searchregion');
+            $table->integer('region')->nullable();            
             $table->boolean('approved');            
             $table->dateTime('approved_on')->nullable();
             $table->softDeletes();

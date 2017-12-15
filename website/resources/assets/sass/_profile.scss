@@ -264,6 +264,11 @@
                 }
             }
         }
+
+        > div{
+            font-size: 1.2em;
+            line-height: 1.6em;
+        }
         
         > a{
             display: block;
@@ -283,7 +288,7 @@
             margin-bottom: 10px;
         }
 
-        #tab_about{
+        #tab_about{            
             h2{
                 font-size: 1.375em;
                 color: $siteOrange;

@@ -60,6 +60,7 @@ class PageController extends Controller{
         foreach($mediacats as $media){
             $media->subcats = $media->getChildCategories();
         }
+
         return view('gallery', [
             'categories' => $mediacats,
             'themes' => $mediathemes,
@@ -88,7 +89,7 @@ class PageController extends Controller{
 
     public function showVendorCategory($category){
         $category = VendorCategory::where("slug", "=", $category)->first();
-        $vendors = Vendor::where('category', '=', $category->id)->get();
+        $vendors = Vendor::where('category', '=', $category->id)->where('approved', '=', true)->get();
         $questions = $category->getQuestions()->first();        
 
         return view('vendor.category', [
@@ -111,15 +112,17 @@ class PageController extends Controller{
     }
 
     public function showVendorPage($slug, Request $request){
-        $vendor = Vendor::where('slug', "=", $slug)->first();
+        $vendor = Vendor::where('slug', "=", $slug)->where('approved', '=', true)->first();
         if($vendor){
             $category = VendorCategory::find($vendor->category);
-            $vendor->media = $vendor->getMedia();
+            $vendor->media = $vendor->getMedia(6);
             return view('vendor.profile', [
                 'vendor' => $vendor,
                 'category' => $category
             ]);
-        }        
+        }else{
+            return response()->view('vendor.404', [], 404);            
+        }    
     }
 
     public function showVendorAccount(Request $request){

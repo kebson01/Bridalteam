@@ -292,8 +292,65 @@ class VendorController extends Controller
             EmailSystem::sendVerificationEmail($vendor->id);
         }
 
-        return response()->json(["status" => "OK"]);
-        
+        return response()->json(["status" => "OK"]);        
+    }
+
+    public function approveVendorClaim($id, Request $request){        
+        $claim = VendorClaim::find($id);
+
+        if($claim && $claim->approved == false){            
+            $vendor = Vendor::find($claim->vendor_id);
+            $vendor->user_id = $claim->user_id;
+            $vendor->pcfirstname = $claim->pcfirstname;
+            $vendor->pclastname = $claim->pclastname;
+            $vendor->pcphone = $claim->pcphone;
+            $vendor->pcphoneext = $claim->pcphoneext;
+            $vendor->pcemail = $claim->pcemail;
+            
+            $vendor->ownerfirstname = $claim->ownerfirstname;
+            $vendor->ownerlastname = $claim->ownerlastname;
+            $vendor->ownerphone = $claim->ownerphone;
+            $vendor->ownerphoneext = $claim->ownerphoneext;
+            $vendor->owneremail = $claim->owneremail;
+            
+            $vendor->address = $claim->address;
+            $vendor->address2 = $claim->address2;
+            $vendor->city = $claim->city;
+            $vendor->state = $claim->state;
+            $vendor->zip = $claim->zip;
+            $vendor->country = $claim->country;
+            
+            $vendor->businessname = $claim->businessname;
+            $vendor->url = $claim->url;
+            $vendor->minbudget = floatval($claim->minbudget);
+            $vendor->maxbudget = floatval($claim->maxbudget);
+            $vendor->region = $claim->region;
+            $vendor->showcitystate = true;
+            $vendor->isFirstLogin = true;            
+            $vendor->slug = str_slug($vendor->businessname);
+
+            if($claim->isNational){
+                $vendor->isnational = true;
+            }else{
+                $vendor->isnational = false;
+            }
+                            
+            $vendor->category = intval($claim->category);
+            $vendor->secondarycategory = intval($claim->secondarycategory);
+            $vendor->active = false;
+            $vendor->approved = false;
+            $vendor->save();
+
+            $claim->approved = true;
+            $claim->approved_on = Carbon::now();
+            $claim->save();
+
+            EmailSystem::sendVerificationEmail($vendor->id);
+
+            return response()->json(["status" => "OK"]);       
+        }else{
+            return response()->json(["status" => "Error", "message" => "Could not find vendor claim."]);   
+        }
     }
 
     public function updateVendor(Request $request){
@@ -654,7 +711,7 @@ class VendorController extends Controller
             
 
             Excel::load($file->getRealPath(), function($reader){
-                $reader->take(100);
+                $reader->take(10);
                 $results = $reader->toArray();
                 $categories = VendorCategory::all();
                 $searchregions = VendorRegion::all();
@@ -686,7 +743,7 @@ class VendorController extends Controller
                         }
                     }
                     //Check for duplicates
-                    $existing = Vendor::where('businessname', '=', trim($row['business_name']))->where('searchregion', '=', $foundregion)->first();
+                    $existing = Vendor::where('businessname', '=', trim($row['business_name']))->where('region', '=', $foundregion)->first();
                     if($existing != null){
                         print "Row $index: " . $row['business_name'] . " already exists in thsi region.  Skipping.<br/>";
                         continue;
@@ -697,7 +754,7 @@ class VendorController extends Controller
                     $newvendor->pcemail = trim($row['email_address']);                    
                     $newvendor->source = trim($row['source']);
                     $newvendor->type = trim($row['type']);
-                    $newvendor->searchregion = $foundregion;
+                    $newvendor->region = $foundregion;
                     $newvendor->category = $foundcategory;                    
 
                     $newvendor->pcfirstname = "";
@@ -717,10 +774,12 @@ class VendorController extends Controller
                     $newvendor->active = true;
                     $newvendor->showcitystate = false;
                     $newvendor->isFirstLogin = false;
-                    $newvendor->approved = false;
+                    $newvendor->approved = true;
+                    $newvendor->approved_on = Carbon::now();
                     
                     if($newvendor->category != null){
-                        if($newvendor->searchregion != null){
+                        //if($newvendor->region != null){
+                        if(true){
                             $newvendor->save();
                         }else{
                             print "Could not save row $index: " . $row['business_name'] . " - Could not find search region for '" . $row['region'] . "'<br/>";

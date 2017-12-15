@@ -23,11 +23,27 @@ use Carbon\Carbon;
 class AdminController extends Controller{
     public function getAllVendors(){
         $vendors = Vendor::all();
+        $claims = VendorClaim::where('approved', '=', false)->get();
 
         return response()->json([
             'status' => "OK",
             'vendors' => $vendors,
-            'claims' => array()
+            'claims' => $claims
+        ]);
+    }
+
+    public function getClaim($id){
+        $claim = VendorClaim::find($id);
+        $origvendor = Vendor::find($claim->vendor_id);
+        $categories = VendorCategory::all();
+        $regions = VendorRegion::all();
+
+        return response()->json([
+            'status' => 'OK',
+            'claim' => $claim,
+            'origvendor' =>$origvendor,
+            'regions' => $regions,
+            'categories' => $categories,
         ]);
     }
 

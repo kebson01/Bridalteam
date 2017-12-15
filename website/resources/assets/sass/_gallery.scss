@@ -6,6 +6,7 @@
             background-color: $siteGray2;
             border:2px solid #fff;
             border-radius: 10px;
+            height: 41px;
             outline: none;
             box-shadow: none;
         }
@@ -221,6 +222,8 @@
 
         > div.keywords{
             width: 48%;
+            position: relative;
+            top:-2px;
         }
     }
     #gallerygrid{

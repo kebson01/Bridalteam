@@ -7,6 +7,8 @@ import EditVendor from './editvendors';
 import MediaManagement from './media';
 import ReviewMedia from './reviewmedia';
 
+import ReviewVendorClaim from './reviewclaim';
+
 
 if(document.getElementById("bridalteamadmin_vendor") != null){
     render(<VendorManagement />, document.getElementById("bridalteamadmin_vendor"));
@@ -22,4 +24,8 @@ if(document.getElementById("bridalteamadmin_media") != null){
 
 if(document.getElementById("bridalteamadmin_editmedia") != null){
     render(<ReviewMedia />, document.getElementById("bridalteamadmin_editmedia"));
+}
+
+if(document.getElementById("bridalteamadmin_reviewclaim") != null){
+    render(<ReviewVendorClaim />, document.getElementById("bridalteamadmin_reviewclaim"));
 }

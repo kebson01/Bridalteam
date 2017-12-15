@@ -17,8 +17,13 @@ class Vendor extends Model
 
     }
     
-    public function getMedia(){
-        $media = Media::where("vendor_id", "=", $this->id)->get();
+    public function getMedia($take = null){
+        $media = array();
+        if($take == null){
+            $media = Media::where("vendor_id", "=", $this->id)->get();
+        }else{
+            $media = Media::where("vendor_id", "=", $this->id)->take($take)->get();
+        }        
         return $media;
     }
 

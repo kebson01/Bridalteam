@@ -77,6 +77,8 @@ Route::group(['prefix' => 'v1'], function(){
         Route::post('/media/{id}', 'AdminController@saveMedia');
         Route::post('/media/{id}/review', 'AdminController@approveMedia');
         Route::get('/vendors/{id}', 'AdminController@getVendor');
+        Route::get('/claims/{id}', 'AdminController@getClaim');
+        Route::post('/claims/{id}/approve', 'VendorController@approveVendorClaim');
         Route::post('/vendors/{id}', 'AdminController@saveVendor');
         Route::post('/vendors/{id}/approve', 'AdminController@approveVendor');
         Route::post('/vendors/{id}/disable', 'AdminController@disableVendor');
