@@ -223,8 +223,17 @@ class AdminController extends Controller{
 
         if($mediareview){
             if($request->review == "true"){
+                $sendnotification = false;
+                
+                if(!$mediareview->approved){
+                    $sendnotification = true;
+                }
                 $mediareview->approveMedia();
-                EmailSystem::sendVendorTransactionalNotice($mediareview->vendor_id, "mediaapproved");
+                if($sendnotification){
+                    EmailSystem::sendVendorTransactionalNotice($mediareview->vendor_id, "mediaapproved");
+                }
+                
+                
             }else{
                 if($request->review == "false"){
                     $mediareview->rejectMedia($request->reviewcomments);

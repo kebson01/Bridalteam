@@ -96,17 +96,8 @@ class EmailSystem{
         $domain = env('DOMAIN');
         $webdomain = env('WEBDOMAIN');
         
-        $vendor = VendorClaim::find($vendorid);
+        $vendor = Vendor::find($vendorid);
         $user = User::find($vendor->user_id);
-        
-        $data = array(
-            "domain" => $domain,
-            "webdomain" => $webdomain,
-            "to" => $user->email,            
-            "name" => $user->fullname(),
-            "businessname" => $vendor->businessname,
-            "slug" => $vendor->slug
-        );
 
         $template = "";
         $subject = "";
@@ -124,7 +115,16 @@ class EmailSystem{
                 break;
         }
 
-        Mail::send($template, ['data' => $data], function($m) use ($data){
+        $data = array(
+            "domain" => $domain,
+            "webdomain" => $webdomain,
+            "to" => $user->email,            
+            "name" => $user->fullname(),
+            "businessname" => $vendor->businessname,
+            "slug" => $vendor->slug
+        );
+
+        Mail::send($template, ['data' => $data], function($m) use ($data, $subject){
             $m->to($data['to'], $data['name'])->subject($subject);
         });
     }

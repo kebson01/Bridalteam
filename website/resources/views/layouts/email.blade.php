@@ -7,7 +7,7 @@
         <br/>
 		<div style="margin:auto;width:600px;background-color:#fff;">
             <br/>
-            <h1 style="text-align:center;margin-top:20px;"><img src="{{ $data['webdomain'] }}/wp-content/themes/bridalteam/img/email/email-logo.png" alt="Bridal Team Wedding Planning" /></h1>
+            <h1 style="text-align:center;margin-top:20px;"><img src="{{ $data['webdomain'] }}/img/email/email-logo.png" alt="Bridal Team Wedding Planning" /></h1>
             @yield('content')
             <br/>
             <br/>

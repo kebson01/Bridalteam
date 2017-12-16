@@ -98,6 +98,7 @@ export default class ReviewMedia extends React.Component{
                     reviewcomments: this.state.reviewcomments
                 }).then((res) => {
                     alert("Media Saved.");
+                    window.location = '/wp-admin/admin.php?page=bridalteamadmin_media';
                 });
             }else{
                 alert("Media Saved.");
