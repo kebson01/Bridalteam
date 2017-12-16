@@ -92,7 +92,7 @@ class EmailSystem{
         });
     }
 
-    public static function sendVendorTransactionalNotice($vendor, $type){
+    public static function sendVendorTransactionalNotice($vendorid, $type){
         $domain = env('DOMAIN');
         $webdomain = env('WEBDOMAIN');
         
