@@ -2,6 +2,7 @@
 namespace App\Classes;
 
 use App\Vendor;
+use App\VendorClaim;
 use App\User;
 use Mail;
 

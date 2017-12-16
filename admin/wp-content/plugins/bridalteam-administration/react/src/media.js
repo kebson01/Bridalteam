@@ -56,27 +56,29 @@ export default class MediaManagement extends React.Component{
                         </thead>
                         <tbody>
                             {this.state.media.map((media, index) => {
-                                return (
-                                    <tr key={index}>
-                                        <td>{media.id}</td>
-                                        {media.media.square_thumbnailpath != null ?
-                                            <td>
-                                                <img width="100px" src={"http://bridalteam.dev/storage" + media.media.square_thumbnailpath} /><br/>
-                                                <a href={"admin.php?page=bridalteamadmin_editmedia&id=" + media.id }>Review</a>
-                                            </td> :
-                                            <td>
-                                                No Thumbnail<br/>
-                                                <a href={"admin.php?page=bridalteamadmin_editmedia&id=" + media.id }>Review</a>
-                                            </td>
-                                        }
-                                        
-                                        <td>{this.isMediaApproved(media.approved)}</td>
-                                        <td>{media.vendor.businessname}</td>
-                                        <td>{media.media.type}</td>                                        
-                                        <td>{media.media.keyword}</td>
-                                        <td>{media.media.updated_at}</td>
-                                    </tr>
-                                )
+                                if(media.media != null){
+                                    return (
+                                        <tr key={index}>
+                                            <td>{media.id}</td>
+                                            {media.media.square_thumbnailpath != null ?
+                                                <td>
+                                                    <img width="100px" src={"http://bridalteam.dev/storage" + media.media.square_thumbnailpath} /><br/>
+                                                    <a href={"admin.php?page=bridalteamadmin_editmedia&id=" + media.id }>Review</a>
+                                                </td> :
+                                                <td>
+                                                    No Thumbnail<br/>
+                                                    <a href={"admin.php?page=bridalteamadmin_editmedia&id=" + media.id }>Review</a>
+                                                </td>
+                                            }
+                                            
+                                            <td>{this.isMediaApproved(media.approved)}</td>
+                                            <td>{media.vendor.businessname}</td>
+                                            <td>{media.media.type}</td>                                        
+                                            <td>{media.media.keyword}</td>
+                                            <td>{media.media.updated_at}</td>
+                                        </tr>
+                                    )
+                                }                                
                             })}
                         </tbody>
                     </table>

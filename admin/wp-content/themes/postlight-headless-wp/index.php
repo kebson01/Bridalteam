@@ -5,5 +5,5 @@ if ( is_single() ) {
 } elseif ( is_page() ) {
 	header( 'Location: /wp-json/wp/v2/pages/' . get_queried_object()->ID );
 } else {
-	header( 'Location: /wp-json/' );
+	header( 'Location: /wp-admin/' );
 }
