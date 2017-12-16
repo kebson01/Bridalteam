@@ -6,6 +6,7 @@ use App\User;
 use Mail;
 
 class EmailSystem{
+
     public static function sendVerificationEmail($vendorid){
         $domain = env('DOMAIN');
         $webdomain = env('WEBDOMAIN');
@@ -46,6 +47,84 @@ class EmailSystem{
         
         Mail::send('email.vendoremail', ['data' => $data], function($m) use ($data){
             $m->to($data['to'], $data['name'])->subject("You have a new message");
+        });
+    }
+
+    public static function sendVendorClaimEmail($claimid, $msg){
+        $domain = env('DOMAIN');
+        $webdomain = env('WEBDOMAIN');
+        
+        $vendor = VendorClaim::find($claimid);
+        $user = User::find($vendor->user_id);
+        
+        $data = array(
+            "domain" => $domain,
+            "webdomain" => $webdomain,
+            "to" => $user->email,
+            "msg" => $msg,
+            "name" => $user->fullname(),
+            "businessname" => $vendor->businessname
+        );
+        
+        Mail::send('email.vendorclaim', ['data' => $data], function($m) use ($data){
+            $m->to($data['to'], $data['name'])->subject("Your profile claim is pending");
+        });
+    }
+
+    public static function sendVendorReviewNotice($vendorid){
+        $domain = env('DOMAIN');
+        $webdomain = env('WEBDOMAIN');
+        
+        $vendor = VendorClaim::find($vendorid);
+        $user = User::find($vendor->user_id);
+        
+        $data = array(
+            "domain" => $domain,
+            "webdomain" => $webdomain,
+            "to" => $user->email,            
+            "name" => $user->fullname(),
+            "businessname" => $vendor->businessname
+        );
+        
+        Mail::send('email.vendorreview', ['data' => $data], function($m) use ($data){
+            $m->to($data['to'], $data['name'])->subject("Your profile is being reviewed");
+        });
+    }
+
+    public static function sendVendorTransactionalNotice($vendor, $type){
+        $domain = env('DOMAIN');
+        $webdomain = env('WEBDOMAIN');
+        
+        $vendor = VendorClaim::find($vendorid);
+        $user = User::find($vendor->user_id);
+        
+        $data = array(
+            "domain" => $domain,
+            "webdomain" => $webdomain,
+            "to" => $user->email,            
+            "name" => $user->fullname(),
+            "businessname" => $vendor->businessname,
+            "slug" => $vendor->slug
+        );
+
+        $template = "";
+        $subject = "";
+
+        switch($type){
+            case "profileapproved":
+                $template = "email.vendorapproved";
+                $subject = "Your profile has been approved!";
+                break;
+            case "mediaapproved":
+                $template = "email.mediaapproved";
+                $subject = "Your media image/video has been approved!";
+                break;
+            default:
+                break;
+        }
+
+        Mail::send($template, ['data' => $data], function($m) use ($data){
+            $m->to($data['to'], $data['name'])->subject($subject);
         });
     }
 }

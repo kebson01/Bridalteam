@@ -20,6 +20,8 @@ use App\MediaReview;
 
 use Carbon\Carbon;
 
+use App\Classes\EmailSystem;
+
 class AdminController extends Controller{
     public function getAllVendors(){
         $vendors = Vendor::all();
@@ -125,6 +127,8 @@ class AdminController extends Controller{
             $vendor->approved_on = Carbon::now();
             $vendor->save();
 
+            EmailSystem::sendVendorTransactionalNotice($vendor->id, "profileapproved");
+
             return response()->json([
                 'status' => 'OK',
             ]);
@@ -220,6 +224,7 @@ class AdminController extends Controller{
         if($mediareview){
             if($request->review == "true"){
                 $mediareview->approveMedia();
+                EmailSystem::sendVendorTransactionalNotice($vendor->id, "mediaapproved");
             }else{
                 if($request->review == "false"){
                     $mediareview->rejectMedia($request->reviewcomments);

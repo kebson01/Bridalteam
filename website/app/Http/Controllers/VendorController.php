@@ -286,7 +286,8 @@ class VendorController extends Controller
         $vendor->save();
         
         if($request->claim != null && $request->claim != ""){
-
+            $message = "<p>Your vendor profile claim has been submitted.  You will be contacted for additional information, or when your claim has been approved.</p>";
+            EmailSystem::sendVendorClaimEmail($vendor->id, $message);
         }else{
             //Send verification email
             EmailSystem::sendVerificationEmail($vendor->id);
@@ -344,7 +345,7 @@ class VendorController extends Controller
             $claim->approved = true;
             $claim->approved_on = Carbon::now();
             $claim->save();
-
+            
             EmailSystem::sendVerificationEmail($vendor->id);
 
             return response()->json(["status" => "OK"]);       
@@ -679,6 +680,9 @@ class VendorController extends Controller
 
                 $vendor->isfirstlogin = false;
                 $vendor->save();
+
+                
+                EmailSystem::sendVendorReviewNotice($vendor->id);
 
                 return response()->json([
                     'status' => "OK", 
