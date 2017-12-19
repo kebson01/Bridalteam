@@ -28,7 +28,7 @@ Route::group(['prefix' => 'v1'], function(){
     });
 
     Route::group(['prefix' => 'modals'], function(){
-        Route::get('vendormessageform/{id}', 'VendorController@getVendorContactFormUI');
+        Route::post('vendormessageform/{id}', 'VendorController@getVendorContactFormUI');
     });
 
     Route::group(['prefix' => 'vendors'], function(){        

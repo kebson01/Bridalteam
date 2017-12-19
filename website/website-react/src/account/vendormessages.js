@@ -84,7 +84,9 @@ export default class VendorAccountMessages extends Component{
                 <div id="messagePane">
                     {this.state.selectedMessage.id !== undefined ?
                         <div id="messageDetail">
-                            <div className="row"><strong>From:</strong> {this.state.selectedMessage.message.firstname} {this.state.selectedMessage.message.lastname}</div>
+                            <div className="row"><strong>From:</strong> {this.state.selectedMessage.message.firstname} {this.state.selectedMessage.message.lastname}
+                                {this.state.selectedMessage.senderbride_id != null ? <em> (Registered Bride)</em> : null }
+                            </div>
                             <div className="row"><strong>On: </strong> {this.state.selectedMessage.created_at}</div>
                             <div className="row"><strong>Event Type: </strong> {this.state.selectedMessage.message.eventtype}</div>
                             <div className="row"><strong>Event Date: </strong> {this.state.selectedMessage.message.eventdate}</div>

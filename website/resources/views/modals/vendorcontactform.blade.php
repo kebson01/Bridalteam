@@ -2,23 +2,25 @@
     <div class="innerwrapper">
         <div class="formsection">
             <div class="row columns">
+                <input type="hidden" value="{{$bride['brideid']}}" name="brideid" />
                 <div class="six columns column col-xs-12 col-sm-6">
                     <label class="form-label">Bride First Name <span>*</span></label>
-                    <input class="form-input" name="firstname" required type="text" />
-                    
+                    <input class="form-input" value="{{$bride['bridefirstname']}}" name="firstname" required type="text" />                    
                 </div>
                 <div class="six columns column col-xs-12 col-sm-6">
-                    <label class="form-label">Bride First Name <span>*</span></label>
-                    <input class="form-input" name="lastname"  required type="text" />
+                    <label class="form-label">Bride Last Name <span>*</span></label>
+                    <input class="form-input" value="{{$bride['bridelastname']}}"  name="lastname"  required type="text" />
                     
                 </div>
             </div>            
+            @if($bride['brideid'] == null)
             <div class="row columns">
                 <div class="twelve columns column col-xs-12 col-sm-12">
                     <label class="form-label">Bride Email <span>*</span></label>
                     <input class="form-input" type="text" name="email" required />
                 </div>
             </div>
+            @endif
             <div class="row columns">
                 <div class="twelve columns column col-xs-12 col-sm-12">
                     <label class="form-label">Event Type *</label>

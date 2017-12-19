@@ -74,7 +74,7 @@ class VendorController extends Controller
     function getVendorMessages(){
         $account = JWTAuth::parseToken()->authenticate();
         $vendor = $account->findVendor();
-        if($vendor){
+        if($vendor){            
             $messages = $vendor->getMessages();
             return response()->json([
                 'status' => "OK",
@@ -1144,14 +1144,22 @@ class VendorController extends Controller
         if($vendor != null){
             $message = new VendorMessage;
             $message->vendor_id = $vendor->id;
+
+            if(!empty($request->brideid)){
+                $message->senderbride_id = $request->brideid;
+            }else{                
+                $message->sender_email = $request->email;
+            }
+
             $message->sender_firstname = $request->firstname;
             $message->sender_lastname = $request->lastname;
-            $message->sender_email = $request->email;
+            
 
             $msgjson = array(
                 "firstname" => $request->firstname,
                 "lastname" => $request->lastname,
                 "email" => $request->email,
+                "brideid" => $request->brideid,
                 "eventtype" => $request->eventtype,
                 "othereventtype" => $request->othereventtype,
                 "eventdate" => $request->eventdate,
@@ -1175,9 +1183,30 @@ class VendorController extends Controller
         
     }
 
-    function getVendorContactFormUI($id){
+    function getVendorContactFormUI($id, Request $request){
         $vendor = Vendor::find($id);
-        $html = view('modals.vendorcontactform', ['vendor' => $vendor])->render();
+        $bride = [
+            'brideid' => '',
+            'bridefirstname' => '',
+            'bridelastname' => ''
+        ];
+
+        if(!empty($request->btpmstoken)){
+            $client = new \GuzzleHttp\Client();
+            $response = $client->post(env('PMSDOMAIN') . '/api/validateBride', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $request->btpmstoken
+                ],
+                'body' => ''
+            ]);
+            $responsebody = json_decode($response->getBody());    
+
+            $bride['brideid'] = $responsebody->brideid;
+            $bride['bridefirstname'] = $responsebody->bridefirstname;
+            $bride['bridelastname'] = $responsebody->bridelastname;
+        }
+        
+        $html = view('modals.vendorcontactform', ['vendor' => $vendor, 'bride' => $bride])->render();
         return response()->json(["status" => "OK", "ui" => $html]);
     }
     

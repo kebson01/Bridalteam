@@ -5942,11 +5942,17 @@ $(document).ready(function () {
 
         $("#vendorprofile #profile_header_info .profile_contact_info a.vendorlink").click(function () {
             console.log("Show contact form modal");
+            var btpmstoken = Cookies.get('btpmstoken');
+            if (btpmstoken === undefined) {
+                btpmstoken = "";
+            }
             $.ajax({
                 url: '/api/v1/modals/vendormessageform/' + $("#vendorprofile input[name=vid]").val(),
-                method: 'GET',
+                method: 'POST',
+                data: JSON.stringify({ btpmstoken: btpmstoken }),
                 contentType: "application/json",
                 success: function (data) {
+
                     showModalDialog(data.ui, "Contact Vendor");
                     var registrationform = $("#modaldialog .vendorcontact.form").parsley();
                     $("#modaldialog .vendorcontact.form select[name=eventtype]").change(function () {
