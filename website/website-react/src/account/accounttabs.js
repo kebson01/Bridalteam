@@ -110,7 +110,8 @@ export default class VendorAccountTabs extends Component {
             catanswers: categoryquestions.cat,
             secondcatanswers: categoryquestions.subcat,
             regions: [],
-            searchregions: []
+            searchregions: [],
+            currentsub: {}
         }
     }
 
@@ -152,6 +153,13 @@ export default class VendorAccountTabs extends Component {
             state.regions = regions;
             state.searchregions = searchregions;            
             this.setState(state);
+        });
+
+        this.api.get('vendors/me/subscriptions').then((d) => {
+            console.log(d);
+            this.setState({
+                currentsub: d.currentsub
+            });
         });
     }
 
@@ -419,7 +427,7 @@ export default class VendorAccountTabs extends Component {
                 }
                 {this.state.tab == 3 ? 
                     <div id="tab_purchases">
-                        <SubscriptionManager isaccount={true} expiration={vendordata.expiration_date} nextsub={nextsub} currentsub={currentsub} />
+                        <SubscriptionManager isaccount={true} expiration={vendordata.expiration_date} nextsub={nextsub} currentsub={this.state.currentsub} />
                     </div> : null
                 } 
                 {this.state.tab == 4 ? <VendorAccountMessages /> : null }

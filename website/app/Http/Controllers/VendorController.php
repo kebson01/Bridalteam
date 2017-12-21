@@ -288,6 +288,9 @@ class VendorController extends Controller
         if($request->claim != null && $request->claim != ""){
             $message = "<p>Your vendor profile claim has been submitted.  You will be contacted for additional information, or when your claim has been approved.</p>";
             EmailSystem::sendVendorClaimEmail($vendor->id, $message);
+
+            $emailmsg = "A vendor claim has been received from $vendor->pcfirstname $vendor->pclastname <$user->email>.";
+            EmailSystem::sendAdminEmail("Vendor Claim Received - " . $vendor->businessname, $emailmsg);
         }else{
             //Send verification email
             EmailSystem::sendVerificationEmail($vendor->id);
@@ -497,6 +500,7 @@ class VendorController extends Controller
                 'status' => 'OK',
                 'subscriptions' => $subscriptions,
                 'addons' => $addons,
+                'currentsub' => $vendor->getSubscription()
             ]);
         }
         return response()->json([
@@ -536,7 +540,7 @@ class VendorController extends Controller
 
             //Find any existing next addons for this vendor and remove them
             $existingnextaddons = VendorNextAddon::where('vendor_id', '=', $vendor->id)->get();
-            foreach($existingnextsub as $addon){
+            foreach($existingnextaddons as $addon){
                 $addon->delete();
             }
 

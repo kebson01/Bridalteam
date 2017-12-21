@@ -98,8 +98,6 @@ export default class SubscriptionManager extends Component{
                 alladdons: data.addons,
                 vendor: data.vendor
             });
-
-            console.log(this.state);
         });
     }
 
@@ -203,9 +201,9 @@ export default class SubscriptionManager extends Component{
     }
 
     startSubscriptionChange = () => {
-        var nextsubstartdate = null;
-        if(this.props.currentsub.nextrenewal_on != null){
-            nextsubstartdate = moment(this.props.currentsub.nextrenewal_on.date);        
+        var nextsubstartdate = null;        
+        if(this.props.currentsub.nextrenewal_on != null){            
+            nextsubstartdate = moment(this.props.currentsub.nextrenewal_on.date);                    
         }else{
             nextsubstartdate = moment(this.props.expiration);
         }
@@ -238,9 +236,9 @@ export default class SubscriptionManager extends Component{
         });
         state.paymenttotal = total;
 
-        if(state.nextSubStartsOn != null){            
-            state.nextSubStartsOn.add(parseInt(state.paymenttotals.subscription.duration), 'M');            
-        }
+        //if(state.nextSubStartsOn != null){            
+        //    state.nextSubStartsOn.add(parseInt(state.paymenttotals.subscription.duration), 'M');            
+        //}
         this.setState(state);                
     }
 

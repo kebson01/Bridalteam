@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\MediaReview;
 
+use App\Classes\EmailSystem;
 
 class Media extends Model
 {
@@ -29,6 +30,9 @@ class Media extends Model
         
         $this->status = 1;
         $this->save();
+
+        $emailmsg = "A image/video has been submitted for review from " . $this->vendor()->businessname . " Access the admin portal to review.";
+        EmailSystem::sendAdminEmail("Media Review Requested - " . $this->vendor()->businessname, $emailmsg);
     }
     
     public function isUnderReview(){

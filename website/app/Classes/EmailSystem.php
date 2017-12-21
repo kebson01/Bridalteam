@@ -8,6 +8,21 @@ use Mail;
 
 class EmailSystem{
 
+    public static function sendAdminEmail($subject, $msg){
+        $adminemails = explode(',', env('ADMIN_EMAILS'));
+
+
+        $data = array(
+            'subject' => $subject,
+            'msg' => $msg,
+            'to' => $adminemails
+        );
+
+        Mail::send('email.admin', ['data' => $data], function ($m) use ($data){
+            $m->to($data['to'])->subject($data['subject']);
+        });
+    }
+
     public static function sendVerificationEmail($vendorid){
         $domain = env('DOMAIN');
         $webdomain = env('WEBDOMAIN');
