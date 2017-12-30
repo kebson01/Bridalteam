@@ -62,7 +62,7 @@ export default class MediaManagement extends React.Component{
                                             <td>{media.id}</td>
                                             {media.media.square_thumbnailpath != null ?
                                                 <td>
-                                                    <img width="100px" src={"http://bridalteam.dev/storage" + media.media.square_thumbnailpath} /><br/>
+                                                    <img width="100px" src={this.api.apiendpoint + "/storage" + media.media.square_thumbnailpath} /><br/>
                                                     <a href={"admin.php?page=bridalteamadmin_editmedia&id=" + media.id }>Review</a>
                                                 </td> :
                                                 <td>

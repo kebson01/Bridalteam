@@ -113,7 +113,7 @@ export default class ReviewMedia extends React.Component{
                 <h1>Item #{this.state.id} - {this.state.media.vendor.businessname}</h1>
                 <div id="bridalteam_media_review">
                     <div id="media_preview">
-                        <img src={"http://bridalteam.dev/storage" + this.state.media.media.thumbnailpath} />
+                        <img src={ this.api.apiendpoint + "/storage" + this.state.media.media.thumbnailpath} />
                         <br/>
                         <div id="media_review_controls">
                         <table className="form-table">
