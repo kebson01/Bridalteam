@@ -1,5 +1,9 @@
 @extends('layouts.main')
 
+@section('title')
+<title>Vendors - {{ env('SEO_SITETITLE') }}</title>
+@endsection
+
 @section('page')
 	<div id="page">		
         <div class="page">				

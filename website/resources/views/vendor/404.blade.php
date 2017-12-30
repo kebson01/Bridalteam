@@ -1,5 +1,9 @@
 @extends('layouts.main')
 
+@section('title')
+<title>Page Not Found - {{ env('SEO_SITETITLE') }}</title>
+@endsection
+
 @section('page')
 <div id="page">
     <div id="vendor404" class="page">

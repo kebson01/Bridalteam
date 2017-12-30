@@ -2,8 +2,8 @@
 <html class="no-js">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Bridal Team</title>   
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">        
+        @yield('title')
         <meta name="viewport" content="width=device-width">        
         
         <link rel="stylesheet" href="https://use.typekit.net/gzu0qvd.css">

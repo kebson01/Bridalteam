@@ -1,5 +1,9 @@
 @extends('layouts.main')
 
+@section('title')
+<title><?php print $category->name; ?> Vendors - {{ env('SEO_SITETITLE') }}</title>
+@endsection
+
 @section('head')
     <script>
         var questions = <?php print json_encode($questions); ?>;

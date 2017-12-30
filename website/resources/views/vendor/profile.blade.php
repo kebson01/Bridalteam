@@ -4,6 +4,10 @@
 
 @endsection
 
+@section('title')
+<title><?php print $vendor->businessname; ?> - {{ env('SEO_SITETITLE') }}</title>
+@endsection
+
 
 @section('page')
 <div id="page">

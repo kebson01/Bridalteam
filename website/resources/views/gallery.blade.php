@@ -4,6 +4,10 @@
 <script>var colorsjson = <?php print $colors; ?>;</script>
 @endsection
 
+@section('title')
+<title>Gallery - {{ env('SEO_SITETITLE') }}</title>
+@endsection
+
 @section('page')
 	<div id="page">		
         <div class="page">				

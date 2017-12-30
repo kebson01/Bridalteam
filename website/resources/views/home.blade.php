@@ -1,5 +1,9 @@
 @extends('layouts.main')
 
+@section('title')
+<title>{{ env('SEO_SITETITLE') }}</title>
+@endsection
+
 @section('page')
 <div id="homepage">
     <div id="heroimage">
@@ -16,8 +20,8 @@
     <section id="welcome">
         <div class="innerwrapper">
             <h1>Better Wedding Planning</h1>
-            <div class="content">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque quam magna, vulputate at enim nec, hendrerit sagittis neque. Integer pretium porttitor lacus quis commodo. Duis suscipit, arcu ut accumsan volutpat, turpis enim tincidunt urna, nec commodo neque neque egestas urna. In malesuada vel sem ut euismod. Pellentesque pellentesque, libero sed vehicula elementum, lorem nulla dignissim sem, et cursus metus mi non ipsum.</p>
+            <div class="content">                                             
+                <?php print $page->content->rendered; ?>                
             </div>
         </div>
     </section>

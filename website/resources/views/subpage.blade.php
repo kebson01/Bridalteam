@@ -1,5 +1,9 @@
 @extends('layouts.main')
 
+@section('title')
+<title><?php print $page->title->rendered; ?> - {{ env('SEO_SITETITLE') }}</title>
+@endsection
+
 @section('page')
 	<div id="page">		
         <div class="page">				

@@ -45,9 +45,12 @@ class PageController extends Controller{
     }
 
     public function showHomePage(){
+        $wpapi = new WpApi();
+        $page = $wpapi->getPage('home');
         $allcategories = VendorCategory::all();
         return view('home', [
-            'categories' => $allcategories
+            'categories' => $allcategories,
+            'page' => $page
         ]);
     }
 

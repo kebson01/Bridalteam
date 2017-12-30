@@ -1,5 +1,9 @@
 @extends('layouts.main')
 
+@section('title')
+<title>My Account - {{ env('SEO_SITETITLE') }}</title>
+@endsection
+
 @section('head')
 <script>
     var vendordata = <?php print json_encode($vendor); ?>;    
