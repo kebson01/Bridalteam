@@ -91,7 +91,7 @@ class EmailSystem{
         $domain = env('DOMAIN');
         $webdomain = env('WEBDOMAIN');
         
-        $vendor = VendorClaim::find($vendorid);
+        $vendor = Vendor::find($vendorid);
         $user = User::find($vendor->user_id);
         
         $data = array(
