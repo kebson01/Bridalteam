@@ -86,6 +86,24 @@
                         max-height: 300px;
                     }
 
+                    .deletemedia{
+                        display: block;                        
+                        position: absolute;
+                        padding: 5px;
+                        top:0;
+                        left:0;
+                        background-color: $siteOrange1;
+                        color: #fff;
+
+                        a{
+                            cursor: pointer;
+                            display: block;
+                            padding: 10px;
+                            font-size: 1.6em;
+                            color: #fff;
+                        }
+                    }
+
                     .mediacontrols{
                         display: block;
                         position: absolute;
@@ -349,7 +367,7 @@
             div.mediaitem{
                 width: 32%;
                 max-width: 300px;
-                margin-bottom: 20px; 
+                margin-bottom: 75px; 
 
                 .mediadetails{
                     .imagepreview{

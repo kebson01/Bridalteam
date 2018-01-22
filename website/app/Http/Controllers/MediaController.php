@@ -164,6 +164,20 @@ class MediaController extends Controller
     public function getPublicMedia($id){
         $media = Media::find($id);
         if($media && $media->status == 2){
+            $vendor = Vendor::find($media->vendor_id);
+            $media->vendorname = $vendor->businessname;
+            $media->vendorslug = $vendor->slug;
+
+            if($media->color != null){
+                $color = MediaColor::find($media->color);
+                $media->color = $color->name;
+            }
+
+            if($media->theme != null){
+                $theme = MediaTheme::find($media->theme);
+                $media->theme = $theme->name;
+            }
+
             return response()->json(["status" => "OK", "media" => $media]);
         }else{
             return response()->json([

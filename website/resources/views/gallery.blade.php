@@ -74,8 +74,12 @@
             <div class="innerwrapper">
                 <header><a id="imagedisplay_close"><i class="fa fa-times" aria-hidden="true"></i></a></header>
                 <div class="imagecontent">
-                    <div class="image"><img src="" /></div>
+                    <div class="image"><a><img src="" /></a></div>
+                    <div class="imageowner"></div>
                     <div class="tags"></div>
+                    <div class="details">
+
+                    </div>
                 </div>                
             </div>
         </div>

@@ -504,7 +504,7 @@ export default class SubscriptionManager extends Component{
                                         </div>
                                         <div className="row">
                                             <div className="six columns">
-                                                <input className="form-input" value={this.state.expdate} type="text" onChange={this.handleFieldChange} placeholder="MM/YY" autoComplete="cc-exp" name="expdate"/>                                                                    
+                                                <input className="form-input" value={this.state.expdate} type="text" onChange={this.handleFieldChange} placeholder="MM/YYYY" autoComplete="cc-exp" name="expdate"/>                                                                    
                                                 <ErrorSpan invalidfields={this.state.invalidfields} message="You must enter your card expiration date." for="expdate" />
                                             </div>
                                             <div className="six columns">

@@ -381,6 +381,9 @@ class VendorController extends Controller
                 //$vendor->country = $request->country;
                 
                 $vendor->businessname = $request->businessname;
+                if((strpos($request->url, "http://") === false) || strpos($request->url, "http://") === 0){
+                    $request->url = "http://" . $request->url;
+                }
                 $vendor->url = $request->url;
                 $vendor->about = $request->about;
                 $vendor->services = $request->services;

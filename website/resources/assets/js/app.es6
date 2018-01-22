@@ -181,7 +181,7 @@ function getFilteredMedia(category, keywords){
             var fullhtml = "";
             response.media.forEach(function(media, index){
                 var html = '<div class="item" data-id="' + media.id + '"><div class="item-content">';
-                html += '<div class="image"><img src="/storage' + media.thumbnailpath + '" /></div>';
+                html += '<div class="image"><img src="/storage' + media.thumbnailpath + '" /></div>';                
                 html += '<div class="tags">';
                 var mediakeywords = media.keyword.split(",");
                 mediakeywords.forEach(function(keyword){
@@ -208,14 +208,34 @@ function initGalleryGrid(){
         $("#imagedisplay").fadeIn(300, function(){
             $.get("/api/v1/media/public/" + mediaid, function(res){
                 console.log(res);
+                $("#imagedisplay .imagecontainer .image a").removeAttr("href");
+                $("#imagedisplay .imagecontainer .image a").removeAttr("target");
+                $("#imagedisplay .imagecontainer .imageowner").empty();
+                $("#imagedisplay .imagecontainer .imageowner").html("by<br /><a href='/vendor/" + res.media.vendorslug + "'>" + res.media.vendorname + "</a>");
+                if(res.media.product_link != null){
+                    $("#imagedisplay .imagecontainer .image a").attr("href", res.media.product_link);
+                    $("#imagedisplay .imagecontainer .image a").attr("target", "_blank");
+                    $("#imagedisplay .imagecontainer .image a").append("<span>Click to view product</span>");
+                }
                 $("#imagedisplay .imagecontainer .image img").attr('src', "/storage" + res.media.urlpath);
                 $("#imagedisplay .imagecontainer .tags").empty();
+                $("#imagedisplay .imagecontainer .details").empty();
 
                 var keywords = res.media.keyword.split(",");
                 keywords.forEach((function(val, index){
                     console.log(val);
                     $("#imagedisplay .imagecontainer .tags").append("<span><a>" + val + "</a></span>");
                 }));
+
+                if(res.media.color != 0){
+                    $("#imagedisplay .imagecontainer .details").append("<span><a>COLOR: " + res.media.color + "</a></span>");
+                }
+                
+                if(res.media.theme != 0){
+                    $("#imagedisplay .imagecontainer .details").append("<span><a>THEME: " + res.media.theme + "</a></span>");
+                }
+                
+
                 $("#imagedisplay .imagecontainer").fadeIn(400);
             });
             

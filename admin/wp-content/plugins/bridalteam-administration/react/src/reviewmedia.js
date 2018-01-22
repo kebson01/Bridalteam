@@ -171,7 +171,7 @@ export default class ReviewMedia extends React.Component{
                                     <td>
                                         <select name="theme" value={this.state.media.media.theme} onChange={this.handleFieldChange}>
                                             <option>Select a Theme</option>
-                                            {this.state.colors.map((theme, index) => {
+                                            {this.state.themes.map((theme, index) => {
                                                 return (
                                                     <option key={index} value={theme.id}>{theme.name}</option>
                                                 )
@@ -199,9 +199,11 @@ export default class ReviewMedia extends React.Component{
                                             <select>
                                                 <option>Select a Category</option>
                                                 {this.state.categories.map((cat, index) => {
-                                                    return (
-                                                        <option key={index} value={cat.id}>{cat.name}</option>
-                                                    )
+                                                    if(cat.parent_category == this.state.media.media.category){
+                                                        return (
+                                                            <option key={index} value={cat.id}>{cat.name}</option>
+                                                        )
+                                                    }                                                    
                                                 })}
                                             </select>
                                         </td>

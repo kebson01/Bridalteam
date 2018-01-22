@@ -26,10 +26,12 @@ export default class MediaManager extends Component{
             if(data.status == "OK"){                
                 var state = this.state;
                 state.limit = data.limit;
+                state.mediacategories = [];
                 state.mediacategories.push({
                     value: "",
                     label: "Select a Category"
                 });
+                state.mediasubcategories = [];
                 state.mediasubcategories.push({
                     value: "",
                     label: "Select a Sub Category"
@@ -152,15 +154,33 @@ export default class MediaManager extends Component{
         }
     }
 
+    deleteMediaItem = (mediaindex) => {
+        if(mediaindex !== undefined){
+            if(confirm ("Are you sure you want to remove this media?")){
+                var media = this.state.media[mediaindex];
+                this.api.delete('media/vendormedia/' + media.id).then((data) => {
+                    if(data.status == "OK"){
+                        this.refreshMedia();
+                        alert("Media deleted.");
+                    }
+                });
+            }
+        }
+    }
+
     submitMediaItem = (mediaindex) => {
         if(mediaindex !== undefined){
             var media = this.state.media[mediaindex];
-            this.api.post('media/submitvendormedia/' + media.id).then((data) => {
+            this.api.post('media/vendormedia/' + media.id, media).then((data) => {
                 if(data.status == "OK"){
-                    alert("Media Submitted for Review.");
-                    this.refreshMedia();
+                    this.api.post('media/submitvendormedia/' + media.id).then((data) => {
+                        if(data.status == "OK"){
+                            alert("Media Submitted for Review.");
+                            this.refreshMedia();
+                        }
+                    });
                 }
-            });
+            });            
         }
     }
 
@@ -185,6 +205,7 @@ export default class MediaManager extends Component{
                                 handleFieldChange={this.handleFieldChange}
                                 saveItem={this.saveMediaItem}
                                 submitItem={this.submitMediaItem}
+                                deleteItem={this.deleteMediaItem}
                                 colors={this.state.mediacolors} 
                                 themes={this.state.mediathemes} 
                                 categories={this.state.mediacategories} 
@@ -241,6 +262,9 @@ class Media extends Component{
                         { this.props.media.status == 1 ? <div className="reviewinprogress"><span>Under Review</span></div> : null}                        
                         <div className="imagepreview">
                             <img src={ this.props.endpoint + "/storage" + this.props.media.square_thumbnailpath} />
+                            <div className="deletemedia">
+                                <a onClick={() => {this.props.deleteItem(this.props.index)}}><i className="fa fa-trash-o" aria-hidden="true"></i></a>
+                            </div>
                             { this.props.media.status == 0 ?
                             <div className="mediacontrols">
                                 <a onClick={() => {this.props.saveItem(this.props.index) }} className="btn">Save</a>

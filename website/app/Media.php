@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\MediaReview;
+use App\Vendor;
 
 use App\Classes\EmailSystem;
 
@@ -45,7 +46,7 @@ class Media extends Model
     }
 
     public function vendor(){
-        return $this->belongsTo('App\Vendor');
+        return Vendor::find($this->vendor_id);
     }
     
     
