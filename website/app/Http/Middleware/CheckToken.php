@@ -16,7 +16,10 @@ class CheckToken
      */
     public function handle($request, Closure $next)
     {
-        $btvendortoken = $_COOKIE['btvendortoken'];
+        $btvendortoken = "";
+        if(isset($_COOKIE['btvendortoken'])){
+            $btvendortoken = $_COOKIE['btvendortoken'];
+        }        
 
         if($btvendortoken != ""){
 

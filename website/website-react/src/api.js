@@ -6,7 +6,7 @@ export default class Api{
         if(process.env.NODE_ENV == "production"){
             this.apiendpoint = "https://www.bridalteam.com";
         }else{
-            this.apiendpoint = "http://bridalteam.loc";
+            this.apiendpoint = "http://bridalteam.test";
         }
         this.client = null;
         var token = Cookies.get('btvendortoken');

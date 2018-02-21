@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import moment from 'moment';
 import Api from "../api";
 import LoadingOverlay from '../misc/loading';
 
@@ -37,6 +38,7 @@ export default class VendorAccountMessages extends Component{
             var state = this.state;
             state.selectedMessage = data.message;  
             state.selectedMessage.message = JSON.parse(state.selectedMessage.messagejson);   
+            state.selectedMessage.created_at = moment.utc(state.selectedMessage.created_at).local();
             console.log(state.selectedMessage);
             this.setState(state);
 
@@ -57,11 +59,13 @@ export default class VendorAccountMessages extends Component{
                 <div id="messageList">
                     <ul>
                         {this.state.messages.map((msg, index) => {
+                            var createddate = moment.utc(msg.created_at).local();
+
                             if(msg.id == this.state.selectedMessage.id){
                                 return(
                                     <li className="selected" onClick={() => { this.selectMessage(msg.id)}} key={index}>
                                         <span className="from"><i className="fa fa-envelope-o" aria-hidden="true"></i>{msg.sender_firstname} {msg.sender_lastname}</span>
-                                        <span className="date">On: {msg.created_at}</span>
+                                        <span className="date">On: {createddate.format("MM/DD/YYYY h:mm A")}</span>
                                         {msg.unread ? <span className="unread"></span> : null}
                                         
                                     </li>
@@ -70,7 +74,7 @@ export default class VendorAccountMessages extends Component{
                                 return(
                                     <li onClick={() => { this.selectMessage(msg.id)}} key={index}>
                                         <span className="from"><i className="fa fa-envelope-o" aria-hidden="true"></i>{msg.sender_firstname} {msg.sender_lastname}</span>
-                                        <span className="date">On: {msg.created_at}</span>
+                                        <span className="date">On: {createddate.format("MM/DD/YYYY h:mm A")}</span>
                                         {msg.unread ? <span className="unread"></span> : null}
                                         
                                     </li>
@@ -87,7 +91,7 @@ export default class VendorAccountMessages extends Component{
                             <div className="row"><strong>From:</strong> {this.state.selectedMessage.message.firstname} {this.state.selectedMessage.message.lastname}
                                 {this.state.selectedMessage.senderbride_id != null ? <em> (Registered Bride)</em> : null }
                             </div>
-                            <div className="row"><strong>On: </strong> {this.state.selectedMessage.created_at}</div>
+                            <div className="row"><strong>On: </strong> {this.state.selectedMessage.created_at.format("MM/DD/YYYY h:mm A")}</div>
                             <div className="row"><strong>Event Type: </strong> {this.state.selectedMessage.message.eventtype}</div>
                             <div className="row"><strong>Event Date: </strong> {this.state.selectedMessage.message.eventdate}</div>
                             <div className="message">{this.state.selectedMessage.message.message}</div>
