@@ -17,6 +17,7 @@ class CreateVendorSubscriptionTable extends Migration
             $table->increments('id');
             $table->integer('vendor_id');
             $table->integer('subscription_id');
+            $table->integer('renewaltries')->default(0);
             $table->date('nextrenewal_on')->nullable();   
             $table->date('periodstarted_on');            
             $table->timestamps();

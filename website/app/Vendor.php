@@ -39,6 +39,7 @@ class Vendor extends Model
         }else{
             $sub = $currentsub->getSubscriptionDetails();
             $sub->nextrenewal_on = $currentsub->nextrenewal_on;
+            $sub->renewalattempts = $currentsub->renewaltries;
             $sub->addons = $this->getAddons();
 
             $subtotal = $sub->amount;

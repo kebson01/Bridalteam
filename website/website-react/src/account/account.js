@@ -51,6 +51,21 @@ export default class VendorAccount extends Component{
     render(){
         return (
             <span>
+                {vendordata.active != true && vendordata.approved == true?
+                    <div className="vendorerrors" style={{
+                        padding: "15px",
+                        textAlign: "center",
+                        backgroundColor: "red",
+                        color: "white",
+                        fontSize: "1.4em"
+                        
+                    }}>
+                        <div className="innerwrapper">
+                            Your Vendor Account has been disabled.<br />Contact support for more details.
+                        </div>
+                    </div>
+                    : null
+                }
                 <header style={{backgroundImage: "url('/storage/" + this.state.vendordata.backgroundimage + "')"}} className="pageheader">
                     <div id="profile_header">
                         <a id="profile_header_edit_btn"><i className="fa fa-pencil"></i> Edit Background</a>

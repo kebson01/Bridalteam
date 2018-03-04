@@ -52,7 +52,7 @@ class ProcessSubs extends Command
     public function handle()
     {
         //
-        $expiredvendorsubs = VendorSubscription::where('nextrenewal_on', "<", date("Y-m-d"))->get();
+        $expiredvendorsubs = VendorSubscription::where('nextrenewal_on', "<", date("Y-m-d"))->where("renewaltries", "<", 3)->get();
         $renewedSubCount = 0;
         $failedSubCount = 0;
         $totalSubCount = count($expiredvendorsubs);
@@ -135,6 +135,14 @@ class ProcessSubs extends Command
                             $renewedSubCount++;
                         }else{
                             //Implement an attempt system - after 3 attempts then disable account
+                            $sub->renewaltries++;
+                            $sub->save();
+
+                            if ($sub->renewaltries > 3) {
+                                //Renewal tried 3 times, disable the account
+                                $vendor->active = false;
+                                $vendor->save();
+                            }
                             $this->info("Vendor ID: " . $sub->vendor_id . " was NOT renewed.");
                             $failedSubCount++;
                             $errorlogs .= "Vendor ID: " . $sub->vendor_id . " was NOT renewed.<br/>";
@@ -145,6 +153,15 @@ class ProcessSubs extends Command
                 $this->info("There was an error renewing vendor ID: " . $sub->vendor_id . " - " . $e->getMessage() . ":" . $e->getLine());                
                 $errorlogs .= "There was an error renewing vendor ID: " . $sub->vendor_id . " - " . $e->getMessage() . ":" . $e->getLine() . "<br/>";
                 $failedSubCount++;
+
+                $sub->renewaltries++;
+                $sub->save();
+
+                if ($sub->renewaltries > 3) {
+                    //Renewal tried 3 times, disable the account
+                    $vendor->active = false;
+                    $vendor->save();
+                }
             }   
         }
 
@@ -154,6 +171,6 @@ class ProcessSubs extends Command
         $emailmsg .= "$failedSubCount subscription renewal failures.  Check logs:<br/><br/>";
         $emailmsg .= $errorlogs;
 
-        EmailSystem::sendAdminEmail("Daily Subscription Processing - " . date("Y-m-d"), $emailmsg);
+        //EmailSystem::sendAdminEmail("Daily Subscription Processing - " . date("Y-m-d"), $emailmsg);
     }
 }
