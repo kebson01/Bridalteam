@@ -721,17 +721,19 @@ class VendorController extends Controller
             $file = $request->importfile;
             
 
-            Excel::load($file->getRealPath(), function($reader){
-                $reader->take(10);
+            Excel::load($file->getRealPath(), function($reader){         
+                
                 $results = $reader->toArray();
+
                 $categories = VendorCategory::all();
                 $searchregions = VendorRegion::all();
 
                 $index = 0;
                 foreach($results as $row){
+                    set_time_limit(25);
                     $foundregion = null;
                     foreach($searchregions as $region){
-                        if(trim($region->region) == trim($row['region'])){
+                        if(trim($region->region) == trim($row['region']) . " - " . trim($row['state'])){
                             $foundregion = $region->id;
                             break;
                         }
@@ -764,7 +766,7 @@ class VendorController extends Controller
                     $newvendor->slug = str_slug($newvendor->businessname);
                     $newvendor->pcemail = trim($row['email_address']);                    
                     $newvendor->source = trim($row['source']);
-                    $newvendor->type = trim($row['type']);
+                    $newvendor->type = trim($row['source_type']);
                     $newvendor->region = $foundregion;
                     $newvendor->category = $foundcategory;                    
 
@@ -793,7 +795,7 @@ class VendorController extends Controller
                         if(true){
                             $newvendor->save();
                         }else{
-                            print "Could not save row $index: " . $row['business_name'] . " - Could not find search region for '" . $row['region'] . "'<br/>";
+                            print "Could not save row $index: " . $row['business_name'] . " - Could not find search region for '" . $row['region'] . " - " . $row['state'] . "'<br/>";
                         }
                     }else{
                         print "Could not save row $index: " . $row['business_name'] . " - Could not find category for '" . $row['category'] . "'<br/>";
