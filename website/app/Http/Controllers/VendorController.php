@@ -188,11 +188,9 @@ class VendorController extends Controller
     }
 
     public function getRegions(){
-        $regions = VendorRegion::all();
-        $searchregions = VendorRegion::all();
+        $regions = VendorRegion::all();        
         return response()->json([
-            'regions' => $regions,
-            'searchregions' => $searchregions
+            'regions' => $regions            
         ]);
     }
 
@@ -719,11 +717,66 @@ class VendorController extends Controller
     public function importVendors(Request $request){
         if($request->importfile){
             $file = $request->importfile;
+
+            
             
 
             Excel::load($file->getRealPath(), function($reader){         
                 
                 $results = $reader->toArray();
+
+                $states = array(
+                    'Alabama'=>'AL',
+                    'Alaska'=>'AK',
+                    'Arizona'=>'AZ',
+                    'Arkansas'=>'AR',
+                    'California'=>'CA',
+                    'Colorado'=>'CO',
+                    'Connecticut'=>'CT',
+                    'Delaware'=>'DE',
+                    'Florida'=>'FL',
+                    'Georgia'=>'GA',
+                    'Hawaii'=>'HI',
+                    'Idaho'=>'ID',
+                    'Illinois'=>'IL',
+                    'Indiana'=>'IN',
+                    'Iowa'=>'IA',
+                    'Kansas'=>'KS',
+                    'Kentucky'=>'KY',
+                    'Louisiana'=>'LA',
+                    'Maine'=>'ME',
+                    'Maryland'=>'MD',
+                    'Massachusetts'=>'MA',
+                    'Michigan'=>'MI',
+                    'Minnesota'=>'MN',
+                    'Mississippi'=>'MS',
+                    'Missouri'=>'MO',
+                    'Montana'=>'MT',
+                    'Nebraska'=>'NE',
+                    'Nevada'=>'NV',
+                    'New Hampshire'=>'NH',
+                    'New Jersey'=>'NJ',
+                    'New Mexico'=>'NM',
+                    'New York'=>'NY',
+                    'North Carolina'=>'NC',
+                    'North Dakota'=>'ND',
+                    'Ohio'=>'OH',
+                    'Oklahoma'=>'OK',
+                    'Oregon'=>'OR',
+                    'Pennsylvania'=>'PA',
+                    'Rhode Island'=>'RI',
+                    'South Carolina'=>'SC',
+                    'South Dakota'=>'SD',
+                    'Tennessee'=>'TN',
+                    'Texas'=>'TX',
+                    'Utah'=>'UT',
+                    'Vermont'=>'VT',
+                    'Virginia'=>'VA',
+                    'Washington'=>'WA',
+                    'West Virginia'=>'WV',
+                    'Wisconsin'=>'WI',
+                    'Wyoming'=>'WY'
+                );
 
                 $categories = VendorCategory::all();
                 $searchregions = VendorRegion::all();
@@ -779,7 +832,7 @@ class VendorController extends Controller
                     $newvendor->owneremail = "";
                     $newvendor->address = "";
                     $newvendor->city = "";
-                    $newvendor->state = "";
+                    $newvendor->state = $states[$row['state']];
                     $newvendor->zip = "";
                     $newvendor->country = "";
                     $newvendor->isnational = false;

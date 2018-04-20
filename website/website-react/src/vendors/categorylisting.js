@@ -1,9 +1,12 @@
 import React, {Component} from 'react';
 import states from '../misc/states';
+import Api from '../api';
 
 export default class VendorCategoryListing extends Component{
     constructor(props){
         super(props);
+
+        this.api = new Api();
 
         var filteroptions = {};
         var questionsArray = JSON.parse(questions.questions);
@@ -11,13 +14,34 @@ export default class VendorCategoryListing extends Component{
         questionsArray.forEach((question, index) => {
             filteroptions["question_" + index] = []            
         });
+
+        console.log(states);
         
         this.state = {
             questions: questionsArray,
             categoryid: questions.category,
             filteroptions: filteroptions,
+            regions: [],
             vendors: vendors
         }
+    }
+
+    componentDidMount() {
+        this.getVendorRegions();
+    }
+
+    getVendorRegions = () => {
+        this.api.get("vendors/regions").then((data) => {
+            
+            const formattedregions = {};
+            data.regions.forEach((region) => {                
+                formattedregions[region.id.toString()] = region.region;                
+            });
+            
+            this.setState({
+                regions: formattedregions
+            });
+        });
     }
 
     onFilterChange = (data) => {        
@@ -30,8 +54,16 @@ export default class VendorCategoryListing extends Component{
         this.refreshFilters();
     }
 
-    refreshFilters = () => {
+    refreshFilters = () => {        
+        var filteroptions = this.state.filteroptions;
+        filteroptions.categoryid = this.state.categoryid;
+
         console.log("Get new vendors....");
+        this.api.post("vendors/filter", filteroptions).then((data) => {     
+            this.setState({
+                vendors: data.results
+            });
+        });
     }
 
     render(){
@@ -40,8 +72,8 @@ export default class VendorCategoryListing extends Component{
                 <a id="mobilevendorfilterbtn">Show Vendor Filters</a>
                 <div id="vendor_filters">
                     <form id="vendor_filters_form">  
-                        <FilterModule select={true} options={states} multiple={false} title="Location" type="State" />
-                        <FilterModule select={true} options={states} multiple={false} title="Regions" type="Region" />
+                        <FilterModule select={true} options={states} multiple={false} title="Location" type="State" updatefilter={this.onFilterChange} />
+                        <FilterModule select={true} options={this.state.regions} multiple={false} title="Regions" type="Region" updatefilter={this.onFilterChange} />
                         {this.state.questions.map((question, index) => {
                             return (
                                 <FilterModule key={index} questionid={"question_" + index} category={this.state.categoryid} multiple={question.multiple} options={question.options} title={question.filterlabel} updatefilter={this.onFilterChange} />
@@ -140,6 +172,15 @@ class FilterModule extends Component{
         });
     }
 
+    handleSelectSelection = (e, index) => {
+        console.log(e.target.value);
+        var update = {};
+        this.props.updatefilter({
+            questionid: this.props.type.toLowerCase(),
+            options: e.target.value
+        });
+    }
+
     clearSelection = () => {
         this.setState({
             selected: []
@@ -148,6 +189,12 @@ class FilterModule extends Component{
         this.props.updatefilter({
             questionid: "question_" + this.props.questionid,
             options: []
+        });
+    }
+    componentWillReceiveProps(newProps) {        
+        this.setState({
+            keys: Object.keys(newProps.options),
+            values: newProps.options
         });
     }
 
@@ -161,7 +208,7 @@ class FilterModule extends Component{
                     </div>:
                     <div className="options inline">    
                         {this.props.select ? 
-                            <select className="form-select" required="">
+                            <select onChange={(e) => { this.handleSelectSelection(e, 1)}} className="form-select" required="">
                                 <option value="">Select a {this.props.type}</option>
                                 {this.state.keys.map((item, index) => {
                                     return (
