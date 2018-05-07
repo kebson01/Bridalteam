@@ -10,7 +10,7 @@
     "require": {
         "php": ">=7.0.0",
         "barryvdh/laravel-cors": "^0.10.0",
-        "cartalyst/stripe-laravel": "2.0.*",
+        "cartalyst/stripe-laravel": "7.0.*",
         "fideloper/proxy": "~3.3",
         "folklore/image": "0.3.*",
         "fzaninotto/faker": "^1.7",
@@ -19,7 +19,7 @@
         "laravel/tinker": "~1.0",
         "maatwebsite/excel": "~2.1.0",
         "tymon/jwt-auth": "0.5.*",
-        "guzzlehttp/guzzle": "~5.0"
+        "guzzlehttp/guzzle": "~6.0"
     },
     "require-dev": {
         "filp/whoops": "~2.0",

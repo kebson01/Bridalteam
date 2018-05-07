@@ -27,11 +27,11 @@ export default class VendorCategoryListing extends Component{
     }
 
     componentDidMount() {
-        this.getVendorRegions();
+        this.getVendorRegions("");
     }
 
-    getVendorRegions = () => {
-        this.api.get("vendors/regions").then((data) => {
+    getVendorRegions = (currentstate) => {
+        this.api.get("vendors/regions?bystate=" + currentstate).then((data) => {
             
             const formattedregions = {};
             data.regions.forEach((region) => {                
@@ -58,12 +58,15 @@ export default class VendorCategoryListing extends Component{
         var filteroptions = this.state.filteroptions;
         filteroptions.categoryid = this.state.categoryid;
 
-        console.log("Get new vendors....");
+        console.log("Get new vendors....");        
         this.api.post("vendors/filter", filteroptions).then((data) => {     
             this.setState({
                 vendors: data.results
             });
         });
+
+        // Update region list
+        this.getVendorRegions(this.state.filteroptions.state);
     }
 
     render(){
