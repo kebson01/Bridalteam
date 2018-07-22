@@ -38,7 +38,7 @@
                             @endforeach
                         </ul>
                         <?php if(!isset($_COOKIE['btvendortoken']) || $user == null): ?>
-                            <a class="button" href="/vendor/login" id="btn_vendorlogin">Vendor Login</a>
+                            <a class="button" href="http://plan.bridalteam.com/login" id="btn_vendorlogin">Bride Login</a>
                         <?php else: ?>
                             <div class="user_menu">  
                                 <div class="userinfo">
@@ -74,6 +74,7 @@
                             @foreach($menu as $menuitem)
                                 <li><a href="{{$menuitem->url}}">{{$menuitem->title}}</a></li>
                             @endforeach
+                            <li><a href="/vendor/login">Vendor Login</a></li>
                         </ul>
                     </nav>
                 </div>
