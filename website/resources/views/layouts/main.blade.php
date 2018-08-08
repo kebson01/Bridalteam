@@ -80,6 +80,10 @@
             <footer class="main">
                 <div class="innerwrapper">
                     <div id="copyright">&copy; <?php print date("Y"); ?> Bridal Team</div>
+                    <div class="socialmedia">
+                        <a target="_blank" href="https://www.facebook.com/bridalteam"><i class="fa fa-facebook-official" aria-hidden="true"></i></a>
+                        <a target="_blank" href="http://twitter.com/bridalteam"><i class="fa fa-twitter-square" aria-hidden="true"></i></a>
+                    </div>
                     <nav>
                         <ul>
                             @foreach($menu as $menuitem)
