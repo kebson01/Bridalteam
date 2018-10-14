@@ -52,10 +52,12 @@ export default class SubscriptionManager extends Component{
     nextPage = () =>{
         var state = this.state;
         state.page++;        
-        this.setState(state);
-        if(state.page == 2){
-            this.calculateSubscriptionTotals()
+
+        if (state.page == 2) {
+            this.calculateSubscriptionTotals();
         }
+
+        this.setState(state);    
     }
 
     backPage = () => {
@@ -190,6 +192,17 @@ export default class SubscriptionManager extends Component{
         return addon;
     }
 
+    isAddonSelected = (value) => {
+        let isSelected = false;
+        this.state.selectedaddons.forEach((selected) => {
+            if (value == selected) {
+                isSelected = true;
+            }
+        });
+
+        return isSelected;
+    }
+
     getSubscriptionById = (id) => {
         var sub = null;
         this.state.allsubs.forEach((s, index) => {
@@ -239,7 +252,9 @@ export default class SubscriptionManager extends Component{
         //if(state.nextSubStartsOn != null){            
         //    state.nextSubStartsOn.add(parseInt(state.paymenttotals.subscription.duration), 'M');            
         //}
-        this.setState(state);                
+        this.setState(state);     
+        
+        return total;
     }
 
     cancelSubscriptionRenewal = () => {
@@ -256,60 +271,63 @@ export default class SubscriptionManager extends Component{
 
     submitPayment = () => {
         console.log("Submitting payment...");
-        var failedvalidation = false;
-        var state = this.state;
-        console.log(state);
-        var errors = validatejs(state, this.constraints);
-        if(errors !== undefined){
-            var fieldkeys = Object.keys(errors);
-            state.invalidfields = fieldkeys;
-            this.setState(state);
-            failedvalidation = true;
-        }
-
-        if(!jQuery.payment.validateCardNumber(state.ccn)){
-            state.invalidfields = ["ccn"];
-            failedvalidation = true;
-        }
-
-        var ccnexpiry = jQuery.payment.cardExpiryVal(state.expdate);
-
-        if(!jQuery.payment.validateCardExpiry(ccnexpiry.month, ccnexpiry.year)){
-            state.invalidfields = ["expdate"];
-            failedvalidation = true;
-        }
-
-        var type = jQuery.payment.cardType(state.ccn);
-
-        if(!jQuery.payment.validateCardCVC(state.cvc, type)){            
-            state.invalidfields = ["cvc"];
-            failedvalidation = true;
-        }
-
-        if(failedvalidation){
-            this.setState(state);
-            return;
-        }else{
-            state.invalidfields = [];
-            this.setState(state);
-        }
-
-        Stripe.card.createToken({
-            name: state.nameoncard,
-            number: state.ccn,
-            cvc: state.cvc,
-            exp_month: ccnexpiry.month,
-            exp_year: ccnexpiry.year
-        }, (status, response) => {
-            if(response.error){
-                alert("There was an error processing your card: " + response.error.message);                
-                state.isLoading = false;
-            }else{
-                var cctoken = response.id;
-                this.purchaseSubscription(cctoken);                
+        if (this.state.paymenttotal > 0) {
+            var failedvalidation = false;
+            var state = this.state;
+            console.log(state);
+            var errors = validatejs(state, this.constraints);
+            if(errors !== undefined){
+                var fieldkeys = Object.keys(errors);
+                state.invalidfields = fieldkeys;
+                this.setState(state);
+                failedvalidation = true;
             }
-        });
 
+            if(!jQuery.payment.validateCardNumber(state.ccn)){
+                state.invalidfields = ["ccn"];
+                failedvalidation = true;
+            }
+
+            var ccnexpiry = jQuery.payment.cardExpiryVal(state.expdate);
+
+            if(!jQuery.payment.validateCardExpiry(ccnexpiry.month, ccnexpiry.year)){
+                state.invalidfields = ["expdate"];
+                failedvalidation = true;
+            }
+
+            var type = jQuery.payment.cardType(state.ccn);
+
+            if(!jQuery.payment.validateCardCVC(state.cvc, type)){            
+                state.invalidfields = ["cvc"];
+                failedvalidation = true;
+            }
+
+            if(failedvalidation){
+                this.setState(state);
+                return;
+            }else{
+                state.invalidfields = [];
+                this.setState(state);
+            }
+
+            Stripe.card.createToken({
+                name: state.nameoncard,
+                number: state.ccn,
+                cvc: state.cvc,
+                exp_month: ccnexpiry.month,
+                exp_year: ccnexpiry.year
+            }, (status, response) => {
+                if(response.error){
+                    alert("There was an error processing your card: " + response.error.message);                
+                    state.isLoading = false;
+                }else{
+                    var cctoken = response.id;
+                    this.purchaseSubscription(cctoken);                
+                }
+            });
+        } else {
+            this.purchaseSubscription(null);  
+        }
     }
 
     purchaseSubscription = (cctoken) => {
@@ -444,7 +462,7 @@ export default class SubscriptionManager extends Component{
                                     <tbody>
                                         {this.getAddonsByDuration(this.state.selectedduration).map((addon, index) => {
                                             
-                                            return ( <Addon key={index} addon={addon} onAddonToggle={this.handleAddonChange} /> )
+                                            return ( <Addon key={index} addon={addon} checked={this.isAddonSelected(addon.id)} onAddonToggle={this.handleAddonChange} /> )
                                         })}
                                     </tbody>                                    
                                 </table>
@@ -487,7 +505,7 @@ export default class SubscriptionManager extends Component{
                                         </tbody>                                        
                                     </table>                                    
                                 </div>            
-                                { !this.props.isaccount ?
+                                { !this.props.isaccount && this.state.paymenttotal > 0 ?
                                     <div className="formsection">
                                         <h3>Payment <span>Details</span></h3>
                                         <div className="row">
@@ -590,7 +608,7 @@ var Addon = (props) => {
             <td>
                 <div className="form-group">
                     <label className="form-checkbox">
-                        <input onChange={props.onAddonToggle} value={props.addon.id} type="checkbox" />
+                        <input onChange={props.onAddonToggle} checked={props.checked} value={props.addon.id} type="checkbox" />
                         <i className="form-icon"></i> Select
                     </label>
                 </div>
