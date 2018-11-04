@@ -96,8 +96,8 @@ class MediaController extends Controller
                 $q->where('color', '=', $color);
             }
 
-            if(!empty($keywords)){                
-                $q->whereRaw("MATCH(keyword) AGAINST(? IN BOOLEAN MODE)", $keywords);                
+            if(!empty($keywords)){     
+                $q->whereRaw("MATCH(keyword) AGAINST(? IN BOOLEAN MODE)", [$keywords]);                
             }
         });        
 

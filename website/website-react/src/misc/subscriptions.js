@@ -480,25 +480,25 @@ export default class SubscriptionManager extends Component{
                             <form className="form" id="vendorpaymentform">
                                 <div className="cardcontainer"></div>
                                 <div className="formsection">
-                                    <h3>Susbcription <span>Review</span></h3>
+                                    <h3>Subscription <span>Review</span></h3>
                                     <table className="totals">
                                         <tbody>
                                             <tr>
-                                                <td>{this.state.paymenttotals.subscription.name}</td>
-                                                <td>${this.state.paymenttotals.subscription.amount} every {this.state.paymenttotals.subscription.duration} month(s)</td>
+                                                <td>{this.state.paymenttotals.subscription.name} Package</td>
+                                                <td>${this.state.paymenttotals.subscription.amount}</td>
                                             </tr>
                                             { this.state.paymenttotals.addons.map((addon, index)=>{
                                                 return (
                                                     <tr key={index}>
                                                         <td>Addon: {addon.name}</td>
-                                                        <td>${addon.price} every {addon.duration} month(s)</td>
+                                                        <td>${addon.price}</td>
                                                     </tr>
                                                 )
                                             })}
                                             
                                             <tr className="totalsline">
-                                                <td>Total</td>
-                                                {this.state.nextSubStartsOn == null ? <td>${this.state.paymenttotal} (due today)</td> : null}
+                                                <td>Total due</td>
+                                                {this.state.nextSubStartsOn == null ? <td>${this.state.paymenttotal} every {this.state.paymenttotals.subscription.duration} month(s)</td> : null}
                                                 {this.state.nextSubStartsOn != null ? <td>${this.state.paymenttotal} (due {this.state.nextSubStartsOn.format('MM/DD/YYYY')})</td> : null}
                                                 
                                             </tr>
