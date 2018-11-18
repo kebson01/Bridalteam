@@ -6082,6 +6082,10 @@ $(document).ready(function () {
         }
         return false;
     });
+
+    $(".logout_btn").click(function () {
+        Cookies.remove('btvendortoken');
+    });
 });
 
 function getFilteredMedia(category, keywords) {

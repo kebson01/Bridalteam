@@ -187,4 +187,8 @@ class PageController extends Controller{
             return redirect('/vendor/account');
         }
     }
+
+    public function logoutRedirect(Request $request) {
+        return redirect("/");
+    }
 }

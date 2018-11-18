@@ -59,7 +59,7 @@
                                 <ul>
                                     <li><a href="/vendor/account">My Account</a></li>
                                     <li><a href="/vendor/<?php print $user->findVendor()->slug; ?>">My Vendor Profile</a></li>
-                                    <li><a href="/logout">Logout</a></li>
+                                    <li><a class="logout_btn" href="/logout">Logout</a></li>
                                 </ul>
                             </div>
                         <?php endif; ?>

@@ -16,6 +16,7 @@ Route::get('/', 'PageController@showHomePage');
 Route::get('/vendor/login', 'PageController@showVendorLogin');
 Route::get('/vendor/register', 'PageController@showVendorRegistration');
 Route::get('/email-verify', 'PageController@showVerification');
+Route::get('/logout', 'PageController@logoutRedirect');
 
 Route::group(['middleware' => 'vendortoken'], function(){
     Route::get('/vendor/account', 'PageController@showVendorAccount');
