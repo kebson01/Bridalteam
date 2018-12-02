@@ -11,6 +11,7 @@ wp-content/cache/supercache/*
 wp-content/w3tc*
 wp-content/w3tc/*
 wp-content/wflogs/*
+blog/wp-content/uploads/*
 sitemap.*
 wp-config.php
 UserFiles

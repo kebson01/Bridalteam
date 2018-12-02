@@ -43,7 +43,7 @@ gulp.task('js', function(){
 
 gulp.task('start', function(){
     browsersync.init({
-        proxy: 'http://bridalteam.loc/'
+        proxy: 'http://bridalteam.test/'
     });
 
     gulp.watch(['./assets/sass/**/*.scss'], ['sass']);

@@ -77,7 +77,11 @@ class PageController extends Controller{
         $page = $wpapi->getPage($slug);
         
         if($page){
-            return view('subpage', [
+            $view = "subpage";            
+            if (isset($page->blogposts) && count($page->blogposts) > 0) {
+                $view = "blog";
+            }
+            return view($view, [
                 'page' => $page
             ]);
         }

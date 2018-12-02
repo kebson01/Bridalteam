@@ -16,6 +16,22 @@ if(!defined('ABSPATH')) exit; // Exit if accessed directly
 
 add_filter('admin_menu', 'bridalteam_admin_menus');
 add_action('admin_enqueue_scripts', 'bridalteam_load_scripts');
+add_action('rest_api_init', function() {
+    register_rest_field('page', 'blogposts', array("get_callback" => "bridalteam_get_blogposts"));
+});
+
+function bridalteam_get_blogposts($object, $field_name, $request) {
+    $page_for_posts = get_option('page_for_posts');
+    if ($object['id'] == $page_for_posts) {
+        $blogposts = get_posts(array(
+            "posts_per_page" => 10
+        ));
+        
+        return $blogposts;
+    }
+
+    return array();
+}
 
 function bridalteam_admin_menus(){
     add_menu_page("Vendors", "Vendors", "edit_posts", "bridalteamadmin_vendors", "bridalteam_render_vendor_admin");    

@@ -1,0 +1,19 @@
+.page.blogposts {
+    background-color: #f8f8f8;
+
+    .innerwrapper {
+        padding: 10px;
+
+        .posts {
+            padding-top: 20px;
+        }
+    }
+}
+
+article.blogpost {
+    padding: 10px;
+    min-height: 500px;
+    background-color: #fff;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
