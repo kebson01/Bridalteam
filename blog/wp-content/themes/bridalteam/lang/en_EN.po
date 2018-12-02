@@ -1,0 +1,497 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Flothemes\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-04-24 16:57+0300\n"
+"PO-Revision-Date: 2012-04-24 16:57+0300\n"
+"Last-Translator: Eugen Figursky <eugen@flosites.com>\n"
+"Language-Team: Flothemes <info@flothemes.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: ./\n"
+"X-Poedit-Language: English\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Country: UNITED STATES\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../404.php:4
+msgid "If you see this message, that means you hit the wrong page, but don’t worry, we have a few options for you."
+msgstr ""
+
+#: ../404.php:6
+msgid "Go Back"
+msgstr ""
+
+#: ../404.php:7
+msgid "Homepage"
+msgstr ""
+
+#: ../404.php:10
+msgid "Contact Us"
+msgstr ""
+
+#: ../archive.php:6
+#, php-format
+msgid "Daily Archives: %s"
+msgstr ""
+
+#: ../archive.php:8
+#, php-format
+msgid "Monthly Archives: %s"
+msgstr ""
+
+#: ../archive.php:10
+#, php-format
+msgid "Yearly Archives: %s"
+msgstr ""
+
+#: ../author.php:5
+#, php-format
+msgid "Author: %s"
+msgstr ""
+
+#: ../category.php:4
+#, php-format
+msgid "Category: %s"
+msgstr ""
+
+#: ../comments.php:16
+msgid "This post is password protected. Enter the password to view comments."
+msgstr ""
+
+#: ../comments.php:26
+msgid "&larr; Older comments"
+msgstr ""
+
+#: ../comments.php:27
+msgid "Newer comments &rarr;"
+msgstr ""
+
+#: ../comments.php:32
+#: ../comments.php:36
+msgid "Comments are closed."
+msgstr ""
+
+#: ../comments.php:47
+#, php-format
+msgid "You must be <a href=\"%s\">logged in</a> to post a comment."
+msgstr ""
+
+#: ../comments.php:53
+#, php-format
+msgid "Logged in as <a href=\"%s/wp-admin/profile.php\">%s</a>."
+msgstr ""
+
+#: ../comments.php:54
+msgid "Log out of this account"
+msgstr ""
+
+#: ../comments.php:54
+msgid "Log out &raquo;"
+msgstr ""
+
+#: ../comments.php:56
+msgid "Name"
+msgstr ""
+
+#: ../comments.php:56
+#: ../comments.php:58
+msgid "*"
+msgstr ""
+
+#: ../comments.php:58
+msgid "Email"
+msgstr ""
+
+#: ../comments.php:60
+msgid "Website"
+msgstr ""
+
+#: ../comments.php:65
+msgid "Comment"
+msgstr ""
+
+#: ../comments.php:70
+msgid "Submit Comment"
+msgstr ""
+
+#: ../comments.php:84
+msgid "Please download the DISQUS plugin from Wordpress Repository and install it."
+msgstr ""
+
+#: ../comments.php:88
+msgid "Please download the Livefyre Realtime Comments plugin from Wordpress Repository and install it."
+msgstr ""
+
+#: ../footer.php:9
+msgid "Made By"
+msgstr ""
+
+#: ../search.php:4
+#, php-format
+msgid "Search Results for: %s"
+msgstr ""
+
+#: ../searchform.php:3
+#: ../searchform.php:4
+msgid "Search"
+msgstr ""
+
+#: ../sidebar-blog.php:6
+msgid "Please activate some Widgets for your Blog."
+msgstr ""
+
+#: ../sidebar-home.php:6
+msgid "Please activate some Widgets for your Homepage."
+msgstr ""
+
+#: ../single-venue.php:13
+msgid "Back to Venue list"
+msgstr ""
+
+#: ../single-video.php:16
+msgid "Back to Videos list"
+msgstr ""
+
+#: ../tag.php:4
+#, php-format
+msgid "Tag Archives: %s"
+msgstr ""
+
+#: ../template-archives.php:11
+msgid "The last 30 Posts"
+msgstr ""
+
+#: ../template-archives.php:25
+msgid "Archives by Month"
+msgstr ""
+
+#: ../template-archives.php:32
+msgid "Archives by Category"
+msgstr ""
+
+#: ../template-contact.php:18
+msgid "Your email was sent successfully. Thank you for your message!"
+msgstr ""
+
+#: ../template-contact.php:32
+msgid "Phone"
+msgstr ""
+
+#: ../template-contact.php:36
+msgid "How did you find me?"
+msgstr ""
+
+#: ../template-contact.php:40
+msgid "Message"
+msgstr ""
+
+#: ../template-sitemap.php:11
+msgid "Pages"
+msgstr ""
+
+#: ../template-sitemap.php:21
+msgid "Categories"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:30
+msgid "Theme Activation"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:64
+#, php-format
+msgid "%s Theme Activation"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:79
+#: ../flotheme/etc/activation.php:81
+msgid "Create static front page?"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:83
+#: ../flotheme/etc/activation.php:95
+#: ../flotheme/etc/activation.php:107
+#: ../flotheme/etc/activation.php:119
+#: ../flotheme/etc/activation.php:131
+msgid "Yes"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:84
+#: ../flotheme/etc/activation.php:96
+#: ../flotheme/etc/activation.php:108
+#: ../flotheme/etc/activation.php:120
+#: ../flotheme/etc/activation.php:132
+msgid "No"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:86
+msgid "Create a page called Home and set it to be the static front page"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:91
+#: ../flotheme/etc/activation.php:93
+msgid "Create a blog page?"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:98
+msgid "Create a page called Blog and set it to be the posts page"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:103
+msgid "Change permalink structure?"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:105
+msgid "Update permalink structure?"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:110
+msgid "Change permalink structure to /&#37;postname&#37;/"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:115
+#: ../flotheme/etc/activation.php:117
+msgid "Create navigation menu?"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:122
+msgid "Create the Primary Navigation menu and set the location"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:127
+#: ../flotheme/etc/activation.php:129
+msgid "Add pages to menu?"
+msgstr ""
+
+#: ../flotheme/etc/activation.php:134
+msgid "Add all current published pages to the Primary Navigation"
+msgstr ""
+
+#: ../flotheme/etc/admin.php:33
+msgid "Flotheme"
+msgstr ""
+
+#: ../flotheme/etc/admin.php:34
+msgid "Theme Options"
+msgstr ""
+
+#: ../flotheme/etc/admin.php:37
+#: ../flotheme/etc/admin.php:42
+msgid "Theme Updater"
+msgstr ""
+
+#: ../flotheme/etc/admin.php:40
+msgid "Flotheme Update Available"
+msgstr ""
+
+#: ../flotheme/etc/admin.php:44
+msgid "Help"
+msgstr ""
+
+#: ../flotheme/etc/admin.php:110
+#, php-format
+msgid "Please update your <a href=\"%s\">site tagline</a>"
+msgstr ""
+
+#: ../flotheme/etc/contact.php:199
+msgid "Cannot send mail. Please check all fields"
+msgstr ""
+
+#: ../flotheme/etc/front.php:49
+msgid "Thank you for your comment!"
+msgstr ""
+
+#: ../flotheme/etc/front.php:220
+#, php-format
+msgid "<cite class=\"fn\">%s</cite>"
+msgstr ""
+
+#: ../flotheme/etc/front.php:221
+#, php-format
+msgid "%1$s"
+msgstr ""
+
+#: ../flotheme/etc/front.php:222
+msgid "(Edit)"
+msgstr ""
+
+#: ../flotheme/etc/front.php:225
+msgid "Your comment is awaiting moderation."
+msgstr ""
+
+#: ../flotheme/etc/front.php:240
+msgid "This post is password protected. To view it please enter your password below:"
+msgstr ""
+
+#: ../flotheme/etc/front.php:241
+msgid "Password:"
+msgstr ""
+
+#: ../flotheme/etc/front.php:359
+msgid "Search for"
+msgstr ""
+
+#: ../flotheme/etc/front.php:371
+#: ../flotheme/etc/front.php:374
+#: ../flotheme/etc/front.php:377
+msgid "Archives"
+msgstr ""
+
+#: ../flotheme/etc/front.php:530
+msgid "Something went wrong. Please refresh page and try again."
+msgstr ""
+
+#: ../flotheme/etc/system.php:60
+msgid "Header Menu"
+msgstr ""
+
+#: ../flotheme/etc/system.php:77
+#: ../flotheme/etc/system.php:78
+msgid "No "
+msgstr ""
+
+#: ../flotheme/etc/system.php:79
+#: ../flotheme/etc/system.php:118
+msgid "Edit "
+msgstr ""
+
+#: ../flotheme/etc/system.php:80
+#: ../flotheme/etc/system.php:114
+msgid "Search "
+msgstr ""
+
+#: ../flotheme/etc/system.php:81
+msgid "View "
+msgstr ""
+
+#: ../flotheme/etc/system.php:82
+#: ../flotheme/etc/system.php:121
+msgid "New "
+msgstr ""
+
+#: ../flotheme/etc/system.php:83
+msgid "Add New"
+msgstr ""
+
+#: ../flotheme/etc/system.php:84
+#: ../flotheme/etc/system.php:120
+msgid "Add New "
+msgstr ""
+
+#: ../flotheme/etc/system.php:115
+msgid "All "
+msgstr ""
+
+#: ../flotheme/etc/system.php:116
+#: ../flotheme/etc/system.php:117
+msgid "Parent "
+msgstr ""
+
+#: ../flotheme/etc/system.php:119
+msgid "Update "
+msgstr ""
+
+#: ../flotheme/functions/media.php:39
+msgid "Sorry that seems to be an invalid <strong>YouTube</strong> URL. Please check it again."
+msgstr ""
+
+#: ../flotheme/functions/media.php:82
+msgid "Sorry that seems to be an invalid <strong>Vimeo</strong> URL. Please check it again. Make sure there is a string of numbers at the end (e.g. http://vimeo.com/2104600)."
+msgstr ""
+
+#: ../flotheme/options/admin/options-framework.php:166
+msgid "Click OK to reset. Any theme settings will be lost!"
+msgstr ""
+
+#: ../flotheme/options/admin/options-framework.php:198
+msgid "Default options restored."
+msgstr ""
+
+#: ../flotheme/options/admin/options-framework.php:239
+msgid "Options saved."
+msgstr ""
+
+#: ../flotheme/options/admin/options-medialibrary-uploader.php:26
+msgid "Options Framework Internal Container"
+msgstr ""
+
+#: ../flotheme/options/admin/options-medialibrary-uploader.php:128
+msgid "Upload"
+msgstr ""
+
+#: ../flotheme/options/admin/options-medialibrary-uploader.php:151
+msgid "View File"
+msgstr ""
+
+#: ../flotheme/options/admin/options-medialibrary-uploader.php:288
+msgid "Gallery"
+msgstr ""
+
+#: ../flotheme/options/admin/options-medialibrary-uploader.php:288
+msgid "Previously Uploaded"
+msgstr ""
+
+#: ../flotheme/widgets/widget-blog.php:15
+msgid "A widget that displays your latest posts with image."
+msgstr ""
+
+#: ../flotheme/widgets/widget-blog.php:26
+msgid "Flotheme Recent Posts"
+msgstr ""
+
+#: ../flotheme/widgets/widget-blog.php:112
+msgid "Latest Blog Posts"
+msgstr ""
+
+#: ../flotheme/widgets/widget-blog.php:117
+msgid "Title:"
+msgstr ""
+
+#: ../flotheme/widgets/widget-blog.php:121
+msgid "Posts to show:"
+msgstr ""
+
+#: ../flotheme/widgets/widget-flickr.php:88
+#: ../flotheme/widgets/widget-flickr.php:89
+#: ../partials/postpreview.php:12
+msgid "by"
+msgstr ""
+
+#: ../flotheme/widgets/widget-tweets.php:16
+msgid "A widget that displays your latest tweets."
+msgstr ""
+
+#: ../flotheme/widgets/widget-tweets.php:29
+msgid "Flotheme Latest Tweets"
+msgstr ""
+
+#: ../flotheme/widgets/widget-tweets.php:122
+msgid "Twitter Username e.g. flothemes"
+msgstr ""
+
+#: ../flotheme/widgets/widget-tweets.php:128
+msgid "Number of tweets (max 20)"
+msgstr ""
+
+#: ../flotheme/widgets/widget-tweets.php:134
+msgid "Follow Text e.g. Follow me on Twitter"
+msgstr ""
+
+#: ../partials/notfound.php:2
+msgid "No results were found for the requested page."
+msgstr ""
+
+#: ../partials/postactions.php:10
+msgid "Tags: "
+msgstr ""
+
+#: ../partials/postcontent.php:5
+msgid "Pages:"
+msgstr ""
+
+#: ../partials/postfooter.php:3
+msgid "Open Post"
+msgstr ""
+

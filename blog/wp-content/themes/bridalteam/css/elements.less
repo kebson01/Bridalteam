@@ -1,0 +1,366 @@
+// GRADIENTS
+// ---------
+.gradient(@color: #F5F5F5, @start: #EEE, @stop: #FFF) {
+  background: @color;
+  background: -webkit-gradient(linear,
+                               left bottom,
+                               left top,
+                               color-stop(0, @start),
+                               color-stop(1, @stop));
+  background: -ms-linear-gradient(bottom,
+                                  @start,
+                                  @stop);
+  background: -moz-linear-gradient(center bottom,
+                                   @start 0%,
+                                   @stop 100%);
+}
+.bw-gradient(@color: #F5F5F5, @start: 0, @stop: 255) {
+  background: @color;
+  background: -webkit-gradient(linear,
+                               left bottom,
+                               left top,
+                               color-stop(0, rgb(@start,@start,@start)),
+                               color-stop(1, rgb(@stop,@stop,@stop)));
+  background: -ms-linear-gradient(bottom,
+                                  rgb(@start,@start,@start) 0%,
+                                  rgb(@start,@start,@start) 100%);
+  background: -moz-linear-gradient(center bottom,
+                                   rgb(@start,@start,@start) 0%,
+                                   rgb(@stop,@stop,@stop) 100%);
+}
+
+// BORDERS & ROUNDED
+// -----------------
+.bordered(@top-color: #EEE, @right-color: #EEE, @bottom-color: #EEE, @left-color: #EEE) {
+  border-top: solid 1px @top-color;
+  border-left: solid 1px @left-color;
+  border-right: solid 1px @right-color;
+  border-bottom: solid 1px @bottom-color;
+}
+
+.rounded(@radius: 2px) {
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+  border-radius: @radius;
+  -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box; 
+}
+.rounded-corners(@tl: 3px, @tr: 3px, @br: 3px, @bl: 3px) {
+	-moz-border-radius-topleft: @tl;
+	-moz-border-radius-topright: @tr;
+	-moz-border-radius-bottomright: @br;
+	-moz-border-radius-bottomleft: @bl;
+	-webkit-border-radius: @tl @tr @br @bl;
+	border-radius: @tl @tr @br @bl;
+}
+.border-radius(@topright: 0, @bottomright: 0, @bottomleft: 0, @topleft: 0) {
+  -webkit-border-top-right-radius: @topright;
+  -webkit-border-bottom-right-radius: @bottomright;
+  -webkit-border-bottom-left-radius: @bottomleft;
+  -webkit-border-top-left-radius: @topleft;
+  -moz-border-radius-topright: @topright;
+  -moz-border-radius-bottomright: @bottomright;
+  -moz-border-radius-bottomleft: @bottomleft;
+  -moz-border-radius-topleft: @topleft;
+  border-top-right-radius: @topright;
+  border-bottom-right-radius: @bottomright;
+  border-bottom-left-radius: @bottomleft;
+  border-top-left-radius: @topleft;
+  -moz-background-clip: padding; -webkit-background-clip: padding-box; background-clip: padding-box; 
+}
+
+// OPACITY & TRANSITIONS
+// ---------------------
+.opacity(@opacity: 0.5) {
+  -moz-opacity: @opacity;
+  -khtml-opacity: @opacity;
+  -webkit-opacity: @opacity;
+  opacity: @opacity;
+}
+.transition-duration(@duration: 0.2s) {
+  -moz-transition-duration: @duration;
+  -webkit-transition-duration: @duration;
+  transition-duration: @duration;
+}
+.rotation(@deg:5deg){
+  -webkit-transform: rotate(@deg);
+  -moz-transform: rotate(@deg);
+  transform: rotate(@deg);
+}
+.scale(@ratio:1.5){
+  -webkit-transform:scale(@ratio);
+  -moz-transform:scale(@ratio);
+  transform:scale(@ratio);
+}
+.transition(@transition) {
+	-webkit-transition: @transition;
+	-moz-transition: @transition;
+	-ms-transition: @transition;
+	-o-transition: @transition;
+	transition: @transition;
+}
+.translate(@x:0, @y:0) {
+  -moz-transform: translate(@x, @y);
+  -webkit-transform: translate(@x, @y);
+  -o-transform: translate(@x, @y);
+  -ms-transform: translate(@x, @y);
+  transform: translate(@x, @y);
+}
+
+// SHADOWS
+// -------
+.drop-shadow(@x-axis: 0, @y-axis: 1px, @blur: 2px, @alpha: 0.1) {
+  -webkit-box-shadow: @x-axis @y-axis @blur rgba(0, 0, 0, @alpha);
+  -moz-box-shadow: @x-axis @y-axis @blur rgba(0, 0, 0, @alpha);
+  box-shadow: @x-axis @y-axis @blur rgba(0, 0, 0, @alpha);
+}
+.inner-shadow(@horizontal:0, @vertical:1px, @blur:2px, @alpha: 0.4) {
+  -webkit-box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);
+  -moz-box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);
+  box-shadow: inset @horizontal @vertical @blur rgba(0, 0, 0, @alpha);
+}
+.box-shadow(@arguments) {
+  -webkit-box-shadow: @arguments;
+  -moz-box-shadow: @arguments;
+  box-shadow: @arguments;
+}
+.shadow-gray-alpha() {
+	-webkit-box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, .3);
+	-moz-box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, .3);
+	box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, .3); 
+}
+.shadow-black-alpha() {
+    -webkit-box-shadow: 0 0 5px black;
+    -moz-box-shadow: 0 0 5px black;
+    box-shadow: 0 0 5px black;
+}
+.text-shadow(@color: #fff) {
+	text-shadow: 1px 1px 0px @color;
+}
+.shadowed(@shadow) {
+	text-shadow: @shadow;
+}
+.no-text-shadow() {
+	text-shadow: none;
+}
+
+// COLUMNS
+// -------
+.columns(@colwidth: 250px, @colcount: 0, @colgap: 50px, @columnRuleColor: #EEE, @columnRuleStyle: solid, @columnRuleWidth: 1px) {
+  -moz-column-width: @colwidth;
+  -moz-column-count: @colcount;
+  -moz-column-gap: @colgap;
+  -moz-column-rule-color: @columnRuleColor;
+  -moz-column-rule-style: @columnRuleStyle;
+  -moz-column-rule-width: @columnRuleWidth;
+  -webkit-column-width: @colwidth;
+  -webkit-column-count: @colcount;
+  -webkit-column-gap: @colgap;
+  -webkit-column-rule-color: @columnRuleColor;
+  -webkit-column-rule-style: @columnRuleStyle;
+  -webkit-column-rule-width: @columnRuleWidth;
+  column-width: @colwidth;
+  column-count: @colcount;
+  column-gap: @colgap;
+  column-rule-color: @columnRuleColor;
+  column-rule-style: @columnRuleStyle;
+  column-rule-width: @columnRuleWidth;
+}
+
+.nobreak {
+	-webkit-column-break-inside:avoid;
+	-moz-column-break-inside:avoid;
+	-o-column-break-inside:avoid;
+	-ms-column-break-inside:avoid;
+	column-break-inside:avoid;
+	display: table;			
+}
+
+// FONTS
+// -----
+.main-font() {
+	font-family:sans-serif;
+}
+.font-shorthand(@weight: normal, @size: 12px, @lineHeight: 1.2) {
+	font-size: @size;
+	font-weight: @weight;
+	line-height: @lineHeight;
+}
+.font-sans-serif(@weight: normal, @size: 12px, @lineHeight: 1.2) {
+	.main-font;
+	font-size: @size;
+	font-weight: @weight;
+	line-height: @lineHeight;
+}
+.font-serif(@weight: normal, @size: 12px, @lineHeight: 1.2) {
+	font-family: "Georgia", Times New Roman, Times, serif;
+	font-size: @size;
+	font-weight: @weight;
+	line-height: @lineHeight;
+}
+.font-monospace(@weight: normal, @size: 12px, @lineHeight: 20px) {
+	font-family: "Monaco", Courier New, monospace;
+	font-size: @size;
+	font-weight: @weight;
+	line-height: @lineHeight;
+}
+.font-smoothing() {
+	-webkit-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+}
+
+// SPACING
+// -------
+.no-spacing() {
+	letter-spacing: -.31em;
+	word-spacing: -.43em;
+}
+.spacing() {
+	letter-spacing:normal;
+	word-spacing:normal;
+}
+
+
+// OTHER
+// -----
+.inline-block() {
+	display: inline-block;
+	*display: inline;
+	*zoom: 1;
+}
+
+
+.box-sizing(@sizing: border-box) {
+  -webkit-box-sizing: @sizing;
+  -moz-box-sizing: @sizing;
+  -ms-box-sizing: @sizing;
+  -o-box-sizing: @sizing;
+  box-sizing: @sizing;
+}
+
+
+.hide-text() {
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+
+.bg-cover() {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+
+
+.desaturate() {
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -ms-filter: grayscale(100%);
+    -o-filter: grayscale(100%);
+}
+
+.saturate() {
+    filter: grayscale(0);
+    -webkit-filter: grayscale(0);
+    -moz-filter: grayscale(0);
+    -ms-filter: grayscale(0);
+    -o-filter: grayscale(0);
+}
+
+// GRADIENTS
+// ---------
+.o-grad() {
+  background: #ff9422; /* Old browsers */
+  background: -moz-linear-gradient(top, #ff9422 0%, #fa8021 44%, #fa8021 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ff9422), color-stop(44%,#fa8021), color-stop(100%,#fa8021)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #ff9422 0%,#fa8021 44%,#fa8021 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #ff9422 0%,#fa8021 44%,#fa8021 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #ff9422 0%,#fa8021 44%,#fa8021 100%); /* IE10+ */
+  background: linear-gradient(to bottom, #ff9422 0%,#fa8021 44%,#fa8021 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff9422', endColorstr='#fa8021',GradientType=0 ); /* IE6-9 */
+}
+// FONTS
+// -----
+.nofont() {
+  font: 0/0 serif;
+  color: transparent;
+}
+
+
+// Open Sans
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700,600);
+
+@font-face {
+  font-family: 'Gotham-Book';
+  src: url('../fonts/Gotham-Book.eot');
+  src: url('../fonts/Gotham-Book.eot?iefix') format('eot'),
+       url('../fonts/Gotham-Book.woff') format('woff'),
+       url('../fonts/Gotham-Book.svg#Gotham-Book') format('svg');
+}
+@font-face {
+  font-family: 'Gotham-MediumItalic';
+  src: url('../fonts/Gotham-MediumItalic.eot');
+  src: url('../fonts/Gotham-MediumItalic.eot?iefix') format('eot'),
+       url('../fonts/Gotham-MediumItalic.woff') format('woff'),
+       url('../fonts/Gotham-MediumItalic.svg#Gotham-MediumItalic') format('svg');
+}
+
+@font-face {
+    font-family: 'GothamHTFBold';
+    src: url('../fonts/gothhtfm-webfont.eot');
+    src: url('../fonts/gothhtfm-webfont.eot?iefix') format('eot'),
+         url('../fonts/gothhtfm-webfont.woff') format('woff'),
+         url('../fonts/gothhtfm-webfont.ttf') format('truetype'),
+         url('../fonts/gothhtfm-webfont.svg#webfontJLvmnEgK') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+  font-family: 'alternategothic2_btregular';
+  src: url('../fonts/alternate_gothic_no2_bt-webfont.eot');
+  src: url('../fonts/alternate_gothic_no2_bt-webfont.eot?#iefix') format('embedded-opentype'),
+       url('../fonts/alternate_gothic_no2_bt-webfont.woff') format('woff'),
+       url('../fonts/alternate_gothic_no2_bt-webfont.ttf') format('truetype'),
+       url('../fonts/alternate_gothic_no2_bt-webfont.svg#alternategothic2_btregular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'WisdomScriptAI';
+  src: url('../fonts/WisdomScript.eot');
+  src: url('../fonts/WisdomScript.eot?#iefix') format('embedded-opentype'),
+       url('../fonts/WisdomScript.woff') format('woff'),
+       url('../fonts/WisdomScript.svg#WisdomScriptAI') format('svg');
+}
+
+.fa() {
+  font-family: 'Gotham-Book';  
+}
+.fm() {
+  font-family: 'GothamHTFBold';
+}
+.fi() {
+  font-family: 'Gotham-MediumItalic';
+}
+
+.fo() {
+  font-family: 'Open Sans';
+}
+.fb() {
+  font-family: 'alternategothic2_btregular';
+}
+.fw() {
+  font-family: 'WisdomScriptAI';
+}
+
+@orange: #fb7e1b;
+@deep: #f86807;
+@yellow: #fbb80c;
+@gray: #464646; 
+@light: #969494; @lighter: #8f8b8b; @lights: #696969;
+@dark: #191919; @darker: #5a5a5a;
