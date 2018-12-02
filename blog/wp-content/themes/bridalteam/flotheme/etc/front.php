@@ -191,7 +191,7 @@ function flo_footer() {
 		js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
 		fjs.parentNode.insertBefore(js, fjs);
 	}(document, 'script', 'facebook-jssdk'));</script>
-	<script type="text/javascript" src="http://assets.pinterest.com/js/pinit.js"></script>
+	<script type="text/javascript" src="https://assets.pinterest.com/js/pinit.js"></script>
 	<?php
 }
 
