@@ -278,7 +278,8 @@ function flotheme_get_images_sizes() {
  * @return array
  */
 function flotheme_get_post_types() {
-	return array(        
+    return array();
+	/*return array(        
         'wedfolio' => array(
             'config' => array(
                 'public' => true,
@@ -374,7 +375,7 @@ function flotheme_get_post_types() {
             'singular' => 'History',
             'multiple' => 'History',
         ),                         
-	);
+	);*/
 }
 
 /**
