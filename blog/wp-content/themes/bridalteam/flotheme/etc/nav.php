@@ -2,7 +2,7 @@
 class Flotheme_Nav_Walker extends Walker_Nav_Menu 
 {
 
-	function start_el(&$output, $category, $depth = 0, $args = array(), $current_object_id = 0)
+	function start_el(&$output, $item, $depth = 0, $args = array(), $current_object_id = 0)
 	{
 		global $wp_query;
 		$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
