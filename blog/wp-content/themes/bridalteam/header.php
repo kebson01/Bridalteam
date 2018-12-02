@@ -6,7 +6,7 @@
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>" />
 	<title><?php wp_title('|', true, 'right'); bloginfo('name'); ?></title>
-	<link href='http://fonts.googleapis.com/css?family=Raleway:400,700,500,600,300' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Raleway:400,700,500,600,300' rel='stylesheet' type='text/css'>
 	<?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>

@@ -76,7 +76,7 @@ function flo_enqueue_scripts() {
 	wp_deregister_script('jquery');
 	//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 	//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
-	wp_register_script('jquery', 'http://code.jquery.com/jquery-1.7.1.min.js');
+	wp_register_script('jquery', 'https://code.jquery.com/jquery-1.7.1.min.js');
 	
 	// add modernizr
 	wp_register_script( 'flo_modernizr', THEME_URL . '/js/libs/modernizr-2.5.3.min.js', array( 'jquery' ), FLOTHEME_THEME_VERSION, false );
