@@ -7382,3 +7382,69 @@ div.image:hover .credits {
     color:#FF9000;
     text-decoration:none;
 }
+
+footer.main {
+  font-size: 14px;
+  font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  clear: both;
+  margin-top: 25px;
+  padding-bottom: 70px;
+}
+
+footer.main nav ul li:after {
+  content: "|";
+  padding-left: 7px;
+}
+
+footer.main #copyright {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+footer.main .socialmedia {
+  text-align: center;
+  margin-bottom: 10px;
+  margin-top: 5px;
+  font-size: 2em;
+}
+
+footer.main nav ul {
+  font-family: "futura-pt",sans-serif;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  text-align: center;
+}
+
+footer.main nav ul li {
+  display: inline-block;
+  margin-right: 7px;
+  margin-top: 0;
+}
+
+footer.main nav ul li:last-of-type {
+  margin-right: 0;
+}
+
+footer.main nav ul li:last-of-type:after {
+  content: "";
+  padding-left: 0;
+
+}
+
+footer.main nav ul li a {
+  text-decoration: none;
+  color: #000;
+}
+
+footer.main .socialmedia a {
+  display: inline-block;
+  margin-right: 10px;
+  color: #010101;
+}
+
+footer.main .socialmedia a:last-of-type {
+  margin-right: 0;
+}
