@@ -5,7 +5,7 @@
  * @class        WPBannerizeClass
  * @package      wpBannerize
  * @subpackage   wpBannerizeClass
- * @author       =undo= <g.fazioli@undolog.com>, <g.fazioli@wpxtre.me>
+ * @author       =undo= <g.fazioli@undolog.com>
  * @copyright    Copyright (C) 2008-2013
  *
  */

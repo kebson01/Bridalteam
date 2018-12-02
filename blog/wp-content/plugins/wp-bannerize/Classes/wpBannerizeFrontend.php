@@ -4,7 +4,7 @@
  *
  * @package             wpBannerize
  * @subpackage          wpBannerizeFrontend
- * @author			  =undo= <g.fazioli@undolog.com>, <g.fazioli@wpxtre.me>
+ * @author			  =undo= <g.fazioli@undolog.com>
  * @copyright		   Copyright (C) 2008-2013
  *
  */
@@ -234,7 +234,7 @@ class WPBannerizeFrontend extends WPBannerizeClass {
 			<?php endif; ?>
 		<?php if ( $this->options['supportWPBannerize'] == '1' ) : ?>
 			<p class="wp-bannerize-support"><a style="font-size:11px;text-align:center"
-			                                   href="https://wpxtre.me/product/bannerize/"
+			                                   href="#"
 			                                   target="_blank"><span>Powered by WP Bannerize</span></a></p>
 			<?php endif; ?>
 		<?php // Widget

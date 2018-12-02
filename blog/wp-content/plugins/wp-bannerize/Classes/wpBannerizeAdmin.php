@@ -4,7 +4,7 @@
  *
  * @package            wpBannerize
  * @subpackage         wpBannerizeAdmin
- * @author             =undo= <g.fazioli@undolog.com>, <g.fazioli@wpxtre.me>
+ * @author             =undo= <g.fazioli@undolog.com>
  * @copyright          Copyright (C) 2008-2013
  *
  */
@@ -103,13 +103,6 @@ class WPBannerizeAdmin extends WPBannerizeClass {
    */
   function commonHeader()
   {
-    ?>
-    <div class="wp_common_box">
-    <a class="wp_common_logo" href="https://wpxtre.me">
-			<?php echo $this->plugin_name ?> ver. <?php echo $this->version ?>
-		</a>
-    <p>This plugin version is no longer updated and supported  <a class="button button-primary button-small" href="https://wpxtre.me/product/bannerize" target="_blank">Check the new version here</a></p>
-    </div><?php
   }
 
   function on_screen_layout_columns( $columns, $screen )
@@ -1864,10 +1857,6 @@ class WPBannerizeAdmin extends WPBannerizeClass {
    */
   function add_plugin_links( $links, $file )
   {
-    if ( $file == plugin_basename( $this->plugin_file ) ) {
-      $links[] = '<strong style="color:#fa0">' .
-        __( 'For more info visit', 'wp-bannerize' ) . ' <a href="https://wpxtre.me/product/bannerize">wpXtreme</a></strong>';
-    }
     return $links;
   }
 

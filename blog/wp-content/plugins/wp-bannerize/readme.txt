@@ -2,17 +2,18 @@
 Contributors: gfazioli
 Donate link: http://www.undolog.com
 Tags: Banner, Manage, Image, ADV, Random, Adobe Flash, Impressions, Click Counter
-Requires at least: 3.6
-Tested up to: 3.7.1
-Stable tag: 3.1.6
+Requires at least: 4.5.2
+Tested up to: 4.7.0
+Stable tag: 4.0.2
 
 WP Bannerize is an easy to use adv server with html, free text and Flash banner support.
 
 == Description ==
 
-**NOTE**
+**TRY THE PRO VERSION**
 
-This plugin version is no longer updated and supported! [Check the new version here](https://wpxtre.me/product/bannerize "Check the new version here")
+You'll find the new version of WP Bannerize [here](https://wordpress.org/plugins/wp-bannerize-pro/).
+This new version can import the previous database. Anyway, you can use them in the same time for a easy test and upgrade.
 
 
 WP Bannerize is an Amazing Banner Manager. With WP Bannerize you can manage all your advertising stuff through widgets, shortcodes or directly from your template.
@@ -117,17 +118,11 @@ The default HTML output for above code is:
 * [Elio e le Storie Tese](http://www.elioelestorietese.it "Elio e le Storie Tese")
 * [Artribune](http://www.artribune.com/ "Artribune")
 * [Undolog](http://www.undolog.com "Undolog")
-* [wpXtreme](https://wpxtre.me "wpXtreme")
-
-Aren't you in this list? Please, [let me know your WordPress site url](mailto:g.fazioli@wpxtre.me "let me know your WordPress site url")
 
 == Related Links ==
 
-* [wpXtreme](https://wpxtre.me "More WordPress Plugin")
 * [Undolog](http://www.undolog.com/ "Author's Web")
 * [Tutorial Video](http://www.youtube.com/watch?v=sAZOyAwXu-U "Tutorial Video")
-
-For more information on the roadmap and the next improvements, please send an e-mail to: [support@wpxtre.me](mailto:support@wpxtre.me "support@wpxtre.me")
 
 
 == Screenshots == 
@@ -173,7 +168,7 @@ For more information on the roadmap and the next improvements, please send an e-
 
 = 3.1.0 =
 
-* Added Notice: This plugin version is no longer updated and supported [Check the new version here](https://wpxtre.me/product/bannerize "Check the new version here")
+* Added Notice: This plugin version is no longer updated and supported
 * Fixed several bugs and updated to WordPress 3.7
 * Updated localization
 
@@ -181,7 +176,6 @@ For more information on the roadmap and the next improvements, please send an e-
 * Fixed anonymous function for php 4
 
 = 3.0.61 =
-* Introducing [wpXtreme](https://wpxtre.me "wpXtreme")
 * Fixed dbDelat output on plugin activation
 
 = 3.0.50 =
@@ -519,9 +513,6 @@ For more information on the roadmap and the next improvements, please send an e-
 
 
 == Upgrade Notice ==
-
-= 3.1.0 =
-This plugin version is no longer updated and supported! [Check the new version here](https://wpxtre.me/product/bannerize "Check the new version here")
 
 = 3.0 =
 Very large improvements and security fix! Upgrade immediately

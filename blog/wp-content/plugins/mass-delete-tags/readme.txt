@@ -2,15 +2,15 @@
 Contributors: ramon fincken
 Tags: tags, admin, mass, delete, clean, remove, speed, quick, tag
 Requires at least: 2.3
-Tested up to: 3.0.1
-Stable tag: 1.0
+Tested up to: 4.8
+Stable tag: 1.0.1
 
 Deletes all tags, handy tool if you want to start over with a quick clean blog.
 
 == Description ==
 
 Deletes all tags, handy tool if you want to start over with a quick clean blog.<br>
-* Coding by <a href="http://www.mijnpress.nl" title="MijnPress.nl WordPress ontwikkeling">MijnPress.nl</a><br>
+* Coding by <a href="https://www.mijnpress.nl" title="MijnPress.nl WordPress ontwikkeling">MijnPress.nl</a><br>
 * Idea by <a href="http://hosting.ber-art.nl" title="hosting.ber-art.nl Webhosting">hosting.ber-art.nl</a>
 
 == Installation ==

@@ -1,6 +1,8 @@
-=== Plugin Name ===
+=== Gravity Forms Auto Placeholders ===
 Contributors: maxxsnake
 Tags: placeholder, gravity forms, placeholders, gravity, forms, watermark, label, input, internet explorer, ie, ie8, ie9, modernizr
+Stable tag: 1.2
+Tested up to: 4.0
 
 Automatically converts all Gravity Form labels into HTML5 placeholders. Includes Modernizr to add placeholder support to Internet Explorer.
 
@@ -20,10 +22,8 @@ By default, Gravity Forms does not include support to use placeholders. A placeh
 
 == Changelog ==
 
+= 1.2 =
+* Updated JavaScript to increase compatibility.
+
 = 1.0 =
 * Created.
-
-== Upgrade Notice ==
-
-= 1.0 =
-Created.

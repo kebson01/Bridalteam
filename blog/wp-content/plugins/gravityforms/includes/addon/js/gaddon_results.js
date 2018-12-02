@@ -25,12 +25,13 @@ var gresults = {
     },
 
     renderStateData: function (state) {
-        jQuery("#gresults-results").data('searchcriteria', state.searchCriteria)
+        var results = jQuery("#gresults-results");
+        results.data('searchcriteria', state.searchCriteria);
         jQuery("#gresults-results-filter").html(state.filterUI);
-        jQuery("#gresults-results").css('opacity', 0);
-        jQuery("#gresults-results").html(state.html);
+        results.css('opacity', 0);
+        results.html(state.html);
         gresults.drawCharts();
-        jQuery("#gresults-results").fadeTo("slow", 1);
+        results.fadeTo("slow", 1);
 
         var filterContainer = jQuery("#gresults-results-field-filters-container");
         filterContainer.resizable();
@@ -51,7 +52,8 @@ var gresults = {
         var filterButtons = jQuery("#gresults-results-filter-buttons input");
         var loading = jQuery(".gresults-filter-loading");
         var viewSlug = jQuery("#gresults-view-slug").val();
-        var data_str = "action=gresults_get_results_" + viewSlug + "&" + gresultsData;
+		var nonce = jQuery("#_gf_results_nonce").val()
+        var data_str = "action=gresults_get_results_" + viewSlug + "&" + gresultsData + '&_gf_results_nonce' + nonce ;
         if (serverStateObject)
             data_str += "&state=" + serverStateObject + "&checkSum=" + checkSum;
 
@@ -76,7 +78,7 @@ var gresults = {
                     filterButtons.removeAttr('disabled');
                     loading.hide();
                     results.html(response.html);
-                    jQuery("#gresults-results").data('searchcriteria', response.searchCriteria) //used in 'more' links
+                    jQuery("#gresults-results").data('searchcriteria', response.searchCriteria); //used in 'more' links
 
                     var filterUI = jQuery("#gresults-results-filter").html();
 
@@ -117,11 +119,13 @@ var gresults = {
     },
 
     getMoreResults: function (formId, fieldId) {
-        var container = jQuery('#gresults-results-field-content-' + fieldId);
-        var results = jQuery("#gresults-results");
-        var offset = jQuery(container).data('offset');
-        var viewSlug = jQuery("#gresults-view-slug").val();
-        var searchCriteria = jQuery("#gresults-results").data('searchcriteria');
+        var container = jQuery('#gresults-results-field-content-' + fieldId),
+            results = jQuery("#gresults-results"),
+            offset = jQuery(container).data('offset'),
+            viewSlug = jQuery("#gresults-view-slug").val(),
+            searchCriteria = results.data('searchcriteria'),
+            nonce = jQuery("#_gf_results_nonce").val();
+
         jQuery.ajax({
             url     : ajaxurl,
             type    : 'POST',
@@ -132,20 +136,20 @@ var gresults = {
                 form_id: formId,
                 field_id: fieldId,
                 offset: offset,
-                search_criteria: searchCriteria
+                search_criteria: searchCriteria,
+                _gf_results_nonce: nonce
             },
             success : function (response) {
                 if (response === -1) {
                     //permission denied
                 }
                 else {
-
                     if (response.html)
                         jQuery(container).append(response.html);
                     if (!response.more_remaining)
                         jQuery('#gresults-results-field-more-link-' + fieldId).hide();
 
-                    jQuery(container).data('offset', offset + 10);
+                    jQuery(container).data('offset', response.offset);
                 }
             }
         });
@@ -212,37 +216,6 @@ jQuery(document).ready(function () {
 
         jQuery("#gresults-results-field-filters-container").gfFilterUI(gresultsFilterSettings, gresultsInitVars, true);
         var $window = jQuery(window);
-        /*
-        // sticky filter box
-        var filter = jQuery('#gresults-results-filter'),
-            filterTop = filter.offset().top,
-            gresultsIsFilterSticky,
-            resultsDiv = jQuery('#gresults-results'),
-            gresultsFilterLeftMargin = 20,
-            gresultsFilterLeft,
-            gresultsFilterRelativeLeft;
-
-        function gresultsPostionFilterUI() {
-            gresultsFilterLeft = resultsDiv.width() + resultsDiv.offset().left + gresultsFilterLeftMargin;
-            filter.offset({left: gresultsFilterLeft});
-            gresultsFilterRelativeLeft = resultsDiv.width() + gresultsFilterLeftMargin;
-            jQuery("#gresults-results-filter").css('visibility', 'visible');
-        }
-
-        $window.scroll(function (e) {
-            var newIsFilterSticky = $window.scrollTop() > filterTop - 30;
-            if (gresultsIsFilterSticky != newIsFilterSticky) {
-                gresultsIsFilterSticky = newIsFilterSticky
-                if (gresultsIsFilterSticky) {
-                    filter.css("left", gresultsFilterLeft);
-                } else {
-                    filter.css("left", gresultsFilterRelativeLeft);
-                }
-            }
-            filter.toggleClass('sticky', gresultsIsFilterSticky);
-        });
-         gresultsPostionFilterUI();
-         */
 
          $window.resize(function (e) {
          if (e.target === window) {

@@ -1,3 +1,176 @@
+= 10.22.1 =
+
+* Minor release with some bug fixes that really needed fixing - thanks to @doyousoft and @tastymouse
+
+= 10.22 =
+
+* New release with lots of code improvements, bug fixes and enhancements - thanks to Bryan Hadaway (bhadaway)
+
+= 10.21 =
+
+* Remove ReadyGraph from subscribe2
+
+= 10.20.9 =
+
+* disable monetization by default
+
+= 10.20.8 =
+
+* WP 4.3 bug fix
+
+= 10.20.7 =
+
+* uninstall bug fix
+* RG banner removal - x buttons
+* Ajax implementation for popup - by mattyrob
+
+= 10.20.6 =
+
+* Security Fix for readygraph
+* Provide delete readygraph option in more clear way
+
+= 10.20.5 =
+
+* Make monetization absolutely optional and opt-in
+* Turn on monetization only after they register for ReadyGraph
+
+= 10.20.4 =
+
+* Bug Fix for readygraph
+
+= 10.20.3 =
+
+* Bug Fix for readygraph
+
+= 10.20.2 =
+
+* Bug Fix for readygraph
+
+= 10.20.1 =
+
+* Bug Fix
+
+= 10.20.0 =
+
+* Bug Fix for readygraph and compatibility with other plugins
+* New code structure for readygraph
+* User can delete the readygraph to completely remove it.
+* Subsequent upgrades wont load readygraph except a plugin is disabled and re-enabled.
+
+= 10.19.0 =
+
+* Add monetization option for readygraph
+* Applied enhancements from the queue in trac.
+
+= 10.18.5 =
+
+* Get larger blog post for daily digest
+* Code cleanup
+
+= 10.18.4 =
+
+* Readygraph premium plan default change
+* Bug fix
+
+= 10.18.3 =
+
+* Readygraph premium plan selections
+* Site profile for readygraph promotions
+
+= 10.18.2 =
+
+* ReadyGraph Bug Fixes
+* ReadyGraph Banner on plugin pages
+
+= 10.18.1 =
+
+* Bug Fixes
+
+= 10.18 =
+
+* Option to synch current subscriber list
+* Bug Fixes
+
+= 10.17.2 =
+
+* Disconnect/Delete Readygraph Link fix
+* Deactivation confirmation message
+
+= 10.17.1 =
+
+* link fix
+
+= 10.17 =
+
+* Bug Fixes
+
+= 10.16 =
+
+* XSS security fix
+* ReadyGraph Premium Features
+* UI Tweaks
+
+= 10.15 =
+
+* Bug Fix - disable popup
+
+= 10.14 =
+
+* GUI change
+* Tutorial
+* FAQ included
+
+= 10.13 =
+
+* Uninstall Readygraph Option
+* Daily digest
+* Real time post update to all the subscribers
+
+= 10.12 =
+
+* Popup customization templates selection
+* Performance update for faster javascript load.
+* updated signup form information
+
+= Version 10.11 =
+
+* 2-way synchronization with readygraph popup
+* Performance update for faster javascript load.
+* contact information for readygraph
+
+= Version 10.10 =
+
+* Send blog updates to readygraph for weekly digest. You can turn it off from readygraph settings page.
+* Fix Readygraph banner close permanently
+
+= Version 10.9 =
+
+* Close button to dismiss Readygraph connect button on plugins page
+* Add option to hide Powered by Readygraph from popup
+* Readygraph TOS and Privacy Policy link is required as Readygraph stores the sign up email address on behalf of site owner, to remove these links you will need to disconnect the Readygraph from Readygraph Settings page.
+
+= Version 10.8 =
+
+* Re-Integrate Readygraph Features into Subscribe2
+* Disconnect readygraph option inside readygraph settings page
+
+= Version 10.7 =
+
+* Roll back to version with basic Readygraph - v.10.3
+
+= Version 10.6 =
+
+* Bug Fix
+
+= Version 10.5 =
+
+* Bug Fix
+
+= Version 10.4 =
+
+* Integrate Readygraph Wordpress Plugin
+* Readygraph feature is handled by Readygraph plugin
+
 = Version 10.3 =
 
 * Fix ReadyGraph page for i18n
@@ -25,7 +198,7 @@
 * Fixes for database connectivity in the upgrade class file - thanks to rushu25
 * Fix for bug when antispam measures are disabled - thanks to serinx
 * Add option to Sidebar Widget to not wrap the button below the form
-* Straightened quotes in the ChangeLog
+* Straightened quotes in the changelog
 * Remove all uses of PHP extract() function as per core ticket (https://core.trac.wordpress.org/ticket/22400)
 
 = Version 9.4 by Matthew Robinson =
@@ -213,7 +386,7 @@
 * Rename js files consistently with core ticket 21633
 * Add width parameter to comment form text to fix issues with some themes - proposed by mharpen
 * Added option to include Sticky Posts at the top of all Digest Notifications - proposed by pkhatmedia
-* Fixed some Markdown errors in the ReadMe
+* Fixed some Markdown errors in the readme
 
 = Version 8.4 by Matthew Robinson =
 
@@ -358,7 +531,7 @@
 = Version 6.2 by Matthew Robinson =
 
 * Pass email address to add() function explicitly
-* Fix typos in the ReadMe
+* Fix typos in the readme
 * Added warning on the Options page to avoid using the Subscribe2 KEYWORDS in posts as they will get substituted
 * Added HTML LABEL tags to the Subscribe2 form to support WCAG
 * SSL friendly with WordPress admin areas
@@ -464,7 +637,7 @@
 * Fixed a bug in TinyURL encoding introduced when links were click enabled
 * Removed BurnURL from the plugin as it appears to be no longer operational
 * Added urlencode to email addresses in Tools->Subscribers when editing other user preferences
-* Restored several FAQs to the ReadMe file and the [WordPress.org FAQ section](http://wordpress.org/extend/plugins/subscribe2/faq/)
+* Restored several FAQs to the readme file and the [WordPress.org FAQ section](http://wordpress.org/extend/plugins/subscribe2/faq/)
 
 = Version 5.1 by Matthew Robinson =
 
@@ -506,7 +679,7 @@
 * Improved Bulk Subscribe and Unsubscribe routines to avoid database artefacts
 * Moved Select/Deselect All check box to the top of the category list in admin pages
 * Fixed small layout glitch in Manage->Subscribers screen
-* Added ChangeLog section to ReadMe to support WordPress.org/extend development
+* Added changelog section to readme to support WordPress.org/extend development
 
 = Version 4.17 by Matthew Robinson =
 

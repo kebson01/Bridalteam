@@ -1,13 +1,4 @@
 <?php
-/**
- * Ajax gateway
- *
- * @package         wp-bannerize
- * @subpackage      ajax_sorter.php
- * @author          =undo= <g.fazioli@wpxtre.me>
- * @copyright       Copyright (C) 2008-2013
- *
- */
 if ( @isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) ) {
   require_once( '../../../wp-config.php' );
   // Database connetc

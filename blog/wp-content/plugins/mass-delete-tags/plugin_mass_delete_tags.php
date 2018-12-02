@@ -1,11 +1,11 @@
 <?php
 /**
  Plugin Name: Mass delete tags
- Plugin URI: http://www.mijnpress.nl
+ Plugin URI: https://www.mijnpress.nl
  Description: Deletes all tags, handy tool if you want to start over with a quick clean blog.
- Version: 1.0
+ Version: 1.0.1
  Author: Ramon Fincken
- Author URI: http://www.mijnpress.nl
+ Author URI: https://www.mijnpress.nl
  */
 
 function plugin_mass_delete_tags_init() {
@@ -13,7 +13,7 @@ function plugin_mass_delete_tags_init() {
 
 	// Get tags
 	$taxonomy = 'post_tag';
-	$all_tags = (array) get_terms($taxonomy,'get=all');
+	$all_tags = (array) get_terms($taxonomy, 'get=all');
 
 	// Settings
 	$limit = 50;

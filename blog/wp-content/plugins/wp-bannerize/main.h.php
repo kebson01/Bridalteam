@@ -1,14 +1,4 @@
 <?php
-/**
- * Global defines and constant
- *
- * @package         wpBannerize
- * @subpackage      wpBannerizeDefines
- * @author          =undo= <g.fazioli@undolog.com>, <g.fazioli@wpxtre.me>
- * @copyright       Copyright (C) 2008-2013
- *
- */
-
 // Internal use
 define( 'kWPBannerizeDebug', false );
 

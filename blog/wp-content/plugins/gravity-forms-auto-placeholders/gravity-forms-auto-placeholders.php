@@ -3,7 +3,7 @@
 Plugin Name: Gravity Forms Auto Placeholders
 Plugin URI: http://thebyob.com/gravity-forms-auto-placeholders
 Description: Automatically converts all Gravity Form labels into HTML5 placeholders. Includes Modernizr to add placeholder support to Internet Explorer.
-Version: 1.1
+Version: 1.2
 Author: Josh Davis
 Author URI: http://josh.dvvvvvvvv.com/
 */
@@ -11,7 +11,7 @@ Author URI: http://josh.dvvvvvvvv.com/
 /*  Copyright 2012  Josh Davis
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, version 2, as 
+    it under the terms of the GNU General Public License, version 2, as
     published by the Free Software Foundation.
 
     This program is distributed in the hope that it will be useful,
@@ -23,13 +23,6 @@ Author URI: http://josh.dvvvvvvvv.com/
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-
-function gfap_load_scripts() {
-	wp_enqueue_script('jquery');
-	wp_register_script('modernizr', 'http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js', array('jquery'));
-	wp_enqueue_script('modernizr');
-}    
-add_action('wp_enqueue_scripts', 'gfap_load_scripts');
 
 function register_gfap_settings() {
 	$setting_vars = array(
@@ -69,41 +62,34 @@ function gfap_options() {
 }
 add_action( 'admin_menu', 'gfap_menu' );
 
-function gfap_script() { ?>
+class GravityFormsAutoPlaceholders {
+	protected static $_version = '1.2';
 
-<script>
-// Start allowance of jQuery to $ shortcut
-jQuery(document).ready(function($){
-
-	// Convert label to placeholder
-	<?php 
-		$gfap_class_pc = get_option('gfap_class');
-		if ($gfap_class_pc) {
-			$gfap_class = 'gfap_placeholder';
-		}
-		else {
-			$gfap_class = 'gform_wrapper';
-		}
-	?>
-	$.each($('.<?php echo $gfap_class; ?> input, .<?php echo $gfap_class; ?> textarea'), function () {
-		var gfapId = this.id;
-		var gfapLabel = $('label[for=' + gfapId + ']');
-		$(gfapLabel).hide();
-		var gfapLabelValue = $(gfapLabel).text();
-		$(this).attr('placeholder',gfapLabelValue);
-	});
-
-	// Use modernizr to add placeholders for IE
-	if(!Modernizr.input.placeholder){$("input,textarea").each(function(){if($(this).val()=="" && $(this).attr("placeholder")!=""){$(this).val($(this).attr("placeholder"));$(this).focus(function(){if($(this).val()==$(this).attr("placeholder")) $(this).val("");});$(this).blur(function(){if($(this).val()=="") $(this).val($(this).attr("placeholder"));});}});}
-
-// Ends allowance of jQuery to $ shortcut
-});
-</script>
-
-<?php
-
+	public static function enqueue() {
+		$plugin_url = plugins_url( '/', __FILE__ );
+		wp_enqueue_script(
+			'gravityformsautoplaceholders_modernizr_placeholders',
+			$plugin_url . 'modernizr.placeholder.min.js',
+			array( 'jquery' ),
+			self::$_version
+		);
+		wp_enqueue_script(
+			'gravityformsautoplaceholders_scripts',
+			$plugin_url . 'scripts.js',
+			array( 'jquery', 'gravityformsautoplaceholders_modernizr_placeholders' ),
+			self::$_version
+		);
+		$gfap_class = get_option( 'gfap_class' );
+		wp_localize_script(
+			'gravityformsautoplaceholders_scripts',
+			'gravityformsautoplaceholders',
+			array(
+				'class_specific' => !empty( $gfap_class ) ? true : false,
+			)
+		);
+	}
 }
 
-add_action('wp_head', 'gfap_script');
+add_action( 'wp_enqueue_scripts', array( 'GravityFormsAutoPlaceholders', 'enqueue' ) );
 
 ?>

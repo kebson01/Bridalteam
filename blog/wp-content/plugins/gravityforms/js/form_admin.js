@@ -1,4 +1,3 @@
-
 /**
 * Common JS functions for form settings and form editor pages.
 */
@@ -12,10 +11,37 @@ jQuery(document).ready(function($){
     });
 
     // init merge tag auto complete
-    if(typeof form != 'undefined')
-        window.gfMergeTags = new gfMergeTagsObj(form);
+	if ( typeof form != 'undefined' && jQuery( '.merge-tag-support' ).length >= 0 ) {
 
+		jQuery( '.merge-tag-support' ).each( function() {
+
+			new gfMergeTagsObj( form, jQuery( this ) );
+
+		} );
+
+	}
+
+	// For backwards compat.
+	if( window.form ) {
+		window.gfMergeTags = new gfMergeTagsObj( form );
+	}
+
+	$(document).ready(function(){
+		$(".gform_currency").bind("change", function(){
+			FormatCurrency(this);
+		}).each(function(){
+			FormatCurrency(this);
+		});
+	});
 });
+
+function FormatCurrency(element){
+	if(gf_vars.gf_currency_config){
+		var currency = new Currency(gf_vars.gf_currency_config);
+		var price = currency.toMoney(jQuery(element).val());
+		jQuery(element).val(price);
+	}
+}
 
 function ToggleConditionalLogic(isInit, objectType){
     var speed = isInit ? "" : "slow";
@@ -82,14 +108,16 @@ function CreateConditionalLogic(objectType, obj){
     var anySelected = obj.conditionalLogic.logicType == "any" ? "selected='selected'" :"";
 
     var objText;
-    if(objectType == "field")
+    if (obj['type'] == "section")
+        objText = gf_vars.thisSectionIf;
+    else if(objectType == "field")
         objText = gf_vars.thisFieldIf;
     else if(objectType == "page")
         objText = gf_vars.thisPage;
     else if(objectType == "confirmation")
-        objText = gf_vars.thisConfirmation
+        objText = gf_vars.thisConfirmation;
     else if(objectType == "notification")
-        objText = gf_vars.thisNotification
+        objText = gf_vars.thisNotification;
     else
         objText = gf_vars.thisFormButton;
 
@@ -102,7 +130,7 @@ function CreateConditionalLogic(objectType, obj){
     var descPiecesArr = makeArray( descPieces );
 
     var str = descPiecesArr.join(' ');
-    var str = gform.applyFilters( 'gform_conditional_logic_description', str, descPieces, objectType, obj );
+    str = gform.applyFilters( 'gform_conditional_logic_description', str, descPieces, objectType, obj );
     var i, rule;
     for(i=0; i < obj.conditionalLogic.rules.length; i++){
         rule = obj.conditionalLogic.rules[i];
@@ -110,9 +138,9 @@ function CreateConditionalLogic(objectType, obj){
         str += GetRuleFields(objectType, i, rule.fieldId);
         str += GetRuleOperators(objectType, i, rule.fieldId, rule.operator);
         str += GetRuleValues(objectType, i, rule.fieldId, rule.value);
-        str += "<a class='add_field_choice' title='add another rule' onclick=\"InsertRule('" + objectType + "', " + (i+1) + ");\" ><i class='fa fa-plus-square fa-lg'></i></a>";
+        str += "<a class='add_field_choice' title='add another rule' onclick=\"InsertRule('" + objectType + "', " + (i+1) + ");\" onkeypress=\"InsertRule('" + objectType + "', " + (i+1) + ");\" ><i class='gficon-add'></i></a>";
         if(obj.conditionalLogic.rules.length > 1 )
-            str += "<a class='delete_field_choice' title='remove this rule' onclick=\"DeleteRule('" + objectType + "', " + i + ");\" ><i class='fa fa-minus-square fa-lg'></i></a></li>";
+            str += "<a class='delete_field_choice' title='remove this rule' onclick=\"DeleteRule('" + objectType + "', " + i + ");\" onkeypress=\"DeleteRule('" + objectType + "', " + i + ");\" ><i class='gficon-subtract'></i></a></li>";
 
         str += "</div>";
     }
@@ -124,12 +152,12 @@ function CreateConditionalLogic(objectType, obj){
 }
 
 function GetRuleOperators( objectType, i, fieldId, selectedOperator ) {
-    var str, supportedOperators, operators, str, selected;
+    var str, supportedOperators, operators, selected;
     supportedOperators = {"is":"is","isnot":"isNot", ">":"greaterThan", "<":"lessThan", "contains":"contains", "starts_with":"startsWith", "ends_with":"endsWith"};
     str = "<select id='" + objectType + "_rule_operator_" + i + "' class='gfield_rule_select' onchange='SetRuleProperty(\"" + objectType + "\", " + i + ", \"operator\", jQuery(this).val());var valueSelector=\"#" + objectType + "_rule_value_" + i + "\"; jQuery(valueSelector).replaceWith(GetRuleValues(\"" + objectType + "\", " + i + ",\"" + fieldId + "\", \"\"));jQuery(valueSelector).change();'>";
     operators = IsEntryMeta(fieldId) ? GetOperatorsForMeta(supportedOperators, fieldId) : supportedOperators;
 
-    operators = gform.applyFilters( 'gform_conditional_logic_operators', operators, objectType, fieldId )
+    operators = gform.applyFilters( 'gform_conditional_logic_operators', operators, objectType, fieldId );
 
     jQuery.each(operators,function(operator, stringKey){
         selected = selectedOperator == operator ? "selected='selected'" : "";
@@ -160,12 +188,27 @@ function GetRuleFields( objectType, ruleIndex, selectedFieldId ) {
 
     for( var i = 0; i < form.fields.length; i++ ) {
 
-        if( IsConditionalLogicField( form.fields[i] ) ) {
+        var field = form.fields[i];
 
-            options.push({
-                label: form.fields[i].adminLabel ? form.fields[i].adminLabel : form.fields[i].label,
-                value: form.fields[i].id
-            });
+        if( IsConditionalLogicField( field ) ) {
+
+            // @todo: the inputType check will likely go away once we've figured out how we're going to manage inputs moving forward
+            if( field.inputs && jQuery.inArray( GetInputType( field ), [ 'checkbox', 'email', 'consent' ] ) == -1 ) {
+                for( var j = 0; j < field.inputs.length; j++ ) {
+                    var input = field.inputs[j];
+                    if( ! input.isHidden ) {
+                        options.push( {
+                            label: GetLabel( field, input.id ),
+                            value: input.id
+                        } );
+                    }
+                }
+            } else {
+                options.push( {
+                    label: GetLabel( field ),
+                    value: field.id
+                } );
+            }
 
         }
 
@@ -176,16 +219,27 @@ function GetRuleFields( objectType, ruleIndex, selectedFieldId ) {
 
     options = gform.applyFilters( 'gform_conditional_logic_fields', options, form, selectedFieldId );
 
-    // create the actual <option> strings
+    str += GetRuleFieldsOptions( options, selectedFieldId );
+
+    str += "</select>";
+    return str;
+}
+
+function GetRuleFieldsOptions( options, selectedFieldId ){
+    var str = '';
     for( var i = 0; i < options.length; i++ ) {
 
         var option = options[i];
-        var selected = option.value == selectedFieldId ? "selected='selected'" : '';
+        if ( typeof option.options !== 'undefined' ) {
+            str += '<optgroup label=" ' + option.label + '">';
+            str += GetRuleFieldsOptions( option.options, selectedFieldId );
+            str += '</optgroup>';
+        } else {
+            var selected = option.value == selectedFieldId ? "selected='selected'" : '';
 
-        str += "<option value='" + option.value + "' " + selected + ">" + option.label + "</option>";
+            str += "<option value='" + option.value + "' " + selected + ">" + option.label + "</option>";
+        }
     }
-
-    str += "</select>";
     return str;
 }
 
@@ -214,12 +268,11 @@ function GetEntryMetaFields( selectedFieldId ) {
 
 function IsConditionalLogicField(field){
     var inputType = field.inputType ? field.inputType : field.type;
-    var supported_fields = ["checkbox", "radio", "select", "text", "website", "textarea", "email", "hidden", "number", "phone", "multiselect", "post_title",
-                            "post_tags", "post_custom_field", "post_content", "post_excerpt"];
+    var supported_fields = GetConditionalLogicFields();
 
     var index = jQuery.inArray(inputType, supported_fields);
     var isConditionalLogicField = index >= 0 ? true : false;
-	isConditionalLogicField = gform.applyFilters( 'gform_is_conditional_logic_field', isConditionalLogicField, field );
+    isConditionalLogicField = gform.applyFilters( 'gform_is_conditional_logic_field', isConditionalLogicField, field );
     return isConditionalLogicField;
 }
 
@@ -233,7 +286,7 @@ function GetRuleValues(objectType, ruleIndex, selectedFieldId, selectedValue, in
     if(!inputName)
         inputName = false;
 
-    var dropdown_id = inputName == false ? objectType + '_rule_value_' + ruleIndex : inputName;
+    var dropdownId = inputName == false ? objectType + '_rule_value_' + ruleIndex : inputName;
 
     if(selectedFieldId == 0)
         selectedFieldId = GetFirstRuleField();
@@ -250,14 +303,15 @@ function GetRuleValues(objectType, ruleIndex, selectedFieldId, selectedValue, in
 
     if(field && field["type"] == "post_category" && field["displayAllCategories"]){
 
-        var dropdown = jQuery('#' + dropdown_id + ".gfield_category_dropdown");
+        var dropdown = jQuery('#' + dropdownId + ".gfield_category_dropdown");
 
-        //don't load category drop down if it already exists (to avoid unecessary ajax requests)
+        //don't load category drop down if it already exists (to avoid unnecessary ajax requests)
         if(dropdown.length > 0){
 
-            var options = dropdown.html();
-            options = options.replace("value=\"" + selectedValue + "\"", "value=\"" + selectedValue + "\" selected=\"selected\"");
-            str = "<select id='" + dropdown_id + "' class='gfield_rule_select gfield_rule_value_dropdown gfield_category_dropdown'>" + options + "</select>";
+	        var options = dropdown.html();
+	        options = options.replace(/ selected="selected"/g, '');
+	        options = options.replace("value=\"" + selectedValue + "\"", "value=\"" + selectedValue + "\" selected=\"selected\"");
+	        str = "<select id='" + dropdownId + "' class='gfield_rule_select gfield_rule_value_dropdown gfield_category_dropdown'>" + options + "</select>";
         }
         else{
             var placeholderName = inputName == false ? "gfield_ajax_placeholder_" + ruleIndex : inputName + "_placeholder";
@@ -272,7 +326,7 @@ function GetRuleValues(objectType, ruleIndex, selectedFieldId, selectedValue, in
                                     if(dropdown_string){
                                         jQuery('#' + placeholderName).replaceWith(dropdown_string.trim());
 
-                                        SetRuleProperty(objectType, ruleIndex, "value", jQuery("#" + dropdown_id).val());
+                                        SetRuleProperty(objectType, ruleIndex, "value", jQuery("#" + dropdownId).val());
                                     }
                                 }
                         );
@@ -282,7 +336,33 @@ function GetRuleValues(objectType, ruleIndex, selectedFieldId, selectedValue, in
         }
     }
     else if(field && field.choices && jQuery.inArray(operator, ["is", "isnot"]) > -1){
-        str = GetRuleValuesDropDown(field.choices, objectType, ruleIndex, selectedValue, inputName);
+        var ruleChoices = field.placeholder ? [{
+            text: field.placeholder,
+            value: ''
+        }].concat(field.choices) : field.choices;
+        str = GetRuleValuesDropDown(ruleChoices, objectType, ruleIndex, selectedValue, inputName);
+    }
+    else if( IsAddressSelect( selectedFieldId, field )  ) {
+
+        //loading categories via AJAX
+        jQuery.post( ajaxurl, {
+            action:       'gf_get_address_rule_values_select',
+            address_type: field.addressType ? field.addressType : gf_vars.defaultAddressType,
+            value:        selectedValue,
+            id:           dropdownId,
+            form_id:      field.formId
+        }, function( selectMarkup ) {
+            if( selectMarkup ) {
+                $select = jQuery( selectMarkup.trim() );
+                $placeholder = jQuery( '#' + dropdownId );
+                $placeholder.replaceWith( $select );
+                SetRuleProperty( objectType, ruleIndex, 'value', $select.val() );
+            }
+        } );
+
+        // will be replaced by real drop down during the ajax callback
+        str = "<select id='" + dropdownId + "' class='gfield_rule_select'><option>" + gf_vars['loading'] + "</option></select>";
+
     }
     else if (isEntryMeta && entry_meta && entry_meta[selectedFieldId] &&  entry_meta[selectedFieldId].filter && typeof entry_meta[selectedFieldId].filter.choices != 'undefined') {
         str = GetRuleValuesDropDown(entry_meta[selectedFieldId].filter.choices, objectType, ruleIndex, selectedValue, inputName);
@@ -291,12 +371,37 @@ function GetRuleValues(objectType, ruleIndex, selectedFieldId, selectedValue, in
         selectedValue = selectedValue ? selectedValue.replace(/'/g, "&#039;") : "";
 
         //create a text field for fields that don't have choices (i.e text, textarea, number, email, etc...)
-        str = "<input type='text' placeholder='" + gf_vars["enterValue"] + "' class='gfield_rule_select' id='" + dropdown_id + "' name='" + dropdown_id + "' value='" + selectedValue.replace(/'/g, "&#039;") + "' onchange='SetRuleProperty(\"" + objectType + "\", " + ruleIndex + ", \"value\", jQuery(this).val());' onkeyup='SetRuleProperty(\"" + objectType + "\", " + ruleIndex + ", \"value\", jQuery(this).val());'>";
+        str = "<input type='text' placeholder='" + gf_vars["enterValue"] + "' class='gfield_rule_select gfield_rule_input' id='" + dropdownId + "' name='" + dropdownId + "' value='" + selectedValue.replace(/'/g, "&#039;") + "' onchange='SetRuleProperty(\"" + objectType + "\", " + ruleIndex + ", \"value\", jQuery(this).val());' onkeyup='SetRuleProperty(\"" + objectType + "\", " + ruleIndex + ", \"value\", jQuery(this).val());'>";
     }
 
     str = gform.applyFilters( 'gform_conditional_logic_values_input', str, objectType, ruleIndex, selectedFieldId, selectedValue )
 
     return str;
+}
+/**
+ * Determine if current Address field input ID is a select (i.e. US => State, International => Country)
+ * @param inputId string Address field input ID
+ * @param field object Address field
+ * @returns {boolean}
+ * @constructor
+ */
+function IsAddressSelect( inputId, field ) {
+
+    if( ! field || GetInputType( field ) != 'address' ) {
+        return false;
+    }
+
+    var addressType = field.addressType ? field.addressType : gf_vars.defaultAddressType;
+
+    if( ! gf_vars.addressTypes[ addressType ] ) {
+        return false;
+    }
+
+    var addressTypeObj = gf_vars.addressTypes[ addressType ],
+        isCountryInput = inputId == field.id + '.6',
+        isStateInput   = inputId == field.id + '.4';
+
+    return ( isCountryInput && addressType == 'international' ) || ( isStateInput && typeof addressTypeObj.states == 'object' );
 }
 
 function GetFirstRuleField(){
@@ -322,8 +427,9 @@ function GetRuleValuesDropDown(choices, objectType, ruleIndex, selectedValue, in
         var selected = isSelected ? "selected='selected'" : "";
         if(isSelected)
             isAnySelected = true;
-
-        str += "<option value='" + choiceValue.replace(/'/g, "&#039;") + "' " + selected + ">" + choices[i].text + "</option>";
+		choiceValue = choiceValue.replace(/'/g, "&#039;");
+		var choiceText = jQuery.trim(jQuery('<div>'+choices[i].text+'</div>').text()) === '' ? choiceValue : choices[i].text;
+        str += "<option value='" + choiceValue.replace(/'/g, "&#039;") + "' " + selected + ">" + choiceText + "</option>";
     }
 
     if(!isAnySelected && selectedValue && selectedValue != "")
@@ -334,13 +440,17 @@ function GetRuleValuesDropDown(choices, objectType, ruleIndex, selectedValue, in
     return str;
 
 }
+function isEmpty(str){
+	return
+}
+
 
 function SetRuleProperty(objectType, ruleIndex, name, value){
     var obj = GetConditionalObject(objectType);
     obj.conditionalLogic.rules[ruleIndex][name] = value;
 }
 
-function GetFieldById(id){
+function GetFieldById( id ) {
     id = parseInt( id );
     for(var i=0; i<form.fields.length; i++){
         if(form.fields[i].id == id)
@@ -396,8 +506,8 @@ function TruncateRuleText(text){
 
 function gfAjaxSpinner(elem, imageSrc, inlineStyles) {
 
-    var imageSrc = typeof imageSrc == 'undefined' ? '/images/ajax-loader.gif': imageSrc;
-    var inlineStyles = typeof inlineStyles != 'undefined' ? inlineStyles : '';
+    imageSrc     = typeof imageSrc == 'undefined' || ! imageSrc ? gf_vars.baseUrl + '/images/spinner.gif': imageSrc;
+    inlineStyles = typeof inlineStyles != 'undefined' ? inlineStyles : '';
 
     this.elem = elem;
     this.image = '<img class="gfspinner" src="' + imageSrc + '" style="' + inlineStyles + '" />';
@@ -406,11 +516,11 @@ function gfAjaxSpinner(elem, imageSrc, inlineStyles) {
         this.spinner = jQuery(this.image);
         jQuery(this.elem).after(this.spinner);
         return this;
-    }
+    };
 
     this.destroy = function() {
         jQuery(this.spinner).remove();
-    }
+    };
 
     return this.init();
 }
@@ -420,20 +530,21 @@ function InsertVariable(element_id, callback, variable) {
     if(!variable)
         variable = jQuery('#' + element_id + '_variable_select').val();
 
-    var messageElement = jQuery("#" + element_id);
+    var input = document.getElementById (element_id);
+    var $input = jQuery(input);
 
     if(document.selection) {
         // Go the IE way
-        messageElement[0].focus();
+        $input[0].focus();
         document.selection.createRange().text=variable;
     }
-    else if(messageElement[0].selectionStart) {
-        // Go the Gecko way
-        obj = messageElement[0]
-        obj.value = obj.value.substr(0, obj.selectionStart) + variable + obj.value.substr(obj.selectionEnd, obj.value.length);
-    }
-    else {
-        messageElement.val(variable + messageElement.val());
+    else if('selectionStart' in input) {
+        var startPos = input.selectionStart;
+        input.value = input.value.substr(0, startPos) + variable + input.value.substr(input.selectionEnd, input.value.length);
+        input.selectionStart = startPos + input.value.length;
+        input.selectionEnd = startPos + input.value.length;
+    } else {
+        $input.val(variable + messageElement.val());
     }
 
     var variableSelect = jQuery('#' + element_id + '_variable_select');
@@ -553,7 +664,6 @@ function DuplicateConfirmation(confirmationId) {
 
 function SetConfirmationConditionalLogic() {
    confirmation['conditionalLogic'] = jQuery('#conditional_logic').val() ? jQuery.parseJSON(jQuery('#conditional_logic').val()) : new ConditionalLogic();
-
 }
 
 function ToggleConfirmation() {
@@ -693,7 +803,13 @@ function ConfirmationObj() {
         $("#single_action").val("delete");
         $("#single_action_argument").val(id);
         $("#gform-settings").submit();
-    }
+    };
+
+    gaddon.duplicateFeed = function (id) {
+        $("#single_action").val("duplicate");
+        $("#single_action_argument").val(id);
+        $("#gform-settings").submit();
+    };
 
     function isValidJson(str) {
         try {
@@ -734,559 +850,728 @@ function Copy(variable){
     return variable;
 }
 
-var gfMergeTagsObj = function(form) {
+var gfMergeTagsObj = function( form, element ) {
 
-    this.form = form;
+	var self      = this;
+		self.form = form;
+		self.elem = element;
 
-    this.init = function() {
+	/**
+	* Initialize a merge tag object.
+	*/
+	self.init = function() {
 
-        var gfMergeTags = this;
+		// If merge tags are already initialized for object, exit.
+		if ( self.elem.data( 'mergeTags' ) ) {
+			return;
+		}
 
-        this.mergeTagList = jQuery('<ul id="gf_merge_tag_list" class=""></ul>');
-        this.mergeTagListHover = false;
+		// Get merge tag list element.
+		self.mergeTagList      = jQuery( '<ul id="gf_merge_tag_list" class=""></ul>' );
+		self.mergeTagListHover = false;
 
-        if(jQuery('.merge-tag-support').length <= 0)
-            return;
+		// Bind keydown event.
+		self.bindKeyDown();
 
-        jQuery( ".merge-tag-support" )
-            // don't navigate away from the field on tab when selecting an item
-            .bind( "keydown", function( event ) {
-                if ( event.keyCode === jQuery.ui.keyCode.TAB && jQuery( this ).data( "autocomplete" ).menu.active ) {
-                    event.preventDefault();
-                }
-            })
-            .each(function(){
+		// Initialize autocomplete.
+		self.initAutocomplete();
 
-                var elem = jQuery(this);
-                var classStr = elem.is('input') ? 'input' : 'textarea';
+		self.addMergeTagIcon();
 
-                elem.autocomplete({
-                    minLength: 1,
-                    source: function( request, response ) {
+		self.mergeTagIcon.find( 'a.open-list' ).on( 'click.gravityforms', function() {
 
-                        // delegate back to autocomplete, but extract the last term
-                        var term = gfMergeTags.extractLast( request.term );
+			var trigger = jQuery(this);
 
-                        if(term.length < elem.autocomplete('option', 'minLength')) {
-                            response( [] );
-                            return;
-                        }
+			var input = self.getTargetElement( trigger );
+			self.mergeTagList.html( '' );
+			self.mergeTagList.append( self.getMergeTagListItems( input ) );
+			self.mergeTagList.insertAfter( trigger ).show();
 
-                        var tags = jQuery.map( gfMergeTags.getAutoCompleteMergeTags(elem), function(item) {
-                            return gfMergeTags.startsWith( item, term ) ? item : null;
-                        });
+		} );
 
-                        response( tags );
-                    },
-                    focus: function() {
-                        // prevent value inserted on focus
-                        return false;
-                    },
-                    select: function( event, ui ) {
-                        var terms = gfMergeTags.split( this.value );
 
-                        // remove the current input
-                        terms.pop();
+		// Hide merge tag list on off click.
+		self.mergeTagList.hover(
+			function() {
+				self.mergeTagListHover = true;
+			},
+			function(){
+				self.mergeTagListHover = false;
+			}
+		);
 
-                        // add the selected item
-                        terms.push( ui.item.value );
+		jQuery( 'body' ).mouseup( function() {
+			if( ! self.mergeTagListHover ) {
+				self.mergeTagList.hide();
+			}
+		} );
 
-                        this.value = terms.join( " " );
-                        return false;
-                    }
-                });
+		// Assign gfMergeTagsObj to element.
+		self.elem.data( 'mergeTags', self );
 
-                var positionClass = gfMergeTags.getClassProperty(this, 'position');
-                var mergeTagIcon = jQuery('<span class="all-merge-tags ' + positionClass + ' ' + classStr + '"><a class="open-list tooltip-merge-tag" title="' + gf_vars.mergeTagsTooltip + '"></a></span>');
+	};
 
-                // add the target element to the merge tag icon data for reference later when determining where the selected merge tag should be inserted
-                mergeTagIcon.data('targetElement', elem.attr('id') );
+	/**
+	* Destroy a merge tag object.
+	*/
+	self.destroy = function( element ) {
 
-                // if "mt-manual_position" class prop is set, look for manual elem with correct class
-                if( gfMergeTags.getClassProperty( this, 'manual_position' ) ) {
-                    var manualClass = '.mt-' + elem.attr('id');
-                    jQuery(manualClass).append( mergeTagIcon );
-                } else {
-                    elem.after( mergeTagIcon );
-                }
+		// Get element.
+		element = self.elem ? self.elem : element;
 
-            });
+		element.next( '.all-merge-tags' ).remove();
+		element.off( 'keydown.gravityforms' );
+		element.autocomplete( 'destroy' );
+		element.data( 'mergeTags', null );
 
-        jQuery('.tooltip-merge-tag').tooltip({
-                show: {delay:1250},
-                content: function () {
-                    return jQuery(this).prop('title');
-                }
-         });
+	};
 
-        jQuery('.all-merge-tags a.open-list').click(function() {
 
-            var trigger = jQuery(this);
 
-            var input = gfMergeTags.getTargetElement( trigger );
-            gfMergeTags.mergeTagList.html( gfMergeTags.getMergeTagListItems( input ) );
-            gfMergeTags.mergeTagList.insertAfter( trigger ).show();
 
-            jQuery('ul#gf_merge_tag_list a').click(function(){
 
-                var value = jQuery(this).data('value');
-                var input = gfMergeTags.getTargetElement( this );
+	// # MERGE TAG INITIALIZATION --------------------------------------------------------------------------------------
 
-                // if input has "mt-wp_editor" class, use WP Editor insert function
-                if( gfMergeTags.isWpEditor( input ) ) {
-                    InsertEditorVariable( input.attr('id'), value );
-                } else {
-                    InsertVariable( input.attr('id'), null, value );
-                }
+	/**
+	* Bind keydown event to element.
+	*/
+	self.bindKeyDown = function() {
 
-                // trigger the change event to fire any functions tied to this input's onchange
-                input.change();
+		self.elem.on( 'keydown.gravityforms', function( event ) {
 
-                gfMergeTags.mergeTagList.hide();
+			var menuActive = self.elem.data( 'autocomplete' ) && self.elem.data( 'autocomplete' ).menu ? self.elem.data( 'autocomplete' ).menu.active : false;
 
-            });
+			if ( event.keyCode === jQuery.ui.keyCode.TAB && menuActive ) {
+				event.preventDefault();
+			}
 
-        });
+		} );
 
-        this.getTargetElement = function( elem ) {
-            var elem = jQuery( elem );
-            return jQuery( '#' + elem.parents('span.all-merge-tags').data('targetElement') );
+	}
+
+	/**
+	* Initialize autocomplete for element.
+	*/
+	self.initAutocomplete = function() {
+
+		self.elem.autocomplete( {
+			minLength: 1,
+			focus:     function() {
+
+				// Prevent value inserted on focus.
+				return false;
+
+			},
+			source:    function( request, response ) {
+
+				// Delegate back to autocomplete, but extract the last term.
+				var term = self.extractLast( request.term );
+
+				if ( term.length < self.elem.autocomplete( 'option', 'minLength' ) ) {
+					response( [] );
+					return;
+				}
+
+				var tags = jQuery.map( self.getAutoCompleteMergeTags( self.elem ), function( item ) {
+					return self.startsWith( item, term ) ? item : null;
+				} );
+
+				response( tags );
+			},
+			select:    function( event, ui ) {
+
+				var terms = this.value.split( ' ' );
+
+				// Remove the current input.
+				terms.pop();
+
+				// Add the selected item.
+				terms.push( ui.item.value );
+
+				this.value = terms.join( ' ' );
+
+				self.elem.trigger( 'input' ).trigger( 'propertychange' );
+
+				return false;
+
+			}
+		} );
+
+	}
+
+	/**
+	* Add merge tag drop down icon next to element.
+	*/
+	self.addMergeTagIcon = function() {
+
+		var inputType     = self.elem.is( 'input' ) ? 'input' : 'textarea',
+		    positionClass = self.getClassProperty( self.elem, 'position' );
+
+		self.mergeTagIcon  = jQuery( '<span class="all-merge-tags ' + positionClass + ' ' + inputType + '"><a class="open-list tooltip-merge-tag" title="' + gf_vars.mergeTagsTooltip + '"></a></span>' );
+
+		// Add the target element to the merge tag icon data for reference later when determining where the selected merge tag should be inserted.
+		self.mergeTagIcon.data( 'targetElement', self.elem.attr( 'id' ) );
+
+		// If "mt-manual_position" class prop is set, look for manual elem with correct class.
+		if ( self.getClassProperty( self.elem, 'manual_position' ) ) {
+
+			var manualClass = '.mt-' + self.elem.attr('id');
+
+			jQuery( manualClass ).append( self.mergeTagIcon );
+
+		} else {
+
+			self.elem.after( self.mergeTagIcon );
+
+		}
+
+		self.mergeTagIcon.find( '.tooltip-merge-tag' ).tooltip( {
+			show:    { delay:1250 },
+			content: function () { return jQuery( this ).prop( 'title' ); }
+		} );
+
+	}
+
+	/**
+	* Bind click event when selecting merge tag from drop down list.
+	*/
+	self.bindMergeTagListClick = function( event ) {
+
+		self.mergeTagList.hide();
+
+		var value = jQuery( event.target ).data('value');
+		var input = self.getTargetElement( event.target );
+
+		// If input has "mt-wp_editor" class, use WP Editor insert function.
+		if( self.isWpEditor( input ) ) {
+			InsertEditorVariable( input.attr('id'), value );
+		} else {
+			InsertVariable( input.attr('id'), null, value );
+		}
+
+		input.trigger( 'input' ).trigger( 'propertychange' );
+
+		self.mergeTagList.hide();
+
+	}
+
+
+
+
+	// # MERGE TAG MANAGEMENT ------------------------------------------------------------------------------------------
+
+
+	this.getMergeTags = function(fields, elementId, hideAllFields, excludeFieldTypes, isPrepop, option) {
+
+		if(typeof fields == 'undefined')
+			fields = [];
+
+		if(typeof excludeFieldTypes == 'undefined')
+			excludeFieldTypes = [];
+
+		var requiredFields = [], optionalFields = [], pricingFields = [];
+		var ungrouped = [], requiredGroup = [], optionalGroup = [], pricingGroup = [], otherGroup = [], customGroup = [];
+
+		if(!hideAllFields)
+			ungrouped.push({ tag: '{all_fields}', 'label': this.getMergeTagLabel('{all_fields}') });
+
+		if(!isPrepop) {
+
+			// group fields by required, optional and pricing
+			for(i in fields) {
+
+				if(!fields.hasOwnProperty(i))
+					continue;
+
+				var field = fields[i];
+
+				if(field['displayOnly'])
+					continue;
+
+				var inputType = GetInputType(field);
+				if(jQuery.inArray(inputType, excludeFieldTypes) != -1)
+					continue;
+
+				if(field.isRequired) {
+
+					switch(inputType) {
+
+					case 'name':
+
+						var requiredField = Copy(field);
+						var prefix, middle, suffix, optionalField;
+
+						if(field['nameFormat'] == 'extended') {
+
+							prefix = GetInput(field, field.id + '.2');
+							suffix = GetInput(field, field.id + '.8');
+
+							optionalField = Copy(field);
+							optionalField['inputs'] = [prefix, suffix];
+
+							// add optional name fields to optional list
+							optionalFields.push(optionalField);
+
+							// remove optional name fields from required list
+							delete requiredField.inputs[0];
+							delete requiredField.inputs[3];
+						} else if(field['nameFormat'] == 'advanced') {
+
+							prefix = GetInput(field, field.id + '.2');
+							middle = GetInput(field, field.id + '.4');
+							suffix = GetInput(field, field.id + '.8');
+
+							optionalField = Copy(field);
+							optionalField['inputs'] = [prefix, middle, suffix];
+
+							// add optional name fields to optional list
+							optionalFields.push(optionalField);
+
+							// remove optional name fields from required list
+							delete requiredField.inputs[0];
+							delete requiredField.inputs[2];
+							delete requiredField.inputs[4];
+						}
+
+						requiredFields.push(requiredField);
+						break;
+
+					default:
+						requiredFields.push(field);
+					}
+
+				} else {
+
+					optionalFields.push(field);
+
+				}
+
+				if(IsPricingField(field.type)) {
+					pricingFields.push(field);
+				}
+
+			}
+
+			if(requiredFields.length > 0) {
+				for(i in requiredFields) {
+					if(! requiredFields.hasOwnProperty(i))
+						continue;
+
+					requiredGroup = requiredGroup.concat(this.getFieldMergeTags(requiredFields[i], option));
+				}
+			}
+
+			if(optionalFields.length > 0) {
+				for(i in optionalFields) {
+
+					if(!optionalFields.hasOwnProperty(i))
+						continue;
+
+					optionalGroup = optionalGroup.concat(this.getFieldMergeTags(optionalFields[i], option));
+				}
+			}
+
+			if(pricingFields.length > 0) {
+
+				if(!hideAllFields)
+					pricingGroup.push({ tag: '{pricing_fields}', 'label': this.getMergeTagLabel('{pricing_fields}') });
+
+				for(i in pricingFields) {
+					if(!pricingFields.hasOwnProperty(i))
+						continue;
+
+					pricingGroup.concat(this.getFieldMergeTags(pricingFields[i], option));
+				}
+
+			}
+
+		}
+
+        var otherTags = [
+            'ip', 'date_mdy', 'date_dmy', 'embed_post:ID', 'embed_post:post_title', 'embed_url', 'entry_id', 'entry_url', 'form_id', 'form_title', 'user_agent', 'referer', 'post_id', 'post_edit_url', 'user:display_name', 'user:user_email', 'user:user_login'
+        ];
+
+        // the form and entry objects are not available during replacement of pre-population merge tags
+        if (isPrepop) {
+            otherTags.splice(otherTags.indexOf('entry_id'), 1);
+            otherTags.splice(otherTags.indexOf('entry_url'), 1);
+            otherTags.splice(otherTags.indexOf('form_id'), 1);
+            otherTags.splice(otherTags.indexOf('form_title'), 1);
         }
 
-        // hide merge tag list on off click
-        this.mergeTagList.hover(function(){
-            gfMergeTags.mergeTagListHover = true;
-        }, function(){
-            gfMergeTags.mergeTagListHover = false;
-        });
-
-        jQuery('body').mouseup(function(){
-            if(!gfMergeTags.mergeTagListHover)
-                gfMergeTags.mergeTagList.hide();
-        });
-
-    }
-
-    this.split = function( val ) {
-        return val.split(' ');
-    }
-
-    this.extractLast = function( term ) {
-        return this.split( term ).pop();
-    }
-
-    this.startsWith = function(string, value) {
-        return string.indexOf(value) === 0;
-    }
-
-    this.getMergeTags = function(fields, elementId, hideAllFields, excludeFieldTypes, isPrepop, option) {
-
-        if(typeof fields == 'undefined')
-            fields = [];
-
-        if(typeof excludeFieldTypes == 'undefined')
-            excludeFieldTypes = [];
-
-        var requiredFields = [], optionalFields = [], pricingFields = [];
-        var ungrouped = [], requiredGroup = [], optionalGroup = [], pricingGroup = [], otherGroup = [], customGroup = [];
-
-        if(!hideAllFields)
-            ungrouped.push({ tag: '{all_fields}', 'label': this.getMergeTagLabel('{all_fields}') });
-
-        if(!isPrepop) {
-
-            // group fields by required, optional and pricing
-            for(i in fields) {
-
-                if(!fields.hasOwnProperty(i))
-                    continue;
-
-                var field = fields[i];
-
-                if(field['displayOnly'])
-                    continue;
-
-                var inputType = GetInputType(field);
-                if(jQuery.inArray(inputType, excludeFieldTypes) != -1)
-                    continue;
-
-                if(field.isRequired) {
-
-                    switch(inputType) {
-
-                    case 'name':
-
-                    	var requiredField = Copy(field);
-
-                        if(field['nameFormat'] == 'extended') {
-
-                            var prefix = GetInput(field, field.id + '.2');
-                            var suffix = GetInput(field, field.id + '.8');
-
-                            var optionalField = Copy(field);
-                            optionalField['inputs'] = [prefix, suffix];
-
-                            // add optional name fields to optional list
-                            optionalFields.push(optionalField);
-
-                            // remove option name fields from required list
-                            delete requiredField.inputs[0];
-                            delete requiredField.inputs[3];
-                        }
-
-                        requiredFields.push(requiredField);
-                        break;
-
-                    default:
-                        requiredFields.push(field);
-                    }
-
-                } else {
-
-                    optionalFields.push(field);
-
-                }
-
-                if(IsPricingField(field.type)) {
-                    pricingFields.push(field);
-                }
-
-            }
-
-            if(requiredFields.length > 0) {
-                for(i in requiredFields) {
-                    if(! requiredFields.hasOwnProperty(i))
-                        continue;
-
-                    requiredGroup = requiredGroup.concat(this.getFieldMergeTags(requiredFields[i], option));
-                }
-            }
-
-            if(optionalFields.length > 0) {
-                for(i in optionalFields) {
-
-                    if(!optionalFields.hasOwnProperty(i))
-                        continue;
-
-                    optionalGroup = optionalGroup.concat(this.getFieldMergeTags(optionalFields[i], option));
-                }
-            }
-
-            if(pricingFields.length > 0) {
-
-                if(!hideAllFields)
-                    pricingGroup.push({ tag: '{pricing_fields}', 'label': this.getMergeTagLabel('{pricing_fields}') });
-
-                for(i in pricingFields) {
-                    if(!pricingFields.hasOwnProperty(i))
-                        continue;
-
-                    pricingGroup.concat(this.getFieldMergeTags(pricingFields[i], option));
-                }
-
-            }
-
+        if(!HasPostField() || isPrepop) { // TODO: consider adding support for passing form object or fields array
+            otherTags.splice(otherTags.indexOf('post_id'), 1);
+            otherTags.splice(otherTags.indexOf('post_edit_url'), 1);
         }
 
-        otherGroup.push( { tag: '{ip}', label: this.getMergeTagLabel('{ip}') });
-        otherGroup.push( { tag: '{date_mdy}', label: this.getMergeTagLabel('{date_mdy}') });
-        otherGroup.push( { tag: '{date_dmy}', label: this.getMergeTagLabel('{date_dmy}') });
-        otherGroup.push( { tag: '{embed_post:ID}', label: this.getMergeTagLabel('{embed_post:ID}') });
-        otherGroup.push( { tag: '{embed_post:post_title}', label: this.getMergeTagLabel('{embed_post:post_title}') });
-        otherGroup.push( { tag: '{embed_url}', label: this.getMergeTagLabel('{embed_url}') });
-        otherGroup.push( { tag: '{entry_id}', label: this.getMergeTagLabel('{entry_id}') });
-        otherGroup.push( { tag: '{entry_url}', label: this.getMergeTagLabel('{entry_url}') });
-        otherGroup.push( { tag: '{form_id}', label: this.getMergeTagLabel('{form_id}') });
-
-        otherGroup.push( { tag: '{form_title}', label: this.getMergeTagLabel('{form_title}') });
-
-        otherGroup.push( { tag: '{user_agent}', label: this.getMergeTagLabel('{user_agent}') });
-        otherGroup.push( { tag: '{referer}', label: this.getMergeTagLabel('{referer}') });
-
-        if(HasPostField() && !isPrepop) { // TODO: consider adding support for passing form object or fields array
-            otherGroup.push( { tag: '{post_id}', label: this.getMergeTagLabel('{post_id}') });
-            otherGroup.push( { tag: '{post_edit_url}', label: this.getMergeTagLabel('{post_edit_url}') });
-        }
-
-        otherGroup.push( { tag: '{user:display_name}', label: this.getMergeTagLabel('{user:display_name}') });
-        otherGroup.push( { tag: '{user:user_email}', label: this.getMergeTagLabel('{user:user_email}') });
-        otherGroup.push( { tag: '{user:user_login}', label: this.getMergeTagLabel('{user:user_login}') });
-
-        var customMergeTags = this.getCustomMergeTags();
-        if( customMergeTags.tags.length > 0 ) {
-            for( i in customMergeTags.tags ) {
-
-                if(! customMergeTags.tags.hasOwnProperty(i))
-                    continue;
-
-                var customMergeTag = customMergeTags.tags[i];
-                customGroup.push( { tag: customMergeTag.tag, label: customMergeTag.label } );
-            }
-        }
-
-        var mergeTags = {
-            ungrouped: {
-                label: this.getMergeGroupLabel('ungrouped'),
-                tags: ungrouped
-            },
-            required: {
-                label: this.getMergeGroupLabel('required'),
-                tags: requiredGroup
-            },
-            optional: {
-                label: this.getMergeGroupLabel('optional'),
-                tags: optionalGroup
-            },
-            pricing: {
-                label: this.getMergeGroupLabel('pricing'),
-                tags: pricingGroup
-            },
-            other: {
-                label: this.getMergeGroupLabel('other'),
-                tags: otherGroup
-            },
-            custom: {
-                label: this.getMergeGroupLabel('custom'),
-                tags: customGroup
-            }
-        }
-
-        mergeTags = gform.applyFilters('gform_merge_tags', mergeTags, elementId, hideAllFields, excludeFieldTypes, isPrepop, option, this );
-
-        return mergeTags;
-    }
-
-    this.getMergeTagLabel = function(tag) {
-
-        for(groupName in gf_vars.mergeTags) {
-
-            if(!gf_vars.mergeTags.hasOwnProperty(groupName))
+        for(var i in otherTags) {
+            if(jQuery.inArray(otherTags[i], excludeFieldTypes) != -1)
                 continue;
 
-            var tags = gf_vars.mergeTags[groupName].tags;
-            for(i in tags) {
-
-                if(!tags.hasOwnProperty(i))
-                    continue;
-
-                if(tags[i].tag == tag)
-                    return tags[i].label;
-            }
+            otherGroup.push( { tag: '{'+ otherTags[i] +'}', label: this.getMergeTagLabel('{'+ otherTags[i] +'}') });
         }
 
-        return '';
-    }
+		var customMergeTags = this.getCustomMergeTags();
+		if( customMergeTags.tags.length > 0 ) {
+			for( i in customMergeTags.tags ) {
 
-    this.getMergeGroupLabel = function(group) {
-        return gf_vars.mergeTags[group].label;
-    }
+				if(! customMergeTags.tags.hasOwnProperty(i))
+					continue;
 
-    this.getFieldMergeTags = function(field, option) {
+				var customMergeTag = customMergeTags.tags[i];
+				customGroup.push( { tag: customMergeTag.tag, label: customMergeTag.label } );
+			}
+		}
 
-        if(typeof option == 'undefined')
-            option = '';
+		var mergeTags = {
+			ungrouped: {
+				label: this.getMergeGroupLabel('ungrouped'),
+				tags: ungrouped
+			},
+			required: {
+				label: this.getMergeGroupLabel('required'),
+				tags: requiredGroup
+			},
+			optional: {
+				label: this.getMergeGroupLabel('optional'),
+				tags: optionalGroup
+			},
+			pricing: {
+				label: this.getMergeGroupLabel('pricing'),
+				tags: pricingGroup
+			},
+			other: {
+				label: this.getMergeGroupLabel('other'),
+				tags: otherGroup
+			},
+			custom: {
+				label: this.getMergeGroupLabel('custom'),
+				tags: customGroup
+			}
+		};
 
-        var mergeTags = [];
-        var inputType = GetInputType(field);
-        var tagArgs = inputType == "list" ? ":" + option : ""; //option currently only supported by list field
-        var value = '', label = '';
+		mergeTags = gform.applyFilters('gform_merge_tags', mergeTags, elementId, hideAllFields, excludeFieldTypes, isPrepop, option, this );
 
-        if( typeof field['inputs'] != 'undefined' && jQuery.isArray(field['inputs']) ) {
+		return mergeTags;
+	};
 
-            if(inputType == 'checkbox') {
-                label = GetLabel(field, field.id).replace("'", "\\'");
-                value = "{" + label + ":" + field.id + tagArgs + "}";
-                mergeTags.push( { tag: value, label: label } );
-            }
+	this.getMergeTagLabel = function(tag) {
 
-            for(i in field.inputs) {
+		for(groupName in gf_vars.mergeTags) {
 
-                if(!field.inputs.hasOwnProperty(i))
-                    continue;
+			if(!gf_vars.mergeTags.hasOwnProperty(groupName))
+				continue;
 
-                var input = field.inputs[i];
-                if(inputType == "creditcard" && jQuery.inArray(input.id,[parseFloat(field.id + ".2"), parseFloat(field.id + ".3"), parseFloat(field.id + ".5")]) > -1)
-                    continue;
-                label = GetLabel(field, input.id).replace("'", "\\'");
-                value = "{" + label + ":" + input.id + tagArgs + "}";
-                mergeTags.push( { tag: value, label: label } );
-            }
+			var tags = gf_vars.mergeTags[groupName].tags;
+			for(i in tags) {
 
-        }
-        else {
-            label = GetLabel(field).replace("'", "\\'");
-            value = "{" + label + ":" + field.id + tagArgs + "}";
-            mergeTags.push( { tag: value, label: label } );
-        }
+				if(!tags.hasOwnProperty(i))
+					continue;
 
-        return mergeTags;
-    }
+				if(tags[i].tag == tag)
+					return tags[i].label;
+			}
+		}
 
-    this.getCustomMergeTags = function() {
-        for(groupName in gf_vars.mergeTags) {
-            if(!gf_vars.mergeTags.hasOwnProperty(groupName))
-                continue;
+		return '';
+	};
 
-            if(groupName == 'custom')
-                return gf_vars.mergeTags[groupName];
-        }
-        return [];
-    }
+	this.getMergeGroupLabel = function(group) {
+		return gf_vars.mergeTags[group].label;
+	};
 
-    this.getAutoCompleteMergeTags = function(elem) {
+	this.getFieldMergeTags = function(field, option) {
 
-        var fields = this.form.fields;
-        var elementId = elem.attr('id');
-        var hideAllFields = this.getClassProperty(elem, 'hide_all_fields') == true;
-        var excludeFieldTypes = this.getClassProperty(elem, 'exclude');
-        var option = this.getClassProperty(elem, 'option');
-        var isPrepop = this.getClassProperty(elem, 'prepopulate');
+		if(typeof option == 'undefined')
+			option = '';
 
-        if(isPrepop) {
-            hideAllFields = true;
-        }
-        var mergeTags = this.getMergeTags(fields, elementId, hideAllFields, excludeFieldTypes, isPrepop, option);
+		var mergeTags = [];
+		var inputType = GetInputType(field);
+		var tagArgs = inputType == "list" ? ":" + option : ""; //option currently only supported by list field
+		var value = '', label = '';
 
-        var autoCompleteTags = [];
-        for(group in mergeTags) {
+		if(jQuery.inArray(inputType, ['date', 'email', 'time', 'password'])>-1){
+			field['inputs'] = null;
+		}
 
-            if(! mergeTags.hasOwnProperty(group))
-                continue;
+		if( typeof field['inputs'] != 'undefined' && jQuery.isArray(field['inputs']) ) {
 
-            var tags = mergeTags[group].tags;
-            for(i in tags) {
+			if(inputType == 'checkbox') {
+				label = GetLabel(field, field.id).replace("'", "\\'");
+				value = "{" + label + ":" + field.id + tagArgs + "}";
+				mergeTags.push( { tag: value, label: label } );
+			}
 
-                if(!tags.hasOwnProperty(i))
-                    continue;
+			for(i in field.inputs) {
 
-                autoCompleteTags.push(tags[i].tag);
-            }
-        }
+				if(!field.inputs.hasOwnProperty(i))
+					continue;
 
-        return autoCompleteTags;
-    }
+				var input = field.inputs[i];
+				if(inputType == "creditcard" && jQuery.inArray(parseFloat(input.id),[parseFloat(field.id + ".2"), parseFloat(field.id + ".3"), parseFloat(field.id + ".5")]) > -1)
+					continue;
+				label = GetLabel(field, input.id).replace("'", "\\'");
+				value = "{" + label + ":" + input.id + tagArgs + "}";
+				mergeTags.push( { tag: value, label: label } );
+			}
 
-    this.getMergeTagListItems = function(elem) {
+		}
+		else {
+			label = GetLabel(field).replace("'", "\\'");
+			value = "{" + label + ":" + field.id + tagArgs + "}";
+			mergeTags.push( { tag: value, label: label } );
+		}
 
-        var fields = this.form.fields;
-        var elementId = elem.attr('id');
-        var hideAllFields = this.getClassProperty(elem, 'hide_all_fields') == true;
-        var excludeFieldTypes = this.getClassProperty(elem, 'exclude');
-        var isPrepop = this.getClassProperty(elem, 'prepopulate');
-        var option = this.getClassProperty(elem, 'option');
+		return mergeTags;
+	};
 
-        if(isPrepop) {
-            hideAllFields = true;
-        }
-        var mergeTags = this.getMergeTags(fields, elementId, hideAllFields, excludeFieldTypes, isPrepop, option);
-        var hasMultipleGroups = this.hasMultipleGroups(mergeTags);
-        var optionsHTML = '';
+	/**
+	* Retrieve list of custom merge tags.
+	*/
+	self.getCustomMergeTags = function() {
 
-        for(group in mergeTags) {
+		for ( groupName in gf_vars.mergeTags ) {
 
-            if(! mergeTags.hasOwnProperty(group))
-                continue;
+			if ( ! gf_vars.mergeTags.hasOwnProperty( groupName ) ) {
+				continue;
+			}
 
-            var label = mergeTags[group].label
-            var tags = mergeTags[group].tags;
+			if ( groupName == 'custom' ) {
+				return gf_vars.mergeTags[ groupName ];
+			}
 
-            // skip groups without any tags
-            if(tags.length <= 0)
-                continue;
+		}
 
-            // if group name provided
-            if(label && hasMultipleGroups)
-                optionsHTML += '<li class="group-header">' + label + '</li>';
+		return [];
 
-            for(i in tags) {
+	};
 
-                if(!tags.hasOwnProperty(i))
-                    continue;
+	this.getAutoCompleteMergeTags = function(elem) {
 
-                var tag = tags[i];
-                optionsHTML += '<li class=""><a class="" data-value="' + tag.tag + '">' + tag.label + '</a></li>';
-            }
+		var fields = this.form.fields;
+		var elementId = elem.attr('id');
+		var hideAllFields = this.getClassProperty(elem, 'hide_all_fields') == true;
+		var excludeFieldTypes = this.getClassProperty(elem, 'exclude');
+		var option = this.getClassProperty(elem, 'option');
+		var isPrepop = this.getClassProperty(elem, 'prepopulate');
 
-        }
+		if(isPrepop) {
+			hideAllFields = true;
+		}
+		var mergeTags = this.getMergeTags(fields, elementId, hideAllFields, excludeFieldTypes, isPrepop, option);
 
-        return optionsHTML;
-    }
+		var autoCompleteTags = [];
+		for(group in mergeTags) {
 
-    this.hasMultipleGroups = function(mergeTags) {
-        var count = 0;
-        for(group in mergeTags) {
+			if(! mergeTags.hasOwnProperty(group))
+				continue;
 
-            if(!mergeTags.hasOwnProperty(group))
-                continue;
+			var tags = mergeTags[group].tags;
+			for(i in tags) {
 
-            if(mergeTags[group].tags.length > 0)
-                count++;
-        }
-        return count > 1;
-    }
+				if(!tags.hasOwnProperty(i))
+					continue;
 
-    /**
-    * Merge Tag inputs support a system for setting various properties for the merge tags via classes.
-    *   e.g. mt-{property}-{value}
+				autoCompleteTags.push(tags[i].tag);
+			}
+		}
+
+		return autoCompleteTags;
+	};
+
+	this.getMergeTagListItems = function(elem) {
+
+		var fields = this.form.fields;
+		var elementId = elem.attr('id');
+		var hideAllFields = this.getClassProperty(elem, 'hide_all_fields') == true;
+		var excludeFieldTypes = this.getClassProperty(elem, 'exclude');
+		var isPrepop = this.getClassProperty(elem, 'prepopulate');
+		var option = this.getClassProperty(elem, 'option');
+
+		if(isPrepop) {
+			hideAllFields = true;
+		}
+		var mergeTags = this.getMergeTags(fields, elementId, hideAllFields, excludeFieldTypes, isPrepop, option);
+		var hasMultipleGroups = this.hasMultipleGroups(mergeTags);
+		var optionsHTML = [];
+
+		for(group in mergeTags) {
+
+			if(! mergeTags.hasOwnProperty(group))
+				continue;
+
+			var label = mergeTags[group].label
+			var tags = mergeTags[group].tags;
+
+			// skip groups without any tags
+			if(tags.length <= 0)
+				continue;
+
+			// if group name provided
+			if(label && hasMultipleGroups)
+				optionsHTML.push( jQuery( '<li class="group-header">' + label + '</li>' ) );
+
+			for(i in tags) {
+
+				if(!tags.hasOwnProperty(i))
+					continue;
+
+				var tag = tags[i];
+
+				var tagHTML = jQuery( '<a class="" data-value="' + tag.tag + '">' + tag.label + '</a>' );
+				tagHTML.on( 'click.gravityforms', self.bindMergeTagListClick );
+
+				optionsHTML.push( jQuery( '<li></li>' ).html( tagHTML ) );
+
+			}
+
+		}
+
+		return optionsHTML;
+	};
+
+	this.hasMultipleGroups = function(mergeTags) {
+		var count = 0;
+		for(group in mergeTags) {
+
+			if(!mergeTags.hasOwnProperty(group))
+				continue;
+
+			if(mergeTags[group].tags.length > 0)
+				count++;
+		}
+		return count > 1;
+	};
+
+
+
+
+
+	// # HELPER METHODS ------------------------------------------------------------------------------------------------
+
+	/**
+	* Merge Tag inputs support a system for setting various properties for the merge tags via classes.
+	*	e.g. mt-{property}-{value}
+	*
+	* You can pass multiple values for a property like so:
+	*	e.g. mt-{property}-{value1}-{value2}-{value3}
+	*
+    * Use the following values to support JS merge tags (because they are not available in front end forms):
+    *	mt-exclude-entry_id-entry_url-form_id-form_title
     *
-    * You can pass multiple values for a property like so:
-    *   e.g. mt-{property}-{value1}-{value2}-{value3}
-    *
-    * Current classes:
-    *   mt-hide_all_fields
-    *   mt-exclude-{field_type}         e.g. mt-exlude-paragraph
-    *   mt-option-{option_value}        e.g. mt-option-url
-    *   mt-position-{position_value}    e.g. mt-position-right
-    *
-    */
-    this.getClassProperty = function(elem, property) {
+	* Current classes:
+	*	mt-hide_all_fields
+	*	mt-exclude-{field_type}			e.g. mt-exlude-paragraph
+	*	mt-option-{option_value}		e.g. mt-option-url
+	*	mt-position-{position_value}	e.g. mt-position-right
+	*
+	*/
+	self.getClassProperty = function( elem, property ) {
 
-        var elem = jQuery(elem);
-        var classStr = elem.attr('class');
+		var elem	 = jQuery( elem ),
+			classStr = elem.attr( 'class' );
 
-        if(!classStr)
-            return '';
+		// If no classes are defined, return empty string.
+		if ( ! classStr ) {
+			return '';
+		}
 
-        var classes = classStr.split(' ');
+		// Split CSS classes.
+		var classes = classStr.split( ' ' );
 
-        for(i in classes) {
+		// Loop through CSS classes.
+		for ( i in classes ) {
 
-            if(!classes.hasOwnProperty(i))
-                continue;
+			// If property does not exist, skip it.
+			if ( ! classes.hasOwnProperty( i ) ) {
+				continue;
+			}
 
-            var pieces = classes[i].split('-');
+			// Split class into pieces.
+			var pieces = classes[i].split('-');
 
-            // if this is not a merge tag class or not the property we are looking for, skip
-            if(pieces[0] != 'mt' || pieces[1] != property)
-                continue;
+			// If this is not a merge tag class or not the property we are looking for, skip.
+			if ( pieces[0] != 'mt' || pieces[1] != property ) {
+				continue;
+			}
 
-            // if more than one value passed, return all values
-            if(pieces.length > 3) {
-                delete pieces[0];
-                delete pieces[1];
-                return pieces;
-            }
-            // if just a property is passed, assume we are looking for boolean, return true
-            else if(pieces.length == 2){
-                return true;
-            // in all other cases, return the value
-            } else {
-                return pieces[2];
-            }
+			// If more than one value passed, return all values.
+			if ( pieces.length > 3 ) {
 
-        }
+				delete pieces[0];
+				delete pieces[1];
+				return pieces;
 
-        return '';
-    }
+			} else if( pieces.length == 2 ) {
 
-    this.isWpEditor = function( mergeTagIcon ) {
-        var mergeTagIcon = jQuery( mergeTagIcon );
-        return this.getClassProperty( mergeTagIcon, 'wp_editor' ) == true;
-    }
+				// If only a property is passed, assume we are looking for boolean, return true.
+				return true;
+			} else {
 
-    this.init();
+				// Otherwise, return the value.
+				return pieces[2];
 
-}
+			}
+
+		}
+
+		return '';
+
+	};
+
+	self.getTargetElement = function( elem ) {
+		var elem = jQuery( elem );
+		var selector = elem.parents('span.all-merge-tags').data('targetElement')
+
+		/* escape any meta-characters with a double back clash as per jQuery Spec http://api.jquery.com/category/selectors/ */
+		return jQuery( '#' + selector.replace(/[!"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~]/g, "\\$&") );
+	}
+
+	/**
+	* Determine if merge tag element is for a WP editor instance.
+	*/
+	self.isWpEditor = function( mergeTagIcon ) {
+
+		// Get merge tag icon element.
+		var mergeTagIcon = jQuery( mergeTagIcon );
+
+		return this.getClassProperty( mergeTagIcon, 'wp_editor' ) == true;
+
+	};
+
+	/**
+	* Split a string at every space.
+	*/
+	self.split = function( string ) {
+
+		return string.split( ' ' );
+
+	};
+
+	/**
+	* Extract last item from string.
+	*/
+	self.extractLast = function( term ) {
+
+		return this.split( term ).pop();
+
+	};
+
+	/**
+	* Check if string starts with a specific value.
+	*/
+	self.startsWith = function( string, value ) {
+
+		return string.indexOf( value ) === 0;
+
+	};
+
+	// If element is defined, initialze.
+	if ( self.elem ) {
+		self.init();
+	}
+
+};
 
 var FeedConditionObj = function( args ) {
 
@@ -1308,10 +1593,20 @@ var FeedConditionObj = function( args ) {
             jQuery('input#feed_condition_conditional_logic_object').val( JSON.stringify( fcobj.logicObject ) );
         });
 
-    }
+    };
 
     this.init();
 
+};
+
+function SimpleConditionObject( object, objectType ) {
+
+	if( objectType.indexOf('simple_condition') < 0 )
+		return object;
+
+	var objectName = objectType.substring(17) + "_object";
+
+	return window[objectName];
 }
 
 function FeedConditionConditionalObject( object, objectType ) {
@@ -1343,7 +1638,6 @@ function makeArray( object ) {
 }
 
 function isSet( $var ) {
-    if (typeof $var != 'undefined')
-        return true
-    return false
+    return typeof $var != 'undefined';
 }
+
