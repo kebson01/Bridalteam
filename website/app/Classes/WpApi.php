@@ -38,7 +38,7 @@ class WpApi{
     private function getData($endpoint){
         $client = new Client();
         $response = $client->get($endpoint);
-        $jsonresponse = (string) $response->getBody();
+        $jsonresponse = (string) $response->getBody();        
         return json_decode($jsonresponse);
     }
 }

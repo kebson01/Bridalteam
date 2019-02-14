@@ -109,7 +109,7 @@
         }
     }
 
-    section.highlight.odd{
+    section.highlight:nth-child(odd){
         background-color: $siteOrange2;
         color: #fff;
     }
@@ -197,7 +197,7 @@
             }
         }
 
-        section.highlight.odd{
+        section.highlight:nth-child(odd){
             .innerwrapper{
                 .content{
                     h1{
