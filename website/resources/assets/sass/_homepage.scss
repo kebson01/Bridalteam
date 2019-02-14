@@ -77,7 +77,7 @@
     section.highlight{
         min-height: 300px;
         color: $siteBlack;
-        background-position: top right;
+        background-position: top left;
         background-repeat: no-repeat;
 
         .innerwrapper{
@@ -111,6 +111,7 @@
 
     section.highlight:nth-child(odd){
         background-color: $siteOrange2;
+        background-position: top right;
         color: #fff;
     }
 
