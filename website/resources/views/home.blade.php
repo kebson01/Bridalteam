@@ -6,16 +6,19 @@
 
 @section('page')
 <div id="homepage">
-    <div id="heroimage">
-        <span class="overlay"></span>
-        <div id="calltoaction">
-            <h2>Start planning your wedding.</h2>
-            <select>
-                @foreach($categories as $category)
-                <option value="{{$category->slug}}">{{$category->name}}</option>
-                @endforeach
-            </select>
-        </div>
+    <div id="heroimage">          
+        <ul class="slides">
+            <?php foreach ($page->acf->slideshow as $slide): ?>
+                <li style="background-image: url('<?php print $slide->image; ?>');'">
+                    <div class="slidecontainer">
+                        <div class="calltoaction">
+                            <h2>FUN, SIMPLE WEDDING PLANNING.</h2>
+                            <h3>Organize details.  Find ideas. Collaborate with your team.  All in one place!  Open your free account today.</h3>                            
+                        </div>
+                    </div>                    
+                </li>
+            <?php endforeach; ?>
+        </ul>              
     </div>
     <section id="welcome">
         <div class="innerwrapper">

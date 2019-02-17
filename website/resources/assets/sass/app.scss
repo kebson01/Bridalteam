@@ -458,6 +458,55 @@ body.noscroll{
                         }
                     }                
                 }
+
+                #tools {
+                    section.tools {
+                        padding: 15px;
+                        background-color: $siteGray4;
+                        margin-bottom: 25px;
+                        border-radius: 15px;
+    
+                        > h1 {
+                            margin: 0;
+                            font-size: 1.25em;
+                            font-weight: bold;
+                            text-transform: uppercase;
+                            color: $siteOrange2;
+                            font-family: $fontRaleway;                    
+                            padding-bottom: 6px;
+                            margin-bottom: 15px;
+                            border-bottom: 1px solid $siteGray6;
+                        }
+    
+                        ul {
+                            margin: 0;
+                            padding: 0;
+                            list-style: none;
+    
+                            li {
+                                margin-bottom: 15px;
+                            }
+    
+                            a {
+                                font-size: 1em;
+                                font-family: $fontRaleway;
+                                letter-spacing: 0.5px;
+                                color: $siteGray3;
+                                font-weight: 500;
+                                text-decoration: none;
+                                text-transform: uppercase;
+                            }
+    
+                            span {
+                                display: block;
+                                margin-top: 5px;
+                                padding-left: 20px;
+                                font-size: 0.925em;
+                            }
+                        }
+                    }
+                }
+                
             }
         }
 
@@ -478,42 +527,85 @@ body.noscroll{
         }
     }
 
-    footer.main{
-        margin-bottom: 35px;
-        padding-bottom: 35px;
-        margin-top: 15px;
+    footer.main{            
+        background-color: $siteGray4;
 
         .socialmedia {
-            text-align: center;
-            margin-bottom: 10px;
-            margin-top: 5px;
-            font-size: 2em;
-
             a{
                 display: inline-block;
                 margin-right: 10px;
-                color: $siteBlack1;
+                color: $siteOrange2;
+                font-size: 2em;
             }
 
             a:last-of-type {
                 margin-right: 0;
             }
         }
+
+        .footercolumns {
+            > .col {
+                padding: 15px;
+                
+                h4 {
+                    font-size: 0.9em;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    color: $siteOrange2;
+                    font-family: $fontRaleway;
+                    margin: 0;
+                    padding-bottom: 6px;
+                    margin-bottom: 10px;
+                    border-bottom: 1px solid $siteGray6;
+                }
+
+                ul {
+                    margin: 0;
+                    padding: 0;
+                    list-style: none;
+
+                    li {
+                        font-size: 0.875em;
+                        font-family: $fontRaleway;
+                        letter-spacing: 0.5px;
+                        a {
+                            color: $siteGray3;
+                            font-weight: 500;
+                            text-decoration: none;
+                            text-transform: uppercase;
+                        }
+                    }
+                }
+            }
+        }
         
         #copyright{
             text-align: center;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
+            letter-spacing: 1px;            
+            margin-top: 30px;
+            background-color: $siteGray6;
+            padding: 10px;
+            padding-top: 25px;
+            padding-bottom: 25px;            
+            font-weight: 500;
+        }
+
+        .copyright{
+            font-size: 0.875em;
+            font-family: $fontRaleway;
+            color: #000;
+            margin-top: 15px;
         }
 
         nav{
             ul{
-                font-family: $fontFutura;
+                font-family: $fontRaleway;
                 padding: 0;
                 margin:0;
                 list-style: none;
                 text-align: center;
+                font-size: 0.875em;
 
                 li{
                     display: inline-block;
@@ -604,13 +696,48 @@ body.noscroll{
                     .innerwrapper{
                         padding-left:0;
                         padding-right:0;
+
+                        #tools {
+                            display: flex;
+                            justify-content: space-between;
+                            justify-content: space-between;
+
+                            section.tools {
+                                width: 48%;
+                            }
+                        }
                     }
                 }
             }
         }
 
-        footer.main{
-            margin-top: 25px;
+        footer.main{       
+            padding-top: 35px;     
+            padding-bottom: 25px;
+
+            .footercolumns {
+                display: flex;
+                justify-content: space-between;
+
+                > .col {
+                    width: 22%;
+                    padding: 0;
+                }
+            }
+
+            #copyright { 
+                padding: 0;
+                height: 50px;
+                line-height: 50px;           
+                nav {
+                    float: left;
+                }
+    
+                .copyright {
+                    float: right;
+                    margin: 0;
+                }
+            }
         }
     }
 }

@@ -40,7 +40,15 @@ class PageController extends Controller{
 
         $wpapi = new WpApi();
         $menuitems = $wpapi->getMenu('main');
+        $footermenuitms = $wpapi->getMenu("footer");
+        $planmenu = $wpapi->getMenu("plan");
+        $connectmenu = $wpapi->getMenu("connect");
+        $companymenu = $wpapi->getMenu("company");
         View::share('menu', $menuitems);
+        View::share('footermenu', $footermenuitms);
+        View::share('planmenu', $planmenu);
+        View::share('connectmenu', $connectmenu);
+        View::share('companymenu', $companymenu);
 
     }
 
@@ -193,6 +201,6 @@ class PageController extends Controller{
     }
 
     public function logoutRedirect(Request $request) {
-        return redirect("/");
+        return redirect("/gallery");
     }
 }

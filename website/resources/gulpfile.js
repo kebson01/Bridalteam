@@ -34,6 +34,7 @@ gulp.task('js', function(){
         "./assets/js/jquery.payment.min.es6",
         "./assets/js/parsley.min.es6",
         "./assets/js/jquery.serializejson.min.es6",
+        "./assets/js/jquery.flexslider-min.es6",
         "./assets/js/app.es6"
     ])
     .pipe(babel().on('error',console.log))

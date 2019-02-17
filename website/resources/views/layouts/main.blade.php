@@ -10,7 +10,8 @@
         <link href="https://fonts.googleapis.com/css?family=Catamaran" rel="stylesheet">
         <link href="/css/app.css" rel="stylesheet">
 
-        <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+        <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+        <script src="https://code.jquery.com/jquery-migrate-3.0.0.min.js"></script>
         <script src="https://use.typekit.net/gzu0qvd.js"></script>
         <script src="https://use.fontawesome.com/831d59b6f5.js"></script>        
         <script>try{Typekit.load({ async: true });}catch(e){}</script>         
@@ -49,7 +50,7 @@
                             @endforeach
                         </ul>
                         <?php if(!isset($_COOKIE['btvendortoken']) || $user == null): ?>
-                            <a class="button" href="http://plan.bridalteam.com/login" id="btn_vendorlogin">Bride Login</a>
+                            <a class="button" href="http://plan.bridalteam.com/login" id="btn_vendorlogin">User Login</a>
                         <?php else: ?>
                             <div class="user_menu">  
                                 <div class="userinfo">
@@ -78,20 +79,52 @@
             </header>
             @yield('page')
             <footer class="main">
-                <div class="innerwrapper">
-                    <div id="copyright">&copy; <?php print date("Y"); ?> Bridal Team</div>
-                    <div class="socialmedia">
-                        <a target="_blank" href="https://www.facebook.com/bridalteam"><i class="fa fa-facebook-official" aria-hidden="true"></i></a>
-                        <a target="_blank" href="http://twitter.com/bridalteam"><i class="fa fa-twitter-square" aria-hidden="true"></i></a>
+                <div class="innerwrapper">                    
+                    <div class="footercolumns">
+                        <div class="col">
+                            <h4>Plan</h4>
+                            <ul>
+                                @foreach($planmenu as $menuitem)
+                                    <li><a href="{{$menuitem->url}}">{{$menuitem->title}}</a></li>
+                                @endforeach                                 
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <h4>Connect</h4>
+                            <ul>
+                                @foreach($connectmenu as $menuitem)
+                                    <li><a href="{{$menuitem->url}}">{{$menuitem->title}}</a></li>
+                                @endforeach 
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <h4>Company</h4>
+                            <ul>
+                                @foreach($companymenu as $menuitem)
+                                    <li><a href="{{$menuitem->url}}">{{$menuitem->title}}</a></li>
+                                @endforeach 
+                            </ul>
+                        </div>
+                        <div class="col socialmedia">
+                            <h4>Social Media</h4>
+                            <a target="_blank" href="https://www.facebook.com/bridalteam"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+                            <a target="_blank" href="http://twitter.com/bridalteam"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+                            <a target="_blank" href="https://www.instagram.com/bridalteam"><i class="fa fa-instagram" aria-hidden="true"></i></a>
+                            <a target="_blank" href="https://www.pinterest.com/bridalteam"><i class="fa fa-pinterest" aria-hidden="true"></i></a>
+                        </div>
+                    </div>                                        
+                </div>
+                <div id="copyright">
+                    <div class="innerwrapper"> 
+                        <nav>
+                            <ul>
+                                @foreach($footermenu as $menuitem)
+                                    <li><a href="{{$menuitem->url}}">{{$menuitem->title}}</a></li>
+                                @endforeach                            
+                            </ul>
+                        </nav>
+                        <div class="copyright">&copy; <?php print date("Y"); ?> Bridal Team</div>
                     </div>
-                    <nav>
-                        <ul>
-                            @foreach($menu as $menuitem)
-                                <li><a href="{{$menuitem->url}}">{{$menuitem->title}}</a></li>
-                            @endforeach
-                            <li><a href="/vendor/login">Vendor Login</a></li>
-                        </ul>
-                    </nav>
                 </div>
             </footer>
         </div>

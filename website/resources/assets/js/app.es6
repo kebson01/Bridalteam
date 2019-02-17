@@ -1,5 +1,16 @@
 var grid = null;
 
+$(window).load(function() {
+    if ($("#homepage #heroimage").length !== 0) {
+        $("#homepage #heroimage").flexslider({
+            directionNav: false,
+            controlNav: false,
+            slideshowSpeed: 7000,  
+            animationSpeed: 1000, 
+        });
+    }
+});
+
 $(document).ready(function(){
     "use strict";
 

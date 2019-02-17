@@ -3,6 +3,51 @@
     "title": "Homepage Fields",
     "fields": [
         {
+            "key": "field_5c69d0a2888d1",
+            "label": "Slideshow",
+            "name": "slideshow",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "collapsed": "",
+            "min": 0,
+            "max": 0,
+            "layout": "table",
+            "button_label": "Add Slide",
+            "sub_fields": [
+                {
+                    "key": "field_5c69d156888d2",
+                    "label": "Image",
+                    "name": "image",
+                    "type": "image",
+                    "instructions": "1280 x 560",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "url",
+                    "preview_size": "large",
+                    "library": "all",
+                    "min_width": 1280,
+                    "min_height": 560,
+                    "min_size": "",
+                    "max_width": 1280,
+                    "max_height": 560,
+                    "max_size": "",
+                    "mime_types": ""
+                }
+            ]
+        },
+        {
             "key": "field_5c64f7b218edb",
             "label": "Highlights",
             "name": "highlights",
@@ -122,5 +167,5 @@
     "hide_on_screen": "",
     "active": 1,
     "description": "",
-    "modified": 1550121457
+    "modified": 1550438284
 }

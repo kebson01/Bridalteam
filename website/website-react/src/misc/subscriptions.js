@@ -454,20 +454,7 @@ export default class SubscriptionManager extends Component{
                                 <Package sub={this.getSubscriptionByDuration(this.state.selectedduration, "silver")} onPackageSelect={this.selectPackage}  />
                                 <Package sub={this.getSubscriptionByDuration(this.state.selectedduration, "gold")} onPackageSelect={this.selectPackage}  />                                
                             </div> : null
-                        }
-                        {this.state.selectedduration != null ?
-                            <div id="addondetails">
-                                <h2>Add-Ons for Vendor Search</h2>
-                                <table cellPadding={0} cellSpacing={0}>
-                                    <tbody>
-                                        {this.getAddonsByDuration(this.state.selectedduration).map((addon, index) => {
-                                            
-                                            return ( <Addon key={index} addon={addon} checked={this.isAddonSelected(addon.id)} onAddonToggle={this.handleAddonChange} /> )
-                                        })}
-                                    </tbody>                                    
-                                </table>
-                            </div> : null
-                        }
+                        }                        
                         <div className="pagination"> 
                             {this.state.selectedsub != null ? <a className="btn" onClick={this.nextPage}>Checkout</a> : null }
                         </div>
