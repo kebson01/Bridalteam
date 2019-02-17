@@ -2,6 +2,9 @@
 
 @section('title')
 <title>Register - {{ env('SEO_SITETITLE') }}</title>
+<script>
+    var vendorterms = {!! $pagejson !!};
+</script>
 @endsection
 
 @section('page')
@@ -12,7 +15,7 @@
             <span class="overlay"></span>
         </header>
         <div id="pagebody">
-            <div id="registrationapp"></div>
+            <div id="registrationapp"></div>                  
         </div>
     </div>
 </div>

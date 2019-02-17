@@ -398,9 +398,7 @@ export default class RegistrationForm extends Component{
                     </div>
                     <div className="formsection" id="termsagreement">
                         <div className="row columns">
-                            <div className="twelve columns column col-xs-12 col-sm-12">
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pulvinar dui vel mi eleifend porta. Ut eu dui nec lorem venenatis pharetra. Vestibulum mauris tellus, laoreet at lorem id, pretium fringilla nunc. Vivamus magna nisi, feugiat id condimentum in, lacinia eu lacus. Vestibulum dignissim neque nec ligula venenatis aliquam convallis vitae massa. Nunc fringilla feugiat odio.</p>
-                            </div>
+                            <div className="twelve columns column col-xs-12 col-sm-12" dangerouslySetInnerHTML={{__html: vendorterms.terms}}></div>
                         </div>
                         <div className="row columns">
                             <div className="twelve columns column col-xs-12 col-sm-12">

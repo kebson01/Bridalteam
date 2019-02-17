@@ -30,7 +30,7 @@
 			<div class="wrapper">
 				<a id="rel-top"></a>
 				<h1 style="position: relative; left: 12px;">
-					<a href="<?php echo home_url(); ?>/">
+					<a href="https://www.bridalteam.com">
 						<img src="<?php bloginfo('template_url')?>/images/logo.png" alt="<?php bloginfo('name'); ?>">
 					</a>
 				</h1>

@@ -119,7 +119,14 @@ class PageController extends Controller{
     }
 
     public function showVendorRegistration(){
-        return view('vendor.registration');
+        $wpapi = new WpApi();
+        $page = $wpapi->getPage('home');
+        $json = [
+            "terms" => $page->acf->vendor_registration_terms
+        ];
+        return view('vendor.registration', [
+            "pagejson" => json_encode($json)
+        ]);
     }
 
     public function showVerification(Request $request){

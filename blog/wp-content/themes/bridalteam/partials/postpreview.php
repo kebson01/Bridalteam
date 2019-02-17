@@ -1,15 +1,6 @@
 <header class="preview">
 	<div class="title cf">
 		<?php global $_wedfolio; ?>
-
-		<?php if (is_user_logged_in()) : global $_wedfolio;?>
-			<a href="#" class="tooltip love-this <?php echo $_wedfolio->isPostLiked('love'); ?>" title="LOVED <?php echo $_wedfolio->getPostLikes(get_the_ID(),'love'); ?>" data-post-id="<?php the_ID(); ?>"></a>
-			<a href="#" class="tooltip like-this <?php echo $_wedfolio->isPostLiked('like'); ?>" title="LIKED <?php echo $_wedfolio->getPostLikes(get_the_ID(),'like'); ?>" data-post-id="<?php the_ID(); ?>"></a>
-		<?php else: ?>
-			<a href="#" class="tooltip love-this login" title="LOVED <?php echo $_wedfolio->getPostLikes(get_the_ID(),'love'); ?>" data-post-id="<?php the_ID(); ?>"></a>
-			<a href="#" class="tooltip like-this login" title="LIKED <?php echo $_wedfolio->getPostLikes(get_the_ID(),'like'); ?>" data-post-id="<?php the_ID(); ?>"></a>
-		<?php endif; ?>
-
 		
 		<h2><a href="<?php the_permalink() ?>" title="<?php the_title_attribute(); ?>" rel="bookmark"><?php the_title();?></a></h2>
 		<time pubdate="<?php the_time('c'); ?>"><?php the_time('M');?> <span><?php the_time('d');?></span></time>

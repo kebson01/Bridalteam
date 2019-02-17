@@ -148,6 +148,25 @@
                     "mime_types": ""
                 }
             ]
+        },
+        {
+            "key": "field_5c69e878c1063",
+            "label": "Vendor Registration Terms",
+            "name": "vendor_registration_terms",
+            "type": "wysiwyg",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "full",
+            "media_upload": 1,
+            "delay": 0
         }
     ],
     "location": [
@@ -167,5 +186,5 @@
     "hide_on_screen": "",
     "active": 1,
     "description": "",
-    "modified": 1550438284
+    "modified": 1550444722
 }

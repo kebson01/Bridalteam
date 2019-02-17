@@ -20,15 +20,6 @@
             <?php endforeach; ?>
         </ul>              
     </div>
-    <section id="welcome">
-        <div class="innerwrapper">
-            <h1><?php print $page->title->rendered; ?></h1>
-            <div class="content">                                             
-                <?php print $page->content->rendered; ?>                
-            </div>
-        </div>
-    </section>
-
     <?php foreach ($page->acf->highlights as $highlight): ?>
         <section style="background-image: url('<?php print $highlight->image_background; ?>');" class="highlight odd">
             <div class="innerwrapper">

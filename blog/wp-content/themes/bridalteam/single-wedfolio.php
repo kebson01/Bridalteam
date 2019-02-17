@@ -32,13 +32,7 @@ if ($ajax) :
 					}
 				?>
 				
-				<?php if (is_user_logged_in()) : global $_wedfolio;?>
-					<a href="#" class="love-this <?php echo $_wedfolio->isPostLiked('love'); ?>" title="LOVED <?php echo $_wedfolio->getPostLikes(get_the_ID(),'love'); ?>" data-post-id="<?php the_ID(); ?>"></a>
-					<a href="#" class="like-this <?php echo $_wedfolio->isPostLiked('like'); ?>" title="LIKED <?php echo $_wedfolio->getPostLikes(get_the_ID(),'like'); ?>" data-post-id="<?php the_ID(); ?>"></a>
-				<?php else: ?>
-					<a href="#" class="love-this login" title="LOVED <?php echo $_wedfolio->getPostLikes(get_the_ID(),'love'); ?>" data-post-id="<?php the_ID(); ?>"></a>
-					<a href="#" class="like-this login" title="LIKED <?php echo $_wedfolio->getPostLikes(get_the_ID(),'like'); ?>" data-post-id="<?php the_ID(); ?>"></a>
-				<?php endif; ?>
+				
 			</div>
 
 			<div class="actions">
