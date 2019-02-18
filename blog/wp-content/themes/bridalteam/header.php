@@ -47,7 +47,7 @@
 				</nav>
 				
 				<div id="usermenu" class="loggedout">
-					<a href="http://plan.bridalteam.com/login">Bride Login</a>
+					<a href="http://plan.bridalteam.com/login">User Login</a>
 				</div>
 
 				<div id="top-buttons">
