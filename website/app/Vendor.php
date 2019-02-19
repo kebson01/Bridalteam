@@ -112,11 +112,16 @@ class Vendor extends Model
     
     public function getMonthlyMediaImageLimit(){
         $sub = $this->getSubscription();
-        if($sub == null){
-            return 3;
-        }else{
-            return $sub->imagelimit;    
+        if ($this->id != 18202) {
+            if($sub == null){
+                return 3;
+            }else{
+                return $sub->imagelimit;    
+            }
+        } else {
+            return 999999999;
         }
+        
         
     }
     
