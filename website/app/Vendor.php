@@ -119,7 +119,7 @@ class Vendor extends Model
                 return $sub->imagelimit;    
             }
         } else {
-            return 999999999;
+            return 50;
         }
         
         
