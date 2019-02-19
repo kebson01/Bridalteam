@@ -144,7 +144,7 @@ class MediaController extends Controller
             }
             $media = $query->get();
             foreach($media as $m){
-                if($m->status  = 2){
+                if($m->status  == 2){
                     array_push($allmedia, $m);
                 }
             }
