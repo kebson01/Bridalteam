@@ -39,8 +39,7 @@
             <header class="main">                
                 <div class="innerwrapper">
                     <h1 id="logo">  
-                        <a href="/"><img src="/img/logo.svg" alt="Bridal Team Wedding Planning" /></a>
-                        <a id="betabadge">BETA</a>
+                        <a href="/"><img src="/img/logo.svg" alt="Bridal Team Wedding Planning" /></a>                        
                     </h1>
                     <nav id="mainmenu" class="main">
                         <!-- Menu Goes Here -->
