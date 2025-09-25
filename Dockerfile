@@ -31,3 +31,6 @@ RUN chown -R www-data:www-data /var/www/html \
  && chmod -R 755 /var/www/html
 
 EXPOSE 8080
+
+# Ensure Cloud Run starts Apache on the correct $PORT via our entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
