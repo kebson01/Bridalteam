@@ -49,7 +49,11 @@
                             @endforeach
                         </ul>
                         <?php if(!isset($_COOKIE['btvendortoken']) || $user == null): ?>
+<<<<<<< HEAD
                             <a class="button" href="http://plan.bridalteam.com/login" id="btn_vendorlogin">Login</a>
+=======
+                            <a class="button" href="{{ url('/vendor/login') }}" id="btn_vendorlogin">User Login</a>
+>>>>>>> main
                         <?php else: ?>
                             <div class="user_menu">  
                                 <div class="userinfo">
