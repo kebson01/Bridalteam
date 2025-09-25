@@ -26,7 +26,12 @@ COPY . /var/www/html/
 COPY cloudrun/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Install Composer dependencies for Laravel
+WORKDIR /var/www/html/website
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
 # Set permissions
+WORKDIR /var/www/html
 RUN chown -R www-data:www-data /var/www/html \
  && chmod -R 755 /var/www/html
 

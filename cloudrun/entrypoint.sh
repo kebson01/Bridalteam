@@ -22,6 +22,15 @@ CONF
 a2enconf laravel
 a2enmod rewrite
 
+# Laravel setup (if .env exists and APP_KEY is empty)
+if [ -f /var/www/html/website/.env ]; then
+    cd /var/www/html/website
+    if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
+        echo "Generating Laravel app key..."
+        php artisan key:generate --force
+    fi
+fi
+
 # Start Apache in foreground
 exec apache2-foreground
 
