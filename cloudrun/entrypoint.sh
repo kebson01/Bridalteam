@@ -30,9 +30,9 @@ if [ ! -f .env ]; then
     echo "Creating .env file..."
     cat > .env <<EOF
 APP_NAME=Bridalteam
-APP_ENV=production
+APP_ENV=${APP_ENV:-production}
 APP_KEY=
-APP_DEBUG=true
+APP_DEBUG=${APP_DEBUG:-false}
 APP_URL=${APP_URL:-http://localhost}
 
 DB_CONNECTION=mysql
