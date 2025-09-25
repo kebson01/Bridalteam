@@ -10,20 +10,24 @@ echo "Starting Apache on port $PORT"
 sed -ri "s/^Listen 80$/Listen ${PORT}/" /etc/apache2/ports.conf
 sed -ri "s/:80>/:${PORT}>/g" /etc/apache2/sites-available/000-default.conf
 
-# Set DocumentRoot to Laravel public directory
-sed -ri "s|DocumentRoot /var/www/html|DocumentRoot /var/www/html/website/public|g" /etc/apache2/sites-available/000-default.conf
-
-# Ensure Laravel public is accessible
-cat >/etc/apache2/conf-available/laravel.conf <<CONF
-<Directory "/var/www/html/website/public">
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-    DirectoryIndex index.php
-</Directory>
+# Configure Apache virtual host for Laravel
+cat >/etc/apache2/sites-available/000-default.conf <<CONF
+<VirtualHost *:${PORT}>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html/website/public
+    
+    <Directory /var/www/html/website/public>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+    
+    ErrorLog \${APACHE_LOG_DIR}/error.log
+    CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
 CONF
 
-a2enconf laravel
 a2enmod rewrite
 
 # Laravel setup
@@ -73,7 +77,12 @@ php artisan view:clear
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# Test Apache configuration
+echo "Testing Apache configuration..."
+apache2ctl configtest
+
 # Start Apache in foreground
+echo "Starting Apache..."
 exec apache2-foreground
 
 
