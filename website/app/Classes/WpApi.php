@@ -36,9 +36,14 @@ class WpApi{
 
 
     private function getData($endpoint){
-        $client = new Client();
-        $response = $client->get($endpoint);
-        $jsonresponse = (string) $response->getBody();        
-        return json_decode($jsonresponse);
+        try {
+            $client = new Client();
+            $response = $client->get($endpoint);
+            $jsonresponse = (string) $response->getBody();        
+            return json_decode($jsonresponse);
+        } catch (\Exception $e) {
+            // Return empty data if WordPress API is not available
+            return (object) ['items' => []];
+        }
     }
 }

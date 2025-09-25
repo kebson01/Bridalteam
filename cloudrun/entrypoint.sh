@@ -47,6 +47,9 @@ SESSION_DRIVER=file
 QUEUE_DRIVER=sync
 
 JWT_SECRET=your_jwt_secret_here
+
+# WordPress API URL (same as APP_URL for now)
+ALLOW_ORIGIN=${APP_URL:-http://localhost}
 EOF
 fi
 
