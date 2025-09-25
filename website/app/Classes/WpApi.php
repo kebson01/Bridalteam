@@ -27,7 +27,7 @@ class WpApi{
     public function getPage($slug){
         $endpoint = $this->url . 'wp/v2/pages/?slug=' . $slug;
         $returnedpages = $this->getData($endpoint);
-        if(count($returnedpages) > 0){
+        if(is_array($returnedpages) && count($returnedpages) > 0){
             return $returnedpages[0];
         }else{
             return null;
@@ -42,8 +42,12 @@ class WpApi{
             $jsonresponse = (string) $response->getBody();        
             return json_decode($jsonresponse);
         } catch (\Exception $e) {
-            // Return empty data if WordPress API is not available
-            return (object) ['items' => []];
+            // Return appropriate empty data based on endpoint
+            if (strpos($endpoint, 'menus/v1/menus') !== false) {
+                return (object) ['items' => []];
+            } else {
+                return []; // For pages endpoint
+            }
         }
     }
 }
