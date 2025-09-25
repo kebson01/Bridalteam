@@ -22,14 +22,43 @@ CONF
 a2enconf laravel
 a2enmod rewrite
 
-# Laravel setup (if .env exists and APP_KEY is empty)
-if [ -f /var/www/html/website/.env ]; then
-    cd /var/www/html/website
-    if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
-        echo "Generating Laravel app key..."
-        php artisan key:generate --force
-    fi
+# Laravel setup
+cd /var/www/html/website
+
+# Create .env if it doesn't exist
+if [ ! -f .env ]; then
+    echo "Creating .env file..."
+    cat > .env <<EOF
+APP_NAME=Bridalteam
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=true
+APP_URL=${APP_URL:-http://localhost}
+
+DB_CONNECTION=mysql
+DB_HOST=${DB_HOST:-127.0.0.1}
+DB_PORT=${DB_PORT:-3306}
+DB_DATABASE=${DB_DATABASE:-bridalteam}
+DB_USERNAME=${DB_USERNAME:-root}
+DB_PASSWORD=${DB_PASSWORD:-}
+
+CACHE_DRIVER=file
+SESSION_DRIVER=file
+QUEUE_DRIVER=sync
+
+JWT_SECRET=your_jwt_secret_here
+EOF
 fi
+
+# Generate app key if needed
+if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
+    echo "Generating Laravel app key..."
+    php artisan key:generate --force
+fi
+
+# Set proper permissions for Laravel
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
 
 # Start Apache in foreground
 exec apache2-foreground
