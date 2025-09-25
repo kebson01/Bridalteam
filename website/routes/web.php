@@ -13,7 +13,17 @@
 
 Route::get('/', 'PageController@showHomePage');
 
-Route::get('/vendor/login', 'PageController@showVendorLogin');
+// Debug route to test routing
+Route::get('/test-route', function() {
+    return 'Routing is working!';
+});
+
+Route::get('/vendor/login', function() {
+    return 'Vendor login route is working! Controller: ' . class_exists('App\Http\Controllers\PageController') ? 'exists' : 'missing';
+});
+
+// Original route (temporarily commented)
+// Route::get('/vendor/login', 'PageController@showVendorLogin');
 Route::get('/vendor/register', 'PageController@showVendorRegistration');
 Route::get('/email-verify', 'PageController@showVerification');
 Route::get('/logout', 'PageController@logoutRedirect');
