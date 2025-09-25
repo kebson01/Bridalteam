@@ -62,10 +62,5 @@
         "sort-packages": true,
         "optimize-autoloader": true
     },
-    "repositories": {
-        "hooks": {
-            "type": "composer",
-            "url": "https://larapack.io"
-        }
-    }
+    "repositories": {}
 }
