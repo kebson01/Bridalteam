@@ -25,6 +25,8 @@ Route::group(['middleware' => 'vendortoken'], function(){
 
 Route::get('/vendors', 'PageController@showVendorCategories');
 Route::get('/vendors/{category}', 'PageController@showVendorCategory');
+
+// Vendor profile route (must be after specific /vendor/ routes)
 Route::get('/vendor/{slug}', 'PageController@showVendorPage');
 
 Route::get('/gallery', 'PageController@showGalleryPage');
