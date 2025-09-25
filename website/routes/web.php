@@ -13,6 +13,11 @@
 
 Route::get('/', 'PageController@showHomePage');
 
+// Debug route
+Route::get('/debug-route', function() {
+    return 'Laravel routing is working!';
+});
+
 Route::get('/vendor/login', 'PageController@showVendorLogin');
 Route::get('/vendor/register', 'PageController@showVendorRegistration');
 Route::get('/email-verify', 'PageController@showVerification');
