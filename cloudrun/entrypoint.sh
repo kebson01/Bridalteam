@@ -1,12 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
 # Cloud Run expects the app to listen on $PORT
-: "${PORT:=8080}"
+export PORT=${PORT:-8080}
+
+echo "Starting Apache on port $PORT"
 
 # Configure Apache to listen on $PORT
-sed -ri "s/^Listen 80$/Listen ${PORT}/" /etc/apache2/ports.conf || true
-sed -ri "s/:80>/:${PORT}>/g" /etc/apache2/sites-available/000-default.conf || true
+sed -ri "s/^Listen 80$/Listen ${PORT}/" /etc/apache2/ports.conf
+sed -ri "s/:80>/:${PORT}>/g" /etc/apache2/sites-available/000-default.conf
 
 # Ensure Laravel public is accessible
 cat >/etc/apache2/conf-available/laravel.conf <<CONF
@@ -16,9 +18,11 @@ cat >/etc/apache2/conf-available/laravel.conf <<CONF
     Require all granted
 </Directory>
 CONF
-a2enconf laravel >/dev/null 2>&1 || true
-a2enmod rewrite >/dev/null 2>&1 || true
 
+a2enconf laravel
+a2enmod rewrite
+
+# Start Apache in foreground
 exec apache2-foreground
 
 
