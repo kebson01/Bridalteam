@@ -44,16 +44,28 @@
                     <nav id="mainmenu" class="main">
                         <!-- Menu Goes Here -->
                         <ul>
-                            @foreach($menu as $menuitem)
-                                <li><a href="{{$menuitem->url}}">{{$menuitem->title}}</a></li>
-                            @endforeach
+                            @if(isset($menu) && is_array($menu) && count($menu) > 0)
+                                @foreach($menu as $menuitem)
+                                    <li><a href="{{$menuitem->url}}">{{$menuitem->title}}</a></li>
+                                @endforeach
+                            @else
+                                <!-- Fallback navigation for better UX when WP menu is unavailable -->
+                                <li><a href="/">Home</a></li>
+                                <li><a href="/gallery">Gallery</a></li>
+                                <li><a href="/vendors">Vendors</a></li>
+                                <li><a href="/blog">Blog</a></li>
+                            @endif
                         </ul>
                         <?php if(!isset($_COOKIE['btvendortoken']) || $user == null): ?>
-<<<<<<< HEAD
-                            <a class="button" href="http://plan.bridalteam.com/login" id="btn_vendorlogin">Login</a>
-=======
+
                             <a class="button" href="{{ url('/vendor/login') }}" id="btn_vendorlogin">User Login</a>
->>>>>>> main
+
+
+                            <a class="button" href="http://plan.bridalteam.com/login" id="btn_vendorlogin">Login</a>
+
+                            <a class="button" href="{{ url('/vendor/login') }}" id="btn_vendorlogin">User Login</a>
+
+
                         <?php else: ?>
                             <div class="user_menu">  
                                 <div class="userinfo">
