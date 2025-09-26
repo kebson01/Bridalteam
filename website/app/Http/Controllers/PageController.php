@@ -56,10 +56,10 @@ class PageController extends Controller{
         $wpapi = new WpApi();
         $page = $wpapi->getPage('home');
         
-        // Try to get categories, fallback to empty collection if DB unavailable
-        try {
+        // Defensive: avoid breaking the landing page if DB is unreachable
+        try{
             $allcategories = VendorCategory::all();
-        } catch (\Exception $e) {
+        }catch(\Exception $e){
             $allcategories = collect([]);
         }
         

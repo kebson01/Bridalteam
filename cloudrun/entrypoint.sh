@@ -59,6 +59,12 @@ if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
     php artisan key:generate --force
 fi
 
+# Clear Laravel caches to ensure routes work
+echo "Clearing Laravel caches..."
+php artisan route:clear
+php artisan config:clear
+php artisan view:clear
+
 # Set proper permissions for Laravel
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
