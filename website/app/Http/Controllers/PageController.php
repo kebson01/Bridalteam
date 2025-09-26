@@ -128,10 +128,13 @@ class PageController extends Controller{
     public function showVendorRegistration(){
         $wpapi = new WpApi();
         $page = $wpapi->getPage('home');
+        
+        // Defensive: handle case where WordPress page or ACF data is unavailable
         $terms = null;
-        if($page && isset($page->acf) && isset($page->acf->vendor_registration_terms)){
+        if($page && is_object($page) && isset($page->acf) && is_object($page->acf) && isset($page->acf->vendor_registration_terms)){
             $terms = $page->acf->vendor_registration_terms;
         }
+        
         $json = [
             "terms" => $terms
         ];
