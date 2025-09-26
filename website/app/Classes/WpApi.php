@@ -3,6 +3,7 @@ namespace App\Classes;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class WpApi{
     protected $url = "";
@@ -18,7 +19,10 @@ class WpApi{
     public function getMenu($id){
         $endpoint = $this->url . 'menus/v1/menus/' . $id;
         Log::info('WpApi getMenu request', ['endpoint' => $endpoint]);
-        $menudata = $this->getData($endpoint);
+        $cacheKey = 'wpapi_menu_' . $id;
+        $menudata = Cache::remember($cacheKey, 300, function() use ($endpoint){
+            return $this->getData($endpoint);
+        });
 
         //Remove admin url from menu URLs
         foreach($menudata->items as $item){
@@ -34,7 +38,10 @@ class WpApi{
     public function getPage($slug){
         $endpoint = $this->url . 'wp/v2/pages/?slug=' . $slug;
         Log::info('WpApi getPage request', ['endpoint' => $endpoint, 'slug' => $slug]);
-        $returnedpages = $this->getData($endpoint);
+        $cacheKey = 'wpapi_page_' . $slug;
+        $returnedpages = Cache::remember($cacheKey, 300, function() use ($endpoint){
+            return $this->getData($endpoint);
+        });
         if(is_array($returnedpages) && count($returnedpages) > 0){
             Log::info('WpApi getPage response', ['has_page' => true]);
             return $returnedpages[0];
@@ -46,21 +53,40 @@ class WpApi{
 
 
     private function getData($endpoint){
-        try{
-            $client = new Client();
-            $response = $client->get($endpoint, ['timeout' => 10]);
-            $jsonresponse = (string) $response->getBody();        
-            return json_decode($jsonresponse);
-        }catch(\Exception $e){
-            Log::error('WpApi request failed', [
-                'endpoint' => $endpoint,
-                'error' => $e->getMessage()
-            ]);
-            // Return structure that templates can tolerate
-            if(strpos($endpoint, 'menus/v1/menus') !== false){
-                return (object)['items' => []];
+        $attempt = 0;
+        $maxAttempts = 4; // total ~ (1 + 2 + 4) = 7s backoff
+        $backoff = 1;
+        while(true){
+            try{
+                $client = new Client();
+                $response = $client->get($endpoint, ['timeout' => 10]);
+                $jsonresponse = (string) $response->getBody();        
+                return json_decode($jsonresponse);
+            }catch(\Exception $e){
+                $attempt++;
+                $code = method_exists($e, 'getCode') ? $e->getCode() : 0;
+                Log::warning('WpApi request error', [
+                    'attempt' => $attempt,
+                    'endpoint' => $endpoint,
+                    'code' => $code,
+                    'error' => $e->getMessage()
+                ]);
+                // Retry on transient errors (429/5xx)
+                if($attempt < $maxAttempts && in_array($code, [0, 429, 500, 502, 503, 504])){
+                    usleep($backoff * 1000000);
+                    $backoff *= 2;
+                    continue;
+                }
+                // Give up
+                Log::error('WpApi request failed', [
+                    'endpoint' => $endpoint,
+                    'error' => $e->getMessage()
+                ]);
+                if(strpos($endpoint, 'menus/v1/menus') !== false){
+                    return (object)['items' => []];
+                }
+                return [];
             }
-            return [];
         }
     }
 }
