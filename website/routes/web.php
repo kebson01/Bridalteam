@@ -13,6 +13,9 @@
 
 Route::get('/', 'PageController@showHomePage');
 
+// Health check for Cloud Run
+Route::get('/healthz', function(){ return 'ok'; });
+
 Route::get('/vendor/login', 'PageController@showVendorLogin');
 Route::get('/vendor/register', 'PageController@showVendorRegistration');
 Route::get('/email-verify', 'PageController@showVerification');
