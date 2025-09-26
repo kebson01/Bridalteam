@@ -55,7 +55,14 @@ class PageController extends Controller{
     public function showHomePage(){
         $wpapi = new WpApi();
         $page = $wpapi->getPage('home');
-        $allcategories = VendorCategory::all();
+        
+        // Defensive: avoid breaking the landing page if DB is unreachable
+        try{
+            $allcategories = VendorCategory::all();
+        }catch(\Exception $e){
+            $allcategories = collect([]);
+        }
+        
         return view('home', [
             'categories' => $allcategories,
             'page' => $page
