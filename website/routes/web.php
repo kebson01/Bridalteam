@@ -28,4 +28,5 @@ Route::get('/vendors/{category}', 'PageController@showVendorCategory');
 Route::get('/vendor/{slug}', 'PageController@showVendorPage');
 
 Route::get('/gallery', 'PageController@showGalleryPage');
-Route::get('/{slug?}', 'PageController@getPage')->where(['slug' => '.*']);
+// Catch-all must exclude vendor/api/admin/blog to keep those paths working
+Route::get('/{slug}', 'PageController@getPage')->where(['slug' => '^(?!vendor|api|admin|blog).*']);

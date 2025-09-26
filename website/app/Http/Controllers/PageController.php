@@ -128,8 +128,12 @@ class PageController extends Controller{
     public function showVendorRegistration(){
         $wpapi = new WpApi();
         $page = $wpapi->getPage('home');
+        $terms = null;
+        if($page && isset($page->acf) && isset($page->acf->vendor_registration_terms)){
+            $terms = $page->acf->vendor_registration_terms;
+        }
         $json = [
-            "terms" => $page->acf->vendor_registration_terms
+            "terms" => $terms
         ];
         return view('vendor.registration', [
             "pagejson" => json_encode($json)
