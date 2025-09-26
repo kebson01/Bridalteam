@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use Auth, View;
+use Illuminate\Support\Facades\Log;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -38,12 +39,17 @@ class PageController extends Controller{
             View::share('user', null);
         }
 
+        Log::info('PageController __construct start');
         $wpapi = new WpApi();
         $menuitems = $wpapi->getMenu('main');
         $footermenuitms = $wpapi->getMenu("footer");
         $planmenu = $wpapi->getMenu("plan");
         $connectmenu = $wpapi->getMenu("connect");
         $companymenu = $wpapi->getMenu("company");
+        Log::info('Menus loaded', [
+            'main' => is_array($menuitems) ? count($menuitems) : 0,
+            'footer' => is_array($footermenuitms) ? count($footermenuitms) : 0
+        ]);
         View::share('menu', $menuitems);
         View::share('footermenu', $footermenuitms);
         View::share('planmenu', $planmenu);
@@ -53,14 +59,18 @@ class PageController extends Controller{
     }
 
     public function showHomePage(){
+        Log::info('showHomePage start');
         $wpapi = new WpApi();
         $page = $wpapi->getPage('home');
+        Log::info('showHomePage page fetched', ['has_page' => $page ? true : false]);
         // Defensive: avoid breaking the landing page if DB is unreachable
         try{
             $allcategories = VendorCategory::all();
         }catch(\Exception $e){
+            Log::error('DB fetch VendorCategory failed', ['error' => $e->getMessage()]);
             $allcategories = collect([]);
         }
+        Log::info('showHomePage render', ['categories' => is_array($allcategories) ? count($allcategories) : $allcategories->count()]);
         return view('home', [
             'categories' => $allcategories,
             'page' => $page
