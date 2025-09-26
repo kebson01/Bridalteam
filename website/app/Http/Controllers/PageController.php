@@ -55,14 +55,7 @@ class PageController extends Controller{
     public function showHomePage(){
         $wpapi = new WpApi();
         $page = $wpapi->getPage('home');
-        
-        // Try to get categories, fallback to empty collection if DB unavailable
-        try {
-            $allcategories = VendorCategory::all();
-        } catch (\Exception $e) {
-            $allcategories = collect([]);
-        }
-        
+        $allcategories = VendorCategory::all();
         return view('home', [
             'categories' => $allcategories,
             'page' => $page
