@@ -126,21 +126,31 @@ class PageController extends Controller{
     }
 
     public function showVendorRegistration(){
-        $wpapi = new WpApi();
-        $page = $wpapi->getPage('home');
-        
-        // Defensive: handle case where WordPress page or ACF data is unavailable
-        $terms = null;
-        if($page && is_object($page) && isset($page->acf) && is_object($page->acf) && isset($page->acf->vendor_registration_terms)){
-            $terms = $page->acf->vendor_registration_terms;
+        try {
+            $wpapi = new WpApi();
+            $page = $wpapi->getPage('home');
+            
+            // Defensive: handle case where WordPress page or ACF data is unavailable
+            $terms = null;
+            if($page && is_object($page) && property_exists($page, 'acf') && $page->acf && is_object($page->acf) && property_exists($page->acf, 'vendor_registration_terms')){
+                $terms = $page->acf->vendor_registration_terms;
+            }
+            
+            $json = [
+                "terms" => $terms
+            ];
+            return view('vendor.registration', [
+                "pagejson" => json_encode($json)
+            ]);
+        } catch (\Exception $e) {
+            // Fallback: return registration page with no terms if anything fails
+            $json = [
+                "terms" => null
+            ];
+            return view('vendor.registration', [
+                "pagejson" => json_encode($json)
+            ]);
         }
-        
-        $json = [
-            "terms" => $terms
-        ];
-        return view('vendor.registration', [
-            "pagejson" => json_encode($json)
-        ]);
     }
 
     public function showVerification(Request $request){
