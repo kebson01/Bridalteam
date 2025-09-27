@@ -98,6 +98,16 @@ class PageController extends Controller{
         }
     }
 
+    public function showBlogPage(){
+        // Dedicated blog page method
+        return view('blog', [
+            'page' => (object) [
+                'title' => 'Wedding Blog',
+                'content' => 'Wedding planning tips and inspiration coming soon!'
+            ]
+        ]);
+    }
+
     public function getPage($slug, Request $request){
         // Handle blog specifically
         if ($slug === 'blog') {

@@ -36,5 +36,8 @@ Route::get('/vendor/{slug}', 'PageController@showVendorPage');
 
 Route::get('/gallery', 'PageController@showGalleryPage');
 
+// Blog route
+Route::get('/blog', 'PageController@showBlogPage');
+
 // Catch-all route for custom pages (must be last)
 Route::get('/{slug}', 'PageController@getPage')->where(['slug' => '^(?!vendor|api|admin|blog).*']);
