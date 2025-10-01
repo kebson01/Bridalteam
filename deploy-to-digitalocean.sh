@@ -58,14 +58,34 @@ cd /opt/bridalteam
 # Copy production environment
 cp production.env .env
 
+# Create SSL directory if it doesn't exist
+mkdir -p ssl
+
 # Start the application
 docker-compose -f docker-compose.prod.yml up -d --build
+
+# Wait for database to be ready
+echo "Waiting for database to be ready..."
+sleep 30
 
 # Run database migrations
 docker-compose -f docker-compose.prod.yml exec -T app php artisan migrate --force
 
+# Clear Laravel caches
+docker-compose -f docker-compose.prod.yml exec -T app php artisan config:clear
+docker-compose -f docker-compose.prod.yml exec -T app php artisan route:clear
+docker-compose -f docker-compose.prod.yml exec -T app php artisan view:clear
+
+# Set proper permissions
+docker-compose -f docker-compose.prod.yml exec -T app chown -R www-data:www-data /var/www/html/website/storage
+docker-compose -f docker-compose.prod.yml exec -T app chmod -R 775 /var/www/html/website/storage
+
 echo "🎉 Deployment complete!"
-echo "Your application is running at: http://$(curl -s ifconfig.me)"
+echo "Your application is running at: https://$(curl -s ifconfig.me)"
+echo "Don't forget to:"
+echo "1. Point your domain to this IP"
+echo "2. Set up SSL certificates in the ssl/ directory"
+echo "3. Update DNS records"
 EOF
 
 echo -e "${GREEN}✅ Deployment completed successfully!${NC}"

@@ -28,3 +28,8 @@ node_modules
 .vagrant
 debug.log
 .env
+*.pem
+ssl/*.pem
+ssl/cert.*
+ssl/key.*
+production.env
