@@ -1,5 +1,5 @@
 # Dockerfile for Bridalteam Project
-FROM php:8.1-apache
+FROM php:7.4-apache
 
 # Install basic dependencies
 RUN apt-get update && apt-get install -y \
@@ -28,7 +28,7 @@ RUN chmod +x /entrypoint.sh
 
 # Install Composer dependencies for Laravel
 WORKDIR /var/www/html/website
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-scripts
 
 # Set permissions
 WORKDIR /var/www/html

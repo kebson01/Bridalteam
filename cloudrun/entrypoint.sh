@@ -25,33 +25,55 @@ a2enmod rewrite
 # Laravel setup
 cd /var/www/html/website
 
-# Create .env if it doesn't exist
-if [ ! -f .env ]; then
-    echo "Creating .env file..."
-    cat > .env <<EOF
+# Remove any existing .env file and create a new one
+rm -f .env
+echo "Creating .env file..."
+cat > .env <<'EOF'
 APP_NAME=Bridalteam
-APP_ENV=${APP_ENV:-production}
-APP_KEY=
-APP_DEBUG=${APP_DEBUG:-false}
-APP_URL=${APP_URL:-http://localhost}
+APP_ENV=local
+APP_KEY=base64:lMPLHbZNxs7gCFYIWcmijeP+aOJYYg61th1l1vCBjgI=
+APP_DEBUG=true
+APP_URL=http://localhost
+
+LOG_CHANNEL=stack
 
 DB_CONNECTION=mysql
-DB_HOST=${DB_HOST:-127.0.0.1}
-DB_PORT=${DB_PORT:-3306}
-DB_DATABASE=${DB_DATABASE:-bridalteam}
-DB_USERNAME=${DB_USERNAME:-root}
-DB_PASSWORD=${DB_PASSWORD:-}
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=bridalteam
+DB_USERNAME=bridalteam_user
+DB_PASSWORD=userpassword
 
+BROADCAST_DRIVER=log
 CACHE_DRIVER=file
 SESSION_DRIVER=file
+SESSION_LIFETIME=120
 QUEUE_DRIVER=sync
+
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_APP_CLUSTER=mt1
+
+MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
 
 JWT_SECRET=your_jwt_secret_here
 
-# WordPress API URL (same as APP_URL for now)
-ALLOW_ORIGIN=${APP_URL:-http://localhost}
+ALLOW_ORIGIN=http://localhost
+SEO_SITETITLE="Bridal Team - Wedding Planning Made Simple"
 EOF
-fi
 
 # Generate app key if needed
 if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
