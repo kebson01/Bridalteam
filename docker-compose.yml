@@ -5,13 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "80:8080"
     volumes:
       - ./website:/var/www/html/website
       - ./admin:/var/www/html/admin  
       - ./blog:/var/www/html/blog
-    environment:
-      - APACHE_DOCUMENT_ROOT=/var/www/html
     depends_on:
       - db
 
