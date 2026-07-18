@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const CATEGORIES = [
   "Venues",
   "Photographers",
@@ -36,22 +38,22 @@ export default function VendorTeaser() {
         <ul className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {CATEGORIES.map((c) => (
             <li key={c}>
-              <a
-                href="#planner"
+              <Link
+                href="/vendors"
                 className="block rounded-xl border border-white/15 bg-white/10 px-4 py-4 text-center text-sm font-medium backdrop-blur transition-colors hover:border-brand hover:bg-white/20"
               >
                 {c}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
 
-        <a
-          href="#planner"
+        <Link
+          href="/vendors"
           className="mt-10 inline-flex rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-dark shadow-glow transition-transform hover:-translate-y-0.5"
         >
           Match me with vendors
-        </a>
+        </Link>
       </div>
     </section>
   );

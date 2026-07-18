@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -35,18 +36,18 @@ export default function Hero() {
         </p>
 
         <div className="animate-fade-up mt-10 flex flex-col items-center gap-3 sm:flex-row">
-          <a
-            href="#planner"
+          <Link
+            href="/planner"
             className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-dark shadow-glow transition-transform hover:-translate-y-0.5"
           >
             Try the AI planner
-          </a>
-          <a
-            href="#vendors"
+          </Link>
+          <Link
+            href="/vendors"
             className="rounded-full border border-white/50 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
           >
             Browse vendors
-          </a>
+          </Link>
         </div>
 
         <dl className="animate-fade-up mt-16 grid w-full max-w-lg grid-cols-3 gap-4 text-white">

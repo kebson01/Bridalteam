@@ -1,17 +1,33 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const COLUMNS = [
   {
     title: "Plan",
-    links: ["AI Planner", "Checklists", "Budget tools", "Guest list"],
+    links: [
+      { label: "AI Planner", href: "/planner" },
+      { label: "Find Vendors", href: "/vendors" },
+      { label: "Inspiration", href: "/inspiration" },
+      { label: "Pricing", href: "/pricing" },
+    ],
   },
   {
     title: "Connect",
-    links: ["Find vendors", "Inspiration", "Blog", "Community"],
+    links: [
+      { label: "Blog", href: "/blog" },
+      { label: "For vendors", href: "/for-vendors" },
+      { label: "How it works", href: "/#how" },
+      { label: "Log in", href: "/login" },
+    ],
   },
   {
     title: "Company",
-    links: ["About", "For vendors", "Pricing", "Contact"],
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
+    ],
   },
 ];
 
@@ -62,13 +78,13 @@ export default function SiteFooter() {
             </h4>
             <ul className="mt-4 space-y-2.5">
               {col.links.map((l) => (
-                <li key={l}>
-                  <a
-                    href="#"
+                <li key={l.label}>
+                  <Link
+                    href={l.href}
                     className="text-sm text-white/65 transition-colors hover:text-white"
                   >
-                    {l}
-                  </a>
+                    {l.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -80,9 +96,9 @@ export default function SiteFooter() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-white/50 sm:flex-row">
           <p>© {new Date().getFullYear()} Bridal Team. All rights reserved.</p>
           <nav className="flex gap-5">
-            <a href="#" className="hover:text-white/80">Privacy</a>
-            <a href="#" className="hover:text-white/80">Terms</a>
-            <a href="#" className="hover:text-white/80">Vendor login</a>
+            <Link href="/privacy" className="hover:text-white/80">Privacy</Link>
+            <Link href="/terms" className="hover:text-white/80">Terms</Link>
+            <Link href="/login" className="hover:text-white/80">Vendor login</Link>
           </nav>
         </div>
       </div>

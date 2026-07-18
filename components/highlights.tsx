@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const BLOCKS = [
   {
@@ -52,13 +53,13 @@ export default function Highlights() {
               <p className="mt-4 text-lg leading-relaxed text-ink-soft/80">
                 {b.body}
               </p>
-              <a
-                href="#planner"
+              <Link
+                href="/planner"
                 className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-dark transition-colors hover:text-brand-deep"
               >
                 Try it with AI
                 <span aria-hidden>→</span>
-              </a>
+              </Link>
             </div>
           </div>
         ))}

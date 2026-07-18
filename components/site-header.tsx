@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useState } from "react";
 
 const NAV = [
-  { label: "How it works", href: "#how" },
-  { label: "AI Planner", href: "#planner" },
-  { label: "Find Vendors", href: "#vendors" },
-  { label: "Inspiration", href: "#inspiration" },
+  { label: "How it works", href: "/#how" },
+  { label: "AI Planner", href: "/planner" },
+  { label: "Find Vendors", href: "/vendors" },
+  { label: "Inspiration", href: "/inspiration" },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 export default function SiteHeader() {
@@ -28,25 +29,31 @@ export default function SiteHeader() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-7 md:flex">
           {NAV.map((item) => (
-            <a
+            <Link
               key={item.href}
               href={item.href}
               className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-dark"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <a
-            href="#planner"
+        <div className="hidden items-center gap-4 md:flex">
+          <Link
+            href="/login"
+            className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
+          >
+            Log in
+          </Link>
+          <Link
+            href="/signup"
             className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(243,103,5,0.7)] transition-transform hover:-translate-y-0.5"
           >
             Start free
-          </a>
+          </Link>
         </div>
 
         <button
@@ -67,23 +74,32 @@ export default function SiteHeader() {
           <ul className="flex flex-col gap-1">
             {NAV.map((item) => (
               <li key={item.href}>
-                <a
+                <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
                 >
                   {item.label}
-                </a>
+                </Link>
               </li>
             ))}
+            <li>
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
+              >
+                Log in
+              </Link>
+            </li>
             <li className="pt-2">
-              <a
-                href="#planner"
+              <Link
+                href="/signup"
                 onClick={() => setOpen(false)}
                 className="block rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-center text-sm font-semibold text-white"
               >
                 Start free
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>

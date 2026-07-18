@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Jost, Raleway } from "next/font/google";
 import "./globals.css";
+import SiteHeader from "@/components/site-header";
+import SiteFooter from "@/components/site-footer";
 
 // Jost is a free geometric sans that stands in for the original Futura-PT.
 const jost = Jost({
@@ -36,7 +38,9 @@ export default function RootLayout({
         className="min-h-full flex flex-col bg-white text-ink"
         suppressHydrationWarning
       >
-        {children}
+        <SiteHeader />
+        <main className="flex-1">{children}</main>
+        <SiteFooter />
       </body>
     </html>
   );
