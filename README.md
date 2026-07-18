@@ -51,6 +51,40 @@ The API route (`app/api/plan/route.ts`) calls the Anthropic Messages API
 (`claude-sonnet-5` by default; override with `ANTHROPIC_MODEL`) and falls back
 to demo mode automatically if the key is missing or a call fails.
 
+## Venues directory (Supabase)
+
+The `/vendors` page reads venues **live from Supabase**. The public Bridal Team
+project (URL + publishable key) is baked into `lib/supabase.ts` as a default, so
+the directory works with no configuration — reads are guarded by row-level
+security (public can read; nobody can write with the public key).
+
+Data lives in the `venues` table (`name`, `category`, `city`, `state`, `price`,
+`capacity`, `tag`, `description`, `image_url`, `website`, `featured`). You can
+add venues three ways:
+
+1. **The admin page** — visit `/admin/venues` (see below).
+2. **The Supabase dashboard** — Table editor → `venues`.
+3. **Bulk import** — upload a CSV into the `venues` table.
+
+### Managing venues from `/admin/venues`
+
+The admin page adds/edits/deletes venues through a password-gated API route that
+writes with the Supabase **service-role** key. Both of these must be set (they
+are server-only secrets — never commit them):
+
+```bash
+cp .env.example .env.local
+# in .env.local:
+#   SUPABASE_SERVICE_ROLE_KEY=...   (Supabase → Project Settings → API → service_role)
+#   ADMIN_PASSWORD=your-strong-passphrase
+```
+
+Then open `/admin/venues`, enter your `ADMIN_PASSWORD`, and manage venues.
+Without these set, the directory still displays; only editing is disabled.
+
+> Note: this is lightweight password protection suitable for a single admin.
+> For multiple users, swap it for Supabase Auth later.
+
 ## Relationship to the original
 
 This repository is the new, self-contained version of Bridal Team. The original
@@ -59,6 +93,6 @@ rebuilt; it remains recoverable in the git history if ever needed.
 
 ## Next steps (not yet built)
 
-- Supabase for auth, vendor directory data, and saved plans
-- Persisted couple accounts + shared team workspaces
-- Real vendor listings wired to the matching AI
+- Supabase Auth for couple accounts + shared team workspaces
+- Extend the directory to all vendor categories (not just venues)
+- Wire the matching AI to query real venue/vendor data

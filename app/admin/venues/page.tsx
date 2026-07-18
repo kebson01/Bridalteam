@@ -1,0 +1,255 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import type { Venue } from "@/lib/supabase";
+
+const EMPTY = {
+  id: "",
+  name: "",
+  category: "Venue",
+  city: "",
+  state: "",
+  price: "$$",
+  capacity: "",
+  tag: "",
+  description: "",
+  image_url: "",
+  website: "",
+  featured: false,
+};
+type Form = typeof EMPTY;
+
+export default function AdminVenuesPage() {
+  const [password, setPassword] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [form, setForm] = useState<Form>(EMPTY);
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    const res = await fetch("/api/admin/venues");
+    const data = await res.json();
+    setVenues(data.venues ?? []);
+  }, []);
+
+  useEffect(() => {
+    if (unlocked) load();
+  }, [unlocked, load]);
+
+  // Restore a previously entered password for convenience.
+  useEffect(() => {
+    const saved = sessionStorage.getItem("bt_admin_pw");
+    if (saved) {
+      setPassword(saved);
+      setUnlocked(true);
+    }
+  }, []);
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setMsg(null);
+    const editing = Boolean(form.id);
+    const res = await fetch("/api/admin/venues", {
+      method: editing ? "PATCH" : "POST",
+      headers: { "Content-Type": "application/json", "x-admin-password": password },
+      body: JSON.stringify(form),
+    });
+    const data = await res.json();
+    setBusy(false);
+    if (!res.ok) {
+      setMsg({ text: data.error ?? "Something went wrong.", ok: false });
+      return;
+    }
+    sessionStorage.setItem("bt_admin_pw", password);
+    setMsg({ text: editing ? "Venue updated." : "Venue added.", ok: true });
+    setForm(EMPTY);
+    load();
+  }
+
+  async function remove(id: string) {
+    if (!confirm("Delete this venue?")) return;
+    const res = await fetch("/api/admin/venues", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", "x-admin-password": password },
+      body: JSON.stringify({ id }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setMsg({ text: data.error ?? "Delete failed.", ok: false });
+      return;
+    }
+    setMsg({ text: "Venue deleted.", ok: true });
+    load();
+  }
+
+  function edit(v: Venue) {
+    setForm({
+      id: v.id,
+      name: v.name ?? "",
+      category: v.category ?? "Venue",
+      city: v.city ?? "",
+      state: v.state ?? "",
+      price: v.price ?? "$$",
+      capacity: v.capacity != null ? String(v.capacity) : "",
+      tag: v.tag ?? "",
+      description: v.description ?? "",
+      image_url: v.image_url ?? "",
+      website: v.website ?? "",
+      featured: v.featured ?? false,
+    });
+    setMsg(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (!unlocked) {
+    return (
+      <section className="mx-auto max-w-md px-5 py-24">
+        <h1 className="text-2xl font-light uppercase tracking-wide text-ink">Venue admin</h1>
+        <p className="mt-2 text-sm text-ink-soft/70">
+          Enter the admin password to manage venues.
+        </p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (password) setUnlocked(true);
+          }}
+          className="mt-6 flex gap-2"
+        >
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Admin password"
+            className="flex-1 rounded-lg border border-stone-2 px-4 py-3 text-sm outline-none focus:border-brand"
+          />
+          <button className="rounded-lg bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-sm font-semibold text-white">
+            Unlock
+          </button>
+        </form>
+        <p className="mt-4 text-xs text-ink-soft/50">
+          Set <code>ADMIN_PASSWORD</code> and <code>SUPABASE_SERVICE_ROLE_KEY</code> in
+          your environment to enable saving.
+        </p>
+      </section>
+    );
+  }
+
+  const field =
+    "w-full rounded-lg border border-stone-2 px-3 py-2.5 text-sm outline-none focus:border-brand";
+
+  return (
+    <section className="mx-auto max-w-5xl px-5 py-14">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-light uppercase tracking-wide text-ink">Venue admin</h1>
+        <button
+          onClick={() => {
+            sessionStorage.removeItem("bt_admin_pw");
+            setUnlocked(false);
+          }}
+          className="text-sm text-ink-soft/60 hover:text-brand-dark"
+        >
+          Lock
+        </button>
+      </div>
+
+      {msg && (
+        <div
+          className={`mt-4 rounded-lg px-4 py-3 text-sm ${
+            msg.ok ? "bg-brand/10 text-brand-deep" : "bg-red-50 text-red-600"
+          }`}
+        >
+          {msg.text}
+        </div>
+      )}
+
+      {/* Add / edit form */}
+      <form
+        onSubmit={save}
+        className="mt-6 rounded-2xl border border-stone-2 bg-white p-6 shadow-card"
+      >
+        <h2 className="text-lg font-medium text-ink">
+          {form.id ? "Edit venue" : "Add a venue"}
+        </h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input required placeholder="Name *" className={field} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <input placeholder="Category (Venue)" className={field} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+          <input placeholder="City" className={field} value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+          <input placeholder="State" className={field} value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+          <select className={field} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })}>
+            <option value="$">$ — budget</option>
+            <option value="$$">$$ — mid</option>
+            <option value="$$$">$$$ — premium</option>
+          </select>
+          <input type="number" placeholder="Capacity (guests)" className={field} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} />
+          <input placeholder="Tag, e.g. 'Garden · 200 guests'" className={field} value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value })} />
+          <input placeholder="Image URL" className={field} value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+          <input placeholder="Website" className={`${field} sm:col-span-2`} value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
+          <textarea placeholder="Description" rows={3} className={`${field} sm:col-span-2`} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        </div>
+        <label className="mt-3 flex items-center gap-2 text-sm text-ink-soft">
+          <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
+          Featured (show first)
+        </label>
+        <div className="mt-5 flex gap-3">
+          <button
+            disabled={busy}
+            className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {busy ? "Saving…" : form.id ? "Update venue" : "Add venue"}
+          </button>
+          {form.id && (
+            <button
+              type="button"
+              onClick={() => setForm(EMPTY)}
+              className="rounded-full border border-stone-2 px-6 py-2.5 text-sm font-medium text-ink-soft"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      </form>
+
+      {/* Existing venues */}
+      <h2 className="mt-10 text-lg font-medium text-ink">
+        Venues <span className="text-ink-soft/50">({venues.length})</span>
+      </h2>
+      <div className="mt-4 space-y-3">
+        {venues.map((v) => (
+          <div
+            key={v.id}
+            className="flex items-center justify-between gap-4 rounded-xl border border-stone-2 bg-white px-4 py-3"
+          >
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="truncate font-medium text-ink">{v.name}</span>
+                {v.featured && (
+                  <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-brand-dark">
+                    Featured
+                  </span>
+                )}
+              </div>
+              <p className="truncate text-sm text-ink-soft/70">
+                {[v.city, v.state].filter(Boolean).join(", ")}
+                {v.price ? ` · ${v.price}` : ""}
+                {v.tag ? ` · ${v.tag}` : ""}
+              </p>
+            </div>
+            <div className="flex flex-none gap-2">
+              <button onClick={() => edit(v)} className="rounded-lg border border-stone-2 px-3 py-1.5 text-sm text-ink-soft hover:border-brand hover:text-brand-dark">
+                Edit
+              </button>
+              <button onClick={() => remove(v.id)} className="rounded-lg border border-stone-2 px-3 py-1.5 text-sm text-red-500 hover:border-red-300">
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+        {venues.length === 0 && (
+          <p className="text-sm text-ink-soft/60">No venues yet — add your first one above.</p>
+        )}
+      </div>
+    </section>
+  );
+}
