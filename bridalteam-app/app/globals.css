@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/*
+  Bridal Team brand system — ported from the original 2012/13 site.
+  Palette and type mirror website/resources/assets/sass/_variables.scss
+*/
+@theme {
+  --color-ink: #222222;
+  --color-ink-deep: #010101;
+  --color-ink-soft: #303030;
+
+  --color-brand: #ff8c1c;       /* $siteOrange  */
+  --color-brand-bright: #ff9000;/* $siteOrange4 */
+  --color-brand-amber: #f5ad00; /* $siteOrange5 */
+  --color-brand-dark: #f36705;  /* $siteDarkOrange1 */
+  --color-brand-deep: #ec5400;  /* $siteDarkOrange2 */
+
+  --color-stone-1: #7b7b7b;
+  --color-stone-2: #eaeaea;
+  --color-stone-3: #9c9c9d;
+  --color-stone-4: #f4f4f4;
+  --color-stone-5: #d2cfca;
+  --color-stone-6: #e0e0e2;
+
+  --font-display: var(--font-jost), "Futura", "Segoe UI", sans-serif;
+  --font-body: var(--font-raleway), -apple-system, system-ui, sans-serif;
+
+  --shadow-card: 0 18px 40px -18px rgba(34, 34, 34, 0.28);
+  --shadow-glow: 0 22px 60px -20px rgba(243, 103, 5, 0.45);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #222222;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+}
+
+/* Ken-burns drift for the hero */
+@keyframes slow-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+.animate-slow-zoom { animation: slow-zoom 18s ease-in-out infinite alternate; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.7s ease-out both; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.animate-pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
