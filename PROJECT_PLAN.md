@@ -49,24 +49,30 @@ have thought of, so it feels like having a real wedding planner in their pocket.
 
 ## Phase 1 — Couple accounts & the "Wedding" project
 *The backbone everything else hangs off of.*
-- [ ] Couple registration + login (reuse the `users` table; separate auth flow from vendors).
-- [ ] **Wedding model**: date, venue, location, budget target, guest-count estimate,
-      couple names, roles (partner A / partner B), theme/style.
-- [ ] Onboarding wizard: a few questions (date, budget, location, style, size) that
-      seed a personalized plan.
-- [ ] Wedding dashboard: countdown, % of tasks done, budget used, upcoming items.
-- [ ] Ability to invite a co-planner (fiancé, mom, maid of honor) with access to the wedding.
+- [x] Couple registration + login (reuse the `users` table; same JWT flow as vendors). — API built
+- [x] **Wedding model**: date, venue, location, budget target, guest-count estimate,
+      couple names, roles (partner A / partner B), theme/style. — migration + model built
+- [ ] Onboarding wizard (frontend): a few questions (date, budget, location, style, size)
+      that seed a personalized plan. *(API accepts these on wedding create; UI pending.)*
+- [x] Wedding dashboard data: countdown, % of tasks done. — `progress()` + `GET /weddings/{id}` (budget rollup: Phase 3)
+- [ ] Ability to invite a co-planner (fiancé, mom, maid of honor). *(members table exists; invite flow pending.)*
 
 ## Phase 2 — Task & checklist engine (the project manager)
 *This is the core "planner" feature.*
-- [ ] **Task model**: title, description, due date, category, status, assignee, priority.
-- [ ] **Checklist templates by timeline** (12+ months, 9, 6, 3, 1 month, week-of, day-of)
-      seeded from the couple's wedding date — auto-generate their master to-do list.
-- [ ] Check tasks off; progress rolls up to the dashboard.
-- [ ] Assign tasks to bridal-party members or the co-planner.
-- [ ] **Deliverables**: attach files/notes to tasks (contracts, mood boards, playlists, menus).
-- [ ] Timeline / calendar view of everything due.
-- [ ] Reminders for upcoming and overdue tasks.
+- [x] **Task model**: title, description, due date, category, status, assignee, priority. — built
+- [x] **Checklist templates by timeline** (12+, 9, 6, 3, 1 month, week-of, day-of, after)
+      seeded from the wedding date — auto-generates the master to-do list. — seeder + generator built (~40 tasks)
+- [x] Check tasks off; progress rolls up to the dashboard. — `PUT .../tasks/{id}` + progress
+- [ ] Assign tasks to bridal-party members or the co-planner. *(column + API field exist; needs members UI.)*
+- [x] **Deliverables**: attach notes/links to tasks. — API built *(file upload deferred)*
+- [ ] Timeline / calendar view of everything due. *(frontend)*
+- [ ] Reminders for upcoming and overdue tasks. *(Phase 7 notifications)*
+
+> **Built so far (backend MVP):** migrations 1–6, models, ~40-task checklist seeder,
+> and the couple/wedding/task/deliverable API. See `website/COUPLE_API.md`.
+> Not yet run end-to-end — needs a working dev env (Phase 0 #4): the app targets
+> Laravel 5.5 and won't boot on this container's PHP 8.4. A feature test
+> (`tests/Feature/WeddingPlannerTest.php`) encodes the expected behavior.
 
 ## Phase 3 — Budget & vendor price lookup
 *Ties the couple side into the vendor marketplace you already have.*

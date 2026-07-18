@@ -57,6 +57,33 @@ Route::group(['prefix' => 'v1'], function(){
         });
     });
 
+    // --- Couple / wedding planner (MVP) ---
+    Route::group(['prefix' => 'couple'], function(){
+        Route::post('/register', 'CoupleAuthController@register');
+        Route::post('/login', 'CoupleAuthController@login');
+
+        Route::group(['middleware' => 'jwt.auth'], function(){
+            Route::get('/me', 'CoupleAuthController@me');
+
+            // Weddings
+            Route::get('/weddings', 'WeddingController@index');
+            Route::post('/weddings', 'WeddingController@store');
+            Route::get('/weddings/{wedding}', 'WeddingController@show');
+            Route::put('/weddings/{wedding}', 'WeddingController@update');
+
+            // Tasks (checklist)
+            Route::get('/weddings/{wedding}/tasks', 'TaskController@index');
+            Route::post('/weddings/{wedding}/tasks', 'TaskController@store');
+            Route::put('/weddings/{wedding}/tasks/{task}', 'TaskController@update');
+            Route::delete('/weddings/{wedding}/tasks/{task}', 'TaskController@destroy');
+
+            // Deliverables (attachments on a task)
+            Route::get('/weddings/{wedding}/tasks/{task}/deliverables', 'DeliverableController@index');
+            Route::post('/weddings/{wedding}/tasks/{task}/deliverables', 'DeliverableController@store');
+            Route::delete('/weddings/{wedding}/tasks/{task}/deliverables/{deliverable}', 'DeliverableController@destroy');
+        });
+    });
+
     Route::group(['prefix' => 'media'], function(){
         Route::group(['middleware' => 'jwt.auth'], function(){
             Route::post('uploadmedia', 'MediaController@uploadMedia');
