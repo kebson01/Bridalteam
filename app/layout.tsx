@@ -30,8 +30,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${jost.variable} ${raleway.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-white text-ink">
+      <body
+        className="min-h-full flex flex-col bg-white text-ink"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>
