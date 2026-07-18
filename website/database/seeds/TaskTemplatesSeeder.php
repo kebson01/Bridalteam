@@ -13,6 +13,11 @@ class TaskTemplatesSeeder extends Seeder
 {
     public function run()
     {
+        // Idempotent: the catalog is seeded once. Safe to call on every boot.
+        if (TaskTemplate::count() > 0) {
+            return;
+        }
+
         $templates = [
             // ~12+ months out (offset ~365)
             ['Set your overall budget', 'Decide the total you can spend and who is contributing. Everything else flows from this.', 'budget', '12mo_plus', 365, 'high', null],

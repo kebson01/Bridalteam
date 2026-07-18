@@ -36,6 +36,23 @@ venue_name, location_city, location_region, guest_estimate, budget_total, style`
 | POST | `/weddings/{id}/tasks/{taskId}/deliverables` | add a `note` or `link` (`title` required); file upload comes later |
 | DELETE | `/weddings/{id}/tasks/{taskId}/deliverables/{deliverableId}` | remove |
 
+## Co-planners & bridal party
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/weddings/{id}/members` | list members (owner + invitees) |
+| POST | `/weddings/{id}/members` | invite (`name` required; `email`, `role`); returns an `invite_token` |
+| PUT | `/weddings/{id}/members/{memberId}` | update role / edit rights |
+| DELETE | `/weddings/{id}/members/{memberId}` | remove (owner cannot be removed) |
+| POST | `/invites/accept` | the logged-in invitee accepts via `{ invite_token }` |
+
+Roles: `co_planner, maid_of_honor, best_man, bridesmaid, groomsman, family, other`.
+Emailing the invite link is deferred to Phase 7 (notifications); for now the
+token is returned in the response so a link can be shared manually.
+
+## Frontend
+The couple web app is served at **`/plan`** (static SPA in
+`public/plan/index.html`) — account → onboarding wizard → dashboard + checklist.
+
 ## Setup
 ```bash
 php artisan migrate --seed        # creates tables + seeds the checklist templates

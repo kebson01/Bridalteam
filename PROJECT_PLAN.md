@@ -34,28 +34,31 @@ have thought of, so it feels like having a real wedding planner in their pocket.
 
 ---
 
-## Phase 0 — Foundation & decisions (get unblocked)
-- [ ] **Decide the frontend direction** for the couple app: extend the existing React
-      app, or start a fresh modern SPA. (Recommend a clean React/Next front end that
-      talks to the Laravel API.)
-- [ ] **Confirm the deploy target** — pick one of DO / GCP / docker-compose and delete
-      the other two configs to stop the drift.
-- [ ] **Repo cleanup** — move/retire the root hotfix files; get default creds out of
-      `production.env` and into secrets.
-- [ ] Stand up a local dev environment that runs the Laravel API + a couple-facing
-      frontend together (a SessionStart hook can enforce this).
-- [ ] Confirm the DB: MySQL vs. moving to a managed Postgres/Supabase (a Supabase
-      connection is available in this workspace if we want it).
+## Phase 0 — Foundation & decisions (get unblocked)  ✅ complete
+- [x] **Frontend direction** — decided: a lightweight couple web app served by
+      Laravel at `/plan` (no separate Node build) for now; graduate to a standalone
+      React SPA later since the API is already decoupled.
+- [x] **Deploy target** — standardized on **Docker Compose / DigitalOcean** (PHP 7.4 +
+      MySQL). GCP/Cloud Run files kept only because the Dockerfile reuses
+      `cloudrun/entrypoint.sh`; documented, not deleted, to avoid breaking the build.
+- [x] **Repo cleanup** — stray hotfix files moved to `archive/`; `production.env`
+      untracked and scrubbed of committed passwords (rotate history creds before launch).
+- [x] **Local dev environment** — `docker-compose up --build` now boots the API +
+      couple frontend, waits for the DB, migrates, and seeds. See `DEV_SETUP.md`.
+      Also fixed: real `JWT_SECRET` at boot (was a placeholder — token auth was broken)
+      and an anonymous `vendor/` volume so the bind mount doesn't hide it.
+- [x] **DB** — staying on MySQL (the app is built for it); Supabase remains a later option.
 
 ## Phase 1 — Couple accounts & the "Wedding" project
 *The backbone everything else hangs off of.*
 - [x] Couple registration + login (reuse the `users` table; same JWT flow as vendors). — API built
 - [x] **Wedding model**: date, venue, location, budget target, guest-count estimate,
       couple names, roles (partner A / partner B), theme/style. — migration + model built
-- [ ] Onboarding wizard (frontend): a few questions (date, budget, location, style, size)
-      that seed a personalized plan. *(API accepts these on wedding create; UI pending.)*
-- [x] Wedding dashboard data: countdown, % of tasks done. — `progress()` + `GET /weddings/{id}` (budget rollup: Phase 3)
-- [ ] Ability to invite a co-planner (fiancé, mom, maid of honor). *(members table exists; invite flow pending.)*
+- [x] Onboarding wizard (frontend): 3-step wizard (names/style → date/city → guests/budget)
+      that creates the wedding and seeds a personalized plan. — built at `/plan`
+- [x] Wedding dashboard: countdown, % of tasks done, live progress bar, grouped checklist. — built
+- [x] Ability to invite a co-planner (fiancé, mom, maid of honor). — invite + accept API built
+      (`WeddingMemberController`); email delivery deferred to Phase 7.
 
 ## Phase 2 — Task & checklist engine (the project manager)
 *This is the core "planner" feature.*
@@ -68,11 +71,15 @@ have thought of, so it feels like having a real wedding planner in their pocket.
 - [ ] Timeline / calendar view of everything due. *(frontend)*
 - [ ] Reminders for upcoming and overdue tasks. *(Phase 7 notifications)*
 
-> **Built so far (backend MVP):** migrations 1–6, models, ~40-task checklist seeder,
-> and the couple/wedding/task/deliverable API. See `website/COUPLE_API.md`.
-> Not yet run end-to-end — needs a working dev env (Phase 0 #4): the app targets
-> Laravel 5.5 and won't boot on this container's PHP 8.4. A feature test
-> (`tests/Feature/WeddingPlannerTest.php`) encodes the expected behavior.
+> **Built (Phases 0–1 + Phase 2 core):** migrations 1–6, models, ~40-task checklist
+> seeder, the couple/wedding/task/deliverable/member API, and the `/plan` web app
+> (auth → onboarding → dashboard + checklist). Run it with `docker-compose up --build`
+> (see `DEV_SETUP.md`); API reference in `website/COUPLE_API.md`.
+>
+> **Verification status:** all PHP/JS/bash lint clean; feature tests in
+> `tests/Feature/WeddingPlannerTest.php`. Not yet booted end-to-end by me — Docker
+> isn't available in this authoring environment — so the first `docker-compose up`
+> on a real machine is the remaining smoke test.
 
 ## Phase 3 — Budget & vendor price lookup
 *Ties the couple side into the vendor marketplace you already have.*

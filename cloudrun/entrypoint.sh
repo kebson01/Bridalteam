@@ -69,7 +69,7 @@ PUSHER_APP_CLUSTER=mt1
 MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
 MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
 
-JWT_SECRET=your_jwt_secret_here
+JWT_SECRET=CHANGE_ME_AT_BOOT
 
 ALLOW_ORIGIN=http://localhost
 SEO_SITETITLE="Bridal Team - Wedding Planning Made Simple"
@@ -81,11 +81,50 @@ if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
     php artisan key:generate --force
 fi
 
+# Ensure a real JWT secret exists (token auth is broken without one).
+# Prefer an injected env var; otherwise generate a strong random secret.
+if grep -q "JWT_SECRET=CHANGE_ME_AT_BOOT" .env 2>/dev/null; then
+    JWT_VALUE="${JWT_SECRET:-$(openssl rand -base64 48 | tr -d '\n/+=' | cut -c1-48)}"
+    sed -ri "s#^JWT_SECRET=.*#JWT_SECRET=${JWT_VALUE}#" .env
+    echo "JWT secret set."
+fi
+
 # Clear Laravel caches to ensure routes work
 echo "Clearing Laravel caches..."
 php artisan route:clear
 php artisan config:clear
 php artisan view:clear
+
+# Export DB settings from .env so the readiness check below can see them.
+export DB_HOST=$(grep -E '^DB_HOST=' .env | cut -d= -f2-)
+export DB_PORT=$(grep -E '^DB_PORT=' .env | cut -d= -f2-)
+export DB_USERNAME=$(grep -E '^DB_USERNAME=' .env | cut -d= -f2-)
+export DB_PASSWORD=$(grep -E '^DB_PASSWORD=' .env | cut -d= -f2-)
+
+# Wait for the database to accept connections, then run migrations + seed.
+echo "Waiting for database..."
+for i in $(seq 1 30); do
+    if php -r '
+        try {
+            new PDO(
+                "mysql:host=".getenv("DB_HOST").";port=".getenv("DB_PORT"),
+                getenv("DB_USERNAME"), getenv("DB_PASSWORD")
+            );
+            exit(0);
+        } catch (Exception $e) { exit(1); }
+    ' 2>/dev/null; then
+        echo "Database is ready."
+        break
+    fi
+    echo "  db not ready yet ($i/30)..."
+    sleep 2
+done
+
+echo "Running migrations..."
+php artisan migrate --force || echo "WARNING: migrations failed (continuing)"
+
+echo "Seeding starter data (idempotent)..."
+php artisan db:seed --class=TaskTemplatesSeeder --force || echo "WARNING: seed failed (continuing)"
 
 # Set proper permissions for Laravel
 chown -R www-data:www-data storage bootstrap/cache

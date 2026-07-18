@@ -8,8 +8,14 @@ services:
       - "80:8080"
     volumes:
       - ./website:/var/www/html/website
-      - ./admin:/var/www/html/admin  
+      # Preserve the vendor/ dir installed during image build (host has none,
+      # so without this the bind mount above would hide it and break the app).
+      - /var/www/html/website/vendor
+      - ./admin:/var/www/html/admin
       - ./blog:/var/www/html/blog
+    environment:
+      # Injected into the container; entrypoint uses this so tokens survive restarts.
+      JWT_SECRET: ${JWT_SECRET:-local_dev_jwt_secret_change_me_0123456789abcdef}
     depends_on:
       - db
 

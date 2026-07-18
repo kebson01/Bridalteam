@@ -81,6 +81,15 @@ Route::group(['prefix' => 'v1'], function(){
             Route::get('/weddings/{wedding}/tasks/{task}/deliverables', 'DeliverableController@index');
             Route::post('/weddings/{wedding}/tasks/{task}/deliverables', 'DeliverableController@store');
             Route::delete('/weddings/{wedding}/tasks/{task}/deliverables/{deliverable}', 'DeliverableController@destroy');
+
+            // Co-planners & bridal party
+            Route::get('/weddings/{wedding}/members', 'WeddingMemberController@index');
+            Route::post('/weddings/{wedding}/members', 'WeddingMemberController@store');
+            Route::put('/weddings/{wedding}/members/{member}', 'WeddingMemberController@update');
+            Route::delete('/weddings/{wedding}/members/{member}', 'WeddingMemberController@destroy');
+
+            // Accept an invite (invitee must be logged in)
+            Route::post('/invites/accept', 'WeddingMemberController@accept');
         });
     });
 

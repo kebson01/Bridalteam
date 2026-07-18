@@ -34,6 +34,12 @@ Route::get('/vendors/{category}', 'PageController@showVendorCategory');
 // Vendor profile route (must be after specific /vendor/ routes)
 Route::get('/vendor/{slug}', 'PageController@showVendorPage');
 
+// Couple wedding-planner app (static SPA served from public/plan)
+Route::get('/plan', function () {
+    return response(file_get_contents(public_path('plan/index.html')))
+        ->header('Content-Type', 'text/html');
+});
+
 Route::get('/gallery', 'PageController@showGalleryPage');
 
 // Blog route

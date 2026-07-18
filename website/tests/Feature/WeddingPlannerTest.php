@@ -95,6 +95,41 @@ class WeddingPlannerTest extends TestCase
         ]);
     }
 
+    public function testCanInviteAndAcceptACoPlanner()
+    {
+        $owner = factory(User::class)->create();
+        $wedding = Wedding::create([
+            'owner_user_id' => $owner->id,
+            'partner1_name' => 'Alex',
+            'status'        => 'planning',
+        ]);
+
+        $invite = $this->json('POST', "/api/v1/couple/weddings/{$wedding->id}/members", [
+            'name'  => 'Sam',
+            'email' => 'sam@example.com',
+            'role'  => 'co_planner',
+        ], $this->authHeader($owner));
+
+        $invite->assertStatus(201);
+        $token = $invite->json('invite_token');
+        $this->assertNotEmpty($token);
+
+        // A different user accepts the invite and gets linked to the wedding.
+        $invitee = factory(User::class)->create();
+        $accept = $this->json('POST', '/api/v1/couple/invites/accept', [
+            'invite_token' => $token,
+        ], $this->authHeader($invitee));
+
+        $accept->assertStatus(200)
+            ->assertJson(['status' => 'OK', 'wedding_id' => $wedding->id]);
+
+        $this->assertDatabaseHas('wedding_members', [
+            'wedding_id'    => $wedding->id,
+            'user_id'       => $invitee->id,
+            'invite_status' => 'accepted',
+        ]);
+    }
+
     public function testCannotAccessAnotherCouplesWedding()
     {
         $owner = factory(User::class)->create();

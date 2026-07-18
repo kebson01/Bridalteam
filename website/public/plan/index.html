@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bridal Team — Your Wedding Planner</title>
+<style>
+  :root {
+    --bg: #fbf7f5; --card: #ffffff; --ink: #2d2a32; --muted: #8a8590;
+    --rose: #c8657f; --rose-dark: #a24d64; --line: #efe7e9; --ok: #3f9d78;
+    --shadow: 0 6px 24px rgba(80,40,55,.08);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--ink); line-height: 1.5; }
+  a { color: var(--rose-dark); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 18px 80px; }
+  .brand { font-weight: 700; letter-spacing: .3px; color: var(--rose-dark); font-size: 20px; }
+  .brand span { color: var(--ink); }
+  header.top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .btn { background: var(--rose); color: #fff; border: 0; padding: 11px 16px; border-radius: 10px;
+         font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn:hover { background: var(--rose-dark); }
+  .btn.ghost { background: transparent; color: var(--rose-dark); border: 1px solid var(--line); }
+  .btn.sm { padding: 7px 11px; font-size: 13px; border-radius: 8px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow); }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  h2 { font-size: 18px; margin: 22px 0 10px; }
+  .muted { color: var(--muted); }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 5px; }
+  input, select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px;
+         font-size: 15px; background: #fff; color: var(--ink); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 150px; }
+  .err { color: #b53c5b; font-size: 13px; margin-top: 8px; min-height: 16px; }
+  .center { text-align: center; }
+  .hide { display: none !important; }
+
+  /* dashboard */
+  .hero { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: center; }
+  .count { font-size: 40px; font-weight: 800; color: var(--rose-dark); line-height: 1; }
+  .progress { height: 12px; background: #f0e6e9; border-radius: 20px; overflow: hidden; margin-top: 10px; }
+  .progress > i { display: block; height: 100%; background: linear-gradient(90deg,var(--rose),var(--rose-dark)); }
+  .stat { text-align: center; }
+  .stat b { font-size: 22px; display: block; }
+
+  .group { margin-top: 8px; }
+  .group h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted);
+              margin: 20px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+  .task { display: flex; align-items: flex-start; gap: 12px; padding: 12px 6px; border-bottom: 1px solid var(--line); }
+  .task:last-child { border-bottom: 0; }
+  .task input[type=checkbox] { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--rose); flex: 0 0 auto; }
+  .task .t-body { flex: 1; }
+  .task .t-title { font-weight: 600; }
+  .task.done .t-title { text-decoration: line-through; color: var(--muted); }
+  .task .t-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #f5eaee;
+          color: var(--rose-dark); margin-right: 6px; }
+  .pill.high { background: #fbe4d6; color: #b5623c; }
+  .addbar { display: flex; gap: 8px; margin-top: 14px; }
+  .addbar input { flex: 1; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink);
+           color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 14px; opacity: 0; transition: .3s; }
+  .toast.show { opacity: 1; }
+  .steps { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Bridal<span>Team</span></div>
+    <button id="logoutBtn" class="btn ghost sm hide" onclick="logout()">Log out</button>
+  </header>
+
+  <!-- AUTH -->
+  <section id="authView" class="card hide">
+    <h1 id="authTitle">Plan your wedding</h1>
+    <p class="muted" id="authSub">Create an account to start your personalized checklist.</p>
+    <div id="regFields">
+      <div class="row">
+        <div><label>First name</label><input id="firstname" /></div>
+        <div><label>Last name</label><input id="lastname" /></div>
+      </div>
+    </div>
+    <label>Email</label><input id="email" type="email" />
+    <label>Password</label><input id="password" type="password" />
+    <div class="err" id="authErr"></div>
+    <button class="btn" id="authSubmit" onclick="submitAuth()">Create account</button>
+    <p class="muted center" style="margin-top:14px">
+      <span id="authToggleText">Already have an account?</span>
+      <a href="#" onclick="toggleAuth();return false;" id="authToggleLink">Log in</a>
+    </p>
+  </section>
+
+  <!-- ONBOARDING -->
+  <section id="onboardView" class="card hide">
+    <div class="steps">Step <span id="stepNum">1</span> of 3</div>
+    <h1 id="onboardTitle">Tell us about your wedding</h1>
+
+    <div id="ob1">
+      <label>Partner 1 name</label><input id="p1" />
+      <label>Partner 2 name</label><input id="p2" />
+      <label>Wedding style / vibe</label>
+      <select id="style">
+        <option value="">Not sure yet</option>
+        <option>Classic</option><option>Modern</option><option>Rustic</option>
+        <option>Beach</option><option>Bohemian</option><option>Glamorous</option>
+      </select>
+    </div>
+
+    <div id="ob2" class="hide">
+      <label>Wedding date (leave blank if undecided)</label><input id="wdate" type="date" />
+      <label>City / area</label><input id="city" placeholder="e.g. Miami, FL" />
+    </div>
+
+    <div id="ob3" class="hide">
+      <label>Estimated number of guests</label><input id="guests" type="number" min="0" placeholder="e.g. 120" />
+      <label>Total budget (USD)</label><input id="budget" type="number" min="0" placeholder="e.g. 30000" />
+    </div>
+
+    <div class="err" id="obErr"></div>
+    <div class="row" style="margin-top:16px">
+      <button class="btn ghost" id="obBack" onclick="obStep(-1)">Back</button>
+      <button class="btn" id="obNext" onclick="obStep(1)">Next</button>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashView" class="hide">
+    <div class="card">
+      <div class="hero">
+        <div>
+          <h1 id="coupleNames">—</h1>
+          <p class="muted" id="weddingMeta"></p>
+        </div>
+        <div class="center">
+          <div class="count" id="countdown">—</div>
+          <div class="muted" id="countLabel">days to go</div>
+        </div>
+      </div>
+      <div class="progress"><i id="progBar" style="width:0%"></i></div>
+      <div class="row" style="margin-top:14px">
+        <div class="stat"><b id="stDone">0</b><span class="muted">done</span></div>
+        <div class="stat"><b id="stTotal">0</b><span class="muted">tasks</span></div>
+        <div class="stat"><b id="stPct">0%</b><span class="muted">complete</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>Your checklist</h2>
+      <div class="addbar">
+        <input id="newTask" placeholder="Add your own task…" onkeydown="if(event.key==='Enter')addTask()" />
+        <button class="btn" onclick="addTask()">Add</button>
+      </div>
+      <div id="taskList"></div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api/v1/couple';
+let mode = 'register';         // 'register' | 'login'
+let step = 1;                  // onboarding step
+let weddingId = localStorage.getItem('bt_wedding') || null;
+
+function token() { return localStorage.getItem('bt_token'); }
+function authHeaders() {
+  const h = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+  if (token()) h['Authorization'] = 'Bearer ' + token();
+  return h;
+}
+function show(id) {
+  ['authView','onboardView','dashView'].forEach(v =>
+    document.getElementById(v).classList.toggle('hide', v !== id));
+  document.getElementById('logoutBtn').classList.toggle('hide', id === 'authView');
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+async function api(path, method, body) {
+  const res = await fetch(API + path, {
+    method: method || 'GET',
+    headers: authHeaders(),
+    body: body ? JSON.stringify(body) : undefined
+  });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  return { ok: res.ok, status: res.status, data };
+}
+
+/* ---------- AUTH ---------- */
+function toggleAuth() {
+  mode = mode === 'register' ? 'login' : 'register';
+  const reg = mode === 'register';
+  document.getElementById('regFields').classList.toggle('hide', !reg);
+  document.getElementById('authTitle').textContent = reg ? 'Plan your wedding' : 'Welcome back';
+  document.getElementById('authSub').textContent = reg
+    ? 'Create an account to start your personalized checklist.'
+    : 'Log in to pick up where you left off.';
+  document.getElementById('authSubmit').textContent = reg ? 'Create account' : 'Log in';
+  document.getElementById('authToggleText').textContent = reg ? 'Already have an account?' : 'New here?';
+  document.getElementById('authToggleLink').textContent = reg ? 'Log in' : 'Create one';
+  document.getElementById('authErr').textContent = '';
+}
+async function submitAuth() {
+  const err = document.getElementById('authErr'); err.textContent = '';
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!email || !password) { err.textContent = 'Email and password are required.'; return; }
+
+  let res;
+  if (mode === 'register') {
+    const firstname = document.getElementById('firstname').value.trim();
+    const lastname = document.getElementById('lastname').value.trim();
+    if (!firstname || !lastname) { err.textContent = 'Please enter your name.'; return; }
+    res = await api('/register', 'POST', { firstname, lastname, email, password });
+  } else {
+    res = await api('/login', 'POST', { email, password });
+  }
+  if (!res.ok) {
+    err.textContent = res.data.error === 'invalid_credentials'
+      ? 'Incorrect email or password.'
+      : (firstError(res.data) || 'Something went wrong.');
+    return;
+  }
+  localStorage.setItem('bt_token', res.data.token);
+  await boot();
+}
+function firstError(data) {
+  if (data && data.errors) { const k = Object.keys(data.errors)[0]; return data.errors[k][0]; }
+  return null;
+}
+function logout() {
+  localStorage.removeItem('bt_token');
+  localStorage.removeItem('bt_wedding');
+  weddingId = null;
+  show('authView');
+}
+
+/* ---------- ONBOARDING ---------- */
+function obShow() {
+  document.getElementById('stepNum').textContent = step;
+  ['ob1','ob2','ob3'].forEach((id,i) =>
+    document.getElementById(id).classList.toggle('hide', (i+1) !== step));
+  document.getElementById('obBack').style.visibility = step === 1 ? 'hidden' : 'visible';
+  document.getElementById('obNext').textContent = step === 3 ? 'Create my plan' : 'Next';
+}
+async function obStep(dir) {
+  const err = document.getElementById('obErr'); err.textContent = '';
+  if (dir === 1) {
+    if (step === 1 && !document.getElementById('p1').value.trim()) {
+      err.textContent = 'Please enter at least one name.'; return;
+    }
+    if (step < 3) { step += 1; obShow(); return; }
+    await createWedding();
+  } else {
+    if (step > 1) { step -= 1; obShow(); }
+  }
+}
+async function createWedding() {
+  const payload = {
+    partner1_name: document.getElementById('p1').value.trim(),
+    partner2_name: document.getElementById('p2').value.trim() || null,
+    style: document.getElementById('style').value || null,
+    wedding_date: document.getElementById('wdate').value || null,
+    location_city: document.getElementById('city').value.trim() || null,
+    guest_estimate: parseInt(document.getElementById('guests').value) || null,
+    budget_total: parseFloat(document.getElementById('budget').value) || null
+  };
+  const res = await api('/weddings', 'POST', payload);
+  if (!res.ok) { document.getElementById('obErr').textContent = firstError(res.data) || 'Could not create your plan.'; return; }
+  weddingId = res.data.wedding.id;
+  localStorage.setItem('bt_wedding', weddingId);
+  toast('Your checklist is ready!');
+  await loadDashboard();
+}
+
+/* ---------- DASHBOARD ---------- */
+const BUCKETS = [
+  { max: 99999, min: 300, label: '12+ months out' },
+  { max: 299,  min: 210, label: '9 months out' },
+  { max: 209,  min: 120, label: '6 months out' },
+  { max: 119,  min: 45,  label: '3 months out' },
+  { max: 44,   min: 8,   label: '1 month out' },
+  { max: 7,    min: 1,   label: 'Week of' },
+  { max: 0,    min: 0,   label: 'Day of' },
+  { max: -1,   min: -99999, label: 'After the wedding' }
+];
+function bucketFor(offset) {
+  if (offset === null || offset === undefined) return 'Anytime';
+  for (const b of BUCKETS) if (offset <= b.max && offset >= b.min) return b.label;
+  return 'Anytime';
+}
+async function loadDashboard() {
+  const w = await api('/weddings/' + weddingId, 'GET');
+  if (!w.ok) { logout(); return; }
+  const wd = w.data.wedding, pr = w.data.progress;
+  document.getElementById('coupleNames').textContent =
+    wd.partner2_name ? (wd.partner1_name + ' & ' + wd.partner2_name) : wd.partner1_name;
+  const meta = [];
+  if (wd.wedding_date) meta.push(new Date(wd.wedding_date + 'T00:00:00').toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}));
+  if (wd.location_city) meta.push(wd.location_city);
+  if (wd.style) meta.push(wd.style);
+  document.getElementById('weddingMeta').textContent = meta.join('  •  ') || 'Date to be decided';
+
+  if (pr.days_until === null) { document.getElementById('countdown').textContent = '∞';
+    document.getElementById('countLabel').textContent = 'set your date'; }
+  else if (pr.days_until < 0) { document.getElementById('countdown').textContent = '♥';
+    document.getElementById('countLabel').textContent = 'congratulations!'; }
+  else { document.getElementById('countdown').textContent = pr.days_until;
+    document.getElementById('countLabel').textContent = 'days to go'; }
+
+  document.getElementById('stDone').textContent = pr.completed_tasks;
+  document.getElementById('stTotal').textContent = pr.total_tasks;
+  document.getElementById('stPct').textContent = pr.percent_complete + '%';
+  document.getElementById('progBar').style.width = pr.percent_complete + '%';
+
+  await loadTasks();
+  show('dashView');
+}
+async function loadTasks() {
+  const res = await api('/weddings/' + weddingId + '/tasks', 'GET');
+  if (!res.ok) return;
+  const tasks = res.data.tasks || [];
+  const groups = {};
+  tasks.forEach(t => {
+    const g = bucketFor(t.timeline_offset_days);
+    (groups[g] = groups[g] || []).push(t);
+  });
+  const order = BUCKETS.map(b => b.label).concat(['Anytime']);
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+  order.forEach(g => {
+    if (!groups[g]) return;
+    const h = document.createElement('div'); h.className = 'group';
+    let html = '<h3>' + g + '</h3>';
+    groups[g].forEach(t => { html += taskRow(t); });
+    h.innerHTML = html;
+    list.appendChild(h);
+  });
+  if (!tasks.length) list.innerHTML = '<p class="muted">No tasks yet — add one above.</p>';
+}
+function taskRow(t) {
+  const done = t.status === 'done';
+  const due = t.due_date ? new Date(t.due_date + 'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'}) : '';
+  const priorityPill = t.priority === 'high' ? '<span class="pill high">priority</span>' : '';
+  const desc = t.description ? '<div class="t-meta">' + escapeHtml(t.description) + '</div>' : '';
+  return '<div class="task ' + (done ? 'done' : '') + '">' +
+    '<input type="checkbox" ' + (done ? 'checked' : '') + ' onchange="toggleTask(' + t.id + ', this.checked)" />' +
+    '<div class="t-body"><div class="t-title">' + escapeHtml(t.title) + '</div>' + desc +
+    '<div class="t-meta">' + priorityPill +
+      '<span class="pill">' + escapeHtml(t.category) + '</span>' +
+      (due ? 'due ' + due : '') + '</div></div></div>';
+}
+async function toggleTask(id, checked) {
+  const res = await api('/weddings/' + weddingId + '/tasks/' + id, 'PUT',
+    { status: checked ? 'done' : 'todo' });
+  if (res.ok) {
+    const pr = res.data.progress;
+    document.getElementById('stDone').textContent = pr.completed_tasks;
+    document.getElementById('stPct').textContent = pr.percent_complete + '%';
+    document.getElementById('progBar').style.width = pr.percent_complete + '%';
+    await loadTasks();
+  }
+}
+async function addTask() {
+  const inp = document.getElementById('newTask');
+  const title = inp.value.trim();
+  if (!title) return;
+  const res = await api('/weddings/' + weddingId + '/tasks', 'POST', { title });
+  if (res.ok) { inp.value = ''; toast('Task added'); await loadDashboard(); }
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+/* ---------- BOOT ---------- */
+async function boot() {
+  if (!token()) { show('authView'); toggleAuthInit(); return; }
+  const me = await api('/me', 'GET');
+  if (!me.ok) { logout(); return; }
+  const weddings = me.data.weddings || [];
+  if (weddings.length) {
+    weddingId = weddings[0].id;
+    localStorage.setItem('bt_wedding', weddingId);
+    await loadDashboard();
+  } else {
+    step = 1; obShow(); show('onboardView');
+  }
+}
+function toggleAuthInit() {
+  // ensure register mode UI is correct on first paint
+  mode = 'login'; toggleAuth();
+}
+boot();
+</script>
+</body>
+</html>
