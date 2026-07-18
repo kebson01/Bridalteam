@@ -1,90 +1,64 @@
-# Bridalteam Project
+# Bridal Team — AI-Powered Wedding Planning (2026 rebuild)
 
-A multi-component web application consisting of Laravel backend, WordPress CMS, and blog functionality.
+A modern rebuild of the original Bridal Team wedding-planning platform
+(circa 2012–2013), keeping the same brand — colors, logo, tagline and
+structure — while replacing the old Laravel + WordPress + jQuery stack with a
+current **Next.js 16 + React 19 + Tailwind v4** app, and adding **AI** at the
+core of the experience.
 
-## 🚀 Quick Deployment with Docker
+> _Fun, simple wedding planning. Organize details. Find ideas. Collaborate with your team._
 
-### Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+## What's here
 
-### Deploy in 2 Steps
+- **Faithful brand system** ported from the original site
+  (`app/globals.css`): the signature orange (`#ff8c1c` / `#f36705`), near-black
+  `#222`, and grays, with Jost (a free Futura-PT stand-in) + Raleway.
+- **Modern homepage** (`app/page.tsx`) — hero with the original tagline and
+  orange wash, the four AI pillars, alternating highlight sections, an AI vendor
+  matching band, and the original footer structure.
+- **Live AI planning assistant** (`components/ai-planner.tsx` +
+  `app/api/plan/route.ts`) — a chat demo that gives real, tailored guidance on
+  timelines, budgets, checklists and vendors.
 
-1. **Clone and navigate to the project:**
-   ```bash
-   git clone <your-repo-url>
-   cd Bridalteam
-   ```
+## The four AI pillars
 
-2. **Start the application:**
-   ```bash
-   docker-compose up -d
-   ```
+1. **AI wedding planner** — timelines, checklists and to-dos for the whole team.
+2. **Smart vendor matching** — best-fit vendors from style, budget and location.
+3. **AI content & inspiration** — mood boards, bios and blog ideas from a prompt.
+4. **Budget & guest tools** — realistic budget estimates and guest-list help.
 
-### Access Your Application
+## Running it
 
-Once deployed, your application will be available at:
-- **Main Website**: http://localhost
-- **Laravel API**: http://localhost/website
-- **WordPress Admin**: http://localhost/admin
-- **Blog**: http://localhost/blog
-
-### Default Database Credentials
-- **Host**: localhost:3306
-- **Database**: bridalteam
-- **Username**: bridalteam_user
-- **Password**: userpassword
-- **Root Password**: rootpassword
-
-## 🛠️ Development
-
-### Stop the application:
 ```bash
-docker-compose down
+npm install
+npm run dev      # http://localhost:3000
 ```
 
-### View logs:
+### AI: demo mode vs. live Claude
+
+The planner works out of the box in **demo mode** — smart, deterministic
+replies that read the couple's question (budget, timeline, vendors, vibe) and
+respond in context. No key required.
+
+To power replies with **live Claude AI**, add a key:
+
 ```bash
-docker-compose logs -f
+cp .env.example .env.local
+# then set ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-### Rebuild after changes:
-```bash
-docker-compose up --build -d
-```
+The API route (`app/api/plan/route.ts`) calls the Anthropic Messages API
+(`claude-sonnet-5` by default; override with `ANTHROPIC_MODEL`) and falls back
+to demo mode automatically if the key is missing or a call fails.
 
-## 📁 Project Structure
+## Relationship to the original
 
-```
-Bridalteam/
-├── website/          # Laravel application
-├── admin/            # WordPress admin
-├── blog/             # WordPress blog
-├── Dockerfile        # Container configuration
-├── docker-compose.yml # Service orchestration
-└── README.md         # This file
-```
+This repository is the new, self-contained version of Bridal Team. The original
+2012/13 Laravel + WordPress + blog codebase was removed when the project was
+rebuilt; it remains recoverable in the git history if ever needed.
 
-## 🔧 Configuration
+## Next steps (not yet built)
 
-### Environment Files
-- Copy `env.production.example` to `.env` and update values
-- Copy `website/.env.production` to `website/.env` for Laravel config
-- Update WordPress config files in `admin/` and `blog/` directories
-
-### WordPress Setup
-1. Navigate to http://localhost/admin
-2. Complete WordPress installation
-3. Repeat for http://localhost/blog if needed
-
-## 🚨 Production Deployment
-
-For production deployment:
-1. Update all passwords in configuration files
-2. Configure proper domain names
-3. Set up SSL certificates
-4. Use a managed database service
-5. Configure backups
-
----
-
-**Need help?** Check the container logs with `docker-compose logs` for troubleshooting.
+- Supabase for auth, vendor directory data, and saved plans
+- Persisted couple accounts + shared team workspaces
+- Real vendor listings wired to the matching AI

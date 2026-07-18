@@ -1,35 +1,41 @@
-# Keep these files out of the repo
-admin/wp-content/themes/twenty*
-admin/wp-content/uploads/
-admin/wp-content/blogs.dir/
-admin/wp-content/upgrade/*
-admin/wp-content/backup-db/*
-admin/wp-content/advanced-cache.php
-admin/wp-content/wp-cache-config.php
-admin/wp-content/cache/*
-admin/wp-content/cache/supercache/*
-admin/wp-content/w3tc*
-admin/wp-content/w3tc/*
-admin/wp-content/wflogs/*
-blog/wp-content/uploads/*
-sitemap.*
-wp-config.php
-UserFiles
-web.config
-*.sql
-*.mp4
-node_modules
-.htaccess
-/website/vendor
-*.DS_Store
-*Thumbs.db
-*.sass-cache*
-*~imageoptim*
-.vagrant
-debug.log
-.env
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
 *.pem
-ssl/*.pem
-ssl/cert.*
-ssl/key.*
-production.env
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

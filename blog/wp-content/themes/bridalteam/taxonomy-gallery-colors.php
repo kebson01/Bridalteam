@@ -1,1 +1,0 @@
-<?php require('archive-gallery.php'); ?>
