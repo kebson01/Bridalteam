@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
+import { supabasePublic, type Venue } from "@/lib/supabase";
 
 export const metadata: Metadata = {
   title: "Find Wedding Vendors — Bridal Team",
   description:
     "Browse venues, photographers, florists, caterers and more — or let AI match you with the best-fit vendors for your style, budget and location.",
 };
+
+// Always read fresh venue data at request time.
+export const dynamic = "force-dynamic";
 
 const CATEGORIES = [
   "Venues",
@@ -19,16 +23,35 @@ const CATEGORIES = [
   "Beauty & Hair",
 ];
 
-const VENDORS = [
-  { name: "Rosewood Estate", category: "Venue", location: "Austin, TX", price: "$$$", tag: "Garden · 200 guests" },
-  { name: "Amber & Ash Photo", category: "Photographer", location: "Nashville, TN", price: "$$", tag: "Documentary style" },
-  { name: "Wildbloom Florals", category: "Florist", location: "Portland, OR", price: "$$", tag: "Seasonal & local" },
-  { name: "The Copper Spoon", category: "Caterer", location: "Denver, CO", price: "$$$", tag: "Farm-to-table" },
-  { name: "Midnight Avenue", category: "Band", location: "Chicago, IL", price: "$$$", tag: "8-piece soul band" },
-  { name: "Sugar & Sea", category: "Cakes", location: "Miami, FL", price: "$$", tag: "Custom tiers" },
+// Fallback shown only if the database can't be reached.
+const FALLBACK: Partial<Venue>[] = [
+  { name: "Rosewood Estate", category: "Venue", city: "Austin", state: "TX", price: "$$$", tag: "Garden · 200 guests" },
+  { name: "The Grand Marquee", category: "Venue", city: "Nashville", state: "TN", price: "$$$", tag: "Ballroom · 300 guests" },
+  { name: "Wildflower Barn", category: "Venue", city: "Portland", state: "OR", price: "$$", tag: "Rustic barn · 150 guests" },
 ];
 
-export default function VendorsPage() {
+async function getVenues(): Promise<Partial<Venue>[]> {
+  try {
+    const supabase = supabasePublic();
+    const { data, error } = await supabase
+      .from("venues")
+      .select("*")
+      .order("featured", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error || !data || data.length === 0) return FALLBACK;
+    return data;
+  } catch {
+    return FALLBACK;
+  }
+}
+
+function locationOf(v: Partial<Venue>) {
+  return [v.city, v.state].filter(Boolean).join(", ");
+}
+
+export default async function VendorsPage() {
+  const venues = await getVenues();
+
   return (
     <>
       <PageHero
@@ -63,30 +86,44 @@ export default function VendorsPage() {
           ))}
         </ul>
 
-        {/* Vendor grid */}
+        {/* Venue grid — live from Supabase */}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {VENDORS.map((v) => (
+          {venues.map((v, i) => (
             <article
-              key={v.name}
+              key={v.id ?? `${v.name}-${i}`}
               className="overflow-hidden rounded-2xl border border-stone-2 bg-white shadow-card transition-transform hover:-translate-y-1"
             >
-              <div className="flex h-36 items-center justify-center bg-gradient-to-br from-brand/15 via-stone-4 to-brand-dark/10">
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
-                  {v.category}
-                </span>
+              <div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-brand/15 via-stone-4 to-brand-dark/10">
+                {v.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={v.image_url} alt={v.name ?? ""} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                    {v.category ?? "Venue"}
+                  </span>
+                )}
+                {v.featured && (
+                  <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
+                    Featured
+                  </span>
+                )}
               </div>
               <div className="p-5">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-lg font-medium text-ink">{v.name}</h3>
-                  <span className="text-sm font-semibold text-brand-dark">{v.price}</span>
+                  {v.price && (
+                    <span className="text-sm font-semibold text-brand-dark">{v.price}</span>
+                  )}
                 </div>
-                <p className="mt-1 text-sm text-ink-soft/70">{v.location}</p>
-                <p className="mt-3 text-sm text-ink-soft/80">{v.tag}</p>
+                {locationOf(v) && (
+                  <p className="mt-1 text-sm text-ink-soft/70">{locationOf(v)}</p>
+                )}
+                {v.tag && <p className="mt-3 text-sm text-ink-soft/80">{v.tag}</p>}
                 <Link
                   href="/planner"
                   className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark hover:text-brand-deep"
                 >
-                  Ask AI about this vendor <span aria-hidden>→</span>
+                  Ask AI about this venue <span aria-hidden>→</span>
                 </Link>
               </div>
             </article>
@@ -94,10 +131,13 @@ export default function VendorsPage() {
         </div>
 
         <p className="mt-10 text-center text-sm text-ink-soft/60">
-          Sample listings shown. Real vendor profiles arrive with the directory
-          launch — vendors can{" "}
+          Venues are managed in Supabase. Add or edit them from the{" "}
+          <Link href="/admin/venues" className="font-semibold text-brand-dark">
+            venue admin
+          </Link>
+          . Vendors can also{" "}
           <Link href="/for-vendors" className="font-semibold text-brand-dark">
-            join the waitlist here
+            join the waitlist
           </Link>
           .
         </p>
