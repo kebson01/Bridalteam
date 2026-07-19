@@ -4,7 +4,7 @@ import Link from "next/link";
 import PageHero from "@/components/page-hero";
 
 export const metadata: Metadata = {
-  title: "Wedding Inspiration — Bridal Team",
+  title: "Wedding Inspiration",
   description:
     "Browse real wedding inspiration and let AI spin up mood boards, palettes and ideas tailored to your style, season and budget.",
 };

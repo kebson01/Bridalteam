@@ -3,7 +3,7 @@ import PageHero from "@/components/page-hero";
 import AuthForm from "@/components/auth-form";
 
 export const metadata: Metadata = {
-  title: "For Vendors — Bridal Team",
+  title: "For Vendors",
   description:
     "Get discovered by couples planning their wedding right now. Join the Bridal Team vendor directory.",
 };
@@ -52,7 +52,7 @@ export default function ForVendorsPage() {
             directory is opening soon — add your email and we&rsquo;ll reach out
             to get your profile set up.
           </div>
-          <AuthForm mode="signup" />
+          <AuthForm mode="signup" audience="vendor" source="for-vendors" />
         </div>
       </section>
     </>

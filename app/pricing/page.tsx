@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageHero from "@/components/page-hero";
 
 export const metadata: Metadata = {
-  title: "Pricing — Bridal Team",
+  title: "Pricing",
   description: "Simple pricing for couples and vendors. Start free.",
 };
 

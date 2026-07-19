@@ -3,7 +3,7 @@ import PageHero from "@/components/page-hero";
 import AuthForm from "@/components/auth-form";
 
 export const metadata: Metadata = {
-  title: "Start Free — Bridal Team",
+  title: "Start Free",
   description: "Open your free Bridal Team account and start planning with AI.",
 };
 
@@ -17,11 +17,11 @@ const PERKS = [
 export default function SignupPage() {
   return (
     <>
-      <PageHero eyebrow="Free account" title="Start planning today" />
+      <PageHero eyebrow="Early access" title="Join the waitlist" />
       <section className="mx-auto grid max-w-5xl items-start gap-12 px-5 py-16 lg:grid-cols-2">
         <div>
           <h2 className="text-2xl font-light uppercase tracking-wide text-ink">
-            Everything you need, free to begin
+            What you&rsquo;ll get when accounts open
           </h2>
           <ul className="mt-6 space-y-3">
             {PERKS.map((p) => (
@@ -36,7 +36,7 @@ export default function SignupPage() {
             ))}
           </ul>
         </div>
-        <AuthForm mode="signup" />
+        <AuthForm mode="signup" audience="couple" source="signup" />
       </section>
     </>
   );

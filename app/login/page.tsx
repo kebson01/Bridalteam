@@ -3,7 +3,7 @@ import PageHero from "@/components/page-hero";
 import AuthForm from "@/components/auth-form";
 
 export const metadata: Metadata = {
-  title: "Log In — Bridal Team",
+  title: "Log In",
   description: "Log in to your Bridal Team account.",
 };
 

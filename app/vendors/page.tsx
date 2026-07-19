@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageHero from "@/components/page-hero";
+import VendorDirectory from "@/components/vendor-directory";
 import { supabasePublic, type Venue } from "@/lib/supabase";
 import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 
 export const metadata: Metadata = {
-  title: "Find Wedding Vendors — Bridal Team",
+  // Bare string — layout's title.template appends the brand.
+  title: "Find Wedding Vendors",
   description:
     "Browse venues, photographers, florists, caterers and more — or let AI match you with the best-fit vendors for your style, budget and location.",
 };
@@ -14,29 +16,18 @@ export const metadata: Metadata = {
 // Always read fresh venue data at request time.
 export const dynamic = "force-dynamic";
 
-const CATEGORIES = [
-  "Venues",
-  "Photographers",
-  "Florists",
-  "Caterers",
-  "DJs & Bands",
-  "Cakes & Desserts",
-  "Planners",
-  "Beauty & Hair",
-];
+type LoadResult =
+  | { status: "ok"; venues: Partial<Venue>[] }
+  | { status: "empty" }
+  | { status: "error" };
 
-// Fallback shown only if the database can't be reached.
-// NOTE before re-enabling this page (see lib/flags.ts): these are invented
-// venues. Rendering them on a query failure silently presents fake listings
-// as real ones -- which is exactly how the venues/vendors table-name bug went
-// unnoticed. Replace this with an honest empty/error state at that point.
-const FALLBACK: Partial<Venue>[] = [
-  { name: "Rosewood Estate", category: "Venue", city: "Austin", state: "TX", price: "$$$", tag: "Garden · 200 guests" },
-  { name: "The Grand Marquee", category: "Venue", city: "Nashville", state: "TN", price: "$$$", tag: "Ballroom · 300 guests" },
-  { name: "Wildflower Barn", category: "Venue", city: "Portland", state: "OR", price: "$$", tag: "Rustic barn · 150 guests" },
-];
-
-async function getVenues(): Promise<Partial<Venue>[]> {
+/**
+ * There is deliberately no hardcoded fallback list here. An earlier version
+ * rendered invented sample venues whenever the query failed, which presented
+ * fictional listings as real ones and hid a table-name bug for weeks. Failing
+ * visibly is the safer behaviour for a directory people book from.
+ */
+async function getVenues(): Promise<LoadResult> {
   try {
     const supabase = supabasePublic();
     const { data, error } = await supabase
@@ -44,22 +35,41 @@ async function getVenues(): Promise<Partial<Venue>[]> {
       .select("*")
       .order("featured", { ascending: false })
       .order("created_at", { ascending: false });
-    if (error || !data || data.length === 0) return FALLBACK;
-    return data;
-  } catch {
-    return FALLBACK;
+
+    if (error) {
+      console.error("vendors query failed:", error.code, error.message);
+      return { status: "error" };
+    }
+    if (!data || data.length === 0) return { status: "empty" };
+    return { status: "ok", venues: data };
+  } catch (err) {
+    console.error("vendors query threw:", err);
+    return { status: "error" };
   }
 }
 
-function locationOf(v: Partial<Venue>) {
-  return [v.city, v.state].filter(Boolean).join(", ");
+function Notice({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-12 text-center">
+      <h2 className="text-lg font-medium text-ink">{title}</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft/75">
+        {body}
+      </p>
+      <Link
+        href="/planner"
+        className="mt-6 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white"
+      >
+        Ask the AI planner instead
+      </Link>
+    </div>
+  );
 }
 
 export default async function VendorsPage() {
   // Hidden until the directory holds real listings — see lib/flags.ts.
   if (!SHOW_VENDOR_DIRECTORY) notFound();
 
-  const venues = await getVenues();
+  const result = await getVenues();
 
   return (
     <>
@@ -70,74 +80,19 @@ export default async function VendorsPage() {
       />
 
       <section className="mx-auto max-w-6xl px-5 py-12">
-        {/* Search + AI match */}
-        <div className="flex flex-col gap-3 rounded-2xl border border-stone-2 bg-white p-4 shadow-card sm:flex-row sm:items-center">
-          <input
-            placeholder="Search vendors, e.g. 'rustic barn venue in Texas'"
-            className="flex-1 rounded-full border border-stone-2 px-5 py-3 text-sm text-ink outline-none focus:border-brand"
+        {result.status === "ok" ? (
+          <VendorDirectory venues={result.venues} />
+        ) : result.status === "empty" ? (
+          <Notice
+            title="No vendors listed yet"
+            body="We're building the directory with real, bookable vendors. Check back soon — or let the AI planner suggest what to book first."
           />
-          <Link
-            href="/planner"
-            className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-center text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
-          >
-            Match me with AI
-          </Link>
-        </div>
-
-        {/* Category chips */}
-        <ul className="mt-8 flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
-            <li key={c}>
-              <span className="inline-block cursor-default rounded-full border border-stone-2 bg-white px-4 py-2 text-sm text-ink-soft transition-colors hover:border-brand hover:text-brand-dark">
-                {c}
-              </span>
-            </li>
-          ))}
-        </ul>
-
-        {/* Venue grid — live from Supabase */}
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {venues.map((v, i) => (
-            <article
-              key={v.id ?? `${v.name}-${i}`}
-              className="overflow-hidden rounded-2xl border border-stone-2 bg-white shadow-card transition-transform hover:-translate-y-1"
-            >
-              <div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-brand/15 via-stone-4 to-brand-dark/10">
-                {v.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={v.image_url} alt={v.name ?? ""} className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
-                    {v.category ?? "Venue"}
-                  </span>
-                )}
-                {v.featured && (
-                  <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
-                    Featured
-                  </span>
-                )}
-              </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-lg font-medium text-ink">{v.name}</h3>
-                  {v.price && (
-                    <span className="text-sm font-semibold text-brand-dark">{v.price}</span>
-                  )}
-                </div>
-                {locationOf(v) && (
-                  <p className="mt-1 text-sm text-ink-soft/70">{locationOf(v)}</p>
-                )}
-                {v.tag && <p className="mt-3 text-sm text-ink-soft/80">{v.tag}</p>}
-                <Link
-                  href="/planner"
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark hover:text-brand-deep"
-                >
-                  Ask AI about this venue <span aria-hidden>→</span>
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+        ) : (
+          <Notice
+            title="We couldn't load the directory"
+            body="Something went wrong fetching vendors. Please try again in a moment."
+          />
+        )}
 
         <p className="mt-10 text-center text-sm text-ink-soft/60">
           Venues are managed in Supabase. Add or edit them from the{" "}
