@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageHero from "@/components/page-hero";
 
 export const metadata: Metadata = {
-  title: "Blog — Bridal Team",
+  title: "Blog",
   description: "Wedding planning tips, ideas and inspiration from the Bridal Team.",
 };
 

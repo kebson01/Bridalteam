@@ -124,7 +124,15 @@ export async function POST(req: Request) {
     });
 
     if (!res.ok) {
-      // Fail gracefully to the demo experience.
+      // Still fail gracefully to the demo experience — but say why in the
+      // server log. Without this, a bad key, a wrong model id or a rate limit
+      // all look identical to "no API key configured", and the UI tells the
+      // visitor to set a key that is already set.
+      const detail = await res.text().catch(() => "");
+      console.error(
+        `Anthropic API request failed: ${res.status} ${res.statusText}`,
+        detail.slice(0, 500),
+      );
       return NextResponse.json({ reply: demoReply(clean), demo: true });
     }
 
@@ -134,7 +142,8 @@ export async function POST(req: Request) {
       demoReply(clean);
 
     return NextResponse.json({ reply, demo: false });
-  } catch {
+  } catch (err) {
+    console.error("Anthropic API request threw:", err);
     return NextResponse.json({ reply: demoReply(clean), demo: true });
   }
 }

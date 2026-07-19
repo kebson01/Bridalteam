@@ -3,7 +3,7 @@ import PageHero from "@/components/page-hero";
 import PlannerChat from "@/components/planner-chat";
 
 export const metadata: Metadata = {
-  title: "AI Wedding Planner — Bridal Team",
+  title: "AI Wedding Planner",
   description:
     "Chat with your AI planning assistant for timelines, budgets, checklists and vendor ideas tailored to your wedding.",
 };

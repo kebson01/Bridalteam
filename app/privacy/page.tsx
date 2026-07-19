@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/page-hero";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Bridal Team",
+  title: "Privacy Policy",
   description: "How Bridal Team handles your data.",
 };
 

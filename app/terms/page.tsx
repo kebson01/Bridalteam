@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/page-hero";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Bridal Team",
+  title: "Terms of Service",
   description: "The terms for using Bridal Team.",
 };
 
