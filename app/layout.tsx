@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Jost, Raleway } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
+import ServiceWorker from "@/components/service-worker";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 
 // Jost is a free geometric sans that stands in for the original Futura-PT.
@@ -46,6 +47,32 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
+  // Installed-app presentation on iOS.
+  appleWebApp: {
+    capable: true,
+    title: SITE_NAME,
+    statusBarStyle: "default",
+  },
+  other: {
+    // Next only emits the standardised `mobile-web-app-capable`. iOS below 16.4
+    // predates manifest support and still needs the apple-prefixed original to
+    // launch standalone rather than in a Safari chrome.
+    "apple-mobile-web-app-capable": "yes",
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    other: [{ rel: "mask-icon", url: "/mask-icon.svg", color: "#f25e00" }],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f25e00",
+  // Installed apps should fill the display, including behind the notch.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -66,6 +93,7 @@ export default function RootLayout({
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />
+        <ServiceWorker />
       </body>
     </html>
   );
