@@ -58,7 +58,7 @@ function guard(req: Request) {
 export async function GET() {
   const supabase = supabasePublic();
   const { data, error } = await supabase
-    .from("venues")
+    .from("vendors")
     .select("*")
     .order("featured", { ascending: false })
     .order("created_at", { ascending: false });
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   if (!values.name) {
     return NextResponse.json({ error: "Name is required." }, { status: 400 });
   }
-  const { data, error } = await admin.from("venues").insert(values).select().single();
+  const { data, error } = await admin.from("vendors").insert(values).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ venue: data });
 }
@@ -88,7 +88,7 @@ export async function PATCH(req: Request) {
   const id = body.id;
   if (!id) return NextResponse.json({ error: "id is required." }, { status: 400 });
   const { data, error } = await admin
-    .from("venues")
+    .from("vendors")
     .update(pick(body))
     .eq("id", id)
     .select()
@@ -104,7 +104,7 @@ export async function DELETE(req: Request) {
   const body = (await req.json().catch(() => ({}))) as VenueInput;
   const id = body.id;
   if (!id) return NextResponse.json({ error: "id is required." }, { status: 400 });
-  const { error } = await admin.from("venues").delete().eq("id", id);
+  const { error } = await admin.from("vendors").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }

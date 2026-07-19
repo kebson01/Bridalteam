@@ -51,24 +51,25 @@ The API route (`app/api/plan/route.ts`) calls the Anthropic Messages API
 (`claude-sonnet-5` by default; override with `ANTHROPIC_MODEL`) and falls back
 to demo mode automatically if the key is missing or a call fails.
 
-## Venues directory (Supabase)
+## Vendor directory (Supabase)
 
-The `/vendors` page reads venues **live from Supabase**. The public Bridal Team
+The `/vendors` page reads vendors **live from Supabase**. The public Bridal Team
 project (URL + publishable key) is baked into `lib/supabase.ts` as a default, so
 the directory works with no configuration — reads are guarded by row-level
 security (public can read; nobody can write with the public key).
 
-Data lives in the `venues` table (`name`, `category`, `city`, `state`, `price`,
-`capacity`, `tag`, `description`, `image_url`, `website`, `featured`). You can
-add venues three ways:
+Data lives in the `vendors` table (`name`, `category`, `city`, `state`, `price`,
+`capacity`, `tag`, `description`, `image_url`, `website`, `featured`) and already
+covers every category — venues, photographers, caterers, music and more. You can
+add vendors three ways:
 
 1. **The admin page** — visit `/admin/venues` (see below).
-2. **The Supabase dashboard** — Table editor → `venues`.
-3. **Bulk import** — upload a CSV into the `venues` table.
+2. **The Supabase dashboard** — Table editor → `vendors`.
+3. **Bulk import** — upload a CSV into the `vendors` table.
 
-### Managing venues from `/admin/venues`
+### Managing vendors from `/admin/venues`
 
-The admin page adds/edits/deletes venues through a password-gated API route that
+The admin page adds/edits/deletes vendors through a password-gated API route that
 writes with the Supabase **service-role** key. Both of these must be set (they
 are server-only secrets — never commit them):
 
@@ -79,7 +80,7 @@ cp .env.example .env.local
 #   ADMIN_PASSWORD=your-strong-passphrase
 ```
 
-Then open `/admin/venues`, enter your `ADMIN_PASSWORD`, and manage venues.
+Then open `/admin/venues`, enter your `ADMIN_PASSWORD`, and manage vendors.
 Without these set, the directory still displays; only editing is disabled.
 
 > Note: this is lightweight password protection suitable for a single admin.
@@ -94,5 +95,5 @@ rebuilt; it remains recoverable in the git history if ever needed.
 ## Next steps (not yet built)
 
 - Supabase Auth for couple accounts + shared team workspaces
-- Extend the directory to all vendor categories (not just venues)
+- Surface the non-venue categories in the directory UI (the data already has them)
 - Wire the matching AI to query real venue/vendor data

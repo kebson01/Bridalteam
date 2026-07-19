@@ -34,7 +34,7 @@ async function getVenues(): Promise<Partial<Venue>[]> {
   try {
     const supabase = supabasePublic();
     const { data, error } = await supabase
-      .from("venues")
+      .from("vendors")
       .select("*")
       .order("featured", { ascending: false })
       .order("created_at", { ascending: false });
