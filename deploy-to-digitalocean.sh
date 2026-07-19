@@ -61,6 +61,20 @@ cp production.env .env
 # Create SSL directory if it doesn't exist
 mkdir -p ssl
 
+# Ensure nginx has a cert/key to load, otherwise it crash-loops on startup and
+# port 443 refuses connections (browser shows ERR_CONNECTION_ABORTED).
+# If real certs aren't present yet, generate a temporary self-signed pair so the
+# site is reachable; replace with Let's Encrypt certs (see ssl/README.md) ASAP.
+if [ ! -f ssl/cert.pem ] || [ ! -f ssl/key.pem ]; then
+    echo "⚠️  No SSL certificate found in ssl/. Generating a TEMPORARY self-signed cert."
+    echo "    Replace ssl/cert.pem and ssl/key.pem with real certs (Let's Encrypt) before going live."
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout ssl/key.pem -out ssl/cert.pem \
+        -subj "/CN=bridalteam.com" \
+        -addext "subjectAltName=DNS:bridalteam.com,DNS:www.bridalteam.com"
+    chmod 600 ssl/key.pem
+fi
+
 # Start the application
 docker-compose -f docker-compose.prod.yml up -d --build
 
