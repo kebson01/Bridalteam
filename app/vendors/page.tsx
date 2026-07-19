@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import { supabasePublic, type Venue } from "@/lib/supabase";
+import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Find Wedding Vendors — Bridal Team",
@@ -24,6 +26,10 @@ const CATEGORIES = [
 ];
 
 // Fallback shown only if the database can't be reached.
+// NOTE before re-enabling this page (see lib/flags.ts): these are invented
+// venues. Rendering them on a query failure silently presents fake listings
+// as real ones -- which is exactly how the venues/vendors table-name bug went
+// unnoticed. Replace this with an honest empty/error state at that point.
 const FALLBACK: Partial<Venue>[] = [
   { name: "Rosewood Estate", category: "Venue", city: "Austin", state: "TX", price: "$$$", tag: "Garden · 200 guests" },
   { name: "The Grand Marquee", category: "Venue", city: "Nashville", state: "TN", price: "$$$", tag: "Ballroom · 300 guests" },
@@ -50,6 +56,9 @@ function locationOf(v: Partial<Venue>) {
 }
 
 export default async function VendorsPage() {
+  // Hidden until the directory holds real listings — see lib/flags.ts.
+  if (!SHOW_VENDOR_DIRECTORY) notFound();
+
   const venues = await getVenues();
 
   return (

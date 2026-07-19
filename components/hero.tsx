@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 
 export default function Hero() {
   return (
@@ -43,10 +44,10 @@ export default function Hero() {
             Try the AI planner
           </Link>
           <Link
-            href="/vendors"
+            href={SHOW_VENDOR_DIRECTORY ? "/vendors" : "/#how"}
             className="rounded-full border border-white/50 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
           >
-            Browse vendors
+            {SHOW_VENDOR_DIRECTORY ? "Browse vendors" : "See how it works"}
           </Link>
         </div>
 

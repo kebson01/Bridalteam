@@ -3,6 +3,7 @@ import Pillars from "@/components/pillars";
 import AIPlanner from "@/components/ai-planner";
 import Highlights from "@/components/highlights";
 import VendorTeaser from "@/components/vendor-teaser";
+import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 
 export default function Home() {
   return (
@@ -11,7 +12,7 @@ export default function Home() {
       <Pillars />
       <Highlights />
       <AIPlanner />
-      <VendorTeaser />
+      {SHOW_VENDOR_DIRECTORY && <VendorTeaser />}
     </>
   );
 }

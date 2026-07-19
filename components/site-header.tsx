@@ -4,10 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
+
 const NAV = [
   { label: "How it works", href: "/#how" },
   { label: "AI Planner", href: "/planner" },
-  { label: "Find Vendors", href: "/vendors" },
+  ...(SHOW_VENDOR_DIRECTORY
+    ? [{ label: "Find Vendors", href: "/vendors" }]
+    : []),
   { label: "Inspiration", href: "/inspiration" },
   { label: "Pricing", href: "/pricing" },
 ];
