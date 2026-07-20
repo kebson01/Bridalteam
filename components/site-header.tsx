@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
-import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
+import { SHOW_VENDOR_DIRECTORY, SHOW_PLANNER_APP } from "@/lib/flags";
 
 const NAV = [
   { label: "How it works", href: "/#how" },
@@ -15,6 +15,11 @@ const NAV = [
   { label: "Inspiration", href: "/inspiration" },
   { label: "Pricing", href: "/pricing" },
 ];
+
+// "Log in" is for people who already have an account, so once accounts exist it
+// points at the real auth screen — never the pre-launch waitlist. "Start free"
+// stays on the waitlist until public signups open (they need production email).
+const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -47,7 +52,7 @@ export default function SiteHeader() {
 
         <div className="hidden items-center gap-4 md:flex">
           <Link
-            href="/login"
+            href={LOGIN_HREF}
             className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
           >
             Log in
@@ -89,7 +94,7 @@ export default function SiteHeader() {
             ))}
             <li>
               <Link
-                href="/login"
+                href={LOGIN_HREF}
                 onClick={() => setOpen(false)}
                 className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
               >

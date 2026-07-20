@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
+import { SHOW_VENDOR_DIRECTORY, SHOW_PLANNER_APP } from "@/lib/flags";
+
+// Existing account holders log in through the real auth screen once it exists.
+const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
 
 const COLUMNS = [
   {
@@ -20,7 +23,7 @@ const COLUMNS = [
       { label: "Blog", href: "/blog" },
       { label: "For vendors", href: "/for-vendors" },
       { label: "How it works", href: "/#how" },
-      { label: "Log in", href: "/login" },
+      { label: "Log in", href: LOGIN_HREF },
     ],
   },
   {
@@ -101,7 +104,7 @@ export default function SiteFooter() {
           <nav className="flex gap-5">
             <Link href="/privacy" className="hover:text-white/80">Privacy</Link>
             <Link href="/terms" className="hover:text-white/80">Terms</Link>
-            <Link href="/login" className="hover:text-white/80">Vendor login</Link>
+            <Link href={LOGIN_HREF} className="hover:text-white/80">Log in</Link>
           </nav>
         </div>
       </div>
