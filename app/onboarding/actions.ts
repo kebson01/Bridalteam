@@ -57,59 +57,30 @@ export async function createWorkspace(
   const orgName =
     companyName ?? [partnerOne, partnerTwo].filter(Boolean).join(" & ") ?? "My wedding";
 
-  const { data: org, error: orgError } = await supabase
-    .from("organizations")
-    .insert({ name: orgName, type: accountType })
-    .select("id")
-    .single();
+  // One RPC rather than four inserts. Creating the org from the client fails on
+  // RLS: supabase-js emits `INSERT ... RETURNING`, and RETURNING requires the
+  // new row to pass the SELECT policy (is_org_member), which can't be true
+  // before the membership exists. The function is SECURITY DEFINER and derives
+  // every row from auth.uid(), so it also makes the whole setup atomic.
+  const { data, error } = await supabase.rpc("create_workspace", {
+    p_type: accountType,
+    p_org_name: orgName,
+    p_partner_one: partnerOne,
+    p_partner_two: partnerTwo,
+    p_event_date: eventDate || null,
+    p_city: city,
+    p_guest_count: guestCount,
+    p_budget_cents: budgetCents,
+    p_style: style,
+  });
 
-  if (orgError || !org) {
-    console.error("org create failed:", orgError?.code, orgError?.message);
+  if (error) {
+    console.error("create_workspace failed:", error.code, error.message);
     return { error: "We couldn't create your workspace. Please try again." };
   }
 
-  const { error: memberError } = await supabase
-    .from("org_members")
-    .insert({ org_id: org.id, user_id: user.id, role: "owner" });
+  const result = Array.isArray(data) ? data[0] : data;
 
-  if (memberError) {
-    console.error("org_members create failed:", memberError.code, memberError.message);
-    return { error: "We couldn't set up your account. Please try again." };
-  }
-
-  // A planning company starts with an empty portfolio and adds weddings as
-  // clients sign on. A couple gets their wedding immediately.
-  if (isCompany) redirect("/dashboard");
-
-  const { data: wedding, error: weddingError } = await supabase
-    .from("weddings")
-    .insert({
-      org_id: org.id,
-      owner_user_id: user.id,
-      partner_one: partnerOne,
-      partner_two: partnerTwo,
-      event_date: eventDate || null,
-      city,
-      guest_count: guestCount,
-      budget_cents: budgetCents,
-      style,
-    })
-    .select("id")
-    .single();
-
-  if (weddingError || !wedding) {
-    console.error("wedding create failed:", weddingError?.code, weddingError?.message);
-    return { error: "We couldn't create your wedding. Please try again." };
-  }
-
-  const { error: wmError } = await supabase
-    .from("wedding_members")
-    .insert({ wedding_id: wedding.id, user_id: user.id, role: "couple", can_edit: true });
-
-  if (wmError) {
-    console.error("wedding_members create failed:", wmError.code, wmError.message);
-    return { error: "We couldn't finish setting up. Please try again." };
-  }
-
-  redirect(`/w/${wedding.id}`);
+  if (result?.wedding_id) redirect(`/w/${result.wedding_id}`);
+  redirect("/dashboard");
 }
