@@ -15,3 +15,15 @@
  */
 export const SHOW_VENDOR_DIRECTORY =
   process.env.NEXT_PUBLIC_SHOW_VENDOR_DIRECTORY === "true";
+
+/**
+ * SHOW_PLANNER_APP — the signed-in planner (accounts, onboarding, dashboard,
+ * wedding workspace). Off by default so the live marketing site keeps
+ * deploying from `main` while this is being built.
+ *
+ * The public /signup and /login pages stay on the waitlist until this is on;
+ * flipping it is what "accounts are open" means. Read at build time, so it
+ * needs a redeploy, not just an env change.
+ */
+export const SHOW_PLANNER_APP =
+  process.env.NEXT_PUBLIC_SHOW_PLANNER_APP === "true";

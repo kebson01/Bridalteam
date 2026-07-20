@@ -6,11 +6,11 @@ import { createClient } from "@supabase/supabase-js";
   guarded by row-level security (public read only). Env vars override them so
   you can point at a different project without touching code.
 */
-const SUPABASE_URL =
+export const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
   "https://yubcwyfhgxjnqydhgjit.supabase.co";
 
-const SUPABASE_ANON_KEY =
+export const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   "sb_publishable_WHCmykSyWQunFvmTG8FDvA_JCq56kTf";
 
