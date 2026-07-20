@@ -1,25 +1,30 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
+import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 /**
  * Exchanges the code from a confirmation or magic-link email for a session,
  * then forwards the user on.
+ *
+ * Redirects are built from the configured public SITE_URL, NOT the incoming
+ * request's origin. Behind DigitalOcean's proxy the app receives requests on
+ * http://localhost:8080, so `new URL(next, request.url)` would send a
+ * freshly-confirmed user to a dead internal address.
  */
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
 
-  // Only ever redirect to a path on this origin — an open redirect here would
+  // Only ever redirect to a path on our own site — an open redirect here would
   // let a crafted email bounce a freshly-authenticated user to any site.
   const requested = url.searchParams.get("next") ?? "/onboarding";
-  const next = requested.startsWith("/") && !requested.startsWith("//")
-    ? requested
-    : "/onboarding";
+  const next =
+    requested.startsWith("/") && !requested.startsWith("//") ? requested : "/onboarding";
 
   if (!code) {
-    return NextResponse.redirect(new URL("/auth/login?error=missing_code", url.origin));
+    return NextResponse.redirect(new URL("/auth/login?error=missing_code", SITE_URL));
   }
 
   const supabase = await supabaseServer();
@@ -27,8 +32,8 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error("auth callback failed:", error.message);
-    return NextResponse.redirect(new URL("/auth/login?error=invalid_code", url.origin));
+    return NextResponse.redirect(new URL("/auth/login?error=invalid_code", SITE_URL));
   }
 
-  return NextResponse.redirect(new URL(next, url.origin));
+  return NextResponse.redirect(new URL(next, SITE_URL));
 }
