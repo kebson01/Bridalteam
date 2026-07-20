@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { SHOW_VENDOR_DIRECTORY, SHOW_PLANNER_APP } from "@/lib/flags";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
 const NAV = [
   { label: "How it works", href: "/#how" },
@@ -17,12 +19,44 @@ const NAV = [
 ];
 
 // "Log in" is for people who already have an account, so once accounts exist it
-// points at the real auth screen — never the pre-launch waitlist. "Start free"
-// stays on the waitlist until public signups open (they need production email).
+// points at the real auth screen — never the pre-launch waitlist.
 const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
+
+/**
+ * Tracks whether someone is signed in, so the header can show "Dashboard /
+ * Log out" instead of "Log in / Start free". `null` means not yet determined —
+ * we render the signed-out buttons until we know, which is the common case.
+ */
+function useSignedIn() {
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!SHOW_PLANNER_APP) {
+      setSignedIn(false);
+      return;
+    }
+    const supabase = supabaseBrowser();
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
+      setSignedIn(!!session),
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  return signedIn;
+}
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const signedIn = useSignedIn();
+
+  async function logout() {
+    await supabaseBrowser().auth.signOut();
+    setOpen(false);
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-stone-2/70 bg-white/85 backdrop-blur-md">
@@ -51,18 +85,38 @@ export default function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
-          <Link
-            href={LOGIN_HREF}
-            className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(243,103,5,0.7)] transition-transform hover:-translate-y-0.5"
-          >
-            Start free
-          </Link>
+          {signedIn ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href={LOGIN_HREF}
+                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
+              >
+                Log in
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(243,103,5,0.7)] transition-transform hover:-translate-y-0.5"
+              >
+                Start free
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -92,24 +146,49 @@ export default function SiteHeader() {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link
-                href={LOGIN_HREF}
-                onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
-              >
-                Log in
-              </Link>
-            </li>
-            <li className="pt-2">
-              <Link
-                href="/signup"
-                onClick={() => setOpen(false)}
-                className="block rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-center text-sm font-semibold text-white"
-              >
-                Start free
-              </Link>
-            </li>
+            {signedIn ? (
+              <>
+                <li>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
+                  >
+                    Dashboard
+                  </Link>
+                </li>
+                <li className="pt-2">
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="block w-full rounded-full border border-stone-2 px-5 py-3 text-center text-sm font-semibold text-ink-soft"
+                  >
+                    Log out
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link
+                    href={LOGIN_HREF}
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
+                  >
+                    Log in
+                  </Link>
+                </li>
+                <li className="pt-2">
+                  <Link
+                    href="/signup"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-center text-sm font-semibold text-white"
+                  >
+                    Start free
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </nav>
       )}

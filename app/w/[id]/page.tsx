@@ -12,12 +12,48 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-function countdown(date: string | null) {
+function daysUntil(date: string | null) {
   if (!date) return null;
-  const days = Math.ceil((new Date(`${date}T00:00:00`).getTime() - Date.now()) / 86_400_000);
-  if (days < 0) return "Congratulations!";
-  if (days === 0) return "Today!";
-  return `${days} ${days === 1 ? "day" : "days"} to go`;
+  return Math.ceil((new Date(`${date}T00:00:00`).getTime() - Date.now()) / 86_400_000);
+}
+
+function longDate(date: string | null) {
+  if (!date) return "Date not set";
+  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function money(cents: number | null, currency: string) {
+  if (cents == null) return null;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
+
+function Stat({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-stone-2 bg-white p-5 shadow-card">
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft/50">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-light text-ink">{value}</p>
+      {sub && <p className="mt-0.5 text-xs text-ink-soft/60">{sub}</p>}
+    </div>
+  );
 }
 
 export default async function WeddingPage({
@@ -37,23 +73,15 @@ export default async function WeddingPage({
   // RLS decides this: no row means no access, which is the same as not existing.
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, event_date, city")
+    .select("id, partner_one, partner_two, event_date, city, venue, guest_count, budget_cents, currency, style")
     .eq("id", id)
     .maybeSingle();
 
   if (!wedding) notFound();
 
   const [{ data: milestones }, { data: deliverables }, { data: tasks }] = await Promise.all([
-    supabase
-      .from("milestones")
-      .select("id, name, target_date, position")
-      .eq("wedding_id", id)
-      .order("position"),
-    supabase
-      .from("deliverables")
-      .select("id, name, milestone_id, position")
-      .eq("wedding_id", id)
-      .order("position"),
+    supabase.from("milestones").select("id, name, target_date, position").eq("wedding_id", id).order("position"),
+    supabase.from("deliverables").select("id, name, milestone_id, position").eq("wedding_id", id).order("position"),
     supabase
       .from("tasks")
       .select("id, title, due_date, completed_at, deliverable_id, position")
@@ -64,19 +92,19 @@ export default async function WeddingPage({
 
   const allTasks = (tasks ?? []) as TaskRow[];
 
-  // Group tasks under their deliverable and milestone. Anything unassigned
-  // falls into a trailing bucket rather than disappearing.
-  const plan: GroupedPlan[] = (milestones ?? []).map((m) => ({
-    milestone: m,
-    deliverables: (deliverables ?? [])
-      .filter((d) => d.milestone_id === m.id)
-      .map((d) => ({
-        id: d.id,
-        name: d.name,
-        tasks: allTasks.filter((t) => t.deliverable_id === d.id),
-      }))
-      .filter((d) => d.tasks.length > 0),
-  })).filter((g) => g.deliverables.length > 0);
+  const plan: GroupedPlan[] = (milestones ?? [])
+    .map((m) => ({
+      milestone: m,
+      deliverables: (deliverables ?? [])
+        .filter((d) => d.milestone_id === m.id)
+        .map((d) => ({
+          id: d.id,
+          name: d.name,
+          tasks: allTasks.filter((t) => t.deliverable_id === d.id),
+        }))
+        .filter((d) => d.tasks.length > 0),
+    }))
+    .filter((g) => g.deliverables.length > 0);
 
   const groupedIds = new Set(
     plan.flatMap((g) => g.deliverables.flatMap((d) => d.tasks.map((t) => t.id))),
@@ -91,56 +119,108 @@ export default async function WeddingPage({
 
   const names =
     [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ") || "Your wedding";
-  const remaining = countdown(wedding.event_date);
+  const days = daysUntil(wedding.event_date);
   const done = allTasks.filter((t) => t.completed_at).length;
   const pct = allTasks.length > 0 ? Math.round((done / allTasks.length) * 100) : 0;
+  const budget = money(wedding.budget_cents, wedding.currency ?? "USD");
+  const locationLine = [wedding.venue, wedding.city].filter(Boolean).join(" · ");
+
+  const countdownValue =
+    days == null ? "—" : days < 0 ? "🎉" : days === 0 ? "Today" : String(days);
+  const countdownSub =
+    days == null ? "Add your date" : days < 0 ? "Congratulations!" : days === 0 ? "It's the day!" : "days to go";
 
   return (
-    <section className="mx-auto max-w-3xl px-5 py-12">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h1 className="text-3xl font-light uppercase tracking-wide text-ink">{names}</h1>
-        {remaining && <p className="text-sm font-medium text-brand-dark">{remaining}</p>}
-      </div>
-      {wedding.city && <p className="mt-1 text-sm text-ink-soft/70">{wedding.city}</p>}
-
-      {allTasks.length > 0 && (
-        <div className="mt-6">
-          <div className="flex items-baseline justify-between text-sm">
-            <span className="text-ink-soft/70">
-              {done} of {allTasks.length} done
-            </span>
-            <span className="font-medium text-brand-dark">{pct}%</span>
+    <div className="bg-stone-4/40">
+      {/* Header band */}
+      <div className="border-b border-stone-2 bg-white">
+        <div className="mx-auto max-w-5xl px-5 py-8">
+          <Link href="/dashboard" className="text-sm font-semibold text-brand-dark hover:text-brand-deep">
+            ← All weddings
+          </Link>
+          <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-light uppercase tracking-wide text-ink sm:text-4xl">
+                {names}
+              </h1>
+              <p className="mt-1 text-sm text-ink-soft/70">{longDate(wedding.event_date)}</p>
+              {locationLine && (
+                <p className="text-sm text-ink-soft/70">{locationLine}</p>
+              )}
+            </div>
+            {wedding.style && (
+              <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">
+                {wedding.style}
+              </span>
+            )}
           </div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-2">
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-5xl px-5 py-10">
+        {/* Stat tiles */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <Stat label="Countdown" value={countdownValue} sub={countdownSub} />
+          <Stat
+            label="Progress"
+            value={`${pct}%`}
+            sub={allTasks.length > 0 ? `${done} of ${allTasks.length} done` : "No tasks yet"}
+          />
+          <Stat
+            label="Guests"
+            value={wedding.guest_count != null ? String(wedding.guest_count) : "—"}
+            sub={wedding.guest_count != null ? "expected" : "Not set"}
+          />
+          <Stat label="Budget" value={budget ?? "—"} sub={budget ? "total" : "Not set"} />
+        </div>
+
+        {/* Progress bar */}
+        {allTasks.length > 0 && (
+          <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-stone-2">
             <div
               className="h-full rounded-full bg-gradient-to-r from-brand to-brand-dark transition-[width]"
               style={{ width: `${pct}%` }}
             />
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="mt-10">
-        {allTasks.length === 0 && (
-          <div className="mb-8 rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-10 text-center">
-            <h2 className="text-lg font-medium text-ink">Your plan is empty</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft/75">
-              Add tasks below, or let AI build a timeline tailored to your date,
-              budget and guest count.
-            </p>
-            <p className="mt-4 text-xs uppercase tracking-[0.2em] text-ink-soft/50">
-              AI plan generation — coming next
-            </p>
+        {/* AI plan CTA — the fastest way to fill an empty plan */}
+        {allTasks.length < 3 && (
+          <div className="mt-8 overflow-hidden rounded-3xl bg-gradient-to-br from-brand to-brand-dark p-8 text-white">
+            <div className="max-w-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
+                Your AI planning team
+              </p>
+              <h2 className="mt-2 text-2xl font-light">
+                Let AI build {names === "Your wedding" ? "your" : `${wedding.partner_one}'s`} plan
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/85">
+                Generate a full timeline — milestones, tasks and deadlines — tuned
+                to your date, guest count and budget. Then edit anything you like.
+              </p>
+              <Link
+                href="/planner"
+                className="mt-5 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-dark transition-transform hover:-translate-y-0.5"
+              >
+                Build my plan with AI
+              </Link>
+            </div>
           </div>
         )}
-        <TaskList plan={plan} weddingId={id} />
-      </div>
 
-      <p className="mt-10 text-center text-sm text-ink-soft/60">
-        <Link href="/dashboard" className="font-semibold text-brand-dark">
-          ← All weddings
-        </Link>
-      </p>
-    </section>
+        {/* Tasks */}
+        <div className="mt-10">
+          <div className="mb-4 flex items-baseline justify-between">
+            <h2 className="text-lg font-medium text-ink">Your checklist</h2>
+            {allTasks.length > 0 && (
+              <span className="text-sm text-ink-soft/60">
+                {allTasks.length - done} left
+              </span>
+            )}
+          </div>
+          <TaskList plan={plan} weddingId={id} />
+        </div>
+      </div>
+    </div>
   );
 }
