@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import TaskList, { type GroupedPlan, type TaskRow } from "@/components/task-list";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
+import { TEMPLATE_TASK_COUNT } from "@/lib/plan-template";
+import { seedExpertPlan } from "./actions";
 
 export const metadata: Metadata = {
   title: "Your Plan",
@@ -184,26 +186,38 @@ export default async function WeddingPage({
           </div>
         )}
 
-        {/* AI plan CTA — the fastest way to fill an empty plan */}
+        {/* Kickstart CTA — the fastest ways to fill an empty plan */}
         {allTasks.length < 3 && (
           <div className="mt-8 overflow-hidden rounded-3xl bg-gradient-to-br from-brand to-brand-dark p-8 text-white">
-            <div className="max-w-xl">
+            <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
-                Your AI planning team
+                Start your plan
               </p>
               <h2 className="mt-2 text-2xl font-light">
-                Let AI build {names === "Your wedding" ? "your" : `${wedding.partner_one}'s`} plan
+                Not sure where to begin? We&rsquo;ll set it up for you.
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-white/85">
-                Generate a full timeline — milestones, tasks and deadlines — tuned
-                to your date, guest count and budget. Then edit anything you like.
+                Get a complete, expert wedding plan — every stage from “just
+                engaged” to the big day, the events around it, and the details
+                first-timers miss — with deadlines built from your date.
               </p>
-              <Link
-                href="/planner"
-                className="mt-5 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-dark transition-transform hover:-translate-y-0.5"
-              >
-                Build my plan with AI
-              </Link>
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <form action={seedExpertPlan}>
+                  <input type="hidden" name="wedding_id" value={id} />
+                  <button
+                    type="submit"
+                    className="w-full rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-dark transition-transform hover:-translate-y-0.5 sm:w-auto"
+                  >
+                    Start with an expert plan ({TEMPLATE_TASK_COUNT} steps)
+                  </button>
+                </form>
+                <Link
+                  href="/planner"
+                  className="inline-flex items-center justify-center rounded-full border border-white/40 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  Or plan with AI
+                </Link>
+              </div>
             </div>
           </div>
         )}

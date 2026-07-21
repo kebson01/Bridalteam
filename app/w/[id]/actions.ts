@@ -2,6 +2,26 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { PLAN_TEMPLATE } from "@/lib/plan-template";
+
+/**
+ * Fills an empty wedding with the expert starter plan (milestones, deliverables,
+ * tasks and tips), with deadlines computed from the couple's date. The RPC
+ * refuses to seed over an existing plan, so this is safe to call more than once.
+ */
+export async function seedExpertPlan(formData: FormData) {
+  const weddingId = String(formData.get("wedding_id") ?? "");
+  if (!weddingId) return;
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.rpc("seed_wedding_plan", {
+    p_wedding_id: weddingId,
+    p_template: PLAN_TEMPLATE,
+  });
+
+  if (error) console.error("seedExpertPlan failed:", error.code, error.message);
+  revalidatePath(`/w/${weddingId}`);
+}
 
 /**
  * Task mutations for a wedding workspace.
