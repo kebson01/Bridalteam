@@ -17,10 +17,20 @@ export default async function InspirationPage() {
   const [{ data: images }, { data: { user } }] = await Promise.all([
     supabase
       .from("inspiration_images")
-      .select("id, image_url, title, theme, colors, media_type, media_url")
+      .select("id, image_url, title, theme, colors, media_type, media_url, like_count")
       .order("created_at", { ascending: false }),
     supabase.auth.getUser(),
   ]);
+
+  // Which of these has the current user liked?
+  let likedIds: string[] = [];
+  if (user && images && images.length > 0) {
+    const { data: likes } = await supabase
+      .from("inspiration_likes")
+      .select("image_id")
+      .eq("user_id", user.id);
+    likedIds = (likes ?? []).map((l) => l.image_id);
+  }
 
   return (
     <>
@@ -34,6 +44,7 @@ export default async function InspirationPage() {
         <InspirationGallery
           images={(images ?? []) as InspirationImage[]}
           signedIn={Boolean(user)}
+          likedIds={likedIds}
         />
 
         <div className="mt-14 rounded-3xl bg-gradient-to-r from-brand to-brand-dark p-10 text-center text-white">

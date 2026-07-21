@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { saveInspiration } from "@/app/inspiration/actions";
+import LikeButton from "@/components/like-button";
+import ShareButton from "@/components/share-button";
 
 export interface InspirationImage {
   id: string;
@@ -13,6 +15,7 @@ export interface InspirationImage {
   colors: string[];
   media_type: string;
   media_url: string | null;
+  like_count?: number;
 }
 
 /** Small badge shown on non-photo tiles. */
@@ -84,13 +87,16 @@ const chipBase = "rounded-full border px-4 py-2 text-sm transition-colors";
 export default function InspirationGallery({
   images,
   signedIn,
+  likedIds = [],
 }: {
   images: InspirationImage[];
   signedIn: boolean;
+  likedIds?: string[];
 }) {
   const [theme, setTheme] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
   const [open, setOpen] = useState<InspirationImage | null>(null);
+  const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
 
   const themes = useMemo(
     () => [...new Set(images.map((i) => i.theme).filter(Boolean))] as string[],
@@ -168,7 +174,12 @@ export default function InspirationGallery({
       </div>
 
       {open && (
-        <Lightbox image={open} signedIn={signedIn} onClose={() => setOpen(null)} />
+        <Lightbox
+          image={open}
+          signedIn={signedIn}
+          liked={likedSet.has(open.id)}
+          onClose={() => setOpen(null)}
+        />
       )}
     </>
   );
@@ -177,10 +188,12 @@ export default function InspirationGallery({
 function Lightbox({
   image,
   signedIn,
+  liked,
   onClose,
 }: {
   image: InspirationImage;
   signedIn: boolean;
+  liked: boolean;
   onClose: () => void;
 }) {
   const [pending, startTransition] = useTransition();
@@ -228,6 +241,20 @@ function Lightbox({
         <div className="flex w-full flex-col p-6 sm:w-1/3">
           <h2 className="text-xl font-medium text-ink">{image.title}</h2>
           {image.theme && <p className="mt-1 text-sm text-ink-soft/70">{image.theme}</p>}
+
+          <div className="mt-3 flex items-center gap-2">
+            <LikeButton
+              imageId={image.id}
+              initialLiked={liked}
+              initialCount={image.like_count ?? 0}
+              signedIn={signedIn}
+            />
+            <ShareButton
+              url={typeof window !== "undefined" ? `${window.location.origin}/i/${image.id}` : `/i/${image.id}`}
+              title={image.title}
+            />
+          </div>
+
           {image.colors.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {image.colors.map((c) => (

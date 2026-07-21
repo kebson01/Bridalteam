@@ -46,6 +46,24 @@ export async function saveInspiration(imageId: string, weddingId?: string): Prom
   return { ok: true, weddingId: target };
 }
 
+/** Toggles the signed-in user's like on a piece of inspiration. */
+export async function toggleLike(imageId: string, liked: boolean): Promise<{ liked: boolean }> {
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !imageId) return { liked };
+
+  if (liked) {
+    await supabase.from("inspiration_likes").delete().eq("image_id", imageId).eq("user_id", user.id);
+    return { liked: false };
+  }
+  await supabase
+    .from("inspiration_likes")
+    .upsert({ image_id: imageId, user_id: user.id }, { onConflict: "image_id,user_id", ignoreDuplicates: true });
+  return { liked: true };
+}
+
 export async function unsaveInspiration(imageId: string, weddingId: string) {
   if (!imageId || !weddingId) return;
   const supabase = await supabaseServer();

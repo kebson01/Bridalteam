@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import VendorProfileForm, { type VendorProfile } from "@/components/vendor-profile-form";
+import VendorMediaManager, { type VendorMedia } from "@/components/vendor-media-manager";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
@@ -39,19 +40,18 @@ export default async function VendorDashboard() {
 
   if (!profile) notFound();
 
+  const { data: media } = await supabase
+    .from("inspiration_images")
+    .select("id, image_url, title, media_type, like_count")
+    .eq("vendor_id", org.id)
+    .order("created_at", { ascending: false });
+
   return (
     <>
       <PageHero eyebrow="Vendor account" title={profile.business_name} />
-      <section className="mx-auto max-w-3xl px-5 py-12">
+      <section className="mx-auto max-w-3xl space-y-10 px-5 py-12">
         <VendorProfileForm profile={profile as VendorProfile} />
-
-        <div className="mt-8 rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-6 text-center">
-          <p className="text-sm font-medium text-ink-soft">Coming to your account soon</p>
-          <p className="mx-auto mt-1 max-w-md text-xs text-ink-soft/60">
-            Upload your photos, videos and audio to the inspiration gallery, and
-            choose a subscription to reach couples planning right now.
-          </p>
-        </div>
+        <VendorMediaManager orgId={org.id} media={(media ?? []) as VendorMedia[]} />
       </section>
     </>
   );
