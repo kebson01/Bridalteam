@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import TaskList, { type GroupedPlan, type TaskRow } from "@/components/task-list";
+import DeletedTasks, { type DeletedTask } from "@/components/deleted-tasks";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { TEMPLATE_TASK_COUNT } from "@/lib/plan-template";
@@ -94,18 +95,27 @@ export default async function WeddingPage({
 
   if (!wedding) notFound();
 
-  const [{ data: milestones }, { data: deliverables }, { data: tasks }] = await Promise.all([
-    supabase.from("milestones").select("id, name, target_date, position").eq("wedding_id", id).order("position"),
-    supabase.from("deliverables").select("id, name, milestone_id, position").eq("wedding_id", id).order("position"),
-    supabase
-      .from("tasks")
-      .select("id, title, due_date, completed_at, deliverable_id, position")
-      .eq("wedding_id", id)
-      .is("deleted_at", null)
-      .order("position"),
-  ]);
+  const [{ data: milestones }, { data: deliverables }, { data: tasks }, { data: deleted }] =
+    await Promise.all([
+      supabase.from("milestones").select("id, name, target_date, position").eq("wedding_id", id).order("position"),
+      supabase.from("deliverables").select("id, name, milestone_id, position").eq("wedding_id", id).order("position"),
+      supabase
+        .from("tasks")
+        .select("id, title, due_date, completed_at, deliverable_id, position")
+        .eq("wedding_id", id)
+        .is("deleted_at", null)
+        .order("position"),
+      supabase
+        .from("tasks")
+        .select("id, title")
+        .eq("wedding_id", id)
+        .not("deleted_at", "is", null)
+        .order("deleted_at", { ascending: false })
+        .limit(50),
+    ]);
 
   const allTasks = (tasks ?? []) as TaskRow[];
+  const deletedTasks = (deleted ?? []) as DeletedTask[];
 
   const plan: GroupedPlan[] = (milestones ?? [])
     .map((m) => ({
@@ -258,6 +268,7 @@ export default async function WeddingPage({
             </div>
           </div>
           <TaskList plan={plan} weddingId={id} />
+          <DeletedTasks tasks={deletedTasks} weddingId={id} />
         </div>
       </div>
     </div>

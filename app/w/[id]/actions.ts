@@ -85,8 +85,8 @@ export async function deleteTask(formData: FormData) {
   const weddingId = String(formData.get("wedding_id") ?? "");
   if (!id || !weddingId) return;
 
-  // Soft delete — the original product had a recycle bin and restoring a task
-  // someone deleted by accident matters more here than reclaiming a row.
+  // Soft delete — the task moves to "Recently deleted" and can be restored, so
+  // an accidental tap isn't permanent.
   const supabase = await supabaseServer();
   const { error } = await supabase
     .from("tasks")
@@ -94,5 +94,34 @@ export async function deleteTask(formData: FormData) {
     .eq("id", id);
 
   if (error) console.error("deleteTask failed:", error.code, error.message);
+  revalidatePath(`/w/${weddingId}`);
+}
+
+/** Brings a soft-deleted task back into the checklist. */
+export async function restoreTask(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const weddingId = String(formData.get("wedding_id") ?? "");
+  if (!id || !weddingId) return;
+
+  const supabase = await supabaseServer();
+  const { error } = await supabase.from("tasks").update({ deleted_at: null }).eq("id", id);
+  if (error) console.error("restoreTask failed:", error.code, error.message);
+  revalidatePath(`/w/${weddingId}`);
+}
+
+/** Permanently removes a task (only offered from the "Recently deleted" view). */
+export async function purgeTask(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const weddingId = String(formData.get("wedding_id") ?? "");
+  if (!id || !weddingId) return;
+
+  const supabase = await supabaseServer();
+  // Guard with a not-null on deleted_at so this can never hit a live task.
+  const { error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("id", id)
+    .not("deleted_at", "is", null);
+  if (error) console.error("purgeTask failed:", error.code, error.message);
   revalidatePath(`/w/${weddingId}`);
 }

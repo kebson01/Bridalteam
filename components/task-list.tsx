@@ -68,7 +68,7 @@ function Task({ task, weddingId }: { task: TaskRow; weddingId: string }) {
         <button
           type="submit"
           aria-label={`Delete "${task.title}"`}
-          className="text-ink-soft/30 opacity-0 transition-opacity hover:text-red-600 focus:opacity-100 group-hover:opacity-100"
+          className="p-1 text-ink-soft/40 transition-colors hover:text-red-600"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M18 6 6 18M6 6l12 12" />
