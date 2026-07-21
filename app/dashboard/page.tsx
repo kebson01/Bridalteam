@@ -65,6 +65,21 @@ export default async function DashboardPage() {
       />
 
       <section className="mx-auto max-w-5xl px-5 py-12">
+        {isCompany && (
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-2 bg-white px-6 py-4 shadow-card">
+            <p className="text-sm text-ink-soft/80">
+              Have a couple already planning on Bridal Team? Join their wedding
+              with a connect code.
+            </p>
+            <Link
+              href="/connect"
+              className="rounded-full border border-brand px-5 py-2 text-sm font-semibold text-brand-dark transition-colors hover:bg-brand hover:text-white"
+            >
+              Connect a couple
+            </Link>
+          </div>
+        )}
+
         {!weddings || weddings.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-12 text-center">
             <h2 className="text-lg font-medium text-ink">No weddings yet</h2>
