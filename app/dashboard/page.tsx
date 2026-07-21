@@ -44,6 +44,9 @@ export default async function DashboardPage() {
     type: string;
   };
 
+  // Vendors have their own home.
+  if (org.type === "vendor") redirect("/vendor");
+
   // RLS already limits this to weddings this user can reach, so no filter here.
   const { data: weddings } = await supabase
     .from("weddings")

@@ -30,7 +30,26 @@ export async function createWorkspace(
 
   if (!user) return { error: "You need to be signed in." };
 
-  const accountType = formData.get("account_type") === "planner_company" ? "planner_company" : "couple";
+  const rawType = formData.get("account_type");
+
+  // Vendors take a separate path: a vendor org + profile, no wedding.
+  if (rawType === "vendor") {
+    const businessName = str(formData.get("business_name"), 160);
+    const category = str(formData.get("vendor_category"), 80);
+    if (!businessName) return { error: "What's your business called?" };
+
+    const { error } = await supabase.rpc("create_vendor_account", {
+      p_business_name: businessName,
+      p_category: category,
+    });
+    if (error) {
+      console.error("create_vendor_account failed:", error.code, error.message);
+      return { error: "We couldn't create your vendor account. Please try again." };
+    }
+    redirect("/vendor");
+  }
+
+  const accountType = rawType === "planner_company" ? "planner_company" : "couple";
   const isCompany = accountType === "planner_company";
 
   const companyName = str(formData.get("company_name"));

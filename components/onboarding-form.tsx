@@ -7,13 +7,14 @@ const INPUT =
   "mt-1.5 w-full rounded-lg border border-stone-2 px-4 py-3 text-sm text-ink outline-none focus:border-brand disabled:opacity-60";
 
 export default function OnboardingForm() {
-  const [accountType, setAccountType] = useState<"couple" | "planner_company">("couple");
+  const [accountType, setAccountType] = useState<"couple" | "planner_company" | "vendor">("couple");
   const [state, formAction, pending] = useActionState<OnboardingState, FormData>(
     createWorkspace,
     { error: null },
   );
 
   const isCompany = accountType === "planner_company";
+  const isVendor = accountType === "vendor";
 
   return (
     <form action={formAction} className="rounded-2xl border border-stone-2 bg-white p-8 shadow-card">
@@ -23,11 +24,12 @@ export default function OnboardingForm() {
         <legend className="text-sm font-medium text-ink-soft">
           What brings you here?
         </legend>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
           {(
             [
               ["couple", "I'm planning my wedding", "You and your wedding party"],
               ["planner_company", "I'm a wedding planner", "Manage weddings for clients"],
+              ["vendor", "I'm a vendor", "List my business & showcase my work"],
             ] as const
           ).map(([value, title, sub]) => (
             <button
@@ -48,7 +50,18 @@ export default function OnboardingForm() {
         </div>
       </fieldset>
 
-      {isCompany ? (
+      {isVendor ? (
+        <div className="mb-4 grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-sm font-medium text-ink-soft">Business name</span>
+            <input required name="business_name" disabled={pending} placeholder="Bloom & Vine Florals" className={INPUT} />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-ink-soft">Category</span>
+            <input name="vendor_category" disabled={pending} placeholder="Florist, Photographer, Venue…" className={INPUT} />
+          </label>
+        </div>
+      ) : isCompany ? (
         <label className="mb-4 block">
           <span className="text-sm font-medium text-ink-soft">Company name</span>
           <input required name="company_name" disabled={pending} placeholder="Evergreen Events" className={INPUT} />
@@ -112,7 +125,13 @@ export default function OnboardingForm() {
         disabled={pending}
         className="w-full rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
       >
-        {pending ? "Setting things up…" : isCompany ? "Create my company workspace" : "Create my plan"}
+        {pending
+          ? "Setting things up…"
+          : isVendor
+            ? "Create my vendor account"
+            : isCompany
+              ? "Create my company workspace"
+              : "Create my plan"}
       </button>
     </form>
   );
