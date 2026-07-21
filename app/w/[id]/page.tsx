@@ -42,20 +42,31 @@ function Stat({
   label,
   value,
   sub,
+  href,
 }: {
   label: string;
   value: string;
   sub?: string;
+  href?: string;
 }) {
-  return (
-    <div className="rounded-2xl border border-stone-2 bg-white p-5 shadow-card">
+  const inner = (
+    <>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft/50">
         {label}
       </p>
       <p className="mt-2 text-2xl font-light text-ink">{value}</p>
       {sub && <p className="mt-0.5 text-xs text-ink-soft/60">{sub}</p>}
-    </div>
+    </>
   );
+  const cls = "rounded-2xl border border-stone-2 bg-white p-5 shadow-card";
+  if (href) {
+    return (
+      <Link href={href} className={`${cls} block transition-transform hover:-translate-y-0.5`}>
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={cls}>{inner}</div>;
 }
 
 export default async function WeddingPage({
@@ -173,7 +184,12 @@ export default async function WeddingPage({
             value={wedding.guest_count != null ? String(wedding.guest_count) : "—"}
             sub={wedding.guest_count != null ? "expected" : "Not set"}
           />
-          <Stat label="Budget" value={budget ?? "—"} sub={budget ? "total" : "Not set"} />
+          <Stat
+            label="Budget"
+            value={budget ?? "—"}
+            sub={budget ? "manage →" : "set it up →"}
+            href={`/w/${id}/budget`}
+          />
         </div>
 
         {/* Progress bar */}
