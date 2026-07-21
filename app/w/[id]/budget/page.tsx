@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import BudgetTable, { type BudgetItem } from "@/components/budget-table";
+import WeddingNav from "@/components/wedding-nav";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { BUDGET_CATEGORY_ORDER } from "@/lib/budget-template";
@@ -76,6 +77,7 @@ export default async function BudgetPage({
           </Link>
           <h1 className="mt-3 text-3xl font-light uppercase tracking-wide text-ink">Budget</h1>
           {names && <p className="mt-1 text-sm text-ink-soft/70">{names}</p>}
+          <WeddingNav weddingId={id} active="budget" />
         </div>
       </div>
 

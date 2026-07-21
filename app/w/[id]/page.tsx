@@ -7,6 +7,7 @@ import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { TEMPLATE_TASK_COUNT } from "@/lib/plan-template";
 import { seedExpertPlan } from "./actions";
 import GeneratePlanButton from "@/components/generate-plan-button";
+import WeddingNav from "@/components/wedding-nav";
 
 export const metadata: Metadata = {
   title: "Your Plan",
@@ -168,6 +169,7 @@ export default async function WeddingPage({
               </span>
             )}
           </div>
+          <WeddingNav weddingId={id} active="plan" />
         </div>
       </div>
 
