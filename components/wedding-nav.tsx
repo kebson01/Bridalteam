@@ -9,12 +9,13 @@ export default function WeddingNav({
   active,
 }: {
   weddingId: string;
-  active: "plan" | "budget" | "vendors" | "travel" | "team";
+  active: "plan" | "budget" | "vendors" | "travel" | "team" | "ideas";
 }) {
   const items = [
     { key: "plan", label: "Checklist", href: `/w/${weddingId}` },
     { key: "budget", label: "Budget", href: `/w/${weddingId}/budget` },
     { key: "vendors", label: "Vendors", href: `/w/${weddingId}/vendors` },
+    { key: "ideas", label: "Ideas", href: `/w/${weddingId}/ideas` },
     { key: "travel", label: "Travel", href: `/w/${weddingId}/travel` },
     { key: "team", label: "Team", href: `/w/${weddingId}/team` },
   ] as const;
