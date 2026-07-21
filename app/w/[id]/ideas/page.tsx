@@ -36,7 +36,7 @@ export default async function IdeasPage({
 
   const { data: saved } = await supabase
     .from("saved_inspiration")
-    .select("image_id, inspiration_images(id, image_url, title, theme, colors)")
+    .select("image_id, inspiration_images(id, image_url, title, theme, colors, media_type, media_url)")
     .eq("wedding_id", id)
     .order("created_at", { ascending: false });
 

@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { unsaveInspiration } from "@/app/inspiration/actions";
+import { MediaBadge } from "@/components/inspiration-gallery";
 
 export interface SavedItem {
   id: string;
@@ -9,6 +10,8 @@ export interface SavedItem {
   title: string;
   theme: string | null;
   colors: string[];
+  media_type: string;
+  media_url: string | null;
 }
 
 /** The couple's saved mood board — the whole party can view; editors can remove. */
@@ -28,6 +31,7 @@ export default function SavedBoard({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={it.image_url} alt={it.title} className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
+          <MediaBadge type={it.media_type} />
           <figcaption className="absolute inset-x-0 bottom-0 p-5 text-white">
             <p className="text-lg font-medium">{it.title}</p>
             <p className="text-sm text-white/75">

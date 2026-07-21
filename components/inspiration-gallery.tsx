@@ -11,6 +11,67 @@ export interface InspirationImage {
   title: string;
   theme: string | null;
   colors: string[];
+  media_type: string;
+  media_url: string | null;
+}
+
+/** Small badge shown on non-photo tiles. */
+export function MediaBadge({ type }: { type: string }) {
+  if (type === "video") {
+    return (
+      <span className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+      </span>
+    );
+  }
+  if (type === "audio") {
+    return (
+      <span className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+      </span>
+    );
+  }
+  return null;
+}
+
+/** Renders the playable media for the lightbox by type. */
+export function MediaPlayer({ item }: { item: InspirationImage }) {
+  if (item.media_type === "video" && item.media_url) {
+    const embed = toEmbed(item.media_url);
+    if (embed) {
+      return (
+        <div className="aspect-video w-full bg-black">
+          <iframe src={embed} title={item.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen className="h-full w-full" />
+        </div>
+      );
+    }
+    return (
+      // eslint-disable-next-line jsx-a11y/media-has-caption
+      <video controls poster={item.image_url} src={item.media_url} className="h-full max-h-[80vh] w-full bg-black object-contain" />
+    );
+  }
+  if (item.media_type === "audio" && item.media_url) {
+    return (
+      <div className="flex h-full flex-col">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+        <audio controls src={item.media_url} className="w-full" />
+      </div>
+    );
+  }
+  // photo (or video/audio missing its source): show the image
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />;
+}
+
+/** Converts a YouTube/Vimeo watch URL to its embed URL; null for direct files. */
+function toEmbed(url: string): string | null {
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vim = url.match(/vimeo\.com\/(\d+)/);
+  if (vim) return `https://player.vimeo.com/video/${vim[1]}`;
+  return null;
 }
 
 const SWATCH: Record<string, string> = {
@@ -95,6 +156,7 @@ export default function InspirationGallery({
               sizes="(max-width: 1024px) 100vw, 33vw"
               className="object-cover transition-transform duration-500 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
+            <MediaBadge type={it.media_type} />
             <figcaption className="absolute inset-x-0 bottom-0 p-5 text-white">
               <p className="text-lg font-medium">{it.title}</p>
               <p className="text-sm text-white/75">
@@ -159,9 +221,8 @@ function Lightbox({
           </svg>
         </button>
 
-        <div className="relative aspect-[4/5] w-full bg-stone-4 sm:w-2/3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image.image_url} alt={image.title} className="h-full w-full object-cover" />
+        <div className="relative flex aspect-[4/5] w-full items-center justify-center bg-stone-4 sm:aspect-auto sm:w-2/3">
+          <MediaPlayer item={image} />
         </div>
 
         <div className="flex w-full flex-col p-6 sm:w-1/3">

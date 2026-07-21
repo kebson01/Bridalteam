@@ -17,7 +17,7 @@ export default async function InspirationPage() {
   const [{ data: images }, { data: { user } }] = await Promise.all([
     supabase
       .from("inspiration_images")
-      .select("id, image_url, title, theme, colors")
+      .select("id, image_url, title, theme, colors, media_type, media_url")
       .order("created_at", { ascending: false }),
     supabase.auth.getUser(),
   ]);
