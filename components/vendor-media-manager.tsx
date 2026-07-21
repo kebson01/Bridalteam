@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useRef, useState, useTransition } from "react";
 import { addVendorMedia, deleteVendorMedia, type MediaState } from "@/app/vendor/actions";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export interface VendorMedia {
   id: string;
@@ -27,6 +28,44 @@ export default function VendorMediaManager({
     added: false,
   });
   const [delPending, startDelete] = useTransition();
+
+  // Photo file upload → Supabase Storage → public URL carried in a hidden field.
+  const [uploadUrl, setUploadUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(file: File) {
+    setUploadError(null);
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please choose an image file.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setUploadError("Image must be under 8 MB.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${orgId}/${crypto.randomUUID()}.${ext}`;
+      const supabase = supabaseBrowser();
+      const { error } = await supabase.storage.from("vendor-media").upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+      if (error) {
+        setUploadError("Upload failed. Please try again.");
+      } else {
+        const { data } = supabase.storage.from("vendor-media").getPublicUrl(path);
+        setUploadUrl(data.publicUrl);
+      }
+    } catch {
+      setUploadError("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -62,21 +101,43 @@ export default function VendorMediaManager({
             <input name="theme" placeholder="Theme (optional)" disabled={pending} className={INPUT} />
           </div>
 
-          <input
-            name="url"
-            required
-            disabled={pending}
-            placeholder={
-              type === "photo"
-                ? "Image URL"
-                : type === "video"
-                  ? "YouTube / Vimeo / video link (your performance reel)"
-                  : "SoundCloud / audio link (your set or sample)"
-            }
-            className={INPUT}
-          />
-          {type !== "photo" && (
-            <input name="poster" placeholder="Cover image URL (optional)" disabled={pending} className={INPUT} />
+          {type === "photo" ? (
+            <div>
+              {/* The uploaded file's public URL travels in the form's url field. */}
+              <input type="hidden" name="url" value={uploadUrl} />
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                disabled={pending || uploading}
+                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                className="block w-full text-sm text-ink-soft file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+              />
+              {uploading && <p className="mt-2 text-xs text-ink-soft/60">Uploading…</p>}
+              {uploadError && <p className="mt-2 text-xs text-red-600">{uploadError}</p>}
+              {uploadUrl && !uploading && (
+                <div className="mt-2 flex items-center gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={uploadUrl} alt="preview" className="h-14 w-14 rounded-lg object-cover" />
+                  <span className="text-xs text-green-700">Ready to add.</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <input
+                name="url"
+                required
+                disabled={pending}
+                placeholder={
+                  type === "video"
+                    ? "YouTube / Vimeo / video link (your performance reel)"
+                    : "SoundCloud / audio link (your set or sample)"
+                }
+                className={INPUT}
+              />
+              <input name="poster" placeholder="Cover image URL (optional)" disabled={pending} className={INPUT} />
+            </>
           )}
 
           {state.error && (
@@ -88,8 +149,8 @@ export default function VendorMediaManager({
 
           <button
             type="submit"
-            disabled={pending}
-            className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-70"
+            disabled={pending || uploading || (type === "photo" && !uploadUrl)}
+            className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
           >
             {pending ? "Adding…" : "Add to gallery"}
           </button>

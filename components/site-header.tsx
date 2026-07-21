@@ -5,15 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { SHOW_VENDOR_DIRECTORY, SHOW_PLANNER_APP } from "@/lib/flags";
+import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
 const NAV = [
   { label: "How it works", href: "/#how" },
   { label: "AI Planner", href: "/planner" },
-  ...(SHOW_VENDOR_DIRECTORY
-    ? [{ label: "Find Vendors", href: "/vendors" }]
-    : []),
+  { label: "Find Vendors", href: "/vendors" },
   { label: "Inspiration", href: "/inspiration" },
   { label: "Pricing", href: "/pricing" },
 ];

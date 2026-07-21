@@ -6,8 +6,12 @@ import { createWorkspace, type OnboardingState } from "@/app/onboarding/actions"
 const INPUT =
   "mt-1.5 w-full rounded-lg border border-stone-2 px-4 py-3 text-sm text-ink outline-none focus:border-brand disabled:opacity-60";
 
-export default function OnboardingForm() {
-  const [accountType, setAccountType] = useState<"couple" | "planner_company" | "vendor">("couple");
+export default function OnboardingForm({
+  initialType = "couple",
+}: {
+  initialType?: "couple" | "planner_company" | "vendor";
+}) {
+  const [accountType, setAccountType] = useState<"couple" | "planner_company" | "vendor">(initialType);
   const [state, formAction, pending] = useActionState<OnboardingState, FormData>(
     createWorkspace,
     { error: null },

@@ -12,8 +12,15 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
   if (!SHOW_PLANNER_APP) notFound();
+  const { type } = await searchParams;
+  const initialType =
+    type === "vendor" ? "vendor" : type === "planner" ? "planner_company" : "couple";
 
   const supabase = await supabaseServer();
   const {
@@ -33,7 +40,7 @@ export default async function OnboardingPage() {
         subtitle="A few details and we'll build your plan. You can change any of this later."
       />
       <section className="mx-auto max-w-2xl px-5 py-16">
-        <OnboardingForm />
+        <OnboardingForm initialType={initialType} />
       </section>
     </>
   );
