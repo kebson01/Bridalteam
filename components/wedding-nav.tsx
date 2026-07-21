@@ -9,12 +9,13 @@ export default function WeddingNav({
   active,
 }: {
   weddingId: string;
-  active: "plan" | "budget" | "vendors";
+  active: "plan" | "budget" | "vendors" | "travel";
 }) {
   const items = [
     { key: "plan", label: "Checklist", href: `/w/${weddingId}` },
     { key: "budget", label: "Budget", href: `/w/${weddingId}/budget` },
     { key: "vendors", label: "Vendors", href: `/w/${weddingId}/vendors` },
+    { key: "travel", label: "Travel", href: `/w/${weddingId}/travel` },
   ] as const;
 
   return (
@@ -23,7 +24,7 @@ export default function WeddingNav({
         <Link
           key={it.key}
           href={it.href}
-          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
             it.key === active
               ? "bg-brand text-white"
               : "text-ink-soft hover:bg-stone-4 hover:text-brand-dark"
