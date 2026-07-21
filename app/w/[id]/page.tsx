@@ -6,6 +6,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { TEMPLATE_TASK_COUNT } from "@/lib/plan-template";
 import { seedExpertPlan } from "./actions";
+import GeneratePlanButton from "@/components/generate-plan-button";
 
 export const metadata: Metadata = {
   title: "Your Plan",
@@ -218,21 +219,21 @@ export default async function WeddingPage({
                 first-timers miss — with deadlines built from your date.
               </p>
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <GeneratePlanButton
+                  weddingId={id}
+                  className="w-full rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-dark transition-transform hover:-translate-y-0.5 disabled:opacity-70 sm:w-auto"
+                >
+                  ✨ Build my plan with AI
+                </GeneratePlanButton>
                 <form action={seedExpertPlan}>
                   <input type="hidden" name="wedding_id" value={id} />
                   <button
                     type="submit"
-                    className="w-full rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-dark transition-transform hover:-translate-y-0.5 sm:w-auto"
+                    className="inline-flex w-full items-center justify-center rounded-full border border-white/40 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 sm:w-auto"
                   >
-                    Start with an expert plan ({TEMPLATE_TASK_COUNT} steps)
+                    Or use the expert checklist ({TEMPLATE_TASK_COUNT} steps)
                   </button>
                 </form>
-                <Link
-                  href="/planner"
-                  className="inline-flex items-center justify-center rounded-full border border-white/40 px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-                >
-                  Or plan with AI
-                </Link>
               </div>
             </div>
           </div>
