@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { PLAN_TEMPLATE } from "@/lib/plan-template";
+import { consumeAiQuota, clientIp } from "@/lib/ai-quota";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -74,7 +75,17 @@ export async function POST(req: Request) {
   let source: "ai" | "template" = "template";
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
+
+  // Meter AI generations against the caller's tier. If they're out of quota,
+  // fall back to the expert template (still a full plan) rather than blocking —
+  // so a couple always gets a plan, they just don't spend AI they don't have.
+  let quotaOk = true;
   if (apiKey) {
+    const quota = await consumeAiQuota(supabase, "generate", clientIp(req));
+    quotaOk = quota.allowed;
+  }
+
+  if (apiKey && quotaOk) {
     const budget = wedding.budget_cents != null ? `$${Math.round(wedding.budget_cents / 100)}` : "unspecified";
     const details = [
       wedding.partner_one && `Partners: ${[wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ")}`,
@@ -144,5 +155,11 @@ Rules:
     return NextResponse.json({ error: "Couldn't save the plan." }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, source, tasksCreated: created ?? 0 });
+  // limited = they wanted AI but were out of quota, so we used the expert template.
+  return NextResponse.json({
+    ok: true,
+    source,
+    tasksCreated: created ?? 0,
+    limited: Boolean(apiKey) && !quotaOk,
+  });
 }

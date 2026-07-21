@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { supabaseServer } from "@/lib/supabase/server";
+import { clientIp } from "@/lib/ai-quota";
 
 export const runtime = "nodejs";
 
@@ -121,6 +123,19 @@ export async function POST(req: Request) {
 
   if (!apiKey) {
     return NextResponse.json({ reply: demoReply(clean), demo: true });
+  }
+
+  // Meter AI usage against the caller's tier (anon by IP, else per account).
+  // Only real (keyed) AI calls are metered — the demo fallback above is free.
+  const supabase = await supabaseServer();
+  const { consumeAiQuota } = await import("@/lib/ai-quota");
+  const quota = await consumeAiQuota(supabase, "chat", clientIp(req));
+  if (!quota.allowed) {
+    const msg =
+      quota.tier === "anon"
+        ? "You've reached the demo limit. **Sign up free** to keep chatting with the AI planner."
+        : "You've reached your AI chat limit for now. **Upgrade** for more AI help anytime.";
+    return NextResponse.json({ reply: msg, demo: false, limited: true }, { status: 200 });
   }
 
   try {
