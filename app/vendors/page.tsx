@@ -15,14 +15,21 @@ export const dynamic = "force-dynamic";
 export default async function VendorsPage() {
   const supabase = await supabaseServer();
 
-  // Only published vendor profiles are visible (RLS enforces this too).
+  // Only published vendor profiles are visible (RLS enforces this too). We pull
+  // the org's plan so Featured vendors can be surfaced first.
   const { data: vendors } = await supabase
     .from("vendor_profiles")
-    .select("org_id, business_name, category, description, city, region, logo_url, cover_url")
+    .select("org_id, business_name, category, description, city, region, logo_url, cover_url, organizations(plan)")
     .eq("status", "published")
     .order("business_name");
 
-  const list = (vendors ?? []) as DirectoryVendor[];
+  const list: DirectoryVendor[] = (vendors ?? [])
+    .map((v) => ({
+      ...v,
+      featured: (v.organizations as unknown as { plan?: string } | null)?.plan === "featured",
+    }))
+    // Featured first, then alphabetical (already ordered by name).
+    .sort((a, b) => Number(b.featured) - Number(a.featured)) as DirectoryVendor[];
 
   return (
     <>

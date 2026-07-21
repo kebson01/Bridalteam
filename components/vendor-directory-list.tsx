@@ -12,6 +12,7 @@ export interface DirectoryVendor {
   region: string | null;
   logo_url: string | null;
   cover_url: string | null;
+  featured?: boolean;
 }
 
 export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVendor[] }) {
@@ -91,6 +92,11 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                 ) : (
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
                     {v.category ?? "Vendor"}
+                  </span>
+                )}
+                {v.featured && (
+                  <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
+                    Featured
                   </span>
                 )}
               </div>

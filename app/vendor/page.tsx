@@ -3,7 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import VendorProfileForm, { type VendorProfile } from "@/components/vendor-profile-form";
 import VendorMediaManager, { type VendorMedia } from "@/components/vendor-media-manager";
+import VendorBilling from "@/components/vendor-billing";
 import { supabaseServer } from "@/lib/supabase/server";
+import { billingConfigured } from "@/lib/stripe";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
@@ -13,8 +15,13 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function VendorDashboard() {
+export default async function VendorDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ billing?: string }>;
+}) {
   if (!SHOW_PLANNER_APP) notFound();
+  const { billing } = await searchParams;
 
   const supabase = await supabaseServer();
   const {
@@ -25,9 +32,11 @@ export default async function VendorDashboard() {
   // Which org is this user in, and is it a vendor?
   const { data: memberships } = await supabase
     .from("org_members")
-    .select("organizations(id, type)")
+    .select("organizations(id, type, plan, subscription_status)")
     .limit(1);
-  const org = memberships?.[0]?.organizations as unknown as { id: string; type: string } | undefined;
+  const org = memberships?.[0]?.organizations as unknown as
+    | { id: string; type: string; plan: string; subscription_status: string | null }
+    | undefined;
 
   if (!org) redirect("/onboarding");
   if (org.type !== "vendor") redirect("/dashboard"); // couple/planner → their dashboard
@@ -50,6 +59,12 @@ export default async function VendorDashboard() {
     <>
       <PageHero eyebrow="Vendor account" title={profile.business_name} />
       <section className="mx-auto max-w-3xl space-y-10 px-5 py-12">
+        <VendorBilling
+          plan={org.plan}
+          status={org.subscription_status}
+          configured={billingConfigured()}
+          flash={billing ?? null}
+        />
         <VendorProfileForm profile={profile as VendorProfile} />
         <VendorMediaManager orgId={org.id} media={(media ?? []) as VendorMedia[]} />
       </section>
