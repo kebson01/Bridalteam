@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import WeddingNav from "@/components/wedding-nav";
 import ConnectCodePanel from "@/components/connect-code-panel";
+import InvitePanel from "@/components/invite-panel";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
@@ -67,8 +68,17 @@ export default async function TeamPage({
     .eq("wedding_id", id)
     .maybeSingle();
 
+  // Pending (unaccepted) invites — managers only, via RLS.
+  const { data: invites } = await supabase
+    .from("wedding_invites")
+    .select("id, email, role")
+    .eq("wedding_id", id)
+    .is("accepted_at", null)
+    .order("created_at", { ascending: false });
+
   const names = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ");
   const memberList = members ?? [];
+  const pending = invites ?? [];
 
   return (
     <div className="min-h-screen bg-stone-4/40">
@@ -84,6 +94,8 @@ export default async function TeamPage({
       </div>
 
       <div className="mx-auto max-w-4xl space-y-8 px-5 py-10">
+        <InvitePanel weddingId={id} />
+
         <ConnectCodePanel weddingId={id} initialCode={codeRow?.code ?? null} />
 
         <section>
@@ -103,9 +115,30 @@ export default async function TeamPage({
               </div>
             ))}
           </div>
-          <p className="mt-4 text-sm text-ink-soft/60">
-            Inviting your wedding party and family by email is coming soon.
-          </p>
+
+          {pending.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-soft/50">
+                Pending invites
+              </h3>
+              <div className="mt-3 space-y-2">
+                {pending.map((inv) => (
+                  <div
+                    key={inv.id}
+                    className="flex items-center justify-between rounded-xl border border-dashed border-stone-2 bg-stone-4 px-5 py-3"
+                  >
+                    <span className="text-sm text-ink-soft">
+                      {inv.email}
+                      <span className="ml-2 text-xs text-ink-soft/50">
+                        {ROLE_LABEL[inv.role] ?? inv.role}
+                      </span>
+                    </span>
+                    <span className="text-xs text-ink-soft/50">Invited</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </div>

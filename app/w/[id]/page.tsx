@@ -245,11 +245,17 @@ export default async function WeddingPage({
         <div className="mt-10">
           <div className="mb-4 flex items-baseline justify-between">
             <h2 className="text-lg font-medium text-ink">Your checklist</h2>
-            {allTasks.length > 0 && (
-              <span className="text-sm text-ink-soft/60">
-                {allTasks.length - done} left
-              </span>
-            )}
+            <div className="flex items-center gap-4">
+              <Link
+                href="/planner"
+                className="text-sm font-semibold text-brand-dark hover:text-brand-deep"
+              >
+                ✨ Ask AI for help
+              </Link>
+              {allTasks.length > 0 && (
+                <span className="text-sm text-ink-soft/60">{allTasks.length - done} left</span>
+              )}
+            </div>
           </div>
           <TaskList plan={plan} weddingId={id} />
         </div>
