@@ -48,8 +48,7 @@ export default function VendorBilling({
       )}
       {flash === "cancel_scheduled" && (
         <p className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Your subscription is set to cancel at the end of your current period. You keep
-          Featured until then. Payments already made are non-refundable.
+          Done — your plan won&rsquo;t renew. You keep Featured until the end of this period.
         </p>
       )}
       {flash === "resumed" && (
@@ -98,11 +97,8 @@ export default function VendorBilling({
             )}
           </div>
           <p className="mt-4 border-t border-stone-2 pt-4 text-xs leading-relaxed text-ink-soft/60">
-            <strong className="text-ink-soft/80">Cancellation &amp; refunds:</strong> Cancel
-            anytime — you keep Featured through the end of your current billing period and
-            aren&rsquo;t charged again. All payments are non-refundable: once a new billing
-            cycle begins and your subscription renews, that charge can&rsquo;t be refunded, in
-            whole or part. Cancel before your renewal date to avoid the next charge.
+            <strong className="text-ink-soft/80">Cancel anytime.</strong> You keep Featured
+            through the period you&rsquo;ve paid for.
           </p>
         </div>
       ) : (
