@@ -44,6 +44,7 @@ export default async function InspirationPage() {
         <InspirationGallery
           images={(images ?? []) as InspirationImage[]}
           signedIn={Boolean(user)}
+          userId={user?.id ?? null}
           likedIds={likedIds}
         />
 

@@ -64,6 +64,76 @@ export async function toggleLike(imageId: string, liked: boolean): Promise<{ lik
   return { liked: true };
 }
 
+export type InspirationComment = {
+  id: string;
+  body: string;
+  author_name: string;
+  user_id: string;
+  created_at: string;
+};
+
+/** Public list of comments on a piece of inspiration, oldest first. */
+export async function listComments(imageId: string): Promise<InspirationComment[]> {
+  if (!imageId) return [];
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase
+    .from("inspiration_comments")
+    .select("id, body, author_name, user_id, created_at")
+    .eq("image_id", imageId)
+    .order("created_at", { ascending: true });
+  if (error) {
+    console.error("listComments failed:", error.code, error.message);
+    return [];
+  }
+  return (data ?? []) as InspirationComment[];
+}
+
+export type CommentResult =
+  | { ok: true; comment: InspirationComment }
+  | { ok: false; error: "sign_in" | "empty" | "failed" };
+
+/** Adds the signed-in user's comment to a piece of inspiration. */
+export async function addComment(imageId: string, body: string): Promise<CommentResult> {
+  const text = body?.trim();
+  if (!imageId) return { ok: false, error: "failed" };
+  if (!text) return { ok: false, error: "empty" };
+
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "sign_in" };
+
+  const authorName =
+    (user.user_metadata?.full_name as string | undefined)?.trim() ||
+    user.email?.split("@")[0] ||
+    "Guest";
+
+  const { data, error } = await supabase
+    .from("inspiration_comments")
+    .insert({ image_id: imageId, user_id: user.id, author_name: authorName, body: text.slice(0, 1000) })
+    .select("id, body, author_name, user_id, created_at")
+    .single();
+
+  if (error || !data) {
+    console.error("addComment failed:", error?.code, error?.message);
+    return { ok: false, error: "failed" };
+  }
+  return { ok: true, comment: data as InspirationComment };
+}
+
+/** Deletes a comment (RLS allows only the author). */
+export async function deleteComment(commentId: string): Promise<{ ok: boolean }> {
+  if (!commentId) return { ok: false };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.from("inspiration_comments").delete().eq("id", commentId);
+  if (error) {
+    console.error("deleteComment failed:", error.code, error.message);
+    return { ok: false };
+  }
+  return { ok: true };
+}
+
 export async function unsaveInspiration(imageId: string, weddingId: string) {
   if (!imageId || !weddingId) return;
   const supabase = await supabaseServer();
