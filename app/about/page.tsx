@@ -5,7 +5,7 @@ import PageHero from "@/components/page-hero";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Bridal Team has helped couples plan happier weddings since 2014 — now rebuilt and powered by AI.",
+    "Bridal Team has helped couples plan happier weddings since 2012 — now rebuilt and powered by AI.",
 };
 
 export default function AboutPage() {
@@ -13,13 +13,13 @@ export default function AboutPage() {
     <>
       <PageHero
         eyebrow="Our story"
-        title="Planning weddings since 2014"
+        title="Planning weddings since 2012"
         subtitle="We started Bridal Team to make wedding planning fun and simple. Today we're reimagining it with AI at your side."
       />
 
       <section className="mx-auto max-w-3xl px-5 py-16 text-lg leading-relaxed text-ink-soft/85">
         <p>
-          Bridal Team began back in 2014 with a simple belief: planning a wedding
+          Bridal Team began back in 2012 with a simple belief: planning a wedding
           should feel joyful, not overwhelming. Couples were juggling
           spreadsheets, sticky notes and a dozen browser tabs — so we built one
           place to organize details, find ideas, and collaborate with the people
@@ -39,7 +39,7 @@ export default function AboutPage() {
 
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {[
-            ["2014", "Founded"],
+            ["2012", "Founded"],
             ["1 place", "For your whole team"],
             ["AI", "At the core"],
           ].map(([stat, label]) => (
