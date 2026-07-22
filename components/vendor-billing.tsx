@@ -48,9 +48,7 @@ export default function VendorBilling({
       )}
       {flash === "cancel_scheduled" && (
         <p className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          You&rsquo;re all set — your plan will stop renewing at the end of your current
-          period, and you keep Featured until then with no further charges. Changed your
-          mind? You can resume anytime before then.
+          Done — your plan won&rsquo;t renew. You keep Featured until the end of this period.
         </p>
       )}
       {flash === "resumed" && (
@@ -99,17 +97,9 @@ export default function VendorBilling({
             )}
           </div>
           <p className="mt-4 border-t border-stone-2 pt-4 text-xs leading-relaxed text-ink-soft/60">
-            <strong className="text-ink-soft/80">Cancel anytime — you&rsquo;re always in control.</strong>{" "}
-            You keep every Featured benefit through the end of the period you&rsquo;ve already
-            paid for, and we&rsquo;ll never charge you without notice. Your plan renews at the
-            start of each new billing period; since that renewal covers the term ahead, it
-            isn&rsquo;t refundable — so if you decide to stop, just cancel before your renewal
-            date and you won&rsquo;t be charged again. Questions about billing? We&rsquo;re happy
-            to help at{" "}
-            <a href="mailto:hello@bridalteam.com" className="font-semibold text-brand-dark">
-              hello@bridalteam.com
-            </a>
-            .
+            <strong className="text-ink-soft/80">Cancel anytime.</strong> You keep Featured
+            through the period you&rsquo;ve paid for. Renewals aren&rsquo;t refundable, so cancel
+            before your renewal date to skip the next charge.
           </p>
         </div>
       ) : (
