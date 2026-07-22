@@ -49,6 +49,9 @@ Route::group(['prefix' => 'v1'], function(){
             Route::post('/{id}/subscribe', 'VendorController@saveSubscription');
             Route::post('/{id}/changesubscription', 'VendorController@changeSubscription');
             Route::post('/{id}/cancelsubscription', 'VendorController@cancelSubscription');
+            Route::post('/{id}/deactivateaccount', 'VendorController@deactivateAccount');
+            Route::post('/{id}/reactivateaccount', 'VendorController@reactivateAccount');
+            Route::post('/{id}/cancelaccount', 'VendorController@cancelAccount');
             Route::post('/me/logo', 'VendorController@uploadVendorLogo');
             Route::post('/me/bg', 'VendorController@uploadVendorBackground');
             Route::get('/me/subscriptions', 'VendorController@getSusbcriptionDetails');

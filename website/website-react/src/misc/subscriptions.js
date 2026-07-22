@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import Api from "../api"
 import validatejs from 'validate.js';
 import moment from 'moment';
+import RefundPolicy from './refundterms';
 
 export default class SubscriptionManager extends Component{
     constructor(props){
@@ -258,12 +259,18 @@ export default class SubscriptionManager extends Component{
     }
 
     cancelSubscriptionRenewal = () => {
-        var confirmation = confirm("Are you sure you want to cancel your subscription?");
+        var confirmation = confirm(
+            "Are you sure you want to cancel your subscription?\n\n" +
+            "Your subscription will stay active until the end of your current paid period and will not renew after that.\n\n" +
+            "Please note: payments already made for the current billing cycle are non-refundable. Canceling does not provide a refund for the time remaining in this period."
+        );
         if(confirmation){
             this.api.post("vendors/" + this.state.vendor.id + "/cancelsubscription",null).then((res) => {
                 if(res.status == "OK"){
-                    alert("Your subscription has been canceled.  It will not renew at the end of this period.");
+                    alert(res.message ? res.message : "Your subscription has been canceled.  It will not renew at the end of this period.");
                     window.location.reload();
+                }else{
+                    alert(res.message ? res.message : "There was an error canceling your subscription.  Contact Bridal Team for support.");
                 }
             });
         }
@@ -490,8 +497,11 @@ export default class SubscriptionManager extends Component{
                                                 
                                             </tr>
                                         </tbody>                                        
-                                    </table>                                    
-                                </div>            
+                                    </table>
+                                </div>
+                                { this.state.paymenttotal > 0 ?
+                                    <RefundPolicy compact={true} /> : null
+                                }
                                 { !this.props.isaccount && this.state.paymenttotal > 0 ?
                                     <div className="formsection">
                                         <h3>Payment <span>Details</span></h3>

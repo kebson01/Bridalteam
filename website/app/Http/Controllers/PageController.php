@@ -180,8 +180,14 @@ class PageController extends Controller{
     public function showVendorRegistration(){
         // Simplified: skip WordPress dependency entirely for now
         // This ensures the registration page always works
+        $terms = "<p>By registering, you agree to our Terms of Service and Privacy Policy.</p>"
+            . "<h4>Subscription, Cancellation &amp; Refund Policy</h4>"
+            . "<p>Paid subscriptions are billed in advance on a recurring basis for the plan term you select (monthly, every 6 months, or annually). Your subscription automatically renews at the end of each term unless you cancel before your renewal date.</p>"
+            . "<p>You may cancel your subscription at any time from your account. When you cancel, your subscription remains active through the end of your current paid billing period and will not renew afterward. You may also deactivate or permanently close your account at any time from your account settings.</p>"
+            . "<p><strong>All payments are non-refundable.</strong> Once a new billing cycle begins and your subscription renews, that payment has already been processed for the upcoming term and is not eligible for a refund, in whole or in part. Canceling, deactivating, or closing your account does not entitle you to a prorated or partial refund for the remaining time in your current period &mdash; you simply keep access until that period ends. To avoid being charged for the next cycle, cancel before your renewal date.</p>";
+
         $json = [
-            "terms" => "By registering, you agree to our Terms of Service and Privacy Policy."
+            "terms" => $terms
         ];
         return view('vendor.registration', [
             "pagejson" => json_encode($json)
