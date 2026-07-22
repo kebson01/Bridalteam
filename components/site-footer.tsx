@@ -100,7 +100,7 @@ export default function SiteFooter() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-white/50 sm:flex-row">
-          <p>© 2012–{new Date().getFullYear()} Bridal Team. All rights reserved.</p>
+          <p>© 2012 Bridal Team. All rights reserved.</p>
           <nav className="flex gap-5">
             <Link href="/privacy" className="hover:text-white/80">Privacy</Link>
             <Link href="/terms" className="hover:text-white/80">Terms</Link>
