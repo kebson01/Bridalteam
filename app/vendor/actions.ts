@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { stripe } from "@/lib/stripe";
 import { youtubePoster } from "@/lib/media";
 
 // RLS ("Vendor team edits its profile") enforces that the caller belongs to the
@@ -134,4 +137,91 @@ export async function setVendorPublished(orgId: string, published: boolean) {
     .eq("org_id", orgId);
   if (error) console.error("setVendorPublished failed:", error.code, error.message);
   revalidatePath("/vendor");
+}
+
+/**
+ * Confirms the signed-in user belongs to this vendor org and returns it.
+ * Guards the account lifecycle actions below. Returns null if not authorized.
+ */
+async function ownedVendorOrg(orgId: string) {
+  if (!orgId) return null;
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await supabase
+    .from("org_members")
+    .select("organizations(id, type, stripe_subscription_id)")
+    .eq("org_id", orgId)
+    .maybeSingle();
+  const org = data?.organizations as unknown as
+    | { id: string; type: string; stripe_subscription_id: string | null }
+    | undefined;
+  if (!org || org.type !== "vendor") return null;
+  return { supabase, org };
+}
+
+/**
+ * Deactivate the account: hide the public listing and stop the subscription
+ * from renewing (kept until the end of the paid period — no refund for the
+ * remainder). Reversible: publish again / resume anytime.
+ */
+export async function deactivateVendorAccount(orgId: string) {
+  const ctx = await ownedVendorOrg(orgId);
+  if (!ctx) redirect("/vendor");
+
+  await ctx.supabase.from("vendor_profiles").update({ status: "draft" }).eq("org_id", orgId);
+
+  if (stripe && ctx.org.stripe_subscription_id) {
+    try {
+      await stripe.subscriptions.update(ctx.org.stripe_subscription_id, {
+        cancel_at_period_end: true,
+      });
+      await ctx.supabase
+        .from("organizations")
+        .update({ cancel_at_period_end: true })
+        .eq("id", orgId);
+    } catch (err) {
+      console.error("deactivate: cancel renewal failed:", err);
+    }
+  }
+
+  redirect("/vendor?account=deactivated");
+}
+
+/**
+ * Permanently close the vendor account: cancel any subscription immediately,
+ * remove the vendor's gallery media, and delete the organization (which cascades
+ * to its membership and profile). Payments already made are non-refundable.
+ *
+ * Uses the service role for the delete because RLS intentionally doesn't let a
+ * member delete their whole org — but only after verifying, above, that the
+ * caller owns this vendor org.
+ */
+export async function closeVendorAccount(orgId: string) {
+  const ctx = await ownedVendorOrg(orgId);
+  if (!ctx) redirect("/vendor");
+
+  if (stripe && ctx.org.stripe_subscription_id) {
+    try {
+      await stripe.subscriptions.cancel(ctx.org.stripe_subscription_id);
+    } catch (err) {
+      console.error("close: cancel subscription failed:", err);
+    }
+  }
+
+  const admin = supabaseAdmin();
+  if (admin) {
+    await admin.from("inspiration_images").delete().eq("vendor_id", orgId);
+    // Cascades to org_members and vendor_profiles (see FK ON DELETE CASCADE).
+    const { error } = await admin.from("organizations").delete().eq("id", orgId);
+    if (error) console.error("close: delete org failed:", error.message);
+  } else {
+    // No service role available — at least take the listing down.
+    await ctx.supabase.from("vendor_profiles").update({ status: "draft" }).eq("org_id", orgId);
+  }
+
+  await ctx.supabase.auth.signOut();
+  redirect("/?account=closed");
 }

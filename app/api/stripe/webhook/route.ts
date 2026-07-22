@@ -47,6 +47,7 @@ export async function POST(req: Request) {
             stripe_subscription_id: String(s.subscription),
             subscription_status: "active",
             plan: "featured",
+            cancel_at_period_end: false,
           });
         }
         break;
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
           stripe_subscription_id: sub.id,
           subscription_status: sub.status,
           plan: active ? "featured" : "free",
+          cancel_at_period_end: sub.cancel_at_period_end,
         });
         break;
       }
@@ -66,6 +68,7 @@ export async function POST(req: Request) {
         await applyByCustomer(String(sub.customer), {
           subscription_status: "canceled",
           plan: "free",
+          cancel_at_period_end: false,
         });
         break;
       }

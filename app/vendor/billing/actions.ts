@@ -14,10 +14,16 @@ async function vendorOrg() {
   if (!user) return null;
   const { data } = await supabase
     .from("org_members")
-    .select("organizations(id, type, name, stripe_customer_id)")
+    .select("organizations(id, type, name, stripe_customer_id, stripe_subscription_id)")
     .limit(1);
   const org = data?.[0]?.organizations as unknown as
-    | { id: string; type: string; name: string; stripe_customer_id: string | null }
+    | {
+        id: string;
+        type: string;
+        name: string;
+        stripe_customer_id: string | null;
+        stripe_subscription_id: string | null;
+      }
     | undefined;
   if (!org || org.type !== "vendor") return null;
   return { org, userId: user.id, email: user.email ?? undefined, supabase };
@@ -54,6 +60,46 @@ export async function startCheckout() {
 
   if (!session.url) redirect("/vendor?billing=error");
   redirect(session.url);
+}
+
+/**
+ * Cancels the Featured subscription at the end of the current paid period. The
+ * vendor keeps Featured until then and is not charged again. Per our refund
+ * policy, the current period is non-refundable — so we cancel at period end
+ * rather than immediately, letting them use what they've paid for.
+ */
+export async function cancelSubscription() {
+  if (!billingConfigured() || !stripe) redirect("/vendor?billing=unavailable");
+  const ctx = await vendorOrg();
+  if (!ctx?.org.stripe_subscription_id) redirect("/vendor");
+
+  await stripe.subscriptions.update(ctx.org.stripe_subscription_id, {
+    cancel_at_period_end: true,
+  });
+  // Optimistic; the webhook confirms it too.
+  await ctx.supabase
+    .from("organizations")
+    .update({ cancel_at_period_end: true })
+    .eq("id", ctx.org.id);
+
+  redirect("/vendor?billing=cancel_scheduled");
+}
+
+/** Undo a scheduled cancellation — the subscription renews normally again. */
+export async function resumeSubscription() {
+  if (!billingConfigured() || !stripe) redirect("/vendor?billing=unavailable");
+  const ctx = await vendorOrg();
+  if (!ctx?.org.stripe_subscription_id) redirect("/vendor");
+
+  await stripe.subscriptions.update(ctx.org.stripe_subscription_id, {
+    cancel_at_period_end: false,
+  });
+  await ctx.supabase
+    .from("organizations")
+    .update({ cancel_at_period_end: false })
+    .eq("id", ctx.org.id);
+
+  redirect("/vendor?billing=resumed");
 }
 
 /** Opens the Stripe billing portal so the vendor can manage/cancel. */

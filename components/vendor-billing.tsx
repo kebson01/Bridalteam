@@ -1,4 +1,9 @@
-import { startCheckout, openBillingPortal } from "@/app/vendor/billing/actions";
+import {
+  startCheckout,
+  openBillingPortal,
+  cancelSubscription,
+  resumeSubscription,
+} from "@/app/vendor/billing/actions";
 
 const FEATURES = [
   "Featured placement — shown first in the directory",
@@ -16,11 +21,13 @@ export default function VendorBilling({
   status,
   configured,
   flash,
+  cancelAtPeriodEnd = false,
 }: {
   plan: string;
   status: string | null;
   configured: boolean;
   flash: string | null;
+  cancelAtPeriodEnd?: boolean;
 }) {
   const isFeatured = plan === "featured";
 
@@ -39,25 +46,64 @@ export default function VendorBilling({
           Billing isn&rsquo;t set up yet. Check back soon.
         </p>
       )}
+      {flash === "cancel_scheduled" && (
+        <p className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Your subscription is set to cancel at the end of your current period. You keep
+          Featured until then. Payments already made are non-refundable.
+        </p>
+      )}
+      {flash === "resumed" && (
+        <p className="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
+          Your subscription will renew as normal — welcome back!
+        </p>
+      )}
 
       {isFeatured ? (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-semibold uppercase text-white">Featured</span>
-              You&rsquo;re on the Featured plan
-            </p>
-            <p className="mt-1 text-xs text-ink-soft/60">
-              {status ? `Subscription ${status}.` : ""} Manage or cancel anytime.
-            </p>
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-semibold uppercase text-white">Featured</span>
+                You&rsquo;re on the Featured plan
+              </p>
+              <p className="mt-1 text-xs text-ink-soft/60">
+                {cancelAtPeriodEnd
+                  ? "Set to cancel — you keep Featured until the end of your current period, then it won't renew."
+                  : status
+                    ? `Subscription ${status}. Renews automatically until you cancel.`
+                    : "Renews automatically until you cancel."}
+              </p>
+            </div>
+            {configured && (
+              <div className="flex flex-wrap gap-2">
+                {cancelAtPeriodEnd ? (
+                  <form action={resumeSubscription}>
+                    <button type="submit" className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2 text-sm font-semibold text-white">
+                      Resume subscription
+                    </button>
+                  </form>
+                ) : (
+                  <form action={cancelSubscription}>
+                    <button type="submit" className="rounded-full border border-stone-2 px-5 py-2 text-sm font-semibold text-ink-soft hover:border-brand">
+                      Cancel subscription
+                    </button>
+                  </form>
+                )}
+                <form action={openBillingPortal}>
+                  <button type="submit" className="rounded-full border border-stone-2 px-5 py-2 text-sm font-semibold text-ink-soft hover:border-brand">
+                    Manage billing
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
-          {configured && (
-            <form action={openBillingPortal}>
-              <button type="submit" className="rounded-full border border-stone-2 px-5 py-2 text-sm font-semibold text-ink-soft hover:border-brand">
-                Manage billing
-              </button>
-            </form>
-          )}
+          <p className="mt-4 border-t border-stone-2 pt-4 text-xs leading-relaxed text-ink-soft/60">
+            <strong className="text-ink-soft/80">Cancellation &amp; refunds:</strong> Cancel
+            anytime — you keep Featured through the end of your current billing period and
+            aren&rsquo;t charged again. All payments are non-refundable: once a new billing
+            cycle begins and your subscription renews, that charge can&rsquo;t be refunded, in
+            whole or part. Cancel before your renewal date to avoid the next charge.
+          </p>
         </div>
       ) : (
         <div>
