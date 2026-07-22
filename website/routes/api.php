@@ -57,6 +57,36 @@ Route::group(['prefix' => 'v1'], function(){
         });
     });
 
+    Route::group(['prefix' => 'brides'], function(){
+        //Public / social browsing (viewer is detected from the token if present)
+        Route::post('/register', 'BrideController@registerBride');
+        Route::post('/login', 'BrideController@login');
+        Route::get('/explore', 'BrideController@getExplore');
+        Route::get('/profile/{slug}', 'BrideController@getPublicProfile');
+        Route::get('/board/{slug}', 'BrideController@getBoard');
+
+        Route::group(['middleware' => 'jwt.auth'], function(){
+            Route::get('/me', 'BrideController@getBrideDetails');
+            Route::post('/me', 'BrideController@updateProfile');
+            Route::post('/me/avatar', 'BrideController@uploadAvatar');
+            Route::get('/feed', 'BrideController@getFeed');
+            Route::get('/myboards', 'BrideController@getMyBoards');
+
+            Route::post('/boards', 'BrideController@createBoard');
+            Route::post('/boards/{id}/update', 'BrideController@updateBoard');
+            Route::post('/boards/{id}/delete', 'BrideController@deleteBoard');
+            Route::post('/boards/{id}/items', 'BrideController@addBoardItem');
+            Route::post('/boards/{id}/items/remove', 'BrideController@removeBoardItem');
+            Route::post('/boards/{id}/like', 'BrideController@likeBoard');
+            Route::post('/boards/{id}/unlike', 'BrideController@unlikeBoard');
+            Route::post('/boards/{id}/comments', 'BrideController@addComment');
+            Route::post('/comments/{id}/delete', 'BrideController@deleteComment');
+
+            Route::post('/follow/{id}', 'BrideController@followBride');
+            Route::post('/unfollow/{id}', 'BrideController@unfollowBride');
+        });
+    });
+
     Route::group(['prefix' => 'media'], function(){
         Route::group(['middleware' => 'jwt.auth'], function(){
             Route::post('uploadmedia', 'MediaController@uploadMedia');

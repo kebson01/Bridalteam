@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 use App\Vendor;
+use App\Bride;
 
 class User extends Authenticatable
 {
@@ -42,9 +43,13 @@ class User extends Authenticatable
         if($id == null){
             $vendor = Vendor::where("user_id", "=", $this->id)->first();
         }else{
-            $vendor = Vendor::where("user_id", "=", $this->id)->where('id', '=', $id)->first();            
+            $vendor = Vendor::where("user_id", "=", $this->id)->where('id', '=', $id)->first();
         }
-        
+
         return $vendor;
+    }
+
+    public function findBride(){
+        return Bride::where("user_id", "=", $this->id)->first();
     }
 }

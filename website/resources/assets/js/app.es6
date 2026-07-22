@@ -82,6 +82,24 @@ $(document).ready(function(){
 
     initGalleryGrid();
 
+    // "Save to Board" bridge: capture the image being viewed and hand it to the
+    // React inspiration widget (mounted on #gallerysaveroot) when the bride
+    // clicks Save.  Delegated so it survives isotope re-rendering the grid.
+    var btCurrentMedia = {id: null, thumb: null, type: null};
+    $(document).on("click", "#gallerygrid .item", function(){
+        btCurrentMedia.id = $(this).data("id");
+        btCurrentMedia.type = $(this).data("type") || "image";
+        var el = $(this).find("img, video");
+        var src = el.attr("src") || "";
+        btCurrentMedia.thumb = src.replace(/^\/storage/, "");
+    });
+    $(document).on("click", "#btSaveInspiration", function(e){
+        e.preventDefault();
+        if(btCurrentMedia.id && typeof window.BTSaveInspiration === "function"){
+            window.BTSaveInspiration(btCurrentMedia.id, btCurrentMedia.thumb, btCurrentMedia.type);
+        }
+    });
+
     if($("#gallerysearch").length != 0){
         $("#gallerykeywords").selectize({
             delimited: ',',
@@ -195,8 +213,12 @@ function getFilteredMedia(category, keywords){
 
             var fullhtml = "";
             response.media.forEach(function(media, index){
-                var html = '<div class="item" data-id="' + media.id + '"><div class="item-content">';
-                html += '<div class="image"><img src="/storage' + media.thumbnailpath + '" /></div>';                
+                var html = '<div class="item" data-id="' + media.id + '" data-type="' + media.type + '"><div class="item-content">';
+                if(media.type === "video"){
+                    html += '<div class="image"><video src="/storage' + media.urlpath + '" preload="metadata" muted playsinline></video><span class="playbadge"><i class="fa fa-play"></i></span></div>';
+                }else{
+                    html += '<div class="image"><img src="/storage' + media.thumbnailpath + '" /></div>';
+                }
                 html += '<div class="tags">';
                 var mediakeywords = media.keyword.split(",");
                 mediakeywords.forEach(function(keyword){
@@ -223,16 +245,21 @@ function initGalleryGrid(){
         $("#imagedisplay").fadeIn(300, function(){
             $.get("/api/v1/media/public/" + mediaid, function(res){
                 console.log(res);
-                $("#imagedisplay .imagecontainer .image a").removeAttr("href");
-                $("#imagedisplay .imagecontainer .image a").removeAttr("target");
                 $("#imagedisplay .imagecontainer .imageowner").empty();
                 $("#imagedisplay .imagecontainer .imageowner").html("by<br /><a href='/vendor/" + res.media.vendorslug + "'>" + res.media.vendorname + "</a>");
-                if(res.media.product_link != null){
-                    $("#imagedisplay .imagecontainer .image a").attr("href", res.media.product_link);
-                    $("#imagedisplay .imagecontainer .image a").attr("target", "_blank");
-                    $("#imagedisplay .imagecontainer .image a").append("<span>Click to view product</span>");
+                if(res.media.type === "video"){
+                    //Play videos with a <video> element instead of a broken <img>.
+                    $("#imagedisplay .imagecontainer .image").html('<video src="/storage' + res.media.urlpath + '" controls autoplay preload="metadata" playsinline></video>');
+                }else{
+                    //Restore the image markup (in case a video was shown previously).
+                    $("#imagedisplay .imagecontainer .image").html('<a><img src="" /></a>');
+                    if(res.media.product_link != null){
+                        $("#imagedisplay .imagecontainer .image a").attr("href", res.media.product_link);
+                        $("#imagedisplay .imagecontainer .image a").attr("target", "_blank");
+                        $("#imagedisplay .imagecontainer .image a").append("<span>Click to view product</span>");
+                    }
+                    $("#imagedisplay .imagecontainer .image img").attr('src', "/storage" + res.media.urlpath);
                 }
-                $("#imagedisplay .imagecontainer .image img").attr('src', "/storage" + res.media.urlpath);
                 $("#imagedisplay .imagecontainer .tags").empty();
                 $("#imagedisplay .imagecontainer .details").empty();
 
