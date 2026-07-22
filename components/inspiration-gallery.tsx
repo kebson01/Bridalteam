@@ -6,6 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import { saveInspiration } from "@/app/inspiration/actions";
 import LikeButton from "@/components/like-button";
 import ShareButton from "@/components/share-button";
+import InspirationComments from "@/components/inspiration-comments";
 import { posterFor, isDirectVideoFile } from "@/lib/media";
 
 export interface InspirationImage {
@@ -130,10 +131,12 @@ export default function InspirationGallery({
   images,
   signedIn,
   likedIds = [],
+  userId = null,
 }: {
   images: InspirationImage[];
   signedIn: boolean;
   likedIds?: string[];
+  userId?: string | null;
 }) {
   const [theme, setTheme] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
@@ -217,6 +220,7 @@ export default function InspirationGallery({
         <Lightbox
           image={open}
           signedIn={signedIn}
+          userId={userId}
           liked={likedSet.has(open.id)}
           onClose={() => setOpen(null)}
         />
@@ -228,11 +232,13 @@ export default function InspirationGallery({
 function Lightbox({
   image,
   signedIn,
+  userId,
   liked,
   onClose,
 }: {
   image: InspirationImage;
   signedIn: boolean;
+  userId: string | null;
   liked: boolean;
   onClose: () => void;
 }) {
@@ -306,7 +312,14 @@ function Lightbox({
             </div>
           )}
 
-          <div className="mt-auto pt-6">
+          <InspirationComments
+            imageId={image.id}
+            signedIn={signedIn}
+            userId={userId}
+            onNeedSignin={() => setStatus("signin")}
+          />
+
+          <div className="pt-4">
             {status === "saved" ? (
               <p className="rounded-full bg-green-100 px-5 py-3 text-center text-sm font-semibold text-green-800">
                 ♥ Saved to your wedding
