@@ -3,6 +3,8 @@
 import { useActionState, useRef, useState, useTransition } from "react";
 import { addVendorMedia, deleteVendorMedia, type MediaState } from "@/app/vendor/actions";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { posterFor } from "@/lib/media";
+import { MediaPlaceholder } from "@/components/inspiration-gallery";
 
 export interface VendorMedia {
   id: string;
@@ -161,11 +163,17 @@ export default function VendorMediaManager({
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-soft/50">Your gallery ({media.length})</h3>
           <div className="mt-3 grid gap-4 sm:grid-cols-3">
-            {media.map((m) => (
+            {media.map((m) => {
+              const still = posterFor(m);
+              return (
               <figure key={m.id} className="relative overflow-hidden rounded-2xl border border-stone-2 bg-white shadow-card">
                 <div className="relative aspect-[4/5] bg-stone-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={m.image_url} alt={m.title} className="h-full w-full object-cover" />
+                  {still ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={still} alt={m.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <MediaPlaceholder type={m.media_type} />
+                  )}
                   <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold uppercase text-white">
                     {m.media_type}
                   </span>
@@ -185,7 +193,8 @@ export default function VendorMediaManager({
                   </button>
                 </figcaption>
               </figure>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

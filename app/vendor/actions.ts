@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { youtubePoster } from "@/lib/media";
 
 // RLS ("Vendor team edits its profile") enforces that the caller belongs to the
 // vendor org, so we update by org_id without an extra permission check.
@@ -72,9 +73,26 @@ export async function addVendorMedia(
   if (!url) return { error: mediaType === "photo" ? "Add an image URL." : "Add the link.", added: false };
 
   // For a photo the URL is the visual; for video/audio the URL is the source and
-  // we need a separate visual (poster/cover) — accept one, else reuse the URL.
+  // we need a separate visual (poster/cover). Prefer a supplied poster, then a
+  // derived one (e.g. a YouTube thumbnail). Never fall back to the raw video URL
+  // — an <img> pointed at a watch/file link renders as a broken tile.
   const poster = str(formData.get("poster"), 500);
-  const imageUrl = mediaType === "photo" ? url : poster ?? url;
+  let imageUrl: string;
+  if (mediaType === "photo") {
+    imageUrl = url;
+  } else {
+    const derived = poster ?? youtubePoster(url);
+    if (!derived) {
+      return {
+        error:
+          "Add a cover image URL for this " +
+          mediaType +
+          " so it shows a preview (YouTube links supply their own).",
+        added: false,
+      };
+    }
+    imageUrl = derived;
+  }
   const mediaUrl = mediaType === "photo" ? null : url;
 
   const supabase = await supabaseServer();

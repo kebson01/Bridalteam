@@ -6,6 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import { saveInspiration } from "@/app/inspiration/actions";
 import LikeButton from "@/components/like-button";
 import ShareButton from "@/components/share-button";
+import { posterFor, isDirectVideoFile } from "@/lib/media";
 
 export interface InspirationImage {
   id: string;
@@ -39,6 +40,7 @@ export function MediaBadge({ type }: { type: string }) {
 
 /** Renders the playable media for the lightbox by type. */
 export function MediaPlayer({ item }: { item: InspirationImage }) {
+  const still = posterFor(item);
   if (item.media_type === "video" && item.media_url) {
     const embed = toEmbed(item.media_url);
     if (embed) {
@@ -50,22 +52,62 @@ export function MediaPlayer({ item }: { item: InspirationImage }) {
     }
     return (
       // eslint-disable-next-line jsx-a11y/media-has-caption
-      <video controls poster={item.image_url} src={item.media_url} className="h-full max-h-[80vh] w-full bg-black object-contain" />
+      <video controls poster={still ?? undefined} src={item.media_url} className="h-full max-h-[80vh] w-full bg-black object-contain" />
     );
   }
   if (item.media_type === "audio" && item.media_url) {
     return (
       <div className="flex h-full flex-col">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />
+        {still ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={still} alt={item.title} className="h-full w-full object-cover" />
+        ) : (
+          <MediaPlaceholder type="audio" />
+        )}
         {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
         <audio controls src={item.media_url} className="w-full" />
       </div>
     );
   }
-  // photo (or video/audio missing its source): show the image
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={item.image_url} alt={item.title} className="h-full w-full object-cover" />;
+  // photo (or video/audio missing its source): show the image if we have one.
+  if (still) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={still} alt={item.title} className="h-full w-full object-cover" />;
+  }
+  return <MediaPlaceholder type={item.media_type} />;
+}
+
+/** Neutral stand-in when an item has no usable still image. */
+export function MediaPlaceholder({ type }: { type: string }) {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-stone-3 to-stone-4 text-white/70">
+      {type === "audio" ? (
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+      ) : (
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+      )}
+    </div>
+  );
+}
+
+/** The still shown on a grid tile: a poster image, a video first frame, or a placeholder. */
+export function TileVisual({ item }: { item: InspirationImage }) {
+  const poster = posterFor(item);
+  if (poster) {
+    return (
+      <Image src={poster} alt={item.title} fill unoptimized
+        sizes="(max-width: 1024px) 100vw, 33vw"
+        className="object-cover transition-transform duration-500 group-hover:scale-105" />
+    );
+  }
+  if (item.media_type === "video" && isDirectVideoFile(item.media_url)) {
+    return (
+      // Muted first-frame preview stands in for a poster.
+      <video src={item.media_url ?? undefined} muted playsInline preload="metadata"
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+    );
+  }
+  return <MediaPlaceholder type={item.media_type} />;
 }
 
 /** Converts a YouTube/Vimeo watch URL to its embed URL; null for direct files. */
@@ -158,9 +200,7 @@ export default function InspirationGallery({
             onClick={() => setOpen(it)}
             className="group relative aspect-[4/5] overflow-hidden rounded-2xl text-left shadow-card"
           >
-            <Image src={it.image_url} alt={it.title} fill unoptimized
-              sizes="(max-width: 1024px) 100vw, 33vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105" />
+            <TileVisual item={it} />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
             <MediaBadge type={it.media_type} />
             <figcaption className="absolute inset-x-0 bottom-0 p-5 text-white">
