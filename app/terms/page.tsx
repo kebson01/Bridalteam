@@ -30,6 +30,24 @@ export default function TermsPage() {
             </p>
           </div>
           <div>
+            <h2 className="text-lg font-medium text-ink">Subscriptions, cancellation &amp; refunds</h2>
+            <p className="mt-2">
+              Paid plans (such as the vendor Featured plan) are billed in advance and
+              renew automatically for the term you choose until you cancel. You can cancel
+              anytime from your account or the billing portal — your plan stays active
+              through the end of the current paid period and won&rsquo;t renew afterward.
+            </p>
+            <p className="mt-2">
+              <strong>All payments are non-refundable.</strong> Once a new billing cycle
+              begins and your subscription renews, that payment has been processed for the
+              upcoming term and is not eligible for a refund, in whole or in part.
+              Cancelling, deactivating or closing your account does not create a prorated
+              or partial refund for the remaining time in your current period — you keep
+              access until it ends. To avoid the next charge, cancel before your renewal
+              date.
+            </p>
+          </div>
+          <div>
             <h2 className="text-lg font-medium text-ink">Your content</h2>
             <p className="mt-2">
               You own the planning content you create. You grant us permission to
