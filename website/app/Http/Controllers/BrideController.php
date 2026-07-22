@@ -430,6 +430,7 @@ class BrideController extends Controller
                 'id' => $item->id,
                 'media_id' => $item->media_id,
                 'note' => $item->note,
+                'type' => $item->media->type,
                 'thumbnail' => $item->media->thumbnailpath,
                 'image' => $item->media->urlpath,
             ];

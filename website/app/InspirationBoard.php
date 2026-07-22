@@ -46,9 +46,9 @@ class InspirationBoard extends Model
     }
 
     /**
-     * The cover image path, falling back to the most recently added item.
+     * The cover media (explicit cover, else the most recently added item).
      */
-    public function coverImage(){
+    public function coverMedia(){
         $media = null;
         if($this->cover_media_id){
             $media = Media::find($this->cover_media_id);
@@ -60,7 +60,7 @@ class InspirationBoard extends Model
                 $media = Media::find($item->media_id);
             }
         }
-        return $media ? $media->thumbnailpath : null;
+        return $media;
     }
 
     /**
@@ -68,13 +68,15 @@ class InspirationBoard extends Model
      */
     public function toSummary($viewerBrideId = null){
         $owner = $this->getOwner();
+        $coverMedia = $this->coverMedia();
         return [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
             'slug' => $this->slug,
             'is_public' => (bool) $this->is_public,
-            'cover' => $this->coverImage(),
+            'cover' => $coverMedia ? $coverMedia->thumbnailpath : null,
+            'cover_type' => $coverMedia ? $coverMedia->type : null,
             'items' => $this->itemCount(),
             'likes' => $this->likeCount(),
             'comments' => $this->commentCount(),

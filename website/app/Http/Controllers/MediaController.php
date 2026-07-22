@@ -38,33 +38,52 @@ class MediaController extends Controller
                 }       
 
                 $thumbdestinationpath = storage_path() . '/app/public/media/'.$vendor->id . '/thumb';
-                $publicmediapath = '/media/' . $vendor->id; 
-                
-                //Generate thumbnail
-                try{
-                    Image::make(storage_path() . '/app/' . $path, array(
-                        'width' => 400,
-                        'height' => 400,
-                        'crop' => false
-                    ))->save($thumbdestinationpath . '/' . 'thumb_' . $pathinfo['basename']);
-                } catch (\Exception $e) {
-                    Log::alert($e->getMessage());
-                    
-                }
-                
-                
-                Image::make(storage_path() . '/app/' . $path, array(
-                    'width' => 400,
-                    'height' => 400,
-                    'crop' => true
-                ))->save($thumbdestinationpath . "/" . "thumb_square_" . $pathinfo['basename']);
-                
+                $publicmediapath = '/media/' . $vendor->id;
+
+                //Detect videos by extension.  Image processing cannot render a
+                //frame from a video, so videos get no generated image thumbnail
+                //and are flagged so the frontend plays them with a <video> tag.
+                $extension = isset($pathinfo['extension']) ? strtolower($pathinfo['extension']) : "";
+                $videoExtensions = array('mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm', 'm4v', '3gp', 'ogv');
+                $isVideo = in_array($extension, $videoExtensions);
+
                 $media = new Media;
                 $media->path = $path;
-                $media->thumbnailpath = $publicmediapath . '/thumb/thumb_' . $pathinfo['basename'];
                 $media->urlpath = $publicmediapath . "/" . $pathinfo['basename'];
-                $media->square_thumbnailpath = $publicmediapath . '/thumb/thumb_square_' .  $pathinfo['basename'];
-                $media->type = "image";
+
+                if($isVideo){
+                    //No image thumbnail for a video: point the thumbnail fields
+                    //at the video itself so the frontend can render it.
+                    $media->type = "video";
+                    $media->thumbnailpath = $publicmediapath . "/" . $pathinfo['basename'];
+                    $media->square_thumbnailpath = $publicmediapath . "/" . $pathinfo['basename'];
+                }else{
+                    //Generate image thumbnails
+                    try{
+                        Image::make(storage_path() . '/app/' . $path, array(
+                            'width' => 400,
+                            'height' => 400,
+                            'crop' => false
+                        ))->save($thumbdestinationpath . '/' . 'thumb_' . $pathinfo['basename']);
+                    } catch (\Exception $e) {
+                        Log::alert($e->getMessage());
+                    }
+
+                    try{
+                        Image::make(storage_path() . '/app/' . $path, array(
+                            'width' => 400,
+                            'height' => 400,
+                            'crop' => true
+                        ))->save($thumbdestinationpath . "/" . "thumb_square_" . $pathinfo['basename']);
+                    } catch (\Exception $e) {
+                        Log::alert($e->getMessage());
+                    }
+
+                    $media->type = "image";
+                    $media->thumbnailpath = $publicmediapath . '/thumb/thumb_' . $pathinfo['basename'];
+                    $media->square_thumbnailpath = $publicmediapath . '/thumb/thumb_square_' .  $pathinfo['basename'];
+                }
+
                 $media->status = 0;
                 $media->vendor_id = $vendor->id;
                 $media->isproduct = false;

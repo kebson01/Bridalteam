@@ -17,16 +17,17 @@ export default class GalleryBridge extends Component{
             open: false,
             showAuth: false,
             mediaId: null,
-            mediaThumb: null
+            mediaThumb: null,
+            mediaType: null
         };
     }
 
     componentDidMount(){
-        window.BTSaveInspiration = (mediaId, mediaThumb) => {
+        window.BTSaveInspiration = (mediaId, mediaThumb, mediaType) => {
             if(new BrideApi().isLoggedIn()){
-                this.setState({open: true, mediaId: mediaId, mediaThumb: mediaThumb, showAuth: false});
+                this.setState({open: true, mediaId: mediaId, mediaThumb: mediaThumb, mediaType: mediaType, showAuth: false});
             }else{
-                this.setState({showAuth: true, mediaId: mediaId, mediaThumb: mediaThumb, open: false});
+                this.setState({showAuth: true, mediaId: mediaId, mediaThumb: mediaThumb, mediaType: mediaType, open: false});
             }
         };
         window.BTIsBrideLoggedIn = () => new BrideApi().isLoggedIn();
@@ -45,7 +46,7 @@ export default class GalleryBridge extends Component{
     render(){
         if(this.state.open){
             return (
-                <SaveToBoard mediaId={this.state.mediaId} mediaThumb={this.state.mediaThumb} onClose={this.close} />
+                <SaveToBoard mediaId={this.state.mediaId} mediaThumb={this.state.mediaThumb} mediaType={this.state.mediaType} onClose={this.close} />
             );
         }
         if(this.state.showAuth){

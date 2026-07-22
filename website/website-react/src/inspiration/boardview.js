@@ -181,7 +181,10 @@ export default class BoardView extends Component{
                         board.items_list.map((item) => {
                             return (
                                 <div key={item.id} className="boarditem">
-                                    <img src={"/storage" + (item.thumbnail || item.image)} />
+                                    {item.type === "video" ?
+                                        <video src={"/storage" + item.image} controls preload="metadata" playsInline></video> :
+                                        <img src={"/storage" + (item.thumbnail || item.image)} />
+                                    }
                                     {board.isowner ?
                                         <a className="removeitem" onClick={() => this.removeItem(item)}><i className="fa fa-times"></i></a> : null
                                     }

@@ -88,7 +88,12 @@ export default class SaveToBoard extends Component{
                         <a className="closebtn" onClick={this.props.onClose}><i className="fa fa-times"></i></a>
                     </header>
                     {this.props.mediaThumb ?
-                        <div className="previewimg"><img src={"/storage" + this.props.mediaThumb} /></div> : null
+                        <div className="previewimg">
+                            {this.props.mediaType === "video" ?
+                                <video src={"/storage" + this.props.mediaThumb} preload="metadata" muted playsInline></video> :
+                                <img src={"/storage" + this.props.mediaThumb} />
+                            }
+                        </div> : null
                     }
                     {this.state.loading ?
                         <div className="loading">Loading your boards&hellip;</div> :

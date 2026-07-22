@@ -50,9 +50,13 @@
                             <div class="grid">
                                 @foreach($media as $m)
                                     <?php $tags = explode(",", $m->keyword); ?>
-                                    <div class="item" data-id="<?php print $m->id; ?>">
+                                    <div class="item" data-id="<?php print $m->id; ?>" data-type="<?php print $m->type; ?>">
                                         <div class="item-content">
+                                            @if($m->type == 'video')
+                                            <div class="image"><video src="/storage<?php print $m->urlpath; ?>" preload="metadata" muted playsinline></video><span class="playbadge"><i class="fa fa-play"></i></span></div>
+                                            @else
                                             <div class="image"><img src="/storage<?php print $m->thumbnailpath; ?>" /></div>
+                                            @endif
                                             <div class="tags">
                                                 @foreach($tags as $tag)
                                                 <span><a>{{$tag}}</a></span>

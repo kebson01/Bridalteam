@@ -4,6 +4,26 @@ import React, {Component} from 'react';
  * Small presentational pieces shared across the inspiration social UI.
  */
 
+/*
+ * Renders a piece of inspiration as either an image or a video (with a play
+ * badge).  `src` is the raw storage path; the /storage prefix is added here.
+ */
+export var MediaThumb = (props) => {
+    if(props.type === "video"){
+        return (
+            <span className="mediathumb video">
+                <video src={"/storage" + props.src} preload="metadata" muted playsInline></video>
+                <span className="playbadge"><i className="fa fa-play"></i></span>
+            </span>
+        );
+    }
+    return (
+        <span className="mediathumb">
+            <img src={"/storage" + props.src} />
+        </span>
+    );
+};
+
 export var Avatar = (props) => {
     var size = props.size ? props.size : 40;
     var style = {width: size, height: size, lineHeight: size + "px", fontSize: (size / 2.4) + "px"};
@@ -34,7 +54,7 @@ export class BoardCard extends Component{
             <div className="boardcard">
                 <div className="cover" onClick={() => this.props.onOpen(board.slug)}>
                     {board.cover ?
-                        <img src={"/storage" + board.cover} /> :
+                        <MediaThumb type={board.cover_type} src={board.cover} /> :
                         <div className="nocover"><i className="fa fa-heart-o"></i></div>
                     }
                     {!board.is_public ? <span className="privatebadge"><i className="fa fa-lock"></i> Private</span> : null}
