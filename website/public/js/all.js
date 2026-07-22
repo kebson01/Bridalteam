@@ -6458,3 +6458,18 @@ function removeModalDialog() {
     $("body").removeClass("noscroll");
     $("#modaldialogcontainer").remove();
 }
+/* Gallery "Save to Board" bridge -> React inspiration widget (#gallerysaveroot) */
+jQuery(function($){
+    var btCurrentMedia = {id: null, thumb: null};
+    $(document).on("click", "#gallerygrid .item", function(){
+        btCurrentMedia.id = $(this).data("id");
+        var src = $(this).find("img").attr("src") || "";
+        btCurrentMedia.thumb = src.replace(/^\/storage/, "");
+    });
+    $(document).on("click", "#btSaveInspiration", function(e){
+        e.preventDefault();
+        if(btCurrentMedia.id && typeof window.BTSaveInspiration === "function"){
+            window.BTSaveInspiration(btCurrentMedia.id, btCurrentMedia.thumb);
+        }
+    });
+});

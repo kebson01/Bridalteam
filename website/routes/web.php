@@ -36,6 +36,8 @@ Route::get('/vendor/{slug}', 'PageController@showVendorPage');
 
 Route::get('/gallery', 'PageController@showGalleryPage');
 
+Route::get('/inspiration', 'PageController@showInspirationPage');
+
 // Blog route
 Route::get('/blog', 'PageController@showBlogPage');
 

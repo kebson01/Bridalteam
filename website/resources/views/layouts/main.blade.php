@@ -52,6 +52,7 @@
                                 <!-- Fallback navigation for better UX when WP menu is unavailable -->
                                 <li><a href="/">Home</a></li>
                                 <li><a href="/gallery">Gallery</a></li>
+                                <li><a href="/inspiration">Inspiration</a></li>
                                 <li><a href="/vendors">Vendors</a></li>
                                 <li><a href="/blog">Blog</a></li>
                             @endif

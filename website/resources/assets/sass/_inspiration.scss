@@ -1,0 +1,153 @@
+/* ==========================================================================
+   Inspiration social experience (bride feed, boards, profiles)
+   Flat CSS (kept in sync with the compiled public/css/app.css)
+   ========================================================================== */
+
+.inspirationapp { font-family: "raleway", sans-serif; color: #333; }
+
+/* Header */
+.inspirationapp .inspirationheader { border-bottom: 1px solid #e0e0e2; margin-bottom: 30px; }
+.inspirationapp .inspirationheader .innerwrapper { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; }
+.inspirationapp .inspirationheader .brand { font-size: 1.5em; font-weight: 700; color: #ff8c1c; cursor: pointer; text-decoration: none; letter-spacing: 1px; }
+.inspirationapp .inspirationheader .brand i { margin-right: 6px; }
+.inspirationapp .inspirationheader nav { display: flex; align-items: center; }
+.inspirationapp .inspirationheader nav a { margin-left: 18px; cursor: pointer; color: #444; text-decoration: none; font-weight: 500; text-transform: uppercase; font-size: .85em; letter-spacing: .5px; }
+.inspirationapp .inspirationheader nav a:hover { color: #ff8c1c; }
+.inspirationapp .inspirationheader nav .loggedin { display: flex; align-items: center; }
+.inspirationapp .inspirationheader nav .loginlink { background: #ff8c1c; color: #fff; padding: 8px 16px; border-radius: 3px; }
+
+/* Avatar */
+.bt-avatar { display: inline-block; border-radius: 50%; overflow: hidden; background: #ff8c1c; color: #fff; text-align: center; font-weight: 600; vertical-align: middle; cursor: pointer; }
+.bt-avatar img { object-fit: cover; display: block; border-radius: 50%; }
+.bt-avatar.initials { background: #f3a34d; }
+
+/* Board grid + cards */
+.boardgrid { display: flex; flex-wrap: wrap; margin: 0 -10px; }
+.boardcard { width: calc(25% - 20px); margin: 10px; background: #fff; border: 1px solid #eee; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); display: flex; flex-direction: column; }
+.boardcard .cover { position: relative; height: 180px; background: #f4f4f4; cursor: pointer; overflow: hidden; }
+.boardcard .cover img { width: 100%; height: 100%; object-fit: cover; }
+.boardcard .cover .nocover { display: flex; align-items: center; justify-content: center; height: 100%; color: #ddd; font-size: 3em; }
+.boardcard .cover .itemcount { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,.55); color: #fff; font-size: .75em; padding: 3px 8px; border-radius: 12px; }
+.boardcard .cover .privatebadge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.55); color: #fff; font-size: .7em; padding: 3px 8px; border-radius: 12px; }
+.boardcard .cardbody { padding: 12px; flex: 1; display: flex; flex-direction: column; }
+.boardcard .cardbody h3 { margin: 0 0 8px; font-size: 1.05em; cursor: pointer; color: #222; }
+.boardcard .owner { display: flex; align-items: center; cursor: pointer; margin-bottom: 10px; }
+.boardcard .owner .ownername { margin-left: 8px; font-size: .85em; color: #666; }
+.boardcard .cardactions { margin-top: auto; display: flex; }
+.boardcard .cardactions a { margin-right: 15px; cursor: pointer; color: #888; font-size: .9em; }
+.boardcard .cardactions a.liked { color: #e0245e; }
+.boardcard .cardactions a:hover { color: #ff8c1c; }
+
+/* Feed sections */
+.feed .feedsection, .feed .suggestedrow { margin-bottom: 40px; }
+.feed h2 { font-size: 1.3em; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 18px; }
+.feed .empty, .profileview .empty, .boardview .empty { color: #999; font-style: italic; }
+.feed.loading, .boardview.loading, .profileview.loading, .savetoboard .loading { padding: 60px 0; text-align: center; color: #999; }
+
+/* Suggested brides */
+.suggestedlist { display: flex; flex-wrap: wrap; margin: 0 -8px; }
+.suggestedbride { width: calc(25% - 16px); margin: 8px; display: flex; align-items: center; background: #fff; border: 1px solid #eee; border-radius: 6px; padding: 10px; }
+.suggestedbride .info { margin-left: 10px; flex: 1; cursor: pointer; overflow: hidden; }
+.suggestedbride .info .name { display: block; font-weight: 600; font-size: .9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.suggestedbride .info .meta { display: block; font-size: .75em; color: #999; }
+.suggestedbride .followbtn { cursor: pointer; font-size: .8em; padding: 5px 12px; border-radius: 20px; background: #ff8c1c; color: #fff; white-space: nowrap; }
+.suggestedbride .followbtn.following { background: #eee; color: #666; }
+
+/* Board view */
+.boardview .backlink, .profileview .backlink { cursor: pointer; color: #888; display: inline-block; margin-bottom: 20px; }
+.boardview .boardheader { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 20px; }
+.boardview .titleblock h1 { margin: 0 0 8px; font-size: 2em; }
+.boardview .titleblock .privatetag { font-size: .5em; vertical-align: middle; background: #eee; color: #666; padding: 4px 8px; border-radius: 12px; }
+.boardview .titleblock .desc { color: #666; margin: 0 0 10px; max-width: 620px; }
+.boardview .titleblock .owner { display: flex; align-items: center; cursor: pointer; }
+.boardview .titleblock .owner span { margin-left: 8px; font-weight: 600; }
+.boardview .boardstats { display: flex; align-items: center; }
+.boardview .boardstats a, .boardview .boardstats .stat { margin-left: 16px; color: #888; cursor: default; }
+.boardview .boardstats a { cursor: pointer; }
+.boardview .boardstats a.like.liked { color: #e0245e; }
+.boardview .boardstats a.share:hover, .boardview .boardstats a.like:hover { color: #ff8c1c; }
+.boardview .ownercontrols { margin-bottom: 20px; }
+.boardview .ownercontrols a { margin-right: 18px; cursor: pointer; color: #666; font-size: .9em; }
+.boardview .ownercontrols a.danger { color: #c0392b; }
+.boardview .boarditems { display: flex; flex-wrap: wrap; margin: 0 -6px 30px; }
+.boardview .boarditem { position: relative; width: calc(25% - 12px); margin: 6px; border-radius: 6px; overflow: hidden; background: #f4f4f4; }
+.boardview .boarditem img { width: 100%; display: block; }
+.boardview .boarditem .removeitem { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,.6); color: #fff; width: 26px; height: 26px; line-height: 26px; text-align: center; border-radius: 50%; cursor: pointer; }
+
+/* Comments */
+.boardcomments { max-width: 700px; }
+.boardcomments h3 { text-transform: uppercase; letter-spacing: 1px; font-size: 1.1em; }
+.boardcomments .addcomment { display: flex; margin-bottom: 20px; }
+.boardcomments .addcomment input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 3px; margin-right: 8px; }
+.boardcomments .loginprompt a { color: #ff8c1c; cursor: pointer; }
+.boardcomments .commentrow { display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #f2f2f2; }
+.boardcomments .commentrow .body { margin-left: 10px; flex: 1; }
+.boardcomments .commentrow .who { font-weight: 600; margin-right: 8px; }
+.boardcomments .commentrow .del { color: #ccc; cursor: pointer; }
+.boardcomments .commentrow .del:hover { color: #c0392b; }
+
+/* Profile */
+.profileview .profilehero { text-align: center; margin-bottom: 30px; }
+.profileview .profilehero h1 { margin: 15px 0 5px; }
+.profileview .profilehero .bio { color: #666; max-width: 500px; margin: 0 auto 10px; }
+.profileview .profilehero .weddingdate { color: #ff8c1c; font-size: .9em; }
+.profileview .profilehero .counts { margin: 15px 0; }
+.profileview .profilehero .counts span { margin: 0 12px; color: #666; }
+.profileview .profilehero .followbtn { display: inline-block; cursor: pointer; padding: 8px 24px; border-radius: 22px; background: #ff8c1c; color: #fff; font-weight: 600; }
+.profileview .profilehero .followbtn.following { background: #eee; color: #666; }
+
+/* Auth */
+.brideauth .authcard { max-width: 380px; margin: 0 auto; }
+.brideauth h2 { text-align: center; margin: 0 0 6px; }
+.brideauth .sub { text-align: center; color: #888; font-size: .9em; margin-bottom: 20px; }
+.brideauth .autherror { background: #fdecea; color: #c0392b; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: .9em; }
+.brideauth input { width: 100%; padding: 11px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 3px; box-sizing: border-box; }
+.brideauth .row2 { display: flex; }
+.brideauth .row2 input:first-child { margin-right: 10px; }
+.brideauth .btn.block { display: block; text-align: center; width: 100%; box-sizing: border-box; }
+.brideauth .switchmode { text-align: center; margin-top: 15px; font-size: .9em; color: #888; }
+.brideauth .switchmode a { color: #ff8c1c; cursor: pointer; }
+
+/* Generic modal */
+.bt-modaloverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.55); z-index: 2000; display: flex; align-items: flex-start; justify-content: center; overflow: auto; padding: 40px 15px; box-sizing: border-box; }
+.bt-modal { background: #fff; border-radius: 8px; width: 100%; max-width: 440px; padding: 22px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+.bt-modal header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.bt-modal header h2 { margin: 0; font-size: 1.3em; }
+.bt-modal .closebtn { position: absolute; top: 14px; right: 16px; color: #999; cursor: pointer; font-size: 1.2em; z-index: 2; }
+.bt-modal input[type=text] { width: 100%; padding: 11px; border: 1px solid #ddd; border-radius: 3px; box-sizing: border-box; margin-bottom: 12px; }
+
+/* Save to board */
+.savetoboard .previewimg { text-align: center; margin-bottom: 15px; }
+.savetoboard .previewimg img { max-height: 140px; border-radius: 6px; }
+.savetoboard .boardrow { display: flex; align-items: center; padding: 12px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 8px; cursor: pointer; }
+.savetoboard .boardrow:hover { border-color: #ff8c1c; }
+.savetoboard .boardrow.saved { background: #fff7ef; border-color: #ff8c1c; }
+.savetoboard .boardrow .title { flex: 1; font-weight: 600; }
+.savetoboard .boardrow .count { color: #999; font-size: .8em; margin-right: 12px; }
+.savetoboard .boardrow .check { color: #ff8c1c; font-size: 1.2em; }
+.savetoboard .createlink { display: block; margin-top: 12px; color: #ff8c1c; cursor: pointer; font-weight: 600; }
+.savetoboard .createboard .actions { display: flex; align-items: center; }
+.savetoboard .createboard .actions .link { margin-left: 12px; color: #999; cursor: pointer; }
+
+/* Gallery "Save to Board" button in the lightbox */
+#imagedisplay header { display: flex; justify-content: space-between; align-items: center; }
+#imagedisplay header .savebtn { cursor: pointer; background: #ff8c1c; color: #fff; padding: 8px 16px; border-radius: 22px; font-size: .85em; font-weight: 600; letter-spacing: .5px; }
+#imagedisplay header .savebtn i { margin-right: 6px; }
+
+@media only screen and (max-width: 60em) {
+    .boardcard, .suggestedbride { width: calc(50% - 20px); }
+    .boardview .boarditem { width: calc(50% - 12px); }
+}
+@media only screen and (max-width: 40em) {
+    .boardcard, .suggestedbride { width: calc(100% - 20px); }
+    .inspirationapp .inspirationheader nav a { margin-left: 10px; font-size: .75em; }
+}
+/* Profile edit */
+.profileview .profilehero .editprofilebtn { display: inline-block; cursor: pointer; padding: 8px 20px; border-radius: 22px; border: 1px solid #ddd; color: #666; font-weight: 600; }
+.profileview .profilehero .editprofilebtn:hover { border-color: #ff8c1c; color: #ff8c1c; }
+.bt-modal.editprofile .avataredit { text-align: center; margin-bottom: 18px; }
+.bt-modal.editprofile .avataredit .bt-avatar { display: block; margin: 0 auto 10px; }
+.bt-modal.editprofile .changephoto { color: #ff8c1c; cursor: pointer; font-weight: 600; font-size: .9em; }
+.bt-modal.editprofile .fieldlabel { display: block; font-size: .8em; text-transform: uppercase; letter-spacing: .5px; color: #888; margin-bottom: 5px; }
+.bt-modal.editprofile input[type=text], .bt-modal.editprofile input[type=date], .bt-modal.editprofile textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 3px; box-sizing: border-box; margin-bottom: 14px; font-family: inherit; }
+.bt-modal.editprofile textarea { height: 90px; resize: vertical; }

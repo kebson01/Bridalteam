@@ -82,6 +82,22 @@ $(document).ready(function(){
 
     initGalleryGrid();
 
+    // "Save to Board" bridge: capture the image being viewed and hand it to the
+    // React inspiration widget (mounted on #gallerysaveroot) when the bride
+    // clicks Save.  Delegated so it survives isotope re-rendering the grid.
+    var btCurrentMedia = {id: null, thumb: null};
+    $(document).on("click", "#gallerygrid .item", function(){
+        btCurrentMedia.id = $(this).data("id");
+        var src = $(this).find("img").attr("src") || "";
+        btCurrentMedia.thumb = src.replace(/^\/storage/, "");
+    });
+    $(document).on("click", "#btSaveInspiration", function(e){
+        e.preventDefault();
+        if(btCurrentMedia.id && typeof window.BTSaveInspiration === "function"){
+            window.BTSaveInspiration(btCurrentMedia.id, btCurrentMedia.thumb);
+        }
+    });
+
     if($("#gallerysearch").length != 0){
         $("#gallerykeywords").selectize({
             delimited: ',',

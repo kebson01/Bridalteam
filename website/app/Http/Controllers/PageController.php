@@ -98,6 +98,11 @@ class PageController extends Controller{
         }
     }
 
+    public function showInspirationPage(){
+        // Social inspiration feed (React app mounts on #inspirationapp).
+        return view('inspiration');
+    }
+
     public function showBlogPage(){
         // Dedicated blog page method
         return view('blog', [

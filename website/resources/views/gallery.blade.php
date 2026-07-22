@@ -72,7 +72,10 @@
         <div class="imagecover"></div>
         <div class="imagecontainer">
             <div class="innerwrapper">
-                <header><a id="imagedisplay_close"><i class="fa fa-times" aria-hidden="true"></i></a></header>
+                <header>
+                    <a id="btSaveInspiration" class="savebtn"><i class="fa fa-heart" aria-hidden="true"></i> Save to Board</a>
+                    <a id="imagedisplay_close"><i class="fa fa-times" aria-hidden="true"></i></a>
+                </header>
                 <div class="imagecontent">
                     <div class="image"><a><img src="" /></a></div>
                     <div class="imageowner"></div>
@@ -80,8 +83,10 @@
                     <div class="details">
 
                     </div>
-                </div>                
+                </div>
             </div>
         </div>
     </div>
+    {{-- Mount point for the React "Save to Board" / bride-auth modals --}}
+    <div id="gallerysaveroot"></div>
 @endsection
