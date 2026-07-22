@@ -98,8 +98,7 @@ export default function VendorBilling({
           </div>
           <p className="mt-4 border-t border-stone-2 pt-4 text-xs leading-relaxed text-ink-soft/60">
             <strong className="text-ink-soft/80">Cancel anytime.</strong> You keep Featured
-            through the period you&rsquo;ve paid for. Renewals aren&rsquo;t refundable, so cancel
-            before your renewal date to skip the next charge.
+            through the period you&rsquo;ve paid for.
           </p>
         </div>
       ) : (
