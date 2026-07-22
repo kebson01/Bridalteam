@@ -139,3 +139,74 @@
         }
     }
 }
+/* Subscription / cancellation / refund policy */
+.refundpolicy{
+    background-color: $siteGray4;
+    border-left: 4px solid $siteOrange;
+    padding: 18px 20px;
+    margin-bottom: 25px;
+    font-size: 0.9em;
+    line-height: 1.5em;
+
+    h3{
+        margin-top: 0;
+        text-transform: uppercase;
+        font-weight: 500;
+        font-family: $fontRaleway;
+        font-size: 1.15em;
+        letter-spacing: 2px;
+
+        span{
+            color: $siteOrange;
+        }
+    }
+
+    ul{
+        margin: 0;
+        padding-left: 18px;
+
+        li{
+            margin-bottom: 8px;
+        }
+    }
+
+    &.compact{
+        p{
+            margin: 0;
+        }
+    }
+}
+
+#tab_accountsettings{
+    .policynote{
+        font-size: 0.9em;
+        color: #666;
+    }
+
+    .accountactions{
+        p{
+            font-size: 0.9em;
+            line-height: 1.5em;
+            max-width: 640px;
+        }
+
+        .btn-deactivate{
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-cancelaccount{
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+
+        &.danger{
+            border-top: 1px solid $siteGray6;
+            padding-top: 20px;
+
+            h3 span{
+                color: #c0392b;
+            }
+        }
+    }
+}

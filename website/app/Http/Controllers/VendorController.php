@@ -576,16 +576,130 @@ class VendorController extends Controller
         $account = JWTAuth::parseToken()->authenticate();
         $vendor = $account->findVendor($id);
         if($vendor){
+            $accessuntil = null;
             $subscription = $vendor->getVendorSubscription();
-            $subscription->nextrenewal_on = null;
-            $subscription->save();
+            if($subscription){
+                //Preserve the paid-through date before we clear the renewal
+                $accessuntil = $subscription->nextrenewal_on;
+                //Setting the renewal date to null stops the daily ProcessSubs
+                //command from ever charging this subscription again.
+                $subscription->nextrenewal_on = null;
+                $subscription->save();
+            }
+
+            //Remove any scheduled upcoming subscription/addon changes so the
+            //vendor is not billed for a plan change that will never happen.
+            VendorNextSubscription::where('vendor_id', '=', $vendor->id)->delete();
+            VendorNextAddon::where('vendor_id', '=', $vendor->id)->delete();
 
             return response()->json([
-                'status' => "OK"
+                'status' => "OK",
+                'accessuntil' => $accessuntil,
+                'message' => "Your subscription has been canceled and will not renew. You will keep access until the end of your current paid period. Payments already made for the current billing cycle are non-refundable."
             ]);
         }else{
             return response()->json([
-                'status' => "Error", 
+                'status' => "Error",
+                "message" => "Could not verify vendor account."
+            ]);
+        }
+    }
+
+    /**
+     * Deactivate a vendor account.  This hides the vendor's public listing and
+     * stops any future subscription renewals, but keeps the account and its
+     * data so the vendor can reactivate later.  Payments already made for the
+     * current billing cycle are non-refundable.
+     */
+    public function deactivateAccount($id, Request $request){
+        $account = JWTAuth::parseToken()->authenticate();
+        $vendor = $account->findVendor($id);
+        if($vendor){
+            $vendor->active = false;
+            $vendor->save();
+
+            //Stop future billing while the account is deactivated.
+            $subscription = $vendor->getVendorSubscription();
+            if($subscription){
+                $subscription->nextrenewal_on = null;
+                $subscription->save();
+            }
+
+            //Clear any scheduled plan changes.
+            VendorNextSubscription::where('vendor_id', '=', $vendor->id)->delete();
+            VendorNextAddon::where('vendor_id', '=', $vendor->id)->delete();
+
+            return response()->json([
+                'status' => "OK",
+                'message' => "Your account has been deactivated and your listing is now hidden. Your subscription will not renew. Payments already made for the current billing cycle are non-refundable. You can reactivate your account at any time by logging back in."
+            ]);
+        }else{
+            return response()->json([
+                'status' => "Error",
+                "message" => "Could not verify vendor account."
+            ]);
+        }
+    }
+
+    /**
+     * Reactivate a previously deactivated vendor account.  The public listing
+     * becomes visible again.  Billing does not resume automatically; the
+     * vendor must choose a subscription again for it to renew.
+     */
+    public function reactivateAccount($id, Request $request){
+        $account = JWTAuth::parseToken()->authenticate();
+        $vendor = $account->findVendor($id);
+        if($vendor){
+            $vendor->active = true;
+            $vendor->save();
+
+            return response()->json([
+                'status' => "OK",
+                'message' => "Your account has been reactivated. Your subscription will not renew automatically. Please choose a subscription to keep your listing active going forward."
+            ]);
+        }else{
+            return response()->json([
+                'status' => "Error",
+                "message" => "Could not verify vendor account."
+            ]);
+        }
+    }
+
+    /**
+     * Permanently cancel and close a vendor account.  This cancels the
+     * subscription, removes the public listing and soft-deletes the vendor
+     * record (data is retained for our records but is no longer visible or
+     * billable).  Payments already made for the current billing cycle are
+     * non-refundable.
+     */
+    public function cancelAccount($id, Request $request){
+        $account = JWTAuth::parseToken()->authenticate();
+        $vendor = $account->findVendor($id);
+        if($vendor){
+            //Cancel the active subscription so no further charges are made.
+            $subscription = $vendor->getVendorSubscription();
+            if($subscription){
+                $subscription->nextrenewal_on = null;
+                $subscription->save();
+            }
+
+            //Remove any scheduled upcoming subscription/addon changes.
+            VendorNextSubscription::where('vendor_id', '=', $vendor->id)->delete();
+            VendorNextAddon::where('vendor_id', '=', $vendor->id)->delete();
+
+            //Hide and soft-delete the vendor.  The record is retained but is
+            //excluded from all public listings and from renewal processing.
+            $vendor->active = false;
+            $vendor->save();
+            $vendor->delete();
+
+            return response()->json([
+                'status' => "OK",
+                'message' => "Your account has been canceled and closed. Your subscription will not renew and your listing has been removed. Payments already made for the current billing cycle are non-refundable."
+            ]);
+        }else{
+            return response()->json([
+                'status' => "Error",
                 "message" => "Could not verify vendor account."
             ]);
         }

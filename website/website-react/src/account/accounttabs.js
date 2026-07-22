@@ -7,6 +7,7 @@ import CatQuestions from '../misc/categoryquestions';
 import MediaManager from '../misc/mediamanager';
 import SubscriptionManager from '../misc/subscriptions';
 import VendorAccountMessages from './vendormessages';
+import RefundPolicy from '../misc/refundterms';
 
 import Api from '../api';
 
@@ -199,10 +200,70 @@ export default class VendorAccountTabs extends Component {
         this.setState(state);
     }
 
-    handleCatAnswersChange = (newVal, question) => {        
+    handleCatAnswersChange = (newVal, question) => {
         var state = this.state;
         state.catanswers['catquestion_' + question] = newVal;
-        this.setState(state);        
+        this.setState(state);
+    }
+
+    deactivateAccount = () => {
+        var confirmation = confirm(
+            "Deactivate your account?\n\n" +
+            "Your public listing will be hidden and your subscription will not renew. " +
+            "Payments already made for the current billing cycle are non-refundable.\n\n" +
+            "You can reactivate your account at any time by logging back in."
+        );
+        if(confirmation){
+            this.api.post("vendors/" + this.state.form.id + "/deactivateaccount", null).then((res) => {
+                if(res.status == "OK"){
+                    alert(res.message ? res.message : "Your account has been deactivated.");
+                    window.location.reload();
+                }else{
+                    alert(res.message ? res.message : "There was an error deactivating your account.  Contact Bridal Team for support.");
+                }
+            }).catch(() => {
+                alert("There was an error deactivating your account.  Contact Bridal Team for support.");
+            });
+        }
+    }
+
+    reactivateAccount = () => {
+        this.api.post("vendors/" + this.state.form.id + "/reactivateaccount", null).then((res) => {
+            if(res.status == "OK"){
+                alert(res.message ? res.message : "Your account has been reactivated.");
+                window.location.reload();
+            }else{
+                alert(res.message ? res.message : "There was an error reactivating your account.  Contact Bridal Team for support.");
+            }
+        }).catch(() => {
+            alert("There was an error reactivating your account.  Contact Bridal Team for support.");
+        });
+    }
+
+    cancelAccount = () => {
+        var confirmation = confirm(
+            "Permanently cancel and close your account?\n\n" +
+            "This cancels your subscription, removes your public listing and closes your account. " +
+            "Payments already made for the current billing cycle are non-refundable and no refund " +
+            "will be issued for the remaining time in your current period.\n\n" +
+            "This action cannot be undone from your account. Are you sure you want to continue?"
+        );
+        if(confirmation){
+            var secondconfirm = confirm("Please confirm once more: do you want to permanently close your account?");
+            if(!secondconfirm){
+                return;
+            }
+            this.api.post("vendors/" + this.state.form.id + "/cancelaccount", null).then((res) => {
+                if(res.status == "OK"){
+                    alert(res.message ? res.message : "Your account has been canceled and closed.");
+                    window.location.href = "/logout";
+                }else{
+                    alert(res.message ? res.message : "There was an error closing your account.  Contact Bridal Team for support.");
+                }
+            }).catch(() => {
+                alert("There was an error closing your account.  Contact Bridal Team for support.");
+            });
+        }
     }
 
     render(){
@@ -213,6 +274,7 @@ export default class VendorAccountTabs extends Component {
                     <li><a onClick={() => { this.changeTab(2) }}>Uploads</a></li>
                     <li><a onClick={() => { this.changeTab(3) }}>Purchases</a></li>
                     <li><a onClick={() => { this.changeTab(4) }}>Messages</a></li>
+                    <li><a onClick={() => { this.changeTab(5) }}>Account Settings</a></li>
                 </ul>
                 <div id="mobilewarning">To edit your account, login on a desktop computer or tablet.</div>
                 {this.state.tab == 1 ? 
@@ -431,6 +493,51 @@ export default class VendorAccountTabs extends Component {
                     </div> : null
                 } 
                 {this.state.tab == 4 ? <VendorAccountMessages /> : null }
+                {this.state.tab == 5 ?
+                    <div id="tab_accountsettings">
+                        <div className="formsection">
+                            <RefundPolicy />
+                            <p className="policynote">
+                                To cancel your subscription while keeping your account open, use the
+                                <strong> Cancel Subscription</strong> option on the <strong>Purchases</strong> tab.
+                            </p>
+                        </div>
+                        <div className="formsection accountactions">
+                            { this.state.form.active != true ?
+                                <div>
+                                    <h3>Reactivate <span>Account</span></h3>
+                                    <p>
+                                        Your account is currently deactivated and your listing is hidden.
+                                        Reactivate to make your listing visible again. Note that your
+                                        subscription will not renew automatically &mdash; choose a subscription
+                                        on the Purchases tab to keep your listing active going forward.
+                                    </p>
+                                    <a onClick={this.reactivateAccount} className="btn">Reactivate My Account</a>
+                                </div>
+                            :
+                                <div>
+                                    <h3>Deactivate <span>Account</span></h3>
+                                    <p>
+                                        Temporarily hide your public listing and stop your subscription from
+                                        renewing. Your account and data are kept, and you can reactivate at any
+                                        time. Payments already made for the current billing cycle are
+                                        non-refundable.
+                                    </p>
+                                    <a onClick={this.deactivateAccount} className="btn btn-deactivate">Deactivate My Account</a>
+                                </div>
+                            }
+                        </div>
+                        <div className="formsection accountactions danger">
+                            <h3>Cancel &amp; Close <span>Account</span></h3>
+                            <p>
+                                Permanently cancel your subscription and close your account. Your public
+                                listing will be removed. This cannot be undone from your account, and
+                                payments already made for the current billing cycle are non-refundable.
+                            </p>
+                            <a onClick={this.cancelAccount} className="btn btn-cancelaccount">Cancel &amp; Close My Account</a>
+                        </div>
+                    </div> : null
+                }
             </div>
         )
     }
