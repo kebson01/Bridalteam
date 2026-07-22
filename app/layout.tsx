@@ -4,6 +4,8 @@ import "./globals.css";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import ServiceWorker from "@/components/service-worker";
+import JsonLd from "@/components/json-ld";
+import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 
 // Jost is a free geometric sans that stands in for the original Futura-PT.
@@ -90,6 +92,8 @@ export default function RootLayout({
         className="min-h-full flex flex-col bg-white text-ink"
         suppressHydrationWarning
       >
+        <JsonLd data={organizationSchema()} />
+        <JsonLd data={websiteSchema()} />
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />

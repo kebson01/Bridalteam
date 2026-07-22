@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageHero from "@/components/page-hero";
+import JsonLd from "@/components/json-ld";
+import { blogPostingSchema } from "@/lib/structured-data";
 import { POSTS, POSTS_BY_DATE, getPost, type Block } from "@/lib/blog";
 import { SITE_URL } from "@/lib/site";
 
@@ -73,6 +75,7 @@ export default async function BlogPostPage({
 
   return (
     <>
+      <JsonLd data={blogPostingSchema(post)} />
       <PageHero eyebrow={post.category} title={post.title} />
 
       <article className="mx-auto max-w-2xl px-5 py-14">
