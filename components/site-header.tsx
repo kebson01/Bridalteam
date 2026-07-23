@@ -11,6 +11,7 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 const NAV = [
   { label: "How it works", href: "/#how" },
   { label: "AI Planner", href: "/planner" },
+  { label: "Guides", href: "/guides" },
   { label: "Find Vendors", href: "/vendors" },
   { label: "Inspiration", href: "/inspiration" },
   { label: "Pricing", href: "/pricing" },

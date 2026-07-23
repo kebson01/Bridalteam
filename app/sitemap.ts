@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 import { POSTS } from "@/lib/blog";
+import { GUIDES } from "@/lib/guides";
 
 /**
  * Public marketing pages only.
@@ -17,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes: Array<{ path: string; priority: number }> = [
     { path: "/", priority: 1 },
     { path: "/planner", priority: 0.9 },
+    { path: "/guides", priority: 0.8 },
     { path: "/inspiration", priority: 0.7 },
     { path: "/pricing", priority: 0.7 },
     { path: "/about", priority: 0.6 },
@@ -44,5 +46,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
-  return [...staticRoutes, ...blogRoutes];
+  const guideRoutes = GUIDES.map((guide) => ({
+    url: `${SITE_URL}/guides/${guide.slug}`,
+    lastModified: new Date(`${guide.updated}T00:00:00`),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...guideRoutes, ...blogRoutes];
 }
