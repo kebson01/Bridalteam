@@ -46,17 +46,20 @@ interface Dashboard {
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 export default function AdminDashboardPage() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const load = useCallback(async (pw: string) => {
+  const load = useCallback(async (user: string, pw: string) => {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/dashboard", { headers: { "x-admin-password": pw } });
+      const res = await fetch("/api/admin/dashboard", {
+        headers: { "x-admin-user": user, "x-admin-password": pw },
+      });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error ?? "Couldn't load.");
@@ -65,6 +68,7 @@ export default function AdminDashboardPage() {
       }
       setData(json);
       setUnlocked(true);
+      sessionStorage.setItem("bt_admin_user", user);
       sessionStorage.setItem("bt_admin_pw", pw);
     } catch {
       setError("Couldn't reach the server.");
@@ -74,23 +78,26 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem("bt_admin_pw");
-    if (saved) {
-      setPassword(saved);
-      load(saved);
+    const savedUser = sessionStorage.getItem("bt_admin_user") ?? "";
+    const savedPw = sessionStorage.getItem("bt_admin_pw");
+    if (savedPw) {
+      setUsername(savedUser);
+      setPassword(savedPw);
+      load(savedUser, savedPw);
     }
   }, [load]);
 
   async function act(action: string, id: string) {
+    const user = sessionStorage.getItem("bt_admin_user") ?? username;
     const pw = sessionStorage.getItem("bt_admin_pw") ?? password;
     setBusy(true);
     const res = await fetch("/api/admin/dashboard", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-password": pw },
+      headers: { "Content-Type": "application/json", "x-admin-user": user, "x-admin-password": pw },
       body: JSON.stringify({ action, id }),
     });
     setBusy(false);
-    if (res.ok) load(pw);
+    if (res.ok) load(user, pw);
     else {
       const j = await res.json().catch(() => ({}));
       setError(j.error ?? "Action failed.");
@@ -98,9 +105,11 @@ export default function AdminDashboardPage() {
   }
 
   function logout() {
+    sessionStorage.removeItem("bt_admin_user");
     sessionStorage.removeItem("bt_admin_pw");
     setUnlocked(false);
     setData(null);
+    setUsername("");
     setPassword("");
   }
 
@@ -113,29 +122,40 @@ export default function AdminDashboardPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            load(password);
+            load(username, password);
           }}
-          className="mt-6 flex gap-2"
+          className="mt-6 space-y-3"
         >
           <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Admin password"
+            type="text"
+            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
             className="w-full rounded-lg border border-stone-2 px-3 py-2.5 text-sm outline-none focus:border-brand"
           />
-          <button
-            type="submit"
-            disabled={busy}
-            className="flex-none rounded-lg bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-          >
-            {busy ? "…" : "Unlock"}
-          </button>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full rounded-lg border border-stone-2 px-3 py-2.5 text-sm outline-none focus:border-brand"
+            />
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex-none rounded-lg bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {busy ? "…" : "Unlock"}
+            </button>
+          </div>
         </form>
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
         <p className="mt-6 text-xs text-ink-soft/50">
-          Set <code>ADMIN_PASSWORD</code> and <code>SUPABASE_SERVICE_ROLE_KEY</code> in your
-          server environment to enable admin.
+          Set <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code> and{" "}
+          <code>SUPABASE_SERVICE_ROLE_KEY</code> in your server environment to enable admin.
         </p>
       </section>
     );

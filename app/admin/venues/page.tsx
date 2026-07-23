@@ -20,6 +20,7 @@ const EMPTY = {
 type Form = typeof EMPTY;
 
 export default function AdminVenuesPage() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [venues, setVenues] = useState<Venue[]>([]);
@@ -37,11 +38,12 @@ export default function AdminVenuesPage() {
     if (unlocked) load();
   }, [unlocked, load]);
 
-  // Restore a previously entered password for convenience.
+  // Restore previously entered credentials for convenience.
   useEffect(() => {
-    const saved = sessionStorage.getItem("bt_admin_pw");
-    if (saved) {
-      setPassword(saved);
+    const savedPw = sessionStorage.getItem("bt_admin_pw");
+    if (savedPw) {
+      setUsername(sessionStorage.getItem("bt_admin_user") ?? "");
+      setPassword(savedPw);
       setUnlocked(true);
     }
   }, []);
@@ -53,7 +55,11 @@ export default function AdminVenuesPage() {
     const editing = Boolean(form.id);
     const res = await fetch("/api/admin/venues", {
       method: editing ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json", "x-admin-password": password },
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-user": username,
+        "x-admin-password": password,
+      },
       body: JSON.stringify(form),
     });
     const data = await res.json();
@@ -62,6 +68,7 @@ export default function AdminVenuesPage() {
       setMsg({ text: data.error ?? "Something went wrong.", ok: false });
       return;
     }
+    sessionStorage.setItem("bt_admin_user", username);
     sessionStorage.setItem("bt_admin_pw", password);
     setMsg({ text: editing ? "Venue updated." : "Venue added.", ok: true });
     setForm(EMPTY);
@@ -72,7 +79,11 @@ export default function AdminVenuesPage() {
     if (!confirm("Delete this venue?")) return;
     const res = await fetch("/api/admin/venues", {
       method: "DELETE",
-      headers: { "Content-Type": "application/json", "x-admin-password": password },
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-user": username,
+        "x-admin-password": password,
+      },
       body: JSON.stringify({ id }),
     });
     const data = await res.json();
@@ -108,29 +119,40 @@ export default function AdminVenuesPage() {
       <section className="mx-auto max-w-md px-5 py-24">
         <h1 className="text-2xl font-light uppercase tracking-wide text-ink">Venue admin</h1>
         <p className="mt-2 text-sm text-ink-soft/70">
-          Enter the admin password to manage venues.
+          Enter your admin username and password to manage venues.
         </p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             if (password) setUnlocked(true);
           }}
-          className="mt-6 flex gap-2"
+          className="mt-6 space-y-3"
         >
           <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Admin password"
-            className="flex-1 rounded-lg border border-stone-2 px-4 py-3 text-sm outline-none focus:border-brand"
+            type="text"
+            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+            className="w-full rounded-lg border border-stone-2 px-4 py-3 text-sm outline-none focus:border-brand"
           />
-          <button className="rounded-lg bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-sm font-semibold text-white">
-            Unlock
-          </button>
+          <div className="flex gap-2">
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="flex-1 rounded-lg border border-stone-2 px-4 py-3 text-sm outline-none focus:border-brand"
+            />
+            <button className="rounded-lg bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-sm font-semibold text-white">
+              Unlock
+            </button>
+          </div>
         </form>
         <p className="mt-4 text-xs text-ink-soft/50">
-          Set <code>ADMIN_PASSWORD</code> and <code>SUPABASE_SERVICE_ROLE_KEY</code> in
-          your environment to enable saving.
+          Set <code>ADMIN_USERNAME</code>, <code>ADMIN_PASSWORD</code> and{" "}
+          <code>SUPABASE_SERVICE_ROLE_KEY</code> in your environment to enable saving.
         </p>
       </section>
     );
@@ -145,6 +167,7 @@ export default function AdminVenuesPage() {
         <h1 className="text-2xl font-light uppercase tracking-wide text-ink">Venue admin</h1>
         <button
           onClick={() => {
+            sessionStorage.removeItem("bt_admin_user");
             sessionStorage.removeItem("bt_admin_pw");
             setUnlocked(false);
           }}

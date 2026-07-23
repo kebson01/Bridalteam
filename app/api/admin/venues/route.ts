@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin, supabasePublic } from "@/lib/supabase";
+import { supabasePublic } from "@/lib/supabase";
+import { adminGuard } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,29 +32,6 @@ function pick(body: VenueInput) {
   return out;
 }
 
-// Returns an error response if the request isn't an authorized, configured admin.
-function guard(req: Request) {
-  const configured = process.env.ADMIN_PASSWORD;
-  if (!configured) {
-    return NextResponse.json(
-      { error: "Admin isn't configured. Set ADMIN_PASSWORD and SUPABASE_SERVICE_ROLE_KEY." },
-      { status: 503 }
-    );
-  }
-  const provided = req.headers.get("x-admin-password");
-  if (provided !== configured) {
-    return NextResponse.json({ error: "Incorrect admin password." }, { status: 401 });
-  }
-  const admin = supabaseAdmin();
-  if (!admin) {
-    return NextResponse.json(
-      { error: "SUPABASE_SERVICE_ROLE_KEY is not set on the server." },
-      { status: 503 }
-    );
-  }
-  return admin;
-}
-
 // Public list (no password) — used by the admin page to render current venues.
 export async function GET() {
   const supabase = supabasePublic();
@@ -67,7 +45,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const admin = guard(req);
+  const admin = adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   const body = (await req.json().catch(() => ({}))) as VenueInput;
@@ -81,7 +59,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const admin = guard(req);
+  const admin = adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   const body = (await req.json().catch(() => ({}))) as VenueInput;
@@ -98,7 +76,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const admin = guard(req);
+  const admin = adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   const body = (await req.json().catch(() => ({}))) as VenueInput;
