@@ -7,6 +7,7 @@
  */
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 import type { Post } from "@/lib/blog";
+import type { Guide, FAQ } from "@/lib/guides";
 
 const LOGO_URL = `${SITE_URL}/icon-512.png`;
 const ORG_ID = `${SITE_URL}/#organization`;
@@ -64,5 +65,52 @@ export function blogPostingSchema(post: Post) {
     author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     publisher: { "@id": ORG_ID },
     isPartOf: { "@id": `${SITE_URL}/#website` },
+  };
+}
+
+/** Article schema for a planning guide. */
+export function guideArticleSchema(guide: Guide) {
+  const url = `${SITE_URL}/guides/${guide.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: guide.title,
+    description: guide.excerpt,
+    datePublished: guide.updated,
+    dateModified: guide.updated,
+    articleSection: guide.category,
+    keywords: guide.keywords.join(", "),
+    url,
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+    publisher: { "@id": ORG_ID },
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+  };
+}
+
+/** FAQPage schema — powers Google's FAQ rich results and helps AI answers. */
+export function faqSchema(faqs: FAQ[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+}
+
+/** BreadcrumbList schema from [name, path] pairs. */
+export function breadcrumbSchema(items: Array<{ name: string; path: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: `${SITE_URL}${item.path}`,
+    })),
   };
 }
