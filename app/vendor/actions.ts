@@ -6,6 +6,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
 import { youtubePoster } from "@/lib/media";
+import { moderateImage } from "@/lib/moderation";
 
 // RLS ("Vendor team edits its profile") enforces that the caller belongs to the
 // vendor org, so we update by org_id without an extra permission check.
@@ -97,6 +98,20 @@ export async function addVendorMedia(
     imageUrl = derived;
   }
   const mediaUrl = mediaType === "photo" ? null : url;
+
+  // AI safety check on the image (the photo itself, or a video/audio poster)
+  // before it can appear in the public gallery. Blocks explicit/inappropriate
+  // content; fails open if moderation is unavailable.
+  const moderation = await moderateImage(imageUrl);
+  if (!moderation.allowed) {
+    return {
+      error:
+        "That image looks inappropriate for the gallery and wasn't added." +
+        (moderation.reason ? ` (${moderation.reason})` : "") +
+        " If you believe this is a mistake, contact support.",
+      added: false,
+    };
+  }
 
   const supabase = await supabaseServer();
   const { error } = await supabase.from("inspiration_images").insert({
