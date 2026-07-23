@@ -373,6 +373,206 @@ export const GUIDES: Guide[] = [
       "wedding reception timeline",
     ],
   },
+  {
+    slug: "how-to-choose-a-wedding-photographer",
+    title: "How to choose a wedding photographer",
+    category: "Vendors",
+    updated: "2026-07-22",
+    readMinutes: 7,
+    excerpt:
+      "How to compare photographers on what matters, the questions to ask, and the contract details that protect the photos you'll keep forever.",
+    intro:
+      "Your photos are what's left when the day is over, so this is one vendor worth choosing carefully. The good news: once you know what to look for, comparing photographers gets a lot simpler. Here's how to find someone whose work — and working style — fits your day.",
+    body: [
+      { h2: "Judge a full gallery, not highlights" },
+      { p: "Anyone can assemble a dazzling highlight reel from years of work. Ask to see two or three complete weddings, start to finish. A full gallery shows consistency — how they handle harsh midday light, dim receptions, group shots, and quiet in-between moments, not just the ten best frames." },
+      { h2: "Match the style to your taste" },
+      { p: "Photographers tend toward a style: light and airy, dark and moody, classic and timeless, or documentary. None is better — but you'll live with it forever, so pick the one you genuinely love. Look at how they edit skin tones and whether the mood feels like your day." },
+      { h2: "Meet them before you book" },
+      { p: "You'll spend the entire day with your photographer, and their presence shapes how relaxed you feel. A quick call or coffee tells you whether they put you at ease and how they direct people — which is most of what makes group photos painless." },
+      { h2: "Questions to ask" },
+      { ul: [
+        "Will you personally shoot our wedding, or an associate? Is there a second shooter?",
+        "How many hours of coverage, and what's the overtime rate?",
+        "When do we get the photos, and roughly how many do we receive?",
+        "Do we get full printing/sharing rights to the images?",
+        "What's your backup plan for gear failure or illness?",
+        "Have you shot at our venue or one like it?",
+      ] },
+      { h2: "Read the contract" },
+      { p: "Confirm the deliverables in writing: hours of coverage, number of edited images, delivery timeline, image rights, and the cancellation and illness-backup policy. Clarity here prevents the most common post-wedding disputes." },
+    ],
+    faqs: [
+      {
+        q: "How much does a wedding photographer cost?",
+        a: "It varies widely by market and experience, but photography typically runs 10–15% of the total wedding budget. Compare packages on hours of coverage, number of edited images, and image rights — not just the headline price.",
+      },
+      {
+        q: "What should you look for in a wedding photographer?",
+        a: "Review two or three complete galleries for consistency, make sure their editing style matches your taste, confirm who actually shoots your day, and meet them to check you feel at ease together.",
+      },
+      {
+        q: "How far in advance should you book a wedding photographer?",
+        a: "Book 9–12 months out. Photographers take one wedding per date, so the best ones fill popular dates a year ahead.",
+      },
+    ],
+    keywords: [
+      "how to choose a wedding photographer",
+      "questions to ask wedding photographer",
+      "wedding photographer tips",
+      "hiring a wedding photographer",
+    ],
+  },
+  {
+    slug: "how-to-choose-a-wedding-florist",
+    title: "How to choose a wedding florist",
+    category: "Vendors",
+    updated: "2026-07-22",
+    readMinutes: 6,
+    excerpt:
+      "How to brief a florist, keep flowers on budget with seasonal choices, and the questions that reveal whether they're the right fit.",
+    intro:
+      "Flowers set the mood of a room more than almost anything else — and they're easier to keep on budget than most couples expect, if you make a few smart choices early. Here's how to find a florist who gets your vision and works within your number.",
+    body: [
+      { h2: "Bring a visual brief" },
+      { p: "Florists think in images, so come with a small collection of photos you love — plus your colors, your venue, and any flowers you adore or can't stand. A tight brief gets a far more useful (and accurate) quote than 'something pretty and seasonal.'" },
+      { h2: "Let season and locality do the work" },
+      { p: "In-season, locally grown flowers cost less and look fresher than imported blooms flown in out of season. A good florist will suggest beautiful seasonal stand-ins for pricey requests — peonies in winter, for instance, are expensive and fragile. Flexibility here saves real money." },
+      { h2: "Prioritize where flowers are seen" },
+      { p: "Spend on the pieces people actually notice up close and photograph most — the bouquet, the ceremony backdrop, the centerpieces — and go simpler on spots guests barely register. Reusing ceremony arrangements at the reception stretches the budget further." },
+      { h2: "Questions to ask" },
+      { ul: [
+        "Have you worked at our venue, and are there any floral restrictions?",
+        "What's realistic for our budget — and where would you splurge or save?",
+        "Do you offer rentals (vases, arches, candles) or is everything purchased?",
+        "Can ceremony flowers be repurposed at the reception?",
+        "Who sets up and breaks down, and is that included?",
+        "What happens if a flower we chose isn't available that week?",
+      ] },
+      { h2: "Confirm the details" },
+      { p: "Get an itemized proposal listing each arrangement, the setup and breakdown plan, delivery timing, and the rental return terms. An itemized quote makes it easy to trim a piece or two if you need to reach your number." },
+    ],
+    faqs: [
+      {
+        q: "How much should you spend on wedding flowers?",
+        a: "Flowers usually take about 8–10% of the wedding budget. Choosing in-season, local blooms and reusing ceremony arrangements at the reception keeps costs down without sacrificing impact.",
+      },
+      {
+        q: "How do you save money on wedding flowers?",
+        a: "Pick in-season, locally grown flowers, spend on high-visibility pieces (bouquet, ceremony backdrop, centerpieces), repurpose ceremony arrangements, and ask your florist for seasonal stand-ins for expensive requests.",
+      },
+      {
+        q: "What should you bring to a florist consultation?",
+        a: "Bring a few inspiration photos, your color palette, your venue details, your budget, and a short list of flowers you love or want to avoid — a clear brief gets a more accurate quote.",
+      },
+    ],
+    keywords: [
+      "how to choose a wedding florist",
+      "wedding flowers budget",
+      "questions to ask wedding florist",
+      "how to save on wedding flowers",
+    ],
+  },
+  {
+    slug: "how-to-choose-a-wedding-dj-or-band",
+    title: "How to choose a wedding DJ or band",
+    category: "Vendors",
+    updated: "2026-07-22",
+    readMinutes: 6,
+    excerpt:
+      "DJ vs. band, how to judge an entertainer who can also run your reception, and the questions that keep the dance floor full.",
+    intro:
+      "Music and the MC set the energy of your reception — a great entertainer keeps the dance floor full and the night flowing, while the wrong one can flatten the room. Here's how to decide between a DJ and a band, and how to vet either.",
+    body: [
+      { h2: "DJ or band?" },
+      { p: "A DJ offers the widest range of songs, exact recordings, and usually a lower price — great if you want a specific playlist and a packed dance floor. A live band brings energy and spectacle but costs more, takes more space, and works from a set repertoire. Some couples split the difference: a DJ for the reception, a soloist or trio for the ceremony and cocktail hour." },
+      { h2: "They're also your MC" },
+      { p: "Your DJ or bandleader usually runs the room — announcing entrances, cueing toasts and dances, and reading the crowd. That hosting skill matters as much as the music. Ask how they handle the flow of the night and how they take (or limit) requests." },
+      { h2: "Hear them in a real setting" },
+      { p: "A polished promo video is table stakes. Ask for audio or video from an actual wedding, or whether you can hear them live. You're listening for how they blend songs, manage transitions, and keep momentum — not just whether they sound good in a studio clip." },
+      { h2: "Questions to ask" },
+      { ul: [
+        "Will the person we meet be the one performing on our date?",
+        "How do you handle must-play and do-not-play lists and guest requests?",
+        "What does setup need — space, power, and how long?",
+        "Do you provide ceremony and cocktail-hour sound, and microphones for toasts?",
+        "What's your backup plan if equipment fails or you're ill?",
+        "How much overtime is available and at what rate?",
+      ] },
+      { h2: "Lock the details" },
+      { p: "Put the performer's name, hours, equipment, breaks, and backup plan in the contract. Share your must-play and do-not-play lists early so there are no surprises when the dancing starts." },
+    ],
+    faqs: [
+      {
+        q: "Should you hire a DJ or a band for a wedding?",
+        a: "A DJ gives you a wider song range and lower cost; a live band brings energy and spectacle at a higher price and larger footprint. Many couples use a DJ for the reception and live musicians for the ceremony or cocktail hour.",
+      },
+      {
+        q: "What questions should you ask a wedding DJ?",
+        a: "Confirm the actual performer on your date, how they handle must-play/do-not-play lists and requests, setup and power needs, ceremony/cocktail sound and toast mics, overtime rates, and their equipment-failure backup plan.",
+      },
+      {
+        q: "How much does a wedding DJ or band cost?",
+        a: "Music and entertainment typically run about 8–10% of the budget. A DJ is usually less than a live band; the exact figure depends on your market, the hours, and whether you also need ceremony and cocktail-hour music.",
+      },
+    ],
+    keywords: [
+      "how to choose a wedding DJ",
+      "wedding DJ vs band",
+      "questions to ask wedding DJ",
+      "wedding band vs DJ",
+    ],
+  },
+  {
+    slug: "how-to-choose-a-wedding-caterer",
+    title: "How to choose a wedding caterer",
+    category: "Vendors",
+    updated: "2026-07-22",
+    readMinutes: 6,
+    excerpt:
+      "Service styles compared, what a per-plate quote really includes, and the questions to ask before you book the biggest line item after your venue.",
+    intro:
+      "Catering is usually the largest expense after the venue, and it shapes how the reception feels — from a relaxed buffet to a formal plated dinner. Here's how to compare caterers on real total cost and find food your guests will actually remember.",
+    body: [
+      { h2: "Start with service style" },
+      { p: "The style drives both cost and atmosphere. Plated service is formal and needs more staff; buffets are relaxed and let guests choose; family-style lands in between and encourages conversation; stations and heavy passed appetizers suit a livelier, mingling reception. Pick the feel you want first, then price it." },
+      { h2: "Understand what a per-plate price includes" },
+      { p: "A per-head quote can mean very different things. Confirm whether it covers staff, rentals (plates, glassware, linens), setup and cleanup, and service charges — or whether those are extra. The lowest per-plate number often isn't the lowest total once the add-ons appear." },
+      { h2: "Always do a tasting" },
+      { p: "Never book significant catering without tasting the actual menu. A tasting also shows how the food holds up at scale and lets you fine-tune seasoning, portions, and presentation. Bring anyone helping decide, and ask how they handle dietary needs." },
+      { h2: "Questions to ask" },
+      { ul: [
+        "Is the per-person price all-in, or are staff, rentals and service charges extra?",
+        "How do you handle allergies, and vegetarian, vegan or other dietary needs?",
+        "What's the staff-to-guest ratio, and are gratuities included?",
+        "Do you provide the bar, or is that separate? Can we bring our own alcohol?",
+        "Have you worked at our venue, and do you handle setup and cleanup?",
+        "When do you need the final headcount, and what's the cancellation policy?",
+      ] },
+      { h2: "Compare on total cost" },
+      { p: "Add up everything — food, staff, rentals, bar, service charge, and tax — before comparing caterers. And nail down the final-headcount deadline, since that number sets your final bill." },
+    ],
+    faqs: [
+      {
+        q: "How much does wedding catering cost?",
+        a: "Venue and catering together are typically 40–50% of the wedding budget, and catering is usually the biggest line item after the venue. Compare total cost — food plus staff, rentals, bar, and service charges — not just the per-plate price.",
+      },
+      {
+        q: "What is the best service style for a wedding?",
+        a: "It depends on the feel you want: plated is formal, buffet is relaxed and budget-friendly, family-style encourages conversation, and stations suit a lively, mingling reception. Choose the atmosphere first, then price it.",
+      },
+      {
+        q: "What questions should you ask a wedding caterer?",
+        a: "Ask whether the per-person price is all-inclusive, how they handle dietary needs, the staff-to-guest ratio and gratuities, bar options, venue experience and cleanup, and the final-headcount and cancellation terms.",
+      },
+    ],
+    keywords: [
+      "how to choose a wedding caterer",
+      "wedding catering cost",
+      "questions to ask wedding caterer",
+      "wedding catering styles",
+    ],
+  },
 ];
 
 export function getGuide(slug: string): Guide | undefined {
