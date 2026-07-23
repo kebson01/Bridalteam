@@ -573,6 +573,262 @@ export const GUIDES: Guide[] = [
       "wedding catering styles",
     ],
   },
+  {
+    slug: "how-to-choose-a-wedding-videographer",
+    title: "How to choose a wedding videographer",
+    category: "Vendors",
+    updated: "2026-07-22",
+    readMinutes: 6,
+    excerpt:
+      "Whether you need video, the film styles to know, and the questions that get you a wedding film you'll actually rewatch.",
+    intro:
+      "Photos freeze moments; video keeps the movement, the voices, and the vows. If reliving the day matters to you, a videographer is worth the budget. Here's how to decide whether you need one and how to pick someone whose films you'll love.",
+    body: [
+      { h2: "Decide if video is for you" },
+      { p: "Not every couple wants video, and that's fine. But the things a photo can't capture — your partner's voice during the vows, a parent's toast, the roar of the dance floor — are exactly what couples say they treasure most later. If those moments matter, it's money well spent." },
+      { h2: "Know the styles" },
+      { p: "Videographers work in recognizable styles. Cinematic films are polished and edited to music like a short movie; documentary films play events out more fully and in order; some deliver a short highlight reel, others a longer feature, many both. Decide whether you want a tight 3–5 minute film, a full documentary, or both before comparing." },
+      { h2: "Watch full films and listen to the audio" },
+      { p: "Audio is where cheap video falls apart. Watch a couple of complete films — not just highlight reels — and listen: are the vows and toasts crisp, or muddy and wind-blown? Clean audio usually means they use proper mics, which separates the pros from the rest." },
+      { h2: "Coordinate with your photographer" },
+      { p: "Your photographer and videographer share the same key moments all day. Pros are used to working together, but it helps if they've met a similar setup. Ask how they stay out of each other's shots — you don't want a camera operator in every photo." },
+      { h2: "Questions to ask" },
+      { ul: [
+        "What deliverables do we get — highlight film, full film, raw footage — and how long?",
+        "How do you capture audio for vows and toasts?",
+        "When will the film be ready, and how many revisions are included?",
+        "Will you personally film, and is there a second shooter?",
+        "How do you coordinate with our photographer?",
+        "What's your backup plan for gear or illness?",
+      ] },
+    ],
+    faqs: [
+      {
+        q: "Do you need a videographer for a wedding?",
+        a: "It's optional, but video captures what photos can't — your vows spoken aloud, toasts, and the energy of the day. If reliving those moments matters to you, it's worth budgeting for.",
+      },
+      {
+        q: "How much does a wedding videographer cost?",
+        a: "Costs vary by market and deliverables. Compare on what you receive — highlight film, full film, raw footage — audio quality, and delivery time, rather than price alone.",
+      },
+      {
+        q: "What is the difference between cinematic and documentary wedding video?",
+        a: "Cinematic films are polished and edited to music like a short movie; documentary films present events more fully and in order. Many videographers offer a short highlight film plus a longer documentary edit.",
+      },
+    ],
+    keywords: [
+      "how to choose a wedding videographer",
+      "do you need a wedding videographer",
+      "wedding videographer questions",
+      "wedding video styles",
+    ],
+  },
+  {
+    slug: "wedding-hair-and-makeup-guide",
+    title: "Booking wedding hair and makeup: a complete guide",
+    category: "Vendors",
+    updated: "2026-07-22",
+    readMinutes: 6,
+    excerpt:
+      "Why the trial matters most, how to build a realistic morning timeline, and the questions to ask your hair and makeup artists.",
+    intro:
+      "Hair and makeup is the vendor closest to you on the morning of the wedding, and the one most likely to run late if you don't plan it. Get the trial and the timeline right and you'll start the day calm and looking like the best version of yourself.",
+    body: [
+      { h2: "The trial is non-negotiable" },
+      { p: "Always book a trial before the wedding, ideally near your date so your hair length and skin match. A trial is where you catch what photos and words can't convey — how a look wears over hours, how it photographs with flash, and whether it truly feels like you. Bring inspiration photos and wear a light-colored top." },
+      { h2: "Build the morning timeline backward" },
+      { p: "Hair and makeup almost always run longer than quoted. Work backward from when you need to be ready, allow 45–60 minutes per person, and add a 30-minute cushion. Decide the order — often the person being photographed getting ready goes last so their look is freshest." },
+      { h2: "Decide who's in the chair" },
+      { p: "Count everyone getting professional hair or makeup — you, attendants, mothers — because it drives both timing and cost. More people means an earlier start or a second artist. Confirm whether the quote is per person and whether there's a minimum." },
+      { h2: "Questions to ask" },
+      { ul: [
+        "Is a trial included, and when should we schedule it?",
+        "Do you come to us, and is there a travel fee?",
+        "How long do you allow per person, and do you bring an assistant for larger groups?",
+        "Do you use long-wear or airbrush products for photos and heat?",
+        "Can you do touch-ups later, or provide a touch-up kit?",
+        "What's the deposit and cancellation policy?",
+      ] },
+      { h2: "Lock the logistics" },
+      { p: "Confirm the arrival time, the number of services, travel fees, and the trial date in writing. Share your morning timeline so the artist knows exactly when each person needs to be finished." },
+    ],
+    faqs: [
+      {
+        q: "Should you do a hair and makeup trial before the wedding?",
+        a: "Yes — always. A trial shows how a look wears over hours and photographs with flash, and lets you adjust before the day. Book it close to your wedding date so hair length and skin tone match.",
+      },
+      {
+        q: "How long does wedding hair and makeup take?",
+        a: "Allow roughly 45–60 minutes per person and add a 30-minute cushion. For larger groups, ask about a second artist so you're not starting before dawn.",
+      },
+      {
+        q: "How much does wedding hair and makeup cost?",
+        a: "It's usually priced per person, often with a minimum, plus a possible travel fee. Confirm whether the trial is included and whether pricing changes for the bridal look versus attendants.",
+      },
+    ],
+    keywords: [
+      "wedding hair and makeup",
+      "wedding makeup trial",
+      "bridal hair and makeup timeline",
+      "wedding makeup artist questions",
+    ],
+  },
+  {
+    slug: "how-to-choose-a-wedding-cake",
+    title: "How to choose a wedding cake",
+    category: "Vendors",
+    updated: "2026-07-22",
+    readMinutes: 5,
+    excerpt:
+      "How cake pricing really works, how much to order, and the questions to ask at your tasting — plus ways to save.",
+    intro:
+      "The cake is part dessert, part centerpiece, and its price can swing widely based on choices most couples don't realize matter. A little know-how gets you something delicious and beautiful without overspending.",
+    body: [
+      { h2: "Understand how cakes are priced" },
+      { p: "Wedding cakes are usually priced per slice, and the number climbs with complexity: hand-piped detail, sugar flowers, fondant, and multiple tiers all add labor. A simpler design in the same flavor can cost far less and photograph just as beautifully." },
+      { h2: "Order the right amount" },
+      { p: "You generally need about one slice per guest, but you don't need every slice to come from the display cake. A common money-saver is a smaller decorated cake for the cutting photo plus a plain 'kitchen cake' or sheet cake sliced in the back — guests never know the difference." },
+      { h2: "Make the tasting count" },
+      { p: "Taste before you commit, and bring your color palette and a photo or two of styles you like. Ask how the cake holds up in your venue's temperature — buttercream can soften in summer heat, which affects both flavor and design choices." },
+      { h2: "Questions to ask" },
+      { ul: [
+        "How is it priced, and what drives the cost up or down?",
+        "Do you handle delivery and setup, and is that included?",
+        "How will it hold up in our venue's temperature?",
+        "Can you accommodate allergies or a gluten-free tier?",
+        "Do we owe a deposit on rented stands or toppers?",
+        "When do you need the final design and guest count?",
+      ] },
+    ],
+    faqs: [
+      {
+        q: "How much does a wedding cake cost?",
+        a: "Wedding cakes are typically priced per slice, and cost rises with complexity — sugar flowers, fondant, hand-piping, and extra tiers. A simpler design in the same flavor can be much cheaper.",
+      },
+      {
+        q: "How do you save money on a wedding cake?",
+        a: "Order a smaller decorated cake for the cutting photo plus a plain sheet 'kitchen cake' sliced in the back, choose a simpler design, and skip elaborate sugar work — guests remember the taste more than the tiers.",
+      },
+      {
+        q: "How much wedding cake do you need per guest?",
+        a: "Plan on about one slice per guest. Not all of it has to come from the display cake — many couples supplement with a back-of-house sheet cake in the same flavor.",
+      },
+    ],
+    keywords: [
+      "how to choose a wedding cake",
+      "wedding cake cost",
+      "wedding cake per slice",
+      "how to save on wedding cake",
+    ],
+  },
+  {
+    slug: "how-to-choose-a-wedding-officiant",
+    title: "How to choose a wedding officiant",
+    category: "Vendors",
+    updated: "2026-07-22",
+    readMinutes: 5,
+    excerpt:
+      "Your options for who marries you, how to make the ceremony legal, and the questions to ask so the ceremony sounds like you.",
+    intro:
+      "The officiant shapes the one part of the day that's legally required and emotionally central — the ceremony itself. Choosing the right person, and handling the legal side correctly, makes sure your marriage is both meaningful and valid.",
+    body: [
+      { h2: "Know your options" },
+      { p: "You can be married by a religious leader, a professional celebrant, a civil officiant like a judge or registrar, or — in many places — a friend or family member who gets temporarily authorized to officiate. A personal officiant makes the ceremony intimate; a professional brings polish and experience. There's no wrong choice, only the right fit for you." },
+      { h2: "Handle the legal side early" },
+      { p: "The officiant's authority and your marriage license are what make the marriage legal — and the rules vary by location. Confirm what your area requires: who may legally officiate, whether the officiant must register in advance, and the license timing (some places have a waiting period or an expiry window). Sort this out well before the date, and verify the specifics with your local marriage authority." },
+      { h2: "Make the ceremony sound like you" },
+      { p: "A good officiant tailors the ceremony to your story rather than reading a generic script. Meet them, share how you met and what your relationship means, and ask to review the ceremony draft. Decide together on readings, vows (written or traditional), and any cultural or religious elements." },
+      { h2: "Questions to ask" },
+      { ul: [
+        "Are you legally able to officiate in our location, and do you handle the license paperwork?",
+        "Do you personalize the ceremony, and can we review a draft?",
+        "Can we write our own vows, and will you help structure them?",
+        "Will you run the rehearsal?",
+        "How long does a typical ceremony run?",
+      ] },
+    ],
+    faqs: [
+      {
+        q: "Who can legally officiate a wedding?",
+        a: "Depending on your location, that can be a religious leader, a civil officiant such as a judge or registrar, a professional celebrant, or a friend or family member who gets temporarily authorized. Rules vary, so confirm the requirements with your local marriage authority.",
+      },
+      {
+        q: "Can a friend or family member officiate your wedding?",
+        a: "In many places, yes — a friend or family member can get temporarily authorized to officiate. Check your local rules early, since some require the officiant to register in advance.",
+      },
+      {
+        q: "What makes a wedding legal?",
+        a: "A valid marriage license and an authorized officiant, filed correctly after the ceremony. Requirements and timing (including any waiting period or license expiry) vary by location, so verify the specifics locally.",
+      },
+    ],
+    keywords: [
+      "how to choose a wedding officiant",
+      "who can officiate a wedding",
+      "wedding officiant questions",
+      "can a friend officiate a wedding",
+    ],
+  },
+  {
+    slug: "how-to-plan-a-wedding-in-6-months",
+    title: "How to plan a wedding in 6 months",
+    category: "Planning",
+    updated: "2026-07-22",
+    readMinutes: 7,
+    excerpt:
+      "A focused, month-by-month plan for a shorter engagement — what to lock immediately, what to skip, and how to stay sane.",
+    intro:
+      "Six months is plenty of time to plan a beautiful wedding — you'll just make decisions faster and in a tighter order. The key is to move on the things that book up first and let go of the pressure to do everything. Here's a realistic month-by-month plan.",
+    body: [
+      { h2: "Month 1: lock the anchors" },
+      { p: "With a short runway, speed on the big three matters most. Set your budget and guest count, then book a date and venue quickly — flexibility on the day of the week or season opens up far more options at better prices." },
+      { ul: [
+        "Set budget and rough guest count.",
+        "Book venue and date (be flexible for availability).",
+        "Book the one-per-day vendors immediately: photographer, caterer, band or DJ.",
+      ] },
+      { h2: "Month 2: the vendors and the dress" },
+      { p: "Order attire now — off-the-rack or made-to-order with a rush, since traditional gown timelines won't fit. Book the remaining key vendors before dates fill." },
+      { ul: [
+        "Order dress/suit (ask about rush alterations).",
+        "Book florist, cake, hair and makeup, officiant.",
+        "Send save-the-dates or go straight to invitations.",
+      ] },
+      { h2: "Months 3–4: details and paper" },
+      { p: "Now the choices that personalize the day. With a compressed timeline, send invitations on the early side so RSVPs come back in time." },
+      { ul: [
+        "Mail invitations (aim for 6–8 weeks before).",
+        "Finalize menu and do a tasting.",
+        "Buy rings; book transportation and room blocks.",
+        "Plan the ceremony and choose readings and vows.",
+      ] },
+      { h2: "Month 5: confirm everything" },
+      { p: "Chase RSVPs, build the seating chart as numbers firm up, and confirm timelines and arrival times with every vendor. Handle the marriage license within your area's valid window." },
+      { h2: "Month 6: the final stretch" },
+      { p: "Give the caterer a final headcount, do a final dress fitting, confirm day-of logistics, and delegate. Assign someone (or a coordinator) to field vendor questions so you can be present." },
+      { h2: "What to let go of" },
+      { p: "A short timeline is permission to simplify. Skip elaborate DIY projects, trust vendors' recommendations instead of over-researching, and remember that guests come for you, not for perfection." },
+    ],
+    faqs: [
+      {
+        q: "Can you plan a wedding in 6 months?",
+        a: "Yes. Six months is enough for a beautiful wedding — you'll just decide faster. Lock your budget, guest count, venue, and one-per-day vendors (photographer, caterer, band/DJ) in the first few weeks, then work through details month by month.",
+      },
+      {
+        q: "What should you book first for a short-notice wedding?",
+        a: "Book the venue and date immediately, then the vendors that take one wedding per day — photographer, caterer, and band or DJ. Flexibility on the day or season dramatically improves availability.",
+      },
+      {
+        q: "How late can you send wedding invitations?",
+        a: "With a short timeline, aim to mail invitations 6–8 weeks before the wedding so RSVPs return in time to finalize your headcount and seating.",
+      },
+    ],
+    keywords: [
+      "how to plan a wedding in 6 months",
+      "short engagement wedding planning",
+      "plan a wedding fast",
+      "6 month wedding timeline",
+    ],
+  },
 ];
 
 export function getGuide(slug: string): Guide | undefined {
