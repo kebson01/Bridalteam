@@ -14,6 +14,12 @@ type BeforeInstallPromptEvent = Event & {
 
 const DISMISS_KEY = "bt_install_dismissed";
 
+/**
+ * Fired by the footer "Install app" link so this banner can re-open even after
+ * it's been dismissed — a persistent fallback entry point.
+ */
+export const INSTALL_EVENT = "bt:install";
+
 /** True when the page is already running as an installed standalone app. */
 function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
@@ -40,7 +46,8 @@ function isIos(): boolean {
  * On Android/Chromium we capture `beforeinstallprompt` and drive the native
  * install flow from our own button. iOS Safari has no such API, so we show the
  * manual "Add to Home Screen" steps instead. The banner never shows on desktop,
- * when already installed, or once the visitor has dismissed it.
+ * when already installed, or once the visitor has dismissed it — but the footer
+ * "Install app" link (INSTALL_EVENT) can always re-open it.
  */
 export default function InstallApp() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
@@ -49,22 +56,39 @@ export default function InstallApp() {
 
   useEffect(() => {
     if (isStandalone()) return;
-    if (typeof window !== "undefined" && localStorage.getItem(DISMISS_KEY) === "1") return;
 
-    // Android / Chromium: defer the native prompt and reveal our button.
+    const dismissed = (() => {
+      try {
+        return localStorage.getItem(DISMISS_KEY) === "1";
+      } catch {
+        return false;
+      }
+    })();
+
+    // Android / Chromium: defer the native prompt. Reveal our banner only if the
+    // visitor hasn't dismissed it before — but always keep the event so the
+    // footer link can fire the native prompt on demand.
     const onBeforeInstall = (event: Event) => {
       event.preventDefault();
       setDeferred(event as BeforeInstallPromptEvent);
-      setVisible(true);
+      if (!dismissed) setVisible(true);
     };
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
 
     // iOS Safari: no event to hook, so offer the manual instructions on mobile.
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
-    if (isIos() && isMobile) {
+    if (isIos() && isMobile && !dismissed) {
       setShowIosHelp(true);
       setVisible(true);
     }
+
+    // Footer "Install app" link — re-open even after dismissal.
+    const onRequest = () => {
+      if (isStandalone()) return;
+      if (isIos()) setShowIosHelp(true);
+      setVisible(true);
+    };
+    window.addEventListener(INSTALL_EVENT, onRequest);
 
     // Once installed, hide and don't nag again.
     const onInstalled = () => {
@@ -79,6 +103,7 @@ export default function InstallApp() {
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
+      window.removeEventListener(INSTALL_EVENT, onRequest);
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
