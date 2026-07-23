@@ -48,7 +48,21 @@ export async function POST(req: Request) {
   const admin = adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
-  const body = (await req.json().catch(() => ({}))) as VenueInput;
+  const body = (await req.json().catch(() => ({}))) as VenueInput & { rows?: VenueInput[] };
+
+  // Bulk insert: { rows: [...] }. Rows without a name are skipped.
+  if (Array.isArray(body.rows)) {
+    const values = body.rows.map(pick).filter((v) => v.name);
+    const skipped = body.rows.length - values.length;
+    if (values.length === 0) {
+      return NextResponse.json({ error: "No rows with a name to import." }, { status: 400 });
+    }
+    const { data, error } = await admin.from("vendors").insert(values).select("id");
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ inserted: data?.length ?? 0, skipped });
+  }
+
+  // Single insert.
   const values = pick(body);
   if (!values.name) {
     return NextResponse.json({ error: "Name is required." }, { status: 400 });

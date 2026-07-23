@@ -19,6 +19,46 @@ const EMPTY = {
 };
 type Form = typeof EMPTY;
 
+// Columns recognized by the bulk importer (match the venues table).
+const BULK_FIELDS = [
+  "name", "category", "city", "state", "price", "capacity",
+  "tag", "description", "image_url", "website", "featured",
+] as const;
+
+/** Split one CSV line, honoring double-quoted fields (and "" escapes). */
+function splitCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; } else inQuotes = false;
+      } else cur += c;
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === ",") {
+      out.push(cur); cur = "";
+    } else cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+
+/** Parse pasted CSV (first line = headers) into row objects keyed by header. */
+function parseCsv(text: string): Record<string, string>[] {
+  const lines = text.trim().split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) return [];
+  const headers = splitCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
+  return lines.slice(1).map((line) => {
+    const cells = splitCsvLine(line);
+    const row: Record<string, string> = {};
+    headers.forEach((h, i) => { row[h] = (cells[i] ?? "").trim(); });
+    return row;
+  });
+}
+
 export default function AdminVenuesPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -27,6 +67,7 @@ export default function AdminVenuesPage() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [bulk, setBulk] = useState("");
 
   const load = useCallback(async () => {
     const res = await fetch("/api/admin/venues");
@@ -72,6 +113,47 @@ export default function AdminVenuesPage() {
     sessionStorage.setItem("bt_admin_pw", password);
     setMsg({ text: editing ? "Venue updated." : "Venue added.", ok: true });
     setForm(EMPTY);
+    load();
+  }
+
+  async function bulkImport() {
+    const parsed = parseCsv(bulk);
+    if (parsed.length === 0) {
+      setMsg({ text: "Paste a CSV with a header row and at least one vendor.", ok: false });
+      return;
+    }
+    const rows = parsed.map((r) => {
+      const row: Record<string, unknown> = {};
+      for (const f of BULK_FIELDS) {
+        const val = r[f];
+        if (val === undefined || val === "") continue;
+        row[f] = f === "featured" ? /^(true|yes|1)$/i.test(val) : val;
+      }
+      return row;
+    });
+
+    setBusy(true);
+    setMsg(null);
+    const res = await fetch("/api/admin/venues", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-user": username,
+        "x-admin-password": password,
+      },
+      body: JSON.stringify({ rows }),
+    });
+    const data = await res.json();
+    setBusy(false);
+    if (!res.ok) {
+      setMsg({ text: data.error ?? "Import failed.", ok: false });
+      return;
+    }
+    setMsg({
+      text: `Imported ${data.inserted} vendor(s)${data.skipped ? `, skipped ${data.skipped} without a name` : ""}.`,
+      ok: true,
+    });
+    setBulk("");
     load();
   }
 
@@ -233,6 +315,40 @@ export default function AdminVenuesPage() {
           )}
         </div>
       </form>
+
+      {/* Bulk import */}
+      <div className="mt-6 rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
+        <h2 className="text-lg font-medium text-ink">Bulk import (CSV)</h2>
+        <p className="mt-1 text-sm text-ink-soft/70">
+          Paste a CSV with a header row to add many vendors at once. Recognized columns:{" "}
+          <code className="text-xs">
+            name, category, city, state, price, capacity, tag, description, image_url, website,
+            featured
+          </code>
+          . Only <strong>name</strong> is required; other columns are optional and unknown ones
+          are ignored.
+        </p>
+        <textarea
+          rows={7}
+          value={bulk}
+          onChange={(e) => setBulk(e.target.value)}
+          placeholder={
+            "name,category,city,state,price\n" +
+            "The Grand Hall,Venue,Miami,FL,$$$\n" +
+            "Bloom & Co,Florist,Coral Springs,FL,$$\n" +
+            "Sunset Sounds,DJ,Fort Lauderdale,FL,$$"
+          }
+          className={`${field} mt-4 font-mono text-xs`}
+        />
+        <button
+          type="button"
+          onClick={bulkImport}
+          disabled={busy || !bulk.trim()}
+          className="mt-3 rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {busy ? "Importing…" : "Import CSV"}
+        </button>
+      </div>
 
       {/* Existing venues */}
       <h2 className="mt-10 text-lg font-medium text-ink">
