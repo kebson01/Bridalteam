@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { notifySlack } from "@/lib/slack";
+import { SITE_URL } from "@/lib/site";
 
 export type SaveResult = { ok: boolean; error?: string; weddingId?: string };
 
@@ -131,6 +133,47 @@ export async function deleteComment(commentId: string): Promise<{ ok: boolean }>
     console.error("deleteComment failed:", error.code, error.message);
     return { ok: false };
   }
+  return { ok: true };
+}
+
+/**
+ * Lets any visitor report an inspiration image as inappropriate. Records the
+ * report for admin review and pings Slack (if configured). Deliberately
+ * low-friction — no sign-in required.
+ */
+export async function reportImage(imageId: string, reason: string): Promise<{ ok: boolean }> {
+  if (!imageId) return { ok: false };
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from("inspiration_reports").insert({
+    image_id: imageId,
+    reason: reason?.trim().slice(0, 500) || null,
+    reporter_user_id: user?.id ?? null,
+  });
+  if (error) {
+    console.error("reportImage failed:", error.code, error.message);
+    return { ok: false };
+  }
+
+  // Best-effort Slack notification for admin review.
+  const { data: img } = await supabase
+    .from("inspiration_images")
+    .select("title, image_url")
+    .eq("id", imageId)
+    .maybeSingle();
+
+  await notifySlack(
+    `:triangular_flag_on_post: *Inspiration image reported*\n` +
+      `• Title: ${img?.title ?? "(unknown)"}\n` +
+      (reason?.trim() ? `• Reason: ${reason.trim().slice(0, 300)}\n` : "") +
+      (user?.email ? `• By: ${user.email}\n` : `• By: anonymous\n`) +
+      (img?.image_url ? `• Image: ${img.image_url}\n` : "") +
+      `• Review: ${SITE_URL}/admin`,
+  );
+
   return { ok: true };
 }
 

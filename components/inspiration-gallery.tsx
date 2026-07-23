@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { saveInspiration } from "@/app/inspiration/actions";
+import { saveInspiration, reportImage } from "@/app/inspiration/actions";
 import LikeButton from "@/components/like-button";
 import ShareButton from "@/components/share-button";
 import InspirationComments from "@/components/inspiration-comments";
@@ -244,6 +244,16 @@ function Lightbox({
 }) {
   const [pending, startTransition] = useTransition();
   const [status, setStatus] = useState<"idle" | "saved" | "signin" | "pick" | "error">("idle");
+  const [report, setReport] = useState<"idle" | "open" | "sent">("idle");
+  const [reportReason, setReportReason] = useState("");
+
+  function submitReport() {
+    startTransition(async () => {
+      await reportImage(image.id, reportReason);
+      setReport("sent");
+      setReportReason("");
+    });
+  }
 
   function save() {
     if (!signedIn) {
@@ -347,6 +357,48 @@ function Lightbox({
             )}
             {status === "error" && (
               <p className="mt-2 text-center text-sm text-red-600">Couldn&rsquo;t save. Try again.</p>
+            )}
+          </div>
+
+          {/* Report */}
+          <div className="mt-4 border-t border-stone-2 pt-3 text-center">
+            {report === "sent" ? (
+              <p className="text-xs text-ink-soft/60">Thanks — we&rsquo;ll review this image.</p>
+            ) : report === "open" ? (
+              <div className="space-y-2">
+                <input
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="What's wrong with this image? (optional)"
+                  maxLength={500}
+                  className="w-full rounded-lg border border-stone-2 px-3 py-2 text-xs outline-none focus:border-brand"
+                />
+                <div className="flex justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={submitReport}
+                    disabled={pending}
+                    className="rounded-full bg-red-600 px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                  >
+                    {pending ? "Sending…" : "Submit report"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReport("idle")}
+                    className="text-xs text-ink-soft/50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setReport("open")}
+                className="text-xs text-ink-soft/50 hover:text-red-600"
+              >
+                ⚑ Report this image
+              </button>
             )}
           </div>
         </div>
