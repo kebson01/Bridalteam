@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SHOW_VENDOR_DIRECTORY, SHOW_PLANNER_APP } from "@/lib/flags";
+import InstallAppLink from "@/components/install-app-link";
 
 // Existing account holders log in through the real auth screen once it exists.
 const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
@@ -105,6 +106,7 @@ export default function SiteFooter() {
             <Link href="/privacy" className="hover:text-white/80">Privacy</Link>
             <Link href="/terms" className="hover:text-white/80">Terms</Link>
             <Link href={LOGIN_HREF} className="hover:text-white/80">Log in</Link>
+            <InstallAppLink className="hover:text-white/80" />
           </nav>
         </div>
       </div>
