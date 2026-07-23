@@ -11,6 +11,7 @@ interface Stats {
   comments: number;
   inspiration: number;
   featured: number;
+  reports: number;
 }
 interface VendorRow {
   org_id: string;
@@ -36,11 +37,20 @@ interface CommentRow {
   image_id: string;
   created_at: string;
 }
+interface ReportRow {
+  id: string;
+  reason: string | null;
+  status: string;
+  created_at: string;
+  image_id: string;
+  inspiration_images: { title: string; image_url: string } | null;
+}
 interface Dashboard {
   stats: Stats;
   vendors: VendorRow[];
   waitlist: WaitlistRow[];
   comments: CommentRow[];
+  reports: ReportRow[];
 }
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -161,14 +171,14 @@ export default function AdminDashboardPage() {
     );
   }
 
-  const { stats, vendors, waitlist, comments } = data;
+  const { stats, vendors, waitlist, comments, reports } = data;
   const tiles: Array<[string, number, string?]> = [
+    ["Reports", stats.reports, stats.reports > 0 ? "needs review" : undefined],
     ["Vendors", stats.vendors, `${stats.vendorsPublished} live`],
     ["Featured (paid)", stats.featured],
     ["Weddings", stats.weddings],
     ["Waitlist", stats.waitlist],
     ["Comments", stats.comments],
-    ["Inspiration", stats.inspiration],
   ];
 
   return (
@@ -192,6 +202,50 @@ export default function AdminDashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Reported images (priority) */}
+      {reports.length > 0 && (
+        <>
+          <h2 className="mt-12 text-sm font-semibold uppercase tracking-wide text-red-600">
+            Reported images ({reports.length})
+          </h2>
+          <div className="mt-3 space-y-2">
+            {reports.map((r) => (
+              <div key={r.id} className="flex items-start gap-4 rounded-xl border border-red-200 bg-red-50/40 p-4">
+                {r.inspiration_images?.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={r.inspiration_images.image_url}
+                    alt=""
+                    className="h-16 w-16 flex-none rounded-lg object-cover"
+                  />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-ink">{r.inspiration_images?.title ?? "(image removed)"}</p>
+                  <p className="text-sm text-ink-soft/80">{r.reason ? `“${r.reason}”` : "No reason given"}</p>
+                  <p className="mt-0.5 text-xs text-ink-soft/50">{fmt(r.created_at)}</p>
+                </div>
+                <div className="flex flex-none flex-col items-end gap-2">
+                  <button
+                    onClick={() => act("delete_reported_image", r.image_id)}
+                    disabled={busy}
+                    className="rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                  >
+                    Remove image
+                  </button>
+                  <button
+                    onClick={() => act("dismiss_report", r.id)}
+                    disabled={busy}
+                    className="text-xs font-semibold text-ink-soft/50 hover:text-ink"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Vendors */}
       <h2 className="mt-12 text-sm font-semibold uppercase tracking-wide text-ink-soft/50">

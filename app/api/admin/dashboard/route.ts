@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   if (admin instanceof NextResponse) return admin;
 
   // Exact counts (service role → not limited by RLS).
-  const [cVendors, cPublished, cWeddings, cWaitlist, cComments, cInspiration, cFeatured] =
+  const [cVendors, cPublished, cWeddings, cWaitlist, cComments, cInspiration, cFeatured, cReports] =
     await Promise.all([
       admin.from("vendor_profiles").select("*", COUNT),
       admin.from("vendor_profiles").select("*", COUNT).eq("status", "published"),
@@ -21,6 +21,7 @@ export async function GET(req: Request) {
       admin.from("inspiration_comments").select("*", COUNT),
       admin.from("inspiration_images").select("*", COUNT),
       admin.from("organizations").select("*", COUNT).eq("plan", "featured"),
+      admin.from("inspiration_reports").select("*", COUNT).eq("status", "open"),
     ]);
 
   const stats = {
@@ -31,9 +32,11 @@ export async function GET(req: Request) {
     comments: cComments.count ?? 0,
     inspiration: cInspiration.count ?? 0,
     featured: cFeatured.count ?? 0,
+    reports: cReports.count ?? 0,
   };
 
-  const [{ data: vendorRows }, { data: waitlistRows }, { data: commentRows }] = await Promise.all([
+  const [{ data: vendorRows }, { data: waitlistRows }, { data: commentRows }, { data: reportRows }] =
+    await Promise.all([
     admin
       .from("vendor_profiles")
       .select("org_id, business_name, category, city, region, status, organizations(plan, subscription_status)")
@@ -49,6 +52,12 @@ export async function GET(req: Request) {
       .select("id, author_name, body, image_id, created_at")
       .order("created_at", { ascending: false })
       .limit(100),
+    admin
+      .from("inspiration_reports")
+      .select("id, reason, status, created_at, image_id, inspiration_images(title, image_url)")
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
 
   return NextResponse.json({
@@ -56,6 +65,7 @@ export async function GET(req: Request) {
     vendors: vendorRows ?? [],
     waitlist: waitlistRows ?? [],
     comments: commentRows ?? [],
+    reports: reportRows ?? [],
   });
 }
 
@@ -83,6 +93,19 @@ export async function POST(req: Request) {
     }
     case "delete_waitlist": {
       const { error } = await admin.from("waitlist").delete().eq("id", id);
+      return error ? fail(error.message) : NextResponse.json({ ok: true });
+    }
+    case "dismiss_report": {
+      // id = report id — keep the image, clear the report.
+      const { error } = await admin
+        .from("inspiration_reports")
+        .update({ status: "dismissed" })
+        .eq("id", id);
+      return error ? fail(error.message) : NextResponse.json({ ok: true });
+    }
+    case "delete_reported_image": {
+      // id = image id — removing it cascades its reports and comments.
+      const { error } = await admin.from("inspiration_images").delete().eq("id", id);
       return error ? fail(error.message) : NextResponse.json({ ok: true });
     }
     default:
