@@ -829,6 +829,225 @@ export const GUIDES: Guide[] = [
       "6 month wedding timeline",
     ],
   },
+  {
+    slug: "wedding-invitations-guide",
+    title: "Wedding invitations: wording, timing, and what to include",
+    category: "Stationery",
+    updated: "2026-07-22",
+    readMinutes: 6,
+    excerpt:
+      "When to send, what every invitation must include, wording basics, and how to count quantities so you don't over- or under-order.",
+    intro:
+      "Invitations do real work: they tell guests when and where to show up, set the tone, and collect the RSVPs your headcount depends on. Here's how to get the timing, wording, and quantities right.",
+    body: [
+      { h2: "When to send" },
+      { p: "Mail invitations about 8 weeks before the wedding — 12 weeks for a destination or holiday weekend, so guests can book travel. Set the RSVP deadline 3–4 weeks before the date, which gives you time to chase stragglers and give the caterer a final count." },
+      { h2: "What every invitation includes" },
+      { p: "At minimum, guests need to know who, when, where, and how to respond." },
+      { ul: [
+        "Hosts (traditionally whoever is contributing) and the couple's names.",
+        "Date, start time, and ceremony location.",
+        "Reception details (or a separate reception card).",
+        "An RSVP method and deadline.",
+        "Dress code, if you have one.",
+        "Where to find more info — often a wedding website URL.",
+      ] },
+      { h2: "Wording basics" },
+      { p: "Formality is a spectrum. Traditional wording spells everything out (\"request the honour of your presence\"); modern wording is warmer and plainer (\"together with their families, invite you to celebrate\"). Match the wording to the wedding's tone, and be consistent across every piece." },
+      { h2: "How many to order" },
+      { p: "Order by household, not by guest — one invitation per couple or family, not per person. Count your households, then add 15–20 extras for mistakes, keepsakes, and last-minute additions. Reprinting a small batch later costs far more per piece than ordering the extras now." },
+      { h2: "Don't forget the extras" },
+      { p: "Budget for postage (bulky or square envelopes cost more), RSVP-card return postage if you're using mail replies, and any inner envelopes, belly bands, or wax seals. These small line items add up quickly." },
+    ],
+    faqs: [
+      {
+        q: "When should you send wedding invitations?",
+        a: "Mail them about 8 weeks before the wedding, or 12 weeks for a destination wedding, and set the RSVP deadline 3–4 weeks before the date so you can finalize your headcount.",
+      },
+      {
+        q: "What information goes on a wedding invitation?",
+        a: "The hosts and couple's names, the date, time, and ceremony location, reception details, an RSVP method and deadline, any dress code, and often a wedding website for extra information.",
+      },
+      {
+        q: "How many wedding invitations should you order?",
+        a: "Order one per household (not per guest), then add 15–20 extras for addressing mistakes, keepsakes, and last-minute additions — reprinting a few later costs much more per piece.",
+      },
+    ],
+    keywords: [
+      "wedding invitations guide",
+      "wedding invitation wording",
+      "when to send wedding invitations",
+      "what to include on wedding invitation",
+    ],
+  },
+  {
+    slug: "save-the-dates-vs-invitations",
+    title: "Save-the-dates vs. invitations: what's the difference?",
+    category: "Stationery",
+    updated: "2026-07-22",
+    readMinutes: 4,
+    excerpt:
+      "What each one is for, when to send them, who gets them, and whether you need save-the-dates at all.",
+    intro:
+      "Save-the-dates and invitations do two different jobs at two different times. Mixing them up leads to confused guests or double-booked weekends. Here's the simple breakdown.",
+    body: [
+      { h2: "Save-the-dates: the heads-up" },
+      { p: "A save-the-date is an early announcement — it tells guests to hold the day so they can plan travel and time off. It's short: your names, the date, and the city. Formal details and the RSVP come later, on the invitation. Send save-the-dates 6–8 months ahead, or up to a year for a destination wedding." },
+      { h2: "Invitations: the formal ask" },
+      { p: "The invitation is the official request to attend, with the full when-and-where and how to RSVP. It sets the tone and collects responses. Send invitations about 8 weeks before the wedding (12 for a destination)." },
+      { h2: "Who gets which" },
+      { p: "One rule prevents awkwardness: everyone who receives a save-the-date must receive an invitation. A save-the-date is effectively a promise. So only send them to guests you're certain you're inviting — finalize the core list first." },
+      { h2: "Do you even need save-the-dates?" },
+      { p: "They're optional. They're most valuable for destination weddings, holiday weekends, or when many guests travel — anything that requires advance planning. For a local wedding with a short timeline, you can skip straight to invitations." },
+    ],
+    faqs: [
+      {
+        q: "What is the difference between a save-the-date and an invitation?",
+        a: "A save-the-date is an early heads-up (names, date, city) sent 6–8 months ahead so guests can plan; the invitation is the formal request with full details and RSVP, sent about 8 weeks before the wedding.",
+      },
+      {
+        q: "Do you have to invite everyone who got a save-the-date?",
+        a: "Yes. A save-the-date is a promise, so everyone who receives one must also receive an invitation. Finalize your core guest list before sending them.",
+      },
+      {
+        q: "Do you need save-the-dates?",
+        a: "They're optional, but valuable for destination weddings, holiday weekends, or when many guests travel. For a local wedding on a short timeline, you can skip them and send invitations only.",
+      },
+    ],
+    keywords: [
+      "save the dates vs invitations",
+      "when to send save the dates",
+      "do you need save the dates",
+      "save the date etiquette",
+    ],
+  },
+  {
+    slug: "wedding-registry-guide",
+    title: "How to create a wedding registry",
+    category: "Planning",
+    updated: "2026-07-22",
+    readMinutes: 5,
+    excerpt:
+      "When to register, how many gifts to add across price ranges, cash and honeymoon funds, and how to share your registry politely.",
+    intro:
+      "A registry makes gift-giving easy for guests and gets you things you'll actually use. A little strategy — range of prices, enough options, the right timing — makes it work smoothly for everyone.",
+    body: [
+      { h2: "Register early" },
+      { p: "Set up your registry before you send save-the-dates, because eager guests (and anyone throwing a shower) will look for it as soon as they hear the news. You can keep adding to it over time — start early, refine later." },
+      { h2: "Offer a range of prices and plenty of options" },
+      { p: "Guests have different budgets, so include gifts across low, medium, and higher price points. And add more items than you have guests — a good rule is roughly two gifts per guest — so people still have good choices late, when the affordable items are gone." },
+      { h2: "Consider cash, honeymoon, and charity funds" },
+      { p: "Many couples already have a full kitchen, so cash funds, honeymoon funds, or a charity option are increasingly normal and welcome. Mix these with physical gifts so guests who prefer picking something tangible still can." },
+      { h2: "Share it the right way" },
+      { p: "Never print registry details on the invitation itself — it reads as asking for gifts. Instead, put the registry link on your wedding website, and let family and the wedding party share it when guests ask. Word of mouth does most of the work." },
+    ],
+    faqs: [
+      {
+        q: "When should you set up a wedding registry?",
+        a: "Register before you send save-the-dates. Guests and shower hosts look for it as soon as they hear the news, and you can keep adding items over time.",
+      },
+      {
+        q: "How many items should you put on a wedding registry?",
+        a: "Aim for roughly two gifts per guest, spread across low, medium, and higher price points, so people always have good options — even late, after the affordable items are claimed.",
+      },
+      {
+        q: "Is it okay to have a cash or honeymoon fund?",
+        a: "Yes — cash, honeymoon, and charity funds are widely accepted now, especially for couples who already have a furnished home. Offer a mix so guests who prefer a physical gift still have choices.",
+      },
+    ],
+    keywords: [
+      "wedding registry guide",
+      "how to create a wedding registry",
+      "how many items wedding registry",
+      "honeymoon fund registry",
+    ],
+  },
+  {
+    slug: "honeymoon-planning-guide",
+    title: "How to plan your honeymoon",
+    category: "Planning",
+    updated: "2026-07-22",
+    readMinutes: 6,
+    excerpt:
+      "When to book, how to budget, whether to leave right after the wedding, and how to choose a destination you'll both love.",
+    intro:
+      "The honeymoon is the reward at the end of all the planning — but it deserves a little planning of its own so it's relaxing, not rushed. Here's how to choose, budget, and time it well.",
+    body: [
+      { h2: "Choose a destination together" },
+      { p: "Start with the kind of trip you both want — beach and rest, city and culture, adventure and outdoors — before picking a place. Factor in the season (you want good weather at your destination, which may be opposite your wedding season) and travel time. A shorter flight leaves more days to actually relax." },
+      { h2: "Set a realistic budget" },
+      { p: "Decide the honeymoon budget alongside the wedding budget, not after — it's easy to spend everything on the day and leave nothing for the trip. Account for flights, lodging, food, activities, and a cushion. A honeymoon registry or cash fund can help guests contribute." },
+      { h2: "Book in the right order" },
+      { p: "Lock flights and lodging early, especially for popular destinations and peak seasons — prices climb and the best resorts fill. Then arrange activities and reservations closer to the date. Don't forget passports (renew early if they expire within six months) and any visas or vaccinations." },
+      { h2: "Leave right away, or later?" },
+      { p: "A 'minimoon' — leaving immediately for a short trip, then taking the big honeymoon later — is increasingly popular. It lets you decompress right after the wedding without the pressure (and expense) of planning a major trip during an already busy time. There's no rule; do what fits your energy and budget." },
+      { h2: "Tell vendors you're newlyweds" },
+      { p: "Hotels and airlines often add small perks — a room upgrade, a welcome treat — for honeymooners. Mention it when booking; the worst they can say is no." },
+    ],
+    faqs: [
+      {
+        q: "When should you book your honeymoon?",
+        a: "Book flights and lodging early — several months out for popular destinations and peak seasons — then arrange activities closer to the date. Check that passports won't expire within six months of travel.",
+      },
+      {
+        q: "How much should you budget for a honeymoon?",
+        a: "Set the honeymoon budget alongside the wedding budget so you don't spend it all on the day. Include flights, lodging, food, activities, and a cushion; a honeymoon fund can let guests contribute.",
+      },
+      {
+        q: "Should you go on your honeymoon right after the wedding?",
+        a: "It's up to you. Many couples take a short 'minimoon' right after and save the big trip for later, which avoids planning a major vacation during an already hectic time.",
+      },
+    ],
+    keywords: [
+      "how to plan a honeymoon",
+      "when to book honeymoon",
+      "honeymoon budget",
+      "minimoon vs honeymoon",
+    ],
+  },
+  {
+    slug: "who-pays-for-the-wedding",
+    title: "Who pays for the wedding? A modern guide",
+    category: "Budget",
+    updated: "2026-07-22",
+    readMinutes: 5,
+    excerpt:
+      "How wedding costs are split today, what tradition used to dictate, and how to have the money conversation without friction.",
+    intro:
+      "The old rules about who pays for what have largely given way to whatever works for each family. Knowing both the tradition and the modern reality helps you have a calm, clear conversation — which matters more than any etiquette chart.",
+    body: [
+      { h2: "The modern reality" },
+      { p: "Today, most weddings are paid for by some mix of the couple and both families, in whatever proportions make sense. Plenty of couples pay for the whole thing themselves; others split costs three ways with each set of parents. There's no single 'correct' split anymore — only what's fair and affordable for the people involved." },
+      { h2: "What tradition used to say" },
+      { p: "Historically, etiquette assigned specific costs to each side — one family covered the ceremony and reception, the other the rehearsal dinner, and so on. It's useful as a reference point and a conversation starter, but few families follow it to the letter now, and you don't have to either." },
+      { h2: "Have the conversation early" },
+      { p: "The single most important step is talking about money before you start booking. Ask each contributor what they're comfortable giving — as a fixed amount, not a blank check — and whether their contribution comes with expectations (like guest-list input). Knowing the real total up front prevents overspending and awkward surprises." },
+      { h2: "Contributions and expectations go together" },
+      { p: "Money often comes with a say. If a parent is funding a big share, they may expect input on the guest list or the venue. Decide together how much influence a contribution carries, and set that expectation kindly and clearly at the start rather than negotiating it later." },
+      { h2: "Keep one shared budget" },
+      { p: "However the money is split, track it in one place — total funds in, costs out, who's covering what. A single shared budget keeps everyone aligned and stops the total from quietly creeping past what anyone agreed to." },
+    ],
+    faqs: [
+      {
+        q: "Who traditionally pays for the wedding?",
+        a: "Traditional etiquette split specific costs between the two families — one covering the ceremony and reception, the other the rehearsal dinner, and so on. Today most weddings are funded by a mix of the couple and both families in whatever proportions work.",
+      },
+      {
+        q: "How do modern couples split wedding costs?",
+        a: "There's no fixed rule now. Some couples pay entirely themselves; others split three ways with each set of parents. The best approach is whatever is fair and affordable for everyone involved.",
+      },
+      {
+        q: "How do you talk to family about paying for the wedding?",
+        a: "Have the conversation before booking anything. Ask each contributor for a specific amount they're comfortable with (not a blank check), clarify any expectations that come with it, and track everything in one shared budget.",
+      },
+    ],
+    keywords: [
+      "who pays for the wedding",
+      "wedding cost split",
+      "who pays for what wedding",
+      "wedding budget who pays",
+    ],
+  },
 ];
 
 export function getGuide(slug: string): Guide | undefined {
