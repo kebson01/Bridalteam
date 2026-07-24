@@ -21,13 +21,28 @@ const NAV = [
 // points at the real auth screen — never the pre-launch waitlist.
 const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
 
+type Viewer = { name: string; firstName: string; avatar: string; email: string };
+
+function toViewer(user: {
+  email?: string;
+  user_metadata?: { full_name?: string; avatar_url?: string };
+} | null): Viewer | null {
+  if (!user) return null;
+  const email = user.email ?? "";
+  const name = (user.user_metadata?.full_name ?? "").trim();
+  const firstName = name.split(/\s+/)[0] || email.split("@")[0] || "there";
+  return { name, firstName, avatar: user.user_metadata?.avatar_url ?? "", email };
+}
+
 /**
- * Tracks whether someone is signed in, so the header can show "Dashboard /
- * Log out" instead of "Log in / Start free". `null` means not yet determined —
- * we render the signed-out buttons until we know, which is the common case.
+ * Tracks the signed-in viewer (name + avatar), so the header can greet them and
+ * show "Dashboard / Log out" instead of "Log in / Start free". `signedIn` is
+ * `null` until determined — we render the signed-out buttons until we know,
+ * which is the common case.
  */
-function useSignedIn() {
+function useViewer() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [viewer, setViewer] = useState<Viewer | null>(null);
 
   useEffect(() => {
     if (!SHOW_PLANNER_APP) {
@@ -35,20 +50,32 @@ function useSignedIn() {
       return;
     }
     const supabase = supabaseBrowser();
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
-      setSignedIn(!!session),
-    );
+    supabase.auth.getUser().then(({ data }) => {
+      setSignedIn(!!data.user);
+      setViewer(toViewer(data.user));
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+      setViewer(toViewer(session?.user ?? null));
+    });
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  return signedIn;
+  return { signedIn, viewer };
+}
+
+/** Initials fallback for the avatar chip. */
+function initialsOf(v: Viewer): string {
+  const source = v.name || v.email.split("@")[0] || "";
+  const parts = source.split(/[\s._-]+/).filter(Boolean);
+  const chars = parts.length >= 2 ? parts[0][0] + parts[1][0] : source.slice(0, 2);
+  return chars.toUpperCase() || "?";
 }
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const signedIn = useSignedIn();
+  const { signedIn, viewer } = useViewer();
 
   async function logout() {
     await supabaseBrowser().auth.signOut();
@@ -94,9 +121,24 @@ export default function SiteHeader() {
               </Link>
               <Link
                 href="/account"
-                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
+                className="group flex items-center gap-2 rounded-full border border-stone-2 py-1 pl-1 pr-3 transition-colors hover:border-brand"
+                aria-label="Account settings"
               >
-                Account
+                {viewer?.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={viewer.avatar}
+                    alt=""
+                    className="h-7 w-7 flex-none rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-dark">
+                    {viewer ? initialsOf(viewer) : ""}
+                  </span>
+                )}
+                <span className="text-sm font-medium text-ink-soft transition-colors group-hover:text-brand-dark">
+                  {viewer ? `Hi, ${viewer.firstName}` : "Account"}
+                </span>
               </Link>
               <button
                 type="button"
@@ -155,20 +197,37 @@ export default function SiteHeader() {
               <>
                 <li>
                   <Link
+                    href="/account"
+                    onClick={() => setOpen(false)}
+                    className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-stone-4"
+                  >
+                    {viewer?.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={viewer.avatar}
+                        alt=""
+                        className="h-9 w-9 flex-none rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-brand/15 text-sm font-semibold text-brand-dark">
+                        {viewer ? initialsOf(viewer) : ""}
+                      </span>
+                    )}
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-ink">
+                        {viewer ? `Hi, ${viewer.firstName}` : "Account"}
+                      </span>
+                      <span className="block text-xs text-ink-soft/60">Account settings</span>
+                    </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/dashboard"
                     onClick={() => setOpen(false)}
                     className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
                   >
                     Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/account"
-                    onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
-                  >
-                    Account
                   </Link>
                 </li>
                 <li className="pt-2">
