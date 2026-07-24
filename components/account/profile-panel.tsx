@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { squareAvatar } from "@/lib/image";
 
 /** Initials fallback when there's no avatar yet. */
 function initials(name: string, email: string): string {
@@ -60,19 +61,27 @@ export default function ProfilePanel({
       setError("Please choose an image file.");
       return;
     }
-    if (file.size > 4 * 1024 * 1024) {
-      setError("Photo must be under 4 MB.");
+    // Generous cap on the *original* — we downscale before upload, so the
+    // stored file ends up tiny regardless.
+    if (file.size > 15 * 1024 * 1024) {
+      setError("Photo must be under 15 MB.");
       return;
     }
     setUploading(true);
     try {
+      // Center-crop to a square and downscale so it frames cleanly and loads fast.
+      const processed = await squareAvatar(file, 512);
+
       const supabase = supabaseBrowser();
-      const ext = file.name.split(".").pop() || "jpg";
       // Folder must be the user's id — storage RLS enforces it.
-      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const path = `${userId}/${crypto.randomUUID()}.${processed.ext}`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { cacheControl: "3600", upsert: false });
+        .upload(path, processed.blob, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: processed.type,
+        });
       if (upErr) {
         setError("Upload failed. Please try again.");
         return;
@@ -119,7 +128,9 @@ export default function ProfilePanel({
           >
             {uploading ? "Uploading…" : avatar ? "Change photo" : "Add photo"}
           </button>
-          <p className="mt-1.5 text-xs text-ink-soft/60">JPG or PNG, up to 4 MB.</p>
+          <p className="mt-1.5 text-xs text-ink-soft/60">
+            JPG, PNG or WebP. We&rsquo;ll crop it to a square automatically.
+          </p>
           <input
             ref={fileRef}
             type="file"
