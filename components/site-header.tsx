@@ -115,6 +115,12 @@ export default function SiteHeader() {
           {signedIn ? (
             <>
               <Link
+                href="/community"
+                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
+              >
+                Community
+              </Link>
+              <Link
                 href="/dashboard"
                 className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
               >
@@ -220,6 +226,15 @@ export default function SiteHeader() {
                       </span>
                       <span className="block text-xs text-ink-soft/60">Account settings</span>
                     </span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/community"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
+                  >
+                    Community
                   </Link>
                 </li>
                 <li>
