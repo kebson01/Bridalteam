@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
+import ProfilePanel from "@/components/account/profile-panel";
 import ChangeEmailPanel from "@/components/account/change-email-panel";
+import SignOutButton from "@/components/account/sign-out-button";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
@@ -15,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * A shared account-settings home for every signed-in user — couples, planners
- * and vendors alike. Currently: change email and change password.
+ * and vendors alike. Profile (photo + name), email, and password.
  */
 export default async function AccountPage() {
   if (!SHOW_PLANNER_APP) notFound();
@@ -26,11 +28,24 @@ export default async function AccountPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login?next=/account");
 
+  const email = user.email ?? "";
+  const name = (user.user_metadata?.full_name as string | undefined)?.trim() ?? "";
+  const avatar = (user.user_metadata?.avatar_url as string | undefined) ?? "";
+
   return (
     <>
       <PageHero eyebrow="Account" title="Account settings" />
       <section className="mx-auto max-w-3xl space-y-6 px-5 py-12">
-        <ChangeEmailPanel currentEmail={user.email ?? ""} />
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-2 bg-white px-6 py-4 shadow-card">
+          <p className="text-sm text-ink-soft/80">
+            Signed in as <span className="font-medium text-ink">{email}</span>
+          </p>
+          <SignOutButton />
+        </div>
+
+        <ProfilePanel userId={user.id} email={email} initialName={name} initialAvatar={avatar} />
+
+        <ChangeEmailPanel currentEmail={email} />
 
         <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
           <h2 className="text-lg font-medium text-ink">Password</h2>
