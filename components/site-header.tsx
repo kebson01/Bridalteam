@@ -94,6 +94,7 @@ export default function SiteHeader() {
             width={168}
             height={46}
             priority
+            unoptimized
             className="h-9 w-auto"
           />
         </Link>
