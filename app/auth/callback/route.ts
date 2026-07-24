@@ -24,7 +24,11 @@ export async function GET(request: Request) {
     requested.startsWith("/") && !requested.startsWith("//") ? requested : "/onboarding";
 
   if (!code) {
-    return NextResponse.redirect(new URL("/auth/login?error=missing_code", SITE_URL));
+    // Supabase redirects here with error params when a link is invalid or
+    // already used — surface that instead of a generic "missing code".
+    const errCode = url.searchParams.get("error_code") ?? "";
+    const kind = /expired/i.test(errCode) ? "expired" : "missing_code";
+    return NextResponse.redirect(new URL(`/auth/login?error=${kind}`, SITE_URL));
   }
 
   const supabase = await supabaseServer();
