@@ -87,12 +87,14 @@ export default function ResetPasswordPanel() {
         <button
           type="button"
           onClick={() => {
+            // /dashboard self-routes each account to its home (couples to their
+            // wedding, vendors to /vendor), so this works for everyone.
             router.push("/dashboard");
             router.refresh();
           }}
           className="mt-6 rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
         >
-          Go to my planner
+          Continue to my account
         </button>
       </div>
     );
