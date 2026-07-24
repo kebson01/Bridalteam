@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import NotificationsBell from "@/components/notifications-bell";
 
 const NAV = [
   { label: "How it works", href: "/#how" },
@@ -21,9 +22,10 @@ const NAV = [
 // points at the real auth screen — never the pre-launch waitlist.
 const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
 
-type Viewer = { name: string; firstName: string; avatar: string; email: string };
+type Viewer = { id: string; name: string; firstName: string; avatar: string; email: string };
 
 function toViewer(user: {
+  id?: string;
   email?: string;
   user_metadata?: { full_name?: string; avatar_url?: string };
 } | null): Viewer | null {
@@ -31,7 +33,7 @@ function toViewer(user: {
   const email = user.email ?? "";
   const name = (user.user_metadata?.full_name ?? "").trim();
   const firstName = name.split(/\s+/)[0] || email.split("@")[0] || "there";
-  return { name, firstName, avatar: user.user_metadata?.avatar_url ?? "", email };
+  return { id: user.id ?? "", name, firstName, avatar: user.user_metadata?.avatar_url ?? "", email };
 }
 
 /**
@@ -126,6 +128,7 @@ export default function SiteHeader() {
               >
                 Dashboard
               </Link>
+              {viewer && <NotificationsBell userId={viewer.id} />}
               <Link
                 href="/account"
                 className="group flex items-center gap-2 rounded-full border border-stone-2 py-1 pl-1 pr-3 transition-colors hover:border-brand"
@@ -173,6 +176,11 @@ export default function SiteHeader() {
           )}
         </div>
 
+        {signedIn && viewer && (
+          <div className="ml-auto mr-1 md:hidden">
+            <NotificationsBell userId={viewer.id} />
+          </div>
+        )}
         <button
           type="button"
           aria-label="Toggle menu"
