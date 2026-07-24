@@ -5,7 +5,7 @@
  * that still changes daily.
  */
 
-const VERSION = "v2";
+const VERSION = "v3";
 const STATIC_CACHE = `bt-static-${VERSION}`;
 const PAGE_CACHE = `bt-pages-${VERSION}`;
 const OFFLINE_URL = "/offline";
@@ -52,14 +52,25 @@ self.addEventListener("fetch", (event) => {
 
   // Navigations: network first, fall back to cache, then the offline page.
   //
-  // IMPORTANT: only plain 200 responses may be cached. A cached *redirected*
-  // response replayed for a navigation is rejected by the browser outright
-  // ("This page couldn't load"), which broke login/confirm flows.
+  // IMPORTANT: a *redirected* response can never be handed back for a
+  // navigation — the browser rejects it outright ("This page couldn't load"),
+  // which broke login/confirm flows (any page that server-side redirect()s,
+  // e.g. /dashboard -> /onboarding after sign-in). It is not enough to skip
+  // *caching* redirected responses; we must also rebuild them into a fresh,
+  // non-redirected response before returning. Only plain 200s are cached.
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
-        .then((response) => {
-          if (response.ok && !response.redirected && response.type === "basic") {
+        .then(async (response) => {
+          if (response.redirected) {
+            const body = await response.arrayBuffer();
+            return new Response(body, {
+              status: response.status,
+              statusText: response.statusText,
+              headers: response.headers,
+            });
+          }
+          if (response.ok && response.type === "basic") {
             const copy = response.clone();
             caches.open(PAGE_CACHE).then((cache) => cache.put(request, copy));
           }
