@@ -80,9 +80,18 @@ export default function InspirationComments({
         ) : (
           comments.map((c) => (
             <div key={c.id} className="group flex items-start gap-2">
-              <span className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-dark">
-                {c.author_name.charAt(0).toUpperCase()}
-              </span>
+              {c.author_avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={c.author_avatar}
+                  alt=""
+                  className="mt-0.5 h-7 w-7 flex-none rounded-full object-cover"
+                />
+              ) : (
+                <span className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-dark">
+                  {c.author_name.charAt(0).toUpperCase()}
+                </span>
+              )}
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-ink">
                   <span className="font-semibold">{c.author_name}</span>{" "}
