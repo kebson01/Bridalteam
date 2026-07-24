@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { downscaleImage } from "@/lib/image";
 import PostComments from "@/components/community/post-comments";
@@ -221,6 +221,45 @@ export default function Community({
       switchScope(res.group.id);
     });
   }
+
+  // Live updates for the scope currently in view.
+  useEffect(() => {
+    const supabase = supabaseBrowser();
+    const channel = supabase
+      .channel(`community:${scope}`)
+      // New posts (RLS ensures group posts only reach members).
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, (payload) => {
+        const row = payload.new as FeedPost & { media_type?: string };
+        // Our own posts are already reflected locally; skip to avoid duplicates.
+        if (row.author_id === viewer.id) return;
+        const inScope =
+          scope === "public" ? row.visibility === "public" : row.group_id === scope;
+        if (!inScope) return;
+        setFeed((f) =>
+          f.some((p) => p.id === row.id)
+            ? f
+            : [{ ...row, liked_by_me: false, comment_count: 0 }, ...f],
+        );
+      })
+      // Like counts change on the posts row.
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "posts" }, (payload) => {
+        const row = payload.new as FeedPost;
+        setFeed((f) => f.map((p) => (p.id === row.id ? { ...p, like_count: row.like_count } : p)));
+      })
+      // New replies bump the comment count (skip our own — already counted).
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "post_comments" }, (payload) => {
+        const row = payload.new as { post_id: string; user_id: string };
+        if (row.user_id === viewer.id) return;
+        setFeed((f) =>
+          f.map((p) => (p.id === row.post_id ? { ...p, comment_count: p.comment_count + 1 } : p)),
+        );
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [scope, viewer.id]);
 
   const activeGroup = groups.find((g) => g.id === scope);
 

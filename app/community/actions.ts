@@ -381,3 +381,43 @@ export async function deletePostComment(commentId: string): Promise<{ ok: boolea
   }
   return { ok: true };
 }
+
+export type AppNotification = {
+  id: string;
+  type: "group_post" | "reply" | "like";
+  actor_name: string;
+  post_id: string | null;
+  group_id: string | null;
+  preview: string | null;
+  read: boolean;
+  created_at: string;
+};
+
+/** Recent notifications for the signed-in user, plus the unread count. */
+export async function listNotifications(): Promise<{ items: AppNotification[]; unread: number }> {
+  const { supabase, user } = await authed();
+  if (!user) return { items: [], unread: 0 };
+  const [{ data }, { count }] = await Promise.all([
+    supabase
+      .from("notifications")
+      .select("id, type, actor_name, post_id, group_id, preview, read, created_at")
+      .order("created_at", { ascending: false })
+      .limit(30),
+    supabase.from("notifications").select("*", { count: "exact", head: true }).eq("read", false),
+  ]);
+  return { items: (data ?? []) as AppNotification[], unread: count ?? 0 };
+}
+
+/** Marks notifications read — all of them, or a specific set. */
+export async function markNotificationsRead(ids?: string[]): Promise<{ ok: boolean }> {
+  const { supabase, user } = await authed();
+  if (!user) return { ok: false };
+  let q = supabase.from("notifications").update({ read: true }).eq("user_id", user.id).eq("read", false);
+  if (ids && ids.length > 0) q = q.in("id", ids);
+  const { error } = await q;
+  if (error) {
+    console.error("markNotificationsRead failed:", error.code, error.message);
+    return { ok: false };
+  }
+  return { ok: true };
+}
