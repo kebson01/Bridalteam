@@ -5,7 +5,7 @@
  * that still changes daily.
  */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `bt-static-${VERSION}`;
 const PAGE_CACHE = `bt-pages-${VERSION}`;
 const OFFLINE_URL = "/offline";
@@ -46,16 +46,23 @@ self.addEventListener("fetch", (event) => {
   // Same-origin only; never touch Supabase or other third parties.
   if (url.origin !== self.location.origin) return;
 
-  // API routes must always hit the network — caching them would serve stale data.
-  if (url.pathname.startsWith("/api/")) return;
+  // API and auth routes must always hit the network untouched — caching them
+  // would serve stale data, and auth flows are redirect-heavy.
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/")) return;
 
   // Navigations: network first, fall back to cache, then the offline page.
+  //
+  // IMPORTANT: only plain 200 responses may be cached. A cached *redirected*
+  // response replayed for a navigation is rejected by the browser outright
+  // ("This page couldn't load"), which broke login/confirm flows.
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone();
-          caches.open(PAGE_CACHE).then((cache) => cache.put(request, copy));
+          if (response.ok && !response.redirected && response.type === "basic") {
+            const copy = response.clone();
+            caches.open(PAGE_CACHE).then((cache) => cache.put(request, copy));
+          }
           return response;
         })
         .catch(async () => {
@@ -73,8 +80,10 @@ self.addEventListener("fetch", (event) => {
         (cached) =>
           cached ??
           fetch(request).then((response) => {
-            const copy = response.clone();
-            caches.open(STATIC_CACHE).then((cache) => cache.put(request, copy));
+            if (response.ok) {
+              const copy = response.clone();
+              caches.open(STATIC_CACHE).then((cache) => cache.put(request, copy));
+            }
             return response;
           }),
       ),
