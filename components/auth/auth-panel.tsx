@@ -109,9 +109,15 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
           placeholder="••••••••"
           className="mt-1.5 w-full rounded-lg border border-stone-2 px-4 py-3 text-sm text-ink outline-none focus:border-brand disabled:opacity-60"
         />
-        {isSignup && (
+        {isSignup ? (
           <span className="mt-1.5 block text-xs text-ink-soft/60">
             At least 8 characters.
+          </span>
+        ) : (
+          <span className="mt-1.5 block text-right">
+            <Link href="/auth/forgot-password" className="text-xs font-medium text-brand-dark">
+              Forgot password?
+            </Link>
           </span>
         )}
       </label>
