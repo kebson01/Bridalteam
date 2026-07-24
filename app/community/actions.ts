@@ -3,8 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { moderateImage } from "@/lib/moderation";
+import { sendEmail, emailLayout } from "@/lib/email";
+import { SITE_URL } from "@/lib/site";
+import { VALID_GROUP_KINDS } from "@/lib/community";
 
-export type PostGroup = { id: string; name: string; join_code: string; owner_id: string };
+export type PostGroup = { id: string; name: string; join_code: string; owner_id: string; kind: string };
+
+export type GroupMember = { user_id: string; name: string; avatar: string | null; is_owner: boolean };
 
 export type FeedPost = {
   id: string;
@@ -46,7 +51,7 @@ export async function listGroups(): Promise<PostGroup[]> {
   if (!user) return [];
   const { data, error } = await supabase
     .from("post_groups")
-    .select("id, name, join_code, owner_id")
+    .select("id, name, join_code, owner_id, kind")
     .order("created_at", { ascending: true });
   if (error) {
     console.error("listGroups failed:", error.code, error.message);
@@ -55,9 +60,13 @@ export async function listGroups(): Promise<PostGroup[]> {
   return (data ?? []) as PostGroup[];
 }
 
-export async function createGroup(name: string): Promise<{ ok: boolean; group?: PostGroup; error?: string }> {
+export async function createGroup(
+  name: string,
+  kind = "custom",
+): Promise<{ ok: boolean; group?: PostGroup; error?: string }> {
   const clean = name?.trim().slice(0, 60);
   if (!clean) return { ok: false, error: "Give your group a name." };
+  const safeKind = VALID_GROUP_KINDS.has(kind) ? kind : "custom";
   const { supabase, user } = await authed();
   if (!user) return { ok: false, error: "sign_in" };
 
@@ -69,8 +78,8 @@ export async function createGroup(name: string): Promise<{ ok: boolean; group?: 
 
   const { data, error } = await supabase
     .from("post_groups")
-    .insert({ owner_id: user.id, name: clean, join_code: code })
-    .select("id, name, join_code, owner_id")
+    .insert({ owner_id: user.id, name: clean, join_code: code, kind: safeKind })
+    .select("id, name, join_code, owner_id, kind")
     .single();
   if (error || !data) {
     console.error("createGroup failed:", error?.code, error?.message);
@@ -78,6 +87,106 @@ export async function createGroup(name: string): Promise<{ ok: boolean; group?: 
   }
   revalidatePath("/community");
   return { ok: true, group: data as PostGroup };
+}
+
+/** Members of a group (caller must be a member). */
+export async function listGroupMembers(groupId: string): Promise<GroupMember[]> {
+  if (!groupId) return [];
+  const { supabase, user } = await authed();
+  if (!user) return [];
+  const { data, error } = await supabase.rpc("list_group_members", { gid: groupId });
+  if (error) {
+    console.error("listGroupMembers failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as GroupMember[];
+}
+
+/**
+ * Owner adds people to a group by email — one or many at once. Emails that
+ * already have an account are added immediately; the rest get an invite email
+ * with the group's join code.
+ */
+export async function addGroupMembers(
+  groupId: string,
+  emailsRaw: string,
+): Promise<{ ok: boolean; added?: number; invited?: number; error?: string }> {
+  if (!groupId) return { ok: false, error: "Missing group." };
+  const emails = emailsRaw
+    .split(/[\s,;]+/)
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
+  if (emails.length === 0) return { ok: false, error: "Enter at least one valid email." };
+
+  const { supabase, user } = await authed();
+  if (!user) return { ok: false, error: "sign_in" };
+
+  const { data, error } = await supabase.rpc("add_group_members_by_email", {
+    gid: groupId,
+    emails,
+  });
+  if (error) {
+    const msg = /not_owner/.test(error.message)
+      ? "Only the group's owner can add members."
+      : "Couldn't add members. Please try again.";
+    return { ok: false, error: msg };
+  }
+
+  const result = (data ?? {}) as { added?: number; not_found?: string[] };
+  const notFound = result.not_found ?? [];
+
+  // Invite the ones who don't have an account yet, with the group's join code.
+  if (notFound.length > 0) {
+    const { data: group } = await supabase
+      .from("post_groups")
+      .select("name, join_code")
+      .eq("id", groupId)
+      .maybeSingle();
+    if (group) {
+      const inviterName =
+        (user.user_metadata?.full_name as string | undefined)?.trim() ||
+        user.email?.split("@")[0] ||
+        "A friend";
+      await Promise.all(
+        notFound.map((to) =>
+          sendEmail({
+            to,
+            subject: `${inviterName} invited you to “${group.name}” on Bridal Team`,
+            html: emailLayout(
+              `You're invited to “${group.name}”`,
+              `${inviterName} added you to their private group on Bridal Team. ` +
+                `Create a free account, then join with code <strong>${group.join_code}</strong>.`,
+              { label: "Join on Bridal Team", url: `${SITE_URL}/auth/signup?next=/community` },
+            ),
+          }).catch(() => undefined),
+        ),
+      );
+    }
+  }
+
+  revalidatePath("/community");
+  return { ok: true, added: result.added ?? 0, invited: notFound.length };
+}
+
+/** Owner removes a member, or a member removes themselves. */
+export async function removeGroupMember(
+  groupId: string,
+  targetUserId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!groupId || !targetUserId) return { ok: false };
+  const { supabase, user } = await authed();
+  if (!user) return { ok: false, error: "sign_in" };
+  const { error } = await supabase.rpc("remove_group_member", { gid: groupId, target: targetUserId });
+  if (error) {
+    const msg = /cannot_remove_owner/.test(error.message)
+      ? "The group owner can't be removed."
+      : /not_allowed/.test(error.message)
+        ? "You don't have permission to do that."
+        : "Couldn't remove that member.";
+    return { ok: false, error: msg };
+  }
+  revalidatePath("/community");
+  return { ok: true };
 }
 
 export async function joinGroup(code: string): Promise<{ ok: boolean; group?: PostGroup; error?: string }> {

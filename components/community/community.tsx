@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { downscaleImage } from "@/lib/image";
 import PostComments from "@/components/community/post-comments";
+import GroupMembers from "@/components/community/group-members";
 import {
   createGroup,
   createPost,
@@ -14,6 +15,7 @@ import {
   type FeedPost,
   type PostGroup,
 } from "@/app/community/actions";
+import { GROUP_PRESETS } from "@/lib/community";
 
 type Viewer = { id: string; name: string; avatar: string };
 
@@ -71,9 +73,14 @@ export default function Community({
   // Groups panel
   const [showGroups, setShowGroups] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupKind, setNewGroupKind] = useState("custom");
   const [joinCode, setJoinCode] = useState("");
   const [groupMsg, setGroupMsg] = useState<string | null>(null);
   const [groupBusy, startGroup] = useTransition();
+
+  // Members panel (per active group) + image lightbox.
+  const [showMembers, setShowMembers] = useState(false);
+  const [lightbox, setLightbox] = useState<string | null>(null);
 
   // Track which posts have their replies expanded.
   const [openComments, setOpenComments] = useState<Set<string>>(new Set());
@@ -81,6 +88,7 @@ export default function Community({
   function switchScope(next: string) {
     setScope(next);
     setAudience(next === "public" ? "public" : next);
+    setShowMembers(false);
     startFeed(async () => setFeed(await listFeed(next)));
   }
 
@@ -179,15 +187,24 @@ export default function Community({
   function doCreateGroup() {
     setGroupMsg(null);
     startGroup(async () => {
-      const res = await createGroup(newGroupName);
+      const res = await createGroup(newGroupName, newGroupKind);
       if (!res.ok || !res.group) {
         setGroupMsg(res.error ?? "Couldn't create group.");
         return;
       }
       setGroups((g) => [...g, res.group!]);
       setNewGroupName("");
-      setGroupMsg(`Created “${res.group.name}”. Share code ${res.group.join_code} to invite people.`);
+      setNewGroupKind("custom");
+      setGroupMsg(`Created “${res.group.name}”. Add people below or share code ${res.group.join_code}.`);
+      switchScope(res.group.id);
+      setShowMembers(true);
     });
+  }
+
+  function handleLeft(groupId: string) {
+    setGroups((g) => g.filter((x) => x.id !== groupId));
+    setShowMembers(false);
+    switchScope("public");
   }
 
   function doJoinGroup() {
@@ -246,11 +263,33 @@ export default function Community({
           <div className="mt-3 space-y-4 rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
             <div>
               <p className="text-sm font-semibold text-ink">Create a group</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {GROUP_PRESETS.map((p) => (
+                  <button
+                    key={p.kind}
+                    type="button"
+                    onClick={() => {
+                      setNewGroupKind(p.kind);
+                      setNewGroupName(p.label);
+                    }}
+                    className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                      newGroupKind === p.kind
+                        ? "border-brand bg-brand/10 text-brand-dark"
+                        : "border-stone-2 text-ink-soft hover:border-brand"
+                    }`}
+                  >
+                    {p.emoji} {p.label}
+                  </button>
+                ))}
+              </div>
               <div className="mt-2 flex gap-2">
                 <input
                   value={newGroupName}
-                  onChange={(e) => setNewGroupName(e.target.value)}
-                  placeholder="e.g. Bridal party"
+                  onChange={(e) => {
+                    setNewGroupName(e.target.value);
+                    setNewGroupKind("custom");
+                  }}
+                  placeholder="Group name"
                   maxLength={60}
                   className="w-full rounded-lg border border-stone-2 px-3 py-2 text-sm outline-none focus:border-brand"
                 />
@@ -375,14 +414,26 @@ export default function Community({
         </div>
 
         {/* Scope heading */}
-        <p className="mt-6 mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft/50">
-          {scope === "public" ? "Public feed" : activeGroup?.name ?? "Group"}
+        <div className="mt-6 mb-3 flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft/50">
+            {scope === "public" ? "Public feed" : activeGroup?.name ?? "Group"}
+          </p>
           {activeGroup && (
-            <span className="ml-2 font-normal normal-case tracking-normal text-ink-soft/50">
-              · invite code {activeGroup.join_code}
-            </span>
+            <button
+              type="button"
+              onClick={() => setShowMembers((v) => !v)}
+              className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+            >
+              {showMembers ? "Hide members" : "Members & invites"}
+            </button>
           )}
-        </p>
+        </div>
+
+        {activeGroup && showMembers && (
+          <div className="mb-4">
+            <GroupMembers group={activeGroup} viewerId={viewer.id} onLeft={handleLeft} />
+          </div>
+        )}
 
         {/* Feed */}
         {loadingFeed ? (
@@ -428,10 +479,19 @@ export default function Community({
                 </div>
 
                 {p.image_url && (
-                  <div className="mt-3 overflow-hidden rounded-xl border border-stone-2">
+                  <button
+                    type="button"
+                    onClick={() => setLightbox(p.image_url)}
+                    className="mt-3 block w-full overflow-hidden rounded-xl border border-stone-2"
+                    aria-label="View photo"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.image_url} alt="" className="max-h-[32rem] w-full object-cover" />
-                  </div>
+                    <img
+                      src={p.image_url}
+                      alt=""
+                      className="max-h-[32rem] w-full cursor-zoom-in object-cover"
+                    />
+                  </button>
                 )}
 
                 <div className="mt-3 flex items-center gap-4 text-sm">
@@ -467,6 +527,34 @@ export default function Community({
           </div>
         )}
       </div>
+
+      {/* Image lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightbox(null)}
+          role="dialog"
+          aria-label="Photo"
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            aria-label="Close"
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightbox}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-full max-w-full rounded-lg object-contain"
+          />
+        </div>
+      )}
     </div>
   );
 }
