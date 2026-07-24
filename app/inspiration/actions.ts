@@ -70,6 +70,7 @@ export type InspirationComment = {
   id: string;
   body: string;
   author_name: string;
+  author_avatar: string | null;
   user_id: string;
   created_at: string;
 };
@@ -80,7 +81,7 @@ export async function listComments(imageId: string): Promise<InspirationComment[
   const supabase = await supabaseServer();
   const { data, error } = await supabase
     .from("inspiration_comments")
-    .select("id, body, author_name, user_id, created_at")
+    .select("id, body, author_name, author_avatar, user_id, created_at")
     .eq("image_id", imageId)
     .order("created_at", { ascending: true });
   if (error) {
@@ -110,11 +111,18 @@ export async function addComment(imageId: string, body: string): Promise<Comment
     (user.user_metadata?.full_name as string | undefined)?.trim() ||
     user.email?.split("@")[0] ||
     "Guest";
+  const authorAvatar = (user.user_metadata?.avatar_url as string | undefined)?.trim() || null;
 
   const { data, error } = await supabase
     .from("inspiration_comments")
-    .insert({ image_id: imageId, user_id: user.id, author_name: authorName, body: text.slice(0, 1000) })
-    .select("id, body, author_name, user_id, created_at")
+    .insert({
+      image_id: imageId,
+      user_id: user.id,
+      author_name: authorName,
+      author_avatar: authorAvatar,
+      body: text.slice(0, 1000),
+    })
+    .select("id, body, author_name, author_avatar, user_id, created_at")
     .single();
 
   if (error || !data) {
