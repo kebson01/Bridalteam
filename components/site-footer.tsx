@@ -54,6 +54,7 @@ export default function SiteFooter() {
             alt="Bridal Team"
             width={180}
             height={49}
+            unoptimized
             className="h-10 w-auto brightness-0 invert"
           />
           <p className="mt-4 max-w-xs text-sm text-white/60">
