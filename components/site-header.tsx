@@ -92,6 +92,12 @@ export default function SiteHeader() {
               >
                 Dashboard
               </Link>
+              <Link
+                href="/account"
+                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
+              >
+                Account
+              </Link>
               <button
                 type="button"
                 onClick={logout}
@@ -154,6 +160,15 @@ export default function SiteHeader() {
                     className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
                   >
                     Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/account"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
+                  >
+                    Account
                   </Link>
                 </li>
                 <li className="pt-2">
