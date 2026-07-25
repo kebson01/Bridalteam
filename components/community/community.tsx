@@ -397,7 +397,7 @@ export default function Community({
     <>
       <div className="mx-auto grid max-w-6xl items-start gap-6 px-4 py-6 lg:grid-cols-[216px_minmax(0,1fr)_288px]">
         {/* ---------------- LEFT RAIL ---------------- */}
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
           <h2 className="hidden font-display text-[22px] font-semibold text-ink lg:block">Navigation</h2>
           <p className="mb-4 hidden text-xs text-ink-soft/60 lg:block">Browse the community</p>
 

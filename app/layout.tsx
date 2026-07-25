@@ -90,7 +90,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className="min-h-full flex flex-col bg-white text-ink"
+        className="min-h-full flex flex-col overflow-x-clip bg-white text-ink"
         suppressHydrationWarning
       >
         <JsonLd data={organizationSchema()} />

@@ -45,65 +45,71 @@ const SOCIAL = [
 ];
 
 export default function SiteFooter() {
+  const year = new Date().getFullYear();
   return (
     <footer className="bg-ink text-white">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="lg:col-span-2">
-          <Image
-            src="/brand/logo.svg"
-            alt="Bridal Team"
-            width={180}
-            height={49}
-            unoptimized
-            className="h-10 w-auto brightness-0 invert"
-          />
-          <p className="mt-4 max-w-xs text-sm text-white/60">
-            Fun, simple wedding planning — reimagined for today and powered by
-            AI. Organize details, find ideas, and collaborate with your team.
-          </p>
-          <div className="mt-6 flex gap-3">
-            {SOCIAL.map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-white/80 transition-colors hover:border-brand hover:bg-brand hover:text-white"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d={s.d} />
-                </svg>
-              </a>
+      <div className="mx-auto max-w-6xl px-5 py-10">
+        <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+          {/* Brand */}
+          <div className="max-w-xs">
+            <Image
+              src="/brand/logo.svg"
+              alt="Bridal Team"
+              width={180}
+              height={49}
+              unoptimized
+              className="h-8 w-auto brightness-0 invert"
+            />
+            <p className="mt-3 text-xs leading-relaxed text-white/55">
+              Fun, simple wedding planning — reimagined for today and powered by AI.
+            </p>
+            <div className="mt-4 flex gap-2.5">
+              {SOCIAL.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/80 transition-colors hover:border-brand hover:bg-brand hover:text-white"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d={s.d} />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Link columns — a compact 3-across grid, even on mobile */}
+          <div className="grid grid-cols-3 gap-6 sm:gap-10">
+            {COLUMNS.map((col) => (
+              <div key={col.title}>
+                <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-amber">
+                  {col.title}
+                </h4>
+                <ul className="mt-3 space-y-2">
+                  {col.links.map((l) => (
+                    <li key={l.label}>
+                      <Link
+                        href={l.href}
+                        className="text-[13px] text-white/60 transition-colors hover:text-white"
+                      >
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </div>
-
-        {COLUMNS.map((col) => (
-          <div key={col.title}>
-            <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-amber">
-              {col.title}
-            </h4>
-            <ul className="mt-4 space-y-2.5">
-              {col.links.map((l) => (
-                <li key={l.label}>
-                  <Link
-                    href={l.href}
-                    className="text-sm text-white/65 transition-colors hover:text-white"
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
       </div>
 
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 text-xs text-white/50 sm:flex-row">
-          <p>© 2012 Bridal Team. All rights reserved.</p>
-          <nav className="flex gap-5">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-4 text-xs text-white/45 sm:flex-row">
+          <p>© {year} Bridal Team. All rights reserved.</p>
+          <nav className="flex flex-wrap justify-center gap-4">
             <Link href="/privacy" className="hover:text-white/80">Privacy</Link>
             <Link href="/terms" className="hover:text-white/80">Terms</Link>
             <Link href={LOGIN_HREF} className="hover:text-white/80">Log in</Link>
