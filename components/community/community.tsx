@@ -6,6 +6,7 @@ import { downscaleImage } from "@/lib/image";
 import PostComments from "@/components/community/post-comments";
 import GroupMembers from "@/components/community/group-members";
 import {
+  createEvent,
   createGroup,
   createPost,
   deletePost,
@@ -14,8 +15,10 @@ import {
   listSavedFeed,
   listTrendingFeed,
   togglePostLike,
+  toggleEventRsvp,
   toggleSavePost,
   votePoll,
+  type AppEvent,
   type FeedPost,
   type PostGroup,
 } from "@/app/community/actions";
@@ -34,6 +37,13 @@ function timeAgo(iso: string): string {
   const days = Math.round(hrs / 24);
   if (days < 7) return `${days}d`;
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function eventWhen(iso: string): string {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return `${date} · ${time}`;
 }
 
 function Avatar({ name, url, size = 40 }: { name: string; url: string | null; size?: number }) {
@@ -64,10 +74,12 @@ export default function Community({
   viewer,
   initialGroups,
   initialFeed,
+  initialEvents,
 }: {
   viewer: Viewer;
   initialGroups: PostGroup[];
   initialFeed: FeedPost[];
+  initialEvents: AppEvent[];
 }) {
   const [groups, setGroups] = useState<PostGroup[]>(initialGroups);
   const [scope, setScope] = useState<string>("public");
@@ -102,6 +114,43 @@ export default function Community({
 
   // Track which posts have their replies expanded.
   const [openComments, setOpenComments] = useState<Set<string>>(new Set());
+
+  // Upcoming events (right rail)
+  const [events, setEvents] = useState<AppEvent[]>(initialEvents);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [evTitle, setEvTitle] = useState("");
+  const [evLocation, setEvLocation] = useState("");
+  const [evWhen, setEvWhen] = useState("");
+  const [evMsg, setEvMsg] = useState<string | null>(null);
+  const [evBusy, startEvent] = useTransition();
+
+  function doCreateEvent() {
+    setEvMsg(null);
+    startEvent(async () => {
+      const res = await createEvent({ title: evTitle, location: evLocation, startsAt: evWhen });
+      if (!res.ok || !res.event) {
+        setEvMsg(res.error ?? "Couldn't create event.");
+        return;
+      }
+      setEvents((list) => [...list, res.event!].sort((a, b) => a.starts_at.localeCompare(b.starts_at)));
+      setEvTitle("");
+      setEvLocation("");
+      setEvWhen("");
+      setShowEventForm(false);
+    });
+  }
+
+  function toggleRsvp(ev: AppEvent) {
+    const nextGoing = !ev.rsvped_by_me;
+    setEvents((list) =>
+      list.map((e) =>
+        e.id === ev.id
+          ? { ...e, rsvped_by_me: nextGoing, going_count: e.going_count + (nextGoing ? 1 : -1) }
+          : e,
+      ),
+    );
+    toggleEventRsvp(ev.id, ev.rsvped_by_me);
+  }
 
   const isView = scope === "trending" || scope === "saved"; // read-only feed views
   const postable = !isView;
@@ -982,23 +1031,91 @@ export default function Community({
               </div>
             </div>
 
-            {/* Upcoming events (placeholder) */}
+            {/* Upcoming events */}
             <div className="mb-6">
               <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-ink">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-dark">
                   <rect x="3" y="4" width="18" height="18" rx="2" />
                   <path d="M16 2v4M8 2v4M3 10h18" />
                 </svg>
-                Upcoming Events <Soon />
+                Upcoming Events
+                <button
+                  type="button"
+                  onClick={() => setShowEventForm((v) => !v)}
+                  className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-lg leading-none text-brand-dark hover:bg-brand/10"
+                  aria-label={showEventForm ? "Close event form" : "Add event"}
+                >
+                  {showEventForm ? "×" : "+"}
+                </button>
               </div>
-              <div className="rounded-xl border border-stone-2 bg-stone-4 p-3 opacity-80">
-                <p className="text-[10.5px] font-bold tracking-wide text-brand-dark">SEPT 12 · LONDON</p>
-                <p className="mt-1 text-sm font-semibold text-ink">Grand Bridal Expo 2026</p>
-                <p className="mt-2 flex items-center gap-2 text-[11.5px] text-ink-soft/60">
-                  <span className="h-4 w-4 rounded-full bg-stone-5" />
-                  +42 going
+
+              {showEventForm && (
+                <div className="mb-3 space-y-2 rounded-xl border border-stone-2 bg-stone-4 p-3">
+                  <input
+                    value={evTitle}
+                    onChange={(e) => setEvTitle(e.target.value)}
+                    placeholder="Event name"
+                    maxLength={120}
+                    className="w-full rounded-lg border border-stone-2 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
+                  />
+                  <input
+                    value={evLocation}
+                    onChange={(e) => setEvLocation(e.target.value)}
+                    placeholder="Location (optional)"
+                    maxLength={120}
+                    className="w-full rounded-lg border border-stone-2 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
+                  />
+                  <input
+                    type="datetime-local"
+                    value={evWhen}
+                    onChange={(e) => setEvWhen(e.target.value)}
+                    className="w-full rounded-lg border border-stone-2 bg-white px-3 py-2 text-sm text-ink-soft outline-none focus:border-brand"
+                  />
+                  <button
+                    type="button"
+                    onClick={doCreateEvent}
+                    disabled={evBusy || !evTitle.trim() || !evWhen}
+                    className="w-full rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  >
+                    {evBusy ? "Adding…" : "Add event"}
+                  </button>
+                  {evMsg && <p className="text-xs text-red-600">{evMsg}</p>}
+                </div>
+              )}
+
+              {events.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-stone-2 p-3 text-center text-xs text-ink-soft/60">
+                  No upcoming events yet. Tap + to add one.
                 </p>
-              </div>
+              ) : (
+                <div className="space-y-2">
+                  {events.map((ev) => (
+                    <div key={ev.id} className="rounded-xl border border-stone-2 bg-stone-4 p-3">
+                      <p className="text-[10.5px] font-bold tracking-wide text-brand-dark">
+                        {eventWhen(ev.starts_at)}
+                        {ev.location ? ` · ${ev.location.toUpperCase()}` : ""}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-ink">{ev.title}</p>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className="text-[11.5px] text-ink-soft/60">
+                          {ev.going_count} going
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => toggleRsvp(ev)}
+                          className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                            ev.rsvped_by_me
+                              ? "bg-brand text-white"
+                              : "border border-stone-2 text-ink-soft hover:border-brand hover:text-brand-dark"
+                          }`}
+                        >
+                          {ev.rsvped_by_me ? "Going ✓" : "RSVP"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-4 border-t border-stone-2 pt-4 text-xs text-ink-soft/60">

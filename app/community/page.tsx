@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Community from "@/components/community/community";
-import { listGroups, listFeed } from "@/app/community/actions";
+import { listGroups, listFeed, listUpcomingEvents } from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
@@ -27,7 +27,11 @@ export default async function CommunityPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login?next=/community");
 
-  const [groups, feed] = await Promise.all([listGroups(), listFeed("public")]);
+  const [groups, feed, events] = await Promise.all([
+    listGroups(),
+    listFeed("public"),
+    listUpcomingEvents(),
+  ]);
 
   const viewer = {
     id: user.id,
@@ -38,5 +42,7 @@ export default async function CommunityPage() {
     avatar: (user.user_metadata?.avatar_url as string | undefined) ?? "",
   };
 
-  return <Community viewer={viewer} initialGroups={groups} initialFeed={feed} />;
+  return (
+    <Community viewer={viewer} initialGroups={groups} initialFeed={feed} initialEvents={events} />
+  );
 }

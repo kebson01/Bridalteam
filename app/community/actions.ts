@@ -577,3 +577,93 @@ export async function markNotificationsRead(ids?: string[]): Promise<{ ok: boole
   }
   return { ok: true };
 }
+
+export type AppEvent = {
+  id: string;
+  title: string;
+  location: string | null;
+  starts_at: string;
+  creator_id: string;
+  going_count: number;
+  rsvped_by_me: boolean;
+};
+
+/** Upcoming community events (soonest first), with RSVP counts for the viewer. */
+export async function listUpcomingEvents(): Promise<AppEvent[]> {
+  const { supabase, user } = await authed();
+  if (!user) return [];
+  const { data: events, error } = await supabase
+    .from("events")
+    .select("id, title, location, starts_at, creator_id")
+    .gte("starts_at", new Date().toISOString())
+    .order("starts_at", { ascending: true })
+    .limit(6);
+  if (error) {
+    console.error("listUpcomingEvents failed:", error.code, error.message);
+    return [];
+  }
+  const rows = events ?? [];
+  const ids = rows.map((e) => e.id);
+  if (ids.length === 0) return [];
+  const { data: rsvps } = await supabase.from("event_rsvps").select("event_id, user_id").in("event_id", ids);
+  const counts = new Map<string, number>();
+  const mine = new Set<string>();
+  for (const r of rsvps ?? []) {
+    counts.set(r.event_id, (counts.get(r.event_id) ?? 0) + 1);
+    if (r.user_id === user.id) mine.add(r.event_id);
+  }
+  return rows.map((e) => ({
+    ...(e as Omit<AppEvent, "going_count" | "rsvped_by_me">),
+    going_count: counts.get(e.id) ?? 0,
+    rsvped_by_me: mine.has(e.id),
+  }));
+}
+
+/** Any member can create an event. */
+export async function createEvent(input: {
+  title: string;
+  location?: string;
+  startsAt: string;
+}): Promise<{ ok: boolean; event?: AppEvent; error?: string }> {
+  const title = input.title?.trim().slice(0, 120);
+  if (!title) return { ok: false, error: "Give your event a name." };
+  const t = Date.parse(input.startsAt);
+  if (!input.startsAt || Number.isNaN(t)) return { ok: false, error: "Pick a date and time." };
+
+  const { supabase, user } = await authed();
+  if (!user) return { ok: false, error: "sign_in" };
+
+  const { data, error } = await supabase
+    .from("events")
+    .insert({
+      creator_id: user.id,
+      creator_name: displayName(user),
+      title,
+      location: input.location?.trim().slice(0, 120) || null,
+      starts_at: new Date(t).toISOString(),
+    })
+    .select("id, title, location, starts_at, creator_id")
+    .single();
+  if (error || !data) {
+    console.error("createEvent failed:", error?.code, error?.message);
+    return { ok: false, error: "Couldn't create that event. Please try again." };
+  }
+  return {
+    ok: true,
+    event: { ...(data as Omit<AppEvent, "going_count" | "rsvped_by_me">), going_count: 0, rsvped_by_me: false },
+  };
+}
+
+/** RSVP to (or cancel RSVP from) an event. `going` is the current state. */
+export async function toggleEventRsvp(eventId: string, going: boolean): Promise<{ ok: boolean }> {
+  const { supabase, user } = await authed();
+  if (!user || !eventId) return { ok: false };
+  if (going) {
+    await supabase.from("event_rsvps").delete().eq("event_id", eventId).eq("user_id", user.id);
+    return { ok: true };
+  }
+  await supabase
+    .from("event_rsvps")
+    .upsert({ event_id: eventId, user_id: user.id }, { onConflict: "event_id,user_id", ignoreDuplicates: true });
+  return { ok: true };
+}
