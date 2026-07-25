@@ -18,13 +18,46 @@ export type FeedPost = {
   author_avatar: string | null;
   body: string | null;
   image_url: string | null;
+  media_type: string | null;
   visibility: "public" | "group";
   group_id: string | null;
   like_count: number;
   created_at: string;
   liked_by_me: boolean;
   comment_count: number;
+  saved_by_me: boolean;
 };
+
+// Columns selected for every feed query — keep in sync with FeedPost's stored fields.
+const POST_COLUMNS =
+  "id, author_id, author_name, author_avatar, body, image_url, media_type, visibility, group_id, like_count, created_at";
+
+type PostRow = Omit<FeedPost, "liked_by_me" | "comment_count" | "saved_by_me">;
+
+/** Adds per-viewer flags (liked/saved) and comment counts to a set of post rows. */
+async function enrichPosts(
+  supabase: Awaited<ReturnType<typeof supabaseServer>>,
+  userId: string,
+  rows: PostRow[],
+): Promise<FeedPost[]> {
+  const ids = rows.map((p) => p.id);
+  if (ids.length === 0) return [];
+  const [{ data: likes }, { data: comments }, { data: saved }] = await Promise.all([
+    supabase.from("post_likes").select("post_id").eq("user_id", userId).in("post_id", ids),
+    supabase.from("post_comments").select("post_id").in("post_id", ids),
+    supabase.from("saved_posts").select("post_id").eq("user_id", userId).in("post_id", ids),
+  ]);
+  const likedSet = new Set((likes ?? []).map((l) => l.post_id));
+  const savedSet = new Set((saved ?? []).map((s) => s.post_id));
+  const commentCounts = new Map<string, number>();
+  for (const c of comments ?? []) commentCounts.set(c.post_id, (commentCounts.get(c.post_id) ?? 0) + 1);
+  return rows.map((p) => ({
+    ...p,
+    liked_by_me: likedSet.has(p.id),
+    saved_by_me: savedSet.has(p.id),
+    comment_count: commentCounts.get(p.id) ?? 0,
+  }));
+}
 
 async function authed() {
   const supabase = await supabaseServer();
@@ -213,7 +246,7 @@ export async function listFeed(scope: string): Promise<FeedPost[]> {
 
   let query = supabase
     .from("posts")
-    .select("id, author_id, author_name, author_avatar, body, image_url, visibility, group_id, like_count, created_at")
+    .select(POST_COLUMNS)
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -224,35 +257,90 @@ export async function listFeed(scope: string): Promise<FeedPost[]> {
     console.error("listFeed failed:", error.code, error.message);
     return [];
   }
-  const rows = posts ?? [];
-  const ids = rows.map((p) => p.id);
-  if (ids.length === 0) return [];
+  return enrichPosts(supabase, user.id, (posts ?? []) as PostRow[]);
+}
 
-  // Which of these the current user has liked, and how many comments each has.
-  const [{ data: likes }, { data: comments }] = await Promise.all([
-    supabase.from("post_likes").select("post_id").eq("user_id", user.id).in("post_id", ids),
-    supabase.from("post_comments").select("post_id").in("post_id", ids),
-  ]);
-  const likedSet = new Set((likes ?? []).map((l) => l.post_id));
-  const commentCounts = new Map<string, number>();
-  for (const c of comments ?? []) commentCounts.set(c.post_id, (commentCounts.get(c.post_id) ?? 0) + 1);
+/** Trending: public posts from the last 7 days, ranked by likes + comments. */
+export async function listTrendingFeed(): Promise<FeedPost[]> {
+  const { supabase, user } = await authed();
+  if (!user) return [];
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select(POST_COLUMNS)
+    .eq("visibility", "public")
+    .gte("created_at", since)
+    .order("like_count", { ascending: false })
+    .limit(60);
+  if (error) {
+    console.error("listTrendingFeed failed:", error.code, error.message);
+    return [];
+  }
+  const enriched = await enrichPosts(supabase, user.id, (posts ?? []) as PostRow[]);
+  return enriched
+    .sort((a, b) => b.like_count + b.comment_count - (a.like_count + a.comment_count))
+    .slice(0, 30);
+}
 
-  return rows.map((p) => ({
-    ...(p as Omit<FeedPost, "liked_by_me" | "comment_count">),
-    liked_by_me: likedSet.has(p.id),
-    comment_count: commentCounts.get(p.id) ?? 0,
-  }));
+/** Posts the signed-in user has saved (bookmarked), newest-saved first. */
+export async function listSavedFeed(): Promise<FeedPost[]> {
+  const { supabase, user } = await authed();
+  if (!user) return [];
+  const { data: saved, error } = await supabase
+    .from("saved_posts")
+    .select("post_id, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    console.error("listSavedFeed failed:", error.code, error.message);
+    return [];
+  }
+  const order = (saved ?? []).map((s) => s.post_id);
+  if (order.length === 0) return [];
+  // RLS on posts still applies — posts the user can no longer see just drop out.
+  const { data: posts } = await supabase.from("posts").select(POST_COLUMNS).in("id", order);
+  const enriched = await enrichPosts(supabase, user.id, (posts ?? []) as PostRow[]);
+  const rank = new Map(order.map((id, i) => [id, i]));
+  return enriched.sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+}
+
+/** A single post by id, for its shareable permalink page. */
+export async function getPost(postId: string): Promise<FeedPost | null> {
+  if (!postId) return null;
+  const { supabase, user } = await authed();
+  if (!user) return null;
+  const { data: post } = await supabase.from("posts").select(POST_COLUMNS).eq("id", postId).maybeSingle();
+  if (!post) return null;
+  const [enriched] = await enrichPosts(supabase, user.id, [post as PostRow]);
+  return enriched ?? null;
+}
+
+/** Save or unsave (bookmark) a post for the signed-in user. */
+export async function toggleSavePost(postId: string, saved: boolean): Promise<{ saved: boolean }> {
+  const { supabase, user } = await authed();
+  if (!user || !postId) return { saved };
+  if (saved) {
+    await supabase.from("saved_posts").delete().eq("post_id", postId).eq("user_id", user.id);
+    return { saved: false };
+  }
+  await supabase
+    .from("saved_posts")
+    .upsert({ post_id: postId, user_id: user.id }, { onConflict: "user_id,post_id", ignoreDuplicates: true });
+  return { saved: true };
 }
 
 export async function createPost(input: {
   body: string;
   imageUrl?: string | null;
+  mediaType?: "photo" | "video";
   visibility: "public" | "group";
   groupId?: string | null;
 }): Promise<{ ok: boolean; error?: string }> {
   const body = input.body?.trim().slice(0, 3000) ?? "";
-  const imageUrl = input.imageUrl?.trim() || null;
-  if (!body && !imageUrl) return { ok: false, error: "Write something or add a photo." };
+  const mediaUrl = input.imageUrl?.trim() || null;
+  const isVideo = input.mediaType === "video";
+  if (!body && !mediaUrl) return { ok: false, error: "Write something or add a photo." };
   if (input.visibility === "group" && !input.groupId)
     return { ok: false, error: "Pick a group to post to." };
 
@@ -260,11 +348,12 @@ export async function createPost(input: {
   if (!user) return { ok: false, error: "sign_in" };
 
   // AI safety check on any image before it goes live. Fails open if unavailable.
-  if (imageUrl) {
-    const moderation = await moderateImage(imageUrl);
+  // (Video moderation isn't supported yet, so videos are posted as-is.)
+  if (mediaUrl && !isVideo) {
+    const moderation = await moderateImage(mediaUrl);
     if (!moderation.allowed) {
       // Best-effort cleanup of the just-uploaded file (user owns their folder).
-      const path = imageUrl.split("/post-media/")[1];
+      const path = mediaUrl.split("/post-media/")[1];
       if (path) await supabase.storage.from("post-media").remove([path]);
       return {
         ok: false,
@@ -280,8 +369,8 @@ export async function createPost(input: {
     author_name: displayName(user),
     author_avatar: (user.user_metadata?.avatar_url as string | undefined)?.trim() || null,
     body: body || null,
-    image_url: imageUrl,
-    media_type: imageUrl ? "photo" : "text",
+    image_url: mediaUrl,
+    media_type: mediaUrl ? (isVideo ? "video" : "photo") : "text",
     visibility: input.visibility,
     group_id: input.visibility === "group" ? input.groupId : null,
   });

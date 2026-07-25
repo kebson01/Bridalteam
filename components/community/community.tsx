@@ -11,7 +11,10 @@ import {
   deletePost,
   joinGroup,
   listFeed,
+  listSavedFeed,
+  listTrendingFeed,
   togglePostLike,
+  toggleSavePost,
   type FeedPost,
   type PostGroup,
 } from "@/app/community/actions";
@@ -74,10 +77,12 @@ export default function Community({
   const [body, setBody] = useState("");
   const [audience, setAudience] = useState<string>("public");
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [mediaType, setMediaType] = useState<"photo" | "video" | "">("");
   const [uploading, setUploading] = useState(false);
   const [posting, startPost] = useTransition();
   const [composerError, setComposerError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
 
   // Groups panel
   const [showGroups, setShowGroups] = useState(false);
@@ -87,22 +92,32 @@ export default function Community({
   const [groupMsg, setGroupMsg] = useState<string | null>(null);
   const [groupBusy, startGroup] = useTransition();
 
-  // Members panel (per active group) + image lightbox.
+  // Members panel (per active group) + image lightbox + share feedback.
   const [showMembers, setShowMembers] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Track which posts have their replies expanded.
   const [openComments, setOpenComments] = useState<Set<string>>(new Set());
 
+  const isView = scope === "trending" || scope === "saved"; // read-only feed views
+  const postable = !isView;
+
+  function loadFor(s: string): Promise<FeedPost[]> {
+    if (s === "trending") return listTrendingFeed();
+    if (s === "saved") return listSavedFeed();
+    return listFeed(s);
+  }
+
   function switchScope(next: string) {
     setScope(next);
-    setAudience(next === "public" ? "public" : next);
+    setAudience(next === "public" || next === "trending" || next === "saved" ? "public" : next);
     setShowMembers(false);
-    startFeed(async () => setFeed(await listFeed(next)));
+    startFeed(async () => setFeed(await loadFor(next)));
   }
 
   function refreshFeed() {
-    startFeed(async () => setFeed(await listFeed(scope)));
+    startFeed(async () => setFeed(await loadFor(scope)));
   }
 
   async function handleImage(file: File) {
@@ -129,11 +144,49 @@ export default function Community({
       }
       const { data } = supabase.storage.from("post-media").getPublicUrl(path);
       setImageUrl(data.publicUrl);
+      setMediaType("photo");
     } catch {
       setComposerError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
+  }
+
+  async function handleVideo(file: File) {
+    setComposerError(null);
+    if (!file.type.startsWith("video/")) {
+      setComposerError("Please choose a video file.");
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      setComposerError("Video must be under 50 MB.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const supabase = supabaseBrowser();
+      const ext = file.name.split(".").pop()?.toLowerCase() || "mp4";
+      const path = `${viewer.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("post-media")
+        .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+      if (error) {
+        setComposerError("Upload failed. Please try again.");
+        return;
+      }
+      const { data } = supabase.storage.from("post-media").getPublicUrl(path);
+      setImageUrl(data.publicUrl);
+      setMediaType("video");
+    } catch {
+      setComposerError("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function clearMedia() {
+    setImageUrl("");
+    setMediaType("");
   }
 
   function submitPost() {
@@ -147,6 +200,7 @@ export default function Community({
       const res = await createPost({
         body,
         imageUrl: imageUrl || null,
+        mediaType: mediaType === "video" ? "video" : "photo",
         visibility,
         groupId: visibility === "group" ? audience : null,
       });
@@ -155,7 +209,7 @@ export default function Community({
         return;
       }
       setBody("");
-      setImageUrl("");
+      clearMedia();
       // If we posted to the scope we're viewing (or to public while on public), refresh.
       if (audience === scope || (audience === "public" && scope === "public")) refreshFeed();
       else switchScope(audience);
@@ -172,6 +226,25 @@ export default function Community({
       ),
     );
     togglePostLike(post.id, post.liked_by_me);
+  }
+
+  function toggleSave(post: FeedPost) {
+    const nextSaved = !post.saved_by_me;
+    setFeed((f) => f.map((p) => (p.id === post.id ? { ...p, saved_by_me: nextSaved } : p)));
+    // On the Saved view, un-saving should drop the card immediately.
+    if (scope === "saved" && !nextSaved) setFeed((f) => f.filter((p) => p.id !== post.id));
+    toggleSavePost(post.id, post.saved_by_me);
+  }
+
+  function sharePost(post: FeedPost) {
+    const url = `${window.location.origin}/community/p/${post.id}`;
+    navigator.clipboard
+      ?.writeText(url)
+      .then(() => {
+        setCopiedId(post.id);
+        setTimeout(() => setCopiedId((c) => (c === post.id ? null : c)), 1800);
+      })
+      .catch(() => undefined);
   }
 
   function removePost(id: string) {
@@ -231,8 +304,9 @@ export default function Community({
     });
   }
 
-  // Live updates for the scope currently in view.
+  // Live updates for the scope currently in view (only for public / group feeds).
   useEffect(() => {
+    if (scope === "trending" || scope === "saved") return;
     const supabase = supabaseBrowser();
     const topic = `community:${scope}`;
 
@@ -250,7 +324,7 @@ export default function Community({
       .channel(topic)
       // New posts (RLS ensures group posts only reach members).
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, (payload) => {
-        const row = payload.new as FeedPost & { media_type?: string };
+        const row = payload.new as FeedPost;
         // Our own posts are already reflected locally; skip to avoid duplicates.
         if (row.author_id === viewer.id) return;
         const inScope =
@@ -259,7 +333,7 @@ export default function Community({
         setFeed((f) =>
           f.some((p) => p.id === row.id)
             ? f
-            : [{ ...row, liked_by_me: false, comment_count: 0 }, ...f],
+            : [{ ...row, liked_by_me: false, comment_count: 0, saved_by_me: false }, ...f],
         );
       })
       // Like counts change on the posts row.
@@ -283,6 +357,14 @@ export default function Community({
   }, [scope, viewer.id]);
 
   const activeGroup = groups.find((g) => g.id === scope);
+  const scopeTitle =
+    scope === "public"
+      ? "Public Feed"
+      : scope === "trending"
+        ? "Trending"
+        : scope === "saved"
+          ? "Saved Posts"
+          : activeGroup?.name ?? "Group";
 
   const navItem =
     "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-[14.5px] font-medium transition-colors";
@@ -326,20 +408,27 @@ export default function Community({
               </button>
             ))}
 
-            {/* Placeholders — not wired up yet. */}
-            <span className={`${navItem} cursor-default whitespace-nowrap text-ink-soft/70`} aria-disabled="true">
+            <button
+              type="button"
+              onClick={() => switchScope("saved")}
+              className={`${navItem} whitespace-nowrap ${scope === "saved" ? navActive : navIdle}`}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
               </svg>
-              Saved Posts <Soon />
-            </span>
-            <span className={`${navItem} cursor-default whitespace-nowrap text-ink-soft/70`} aria-disabled="true">
+              Saved Posts
+            </button>
+            <button
+              type="button"
+              onClick={() => switchScope("trending")}
+              className={`${navItem} whitespace-nowrap ${scope === "trending" ? navActive : navIdle}`}
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <path d="M23 6l-9.5 9.5-5-5L1 18" />
                 <path d="M17 6h6v6" />
               </svg>
-              Trending <Soon />
-            </span>
+              Trending
+            </button>
           </nav>
 
           <button
@@ -439,105 +528,122 @@ export default function Community({
             </p>
           </div>
 
-          {/* Composer */}
-          <div className="rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
-            <div className="flex gap-3">
-              <Avatar name={viewer.name} url={viewer.avatar || null} size={44} />
-              <div className="min-w-0 flex-1">
-                <textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  rows={2}
-                  maxLength={3000}
-                  placeholder={
-                    audience === "public"
-                      ? "Share something with the community…"
-                      : `Post to ${activeGroup?.name ?? "your group"}…`
-                  }
-                  className="w-full resize-none rounded-xl border border-stone-2 bg-stone-4 px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white"
-                />
-                {imageUrl && (
-                  <div className="mt-2 overflow-hidden rounded-lg border border-stone-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imageUrl} alt="Attached" className="max-h-72 w-full object-cover" />
-                  </div>
-                )}
-                <div className="mt-3 flex flex-wrap items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => fileRef.current?.click()}
-                    disabled={uploading}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 disabled:opacity-60"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <circle cx="8.5" cy="8.5" r="1.5" />
-                      <path d="M21 15l-5-5L5 21" />
-                    </svg>
-                    {uploading ? "Uploading…" : imageUrl ? "Change photo" : "Photo"}
-                  </button>
-                  <span className="flex cursor-default items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft/50">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                      <path d="M23 7l-7 5 7 5V7z" />
-                      <rect x="1" y="5" width="15" height="14" rx="2" />
-                    </svg>
-                    Video
-                    <span className="rounded-full bg-brand/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-brand-dark">
-                      Soon
-                    </span>
-                  </span>
-                  <span className="flex cursor-default items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft/50">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                      <path d="M18 20V10M12 20V4M6 20v-6" />
-                    </svg>
-                    Poll
-                    <span className="rounded-full bg-brand/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-brand-dark">
-                      Soon
-                    </span>
-                  </span>
+          {/* Composer — hidden on read-only views (Trending / Saved) */}
+          {postable && (
+            <div className="rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
+              <div className="flex gap-3">
+                <Avatar name={viewer.name} url={viewer.avatar || null} size={44} />
+                <div className="min-w-0 flex-1">
+                  <textarea
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    rows={2}
+                    maxLength={3000}
+                    placeholder={
+                      audience === "public"
+                        ? "Share something with the community…"
+                        : `Post to ${activeGroup?.name ?? "your group"}…`
+                    }
+                    className="w-full resize-none rounded-xl border border-stone-2 bg-stone-4 px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white"
+                  />
                   {imageUrl && (
+                    <div className="mt-2 overflow-hidden rounded-lg border border-stone-2">
+                      {mediaType === "video" ? (
+                        <video src={imageUrl} controls playsInline className="max-h-72 w-full bg-black object-contain" />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imageUrl} alt="Attached" className="max-h-72 w-full object-cover" />
+                      )}
+                    </div>
+                  )}
+                  <div className="mt-3 flex flex-wrap items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => setImageUrl("")}
-                      className="text-sm text-ink-soft/60 hover:text-red-600"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 disabled:opacity-60"
                     >
-                      Remove
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                      </svg>
+                      {uploading ? "Uploading…" : mediaType === "photo" ? "Change photo" : "Photo"}
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => videoRef.current?.click()}
+                      disabled={uploading}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 disabled:opacity-60"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M23 7l-7 5 7 5V7z" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" />
+                      </svg>
+                      {mediaType === "video" ? "Change video" : "Video"}
+                    </button>
+                    <span className="flex cursor-default items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft/50">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M18 20V10M12 20V4M6 20v-6" />
+                      </svg>
+                      Poll
+                      <span className="rounded-full bg-brand/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-brand-dark">
+                        Soon
+                      </span>
+                    </span>
+                    {imageUrl && (
+                      <button
+                        type="button"
+                        onClick={clearMedia}
+                        className="text-sm text-ink-soft/60 hover:text-red-600"
+                      >
+                        Remove
+                      </button>
+                    )}
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleImage(f);
+                        e.target.value = "";
+                      }}
+                    />
+                    <input
+                      ref={videoRef}
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleVideo(f);
+                        e.target.value = "";
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={submitPost}
+                      disabled={posting || uploading || (!body.trim() && !imageUrl)}
+                      className="ml-auto rounded-xl bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-bold text-white shadow-[0_12px_26px_-12px_rgba(243,103,5,0.85)] disabled:opacity-50"
+                    >
+                      {posting ? "Posting…" : "Post"}
+                    </button>
+                  </div>
+                  {composerError && (
+                    <p role="alert" className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {composerError}
+                    </p>
                   )}
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) handleImage(f);
-                      e.target.value = "";
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={submitPost}
-                    disabled={posting || uploading || (!body.trim() && !imageUrl)}
-                    className="ml-auto rounded-xl bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-bold text-white shadow-[0_12px_26px_-12px_rgba(243,103,5,0.85)] disabled:opacity-50"
-                  >
-                    {posting ? "Posting…" : "Post"}
-                  </button>
                 </div>
-                {composerError && (
-                  <p role="alert" className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-                    {composerError}
-                  </p>
-                )}
               </div>
             </div>
-          </div>
+          )}
 
           {/* Feed heading */}
           <div className="flex items-center justify-between gap-3 px-1">
-            <h2 className="font-display text-xl font-semibold text-ink">
-              {scope === "public" ? "Public Feed" : activeGroup?.name ?? "Group"}
-            </h2>
+            <h2 className="font-display text-xl font-semibold text-ink">{scopeTitle}</h2>
             {activeGroup ? (
               <button
                 type="button"
@@ -546,10 +652,14 @@ export default function Community({
               >
                 {showMembers ? "Hide members" : "Members & invites"}
               </button>
-            ) : (
+            ) : scope === "public" ? (
               <span className="text-[13px] text-ink-soft/60">
                 Sort by: <b className="font-semibold text-brand-dark">Recent</b>
               </span>
+            ) : scope === "trending" ? (
+              <span className="text-[13px] text-ink-soft/60">Most engaging this week</span>
+            ) : (
+              <span className="text-[13px] text-ink-soft/60">Only you can see this</span>
             )}
           </div>
 
@@ -567,7 +677,11 @@ export default function Community({
               <p className="text-sm text-ink-soft/70">
                 {scope === "public"
                   ? "No posts yet — be the first to share something."
-                  : "No posts in this group yet. Start the conversation."}
+                  : scope === "trending"
+                    ? "Nothing trending yet — the most-liked and most-discussed posts of the week show up here."
+                    : scope === "saved"
+                      ? "No saved posts yet. Tap Save on any post to bookmark it here."
+                      : "No posts in this group yet. Start the conversation."}
               </p>
             </div>
           ) : (
@@ -603,21 +717,29 @@ export default function Community({
 
                   {p.body && <p className="mt-3 whitespace-pre-wrap text-[14.5px] leading-relaxed text-ink">{p.body}</p>}
 
-                  {p.image_url && (
-                    <button
-                      type="button"
-                      onClick={() => setLightbox(p.image_url)}
-                      className="mt-3 block w-full overflow-hidden rounded-xl border border-stone-2"
-                      aria-label="View photo"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                  {p.image_url &&
+                    (p.media_type === "video" ? (
+                      <video
                         src={p.image_url}
-                        alt=""
-                        className="max-h-[32rem] w-full cursor-zoom-in object-cover"
+                        controls
+                        playsInline
+                        className="mt-3 max-h-[32rem] w-full rounded-xl border border-stone-2 bg-black object-contain"
                       />
-                    </button>
-                  )}
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setLightbox(p.image_url)}
+                        className="mt-3 block w-full overflow-hidden rounded-xl border border-stone-2"
+                        aria-label="View photo"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={p.image_url}
+                          alt=""
+                          className="max-h-[32rem] w-full cursor-zoom-in object-cover"
+                        />
+                      </button>
+                    ))}
 
                   {(p.like_count > 0 || p.comment_count > 0) && (
                     <p className="mt-3 text-right text-xs text-ink-soft/50">
@@ -650,9 +772,10 @@ export default function Community({
                       </svg>
                       Comment
                     </button>
-                    <span
-                      className="flex flex-1 cursor-default items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold text-ink-soft/45"
-                      title="Sharing is coming soon"
+                    <button
+                      type="button"
+                      onClick={() => sharePost(p)}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-dark"
                     >
                       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                         <circle cx="18" cy="5" r="3" />
@@ -660,8 +783,20 @@ export default function Community({
                         <circle cx="18" cy="19" r="3" />
                         <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
                       </svg>
-                      Share
-                    </span>
+                      {copiedId === p.id ? "Copied!" : "Share"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleSave(p)}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold transition-colors hover:bg-stone-4 ${
+                        p.saved_by_me ? "text-brand-dark" : "text-ink-soft hover:text-brand-dark"
+                      }`}
+                    >
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill={p.saved_by_me ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                      </svg>
+                      {p.saved_by_me ? "Saved" : "Save"}
+                    </button>
                   </div>
 
                   {openComments.has(p.id) && (
@@ -740,8 +875,9 @@ export default function Community({
             </div>
 
             <div className="flex gap-4 border-t border-stone-2 pt-4 text-xs text-ink-soft/60">
-              <a href="/legal/accessibility" className="hover:text-brand-dark">Help Center</a>
-              <a href="/legal/privacy" className="hover:text-brand-dark">Privacy Policy</a>
+              <a href="/privacy" className="hover:text-brand-dark">Privacy</a>
+              <a href="/terms" className="hover:text-brand-dark">Terms</a>
+              <a href="/guides" className="hover:text-brand-dark">Guides</a>
             </div>
             <p className="mt-2 text-[11px] text-ink-soft/40">© 2026 Bridal Team Inc.</p>
           </div>
