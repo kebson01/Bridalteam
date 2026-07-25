@@ -9,6 +9,7 @@ import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import NotificationsBell from "@/components/notifications-bell";
 
+// Marketing nav — shown to visitors who aren't signed in.
 const NAV = [
   { label: "How it works", href: "/#how" },
   { label: "AI Planner", href: "/planner" },
@@ -16,6 +17,16 @@ const NAV = [
   { label: "Find Vendors", href: "/vendors" },
   { label: "Inspiration", href: "/inspiration" },
   { label: "Pricing", href: "/pricing" },
+];
+
+// Signed-in nav — a lean, app-focused menu so the header doesn't feel crowded
+// once you're inside the product. Marketing links (How it works, Guides, Find
+// Vendors, Pricing) stay reachable from the footer.
+const APP_NAV = [
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "Community", href: "/community" },
+  { label: "AI Planner", href: "/planner" },
+  { label: "Inspiration", href: "/inspiration" },
 ];
 
 // "Log in" is for people who already have an account, so once accounts exist it
@@ -102,7 +113,7 @@ export default function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex">
-          {NAV.map((item) => (
+          {(signedIn ? APP_NAV : NAV).map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -116,18 +127,6 @@ export default function SiteHeader() {
         <div className="hidden items-center gap-4 md:flex">
           {signedIn ? (
             <>
-              <Link
-                href="/community"
-                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
-              >
-                Community
-              </Link>
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
-              >
-                Dashboard
-              </Link>
               {viewer && <NotificationsBell userId={viewer.id} />}
               <Link
                 href="/account"
@@ -197,7 +196,7 @@ export default function SiteHeader() {
       {open && (
         <nav className="border-t border-stone-2 bg-white px-5 py-4 md:hidden">
           <ul className="flex flex-col gap-1">
-            {NAV.map((item) => (
+            {(signedIn ? APP_NAV : NAV).map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
@@ -234,24 +233,6 @@ export default function SiteHeader() {
                       </span>
                       <span className="block text-xs text-ink-soft/60">Account settings</span>
                     </span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/community"
-                    onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
-                  >
-                    Community
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
-                  >
-                    Dashboard
                   </Link>
                 </li>
                 <li className="pt-2">
