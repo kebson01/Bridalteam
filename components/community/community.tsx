@@ -39,10 +39,19 @@ function Avatar({ name, url, size = 40 }: { name: string; url: string | null; si
     return <img src={url} alt="" className={cls} style={{ width: size, height: size }} />;
   return (
     <span
-      className="flex flex-none items-center justify-center rounded-full bg-brand/15 font-semibold text-brand-dark"
+      className="flex flex-none items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-deep font-semibold text-white"
       style={{ width: size, height: size, fontSize: size * 0.4 }}
     >
       {name.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+/** Small "coming soon" chip for placeholder features. */
+function Soon() {
+  return (
+    <span className="ml-auto rounded-full bg-brand/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-brand-dark">
+      Soon
     </span>
   );
 }
@@ -275,308 +284,468 @@ export default function Community({
 
   const activeGroup = groups.find((g) => g.id === scope);
 
+  const navItem =
+    "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-[14.5px] font-medium transition-colors";
+  const navActive =
+    "bg-gradient-to-br from-brand to-brand-dark text-white shadow-[0_10px_22px_-12px_rgba(243,103,5,0.8)]";
+  const navIdle = "text-ink-soft hover:bg-stone-4";
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
-      {/* Sidebar: scopes + groups */}
-      <aside className="lg:sticky lg:top-24 lg:self-start">
-        <nav className="flex gap-2 overflow-x-auto lg:flex-col">
+    <>
+      <div className="mx-auto grid max-w-6xl items-start gap-6 px-4 py-6 lg:grid-cols-[216px_minmax(0,1fr)_288px]">
+        {/* ---------------- LEFT RAIL ---------------- */}
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <h2 className="hidden font-display text-[22px] font-semibold text-ink lg:block">Navigation</h2>
+          <p className="mb-4 hidden text-xs text-ink-soft/60 lg:block">Browse the community</p>
+
+          <nav className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0">
+            <button
+              type="button"
+              onClick={() => switchScope("public")}
+              className={`${navItem} whitespace-nowrap ${scope === "public" ? navActive : navIdle}`}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              </svg>
+              Public Feed
+            </button>
+
+            {groups.map((g) => (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => switchScope(g.id)}
+                className={`${navItem} whitespace-nowrap ${scope === g.id ? navActive : navIdle}`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span className="truncate">{g.name}</span>
+              </button>
+            ))}
+
+            {/* Placeholders — not wired up yet. */}
+            <span className={`${navItem} cursor-default whitespace-nowrap text-ink-soft/70`} aria-disabled="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+              Saved Posts <Soon />
+            </span>
+            <span className={`${navItem} cursor-default whitespace-nowrap text-ink-soft/70`} aria-disabled="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M23 6l-9.5 9.5-5-5L1 18" />
+                <path d="M17 6h6v6" />
+              </svg>
+              Trending <Soon />
+            </span>
+          </nav>
+
           <button
             type="button"
-            onClick={() => switchScope("public")}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-left text-sm font-medium transition-colors ${
-              scope === "public" ? "bg-brand text-white" : "text-ink-soft hover:bg-stone-4"
-            }`}
+            onClick={() => setShowGroups((v) => !v)}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-3 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
-            🌍 Public feed
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            {showGroups ? "Close" : "Create New Group"}
           </button>
-          {groups.map((g) => (
-            <button
-              key={g.id}
-              type="button"
-              onClick={() => switchScope(g.id)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-left text-sm font-medium transition-colors ${
-                scope === g.id ? "bg-brand text-white" : "text-ink-soft hover:bg-stone-4"
-              }`}
-            >
-              {g.name}
-            </button>
-          ))}
-        </nav>
-        <button
-          type="button"
-          onClick={() => setShowGroups((v) => !v)}
-          className="mt-3 w-full rounded-full border border-stone-2 px-4 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
-        >
-          {showGroups ? "Close groups" : "Groups & invites"}
-        </button>
 
-        {showGroups && (
-          <div className="mt-3 space-y-4 rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
-            <div>
-              <p className="text-sm font-semibold text-ink">Create a group</p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {GROUP_PRESETS.map((p) => (
-                  <button
-                    key={p.kind}
-                    type="button"
-                    onClick={() => {
-                      setNewGroupKind(p.kind);
-                      setNewGroupName(p.label);
-                    }}
-                    className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                      newGroupKind === p.kind
-                        ? "border-brand bg-brand/10 text-brand-dark"
-                        : "border-stone-2 text-ink-soft hover:border-brand"
-                    }`}
-                  >
-                    {p.emoji} {p.label}
-                  </button>
-                ))}
-              </div>
-              <div className="mt-2 flex gap-2">
-                <input
-                  value={newGroupName}
-                  onChange={(e) => {
-                    setNewGroupName(e.target.value);
-                    setNewGroupKind("custom");
-                  }}
-                  placeholder="Group name"
-                  maxLength={60}
-                  className="w-full rounded-lg border border-stone-2 px-3 py-2 text-sm outline-none focus:border-brand"
-                />
-                <button
-                  type="button"
-                  onClick={doCreateGroup}
-                  disabled={groupBusy || !newGroupName.trim()}
-                  className="flex-none rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  Create
-                </button>
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-ink">Join with a code</p>
-              <div className="mt-2 flex gap-2">
-                <input
-                  value={joinCode}
-                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  placeholder="ABC123"
-                  maxLength={6}
-                  className="w-full rounded-lg border border-stone-2 px-3 py-2 text-sm uppercase tracking-widest outline-none focus:border-brand"
-                />
-                <button
-                  type="button"
-                  onClick={doJoinGroup}
-                  disabled={groupBusy || !joinCode.trim()}
-                  className="flex-none rounded-lg border border-stone-2 px-3 py-2 text-sm font-semibold text-ink-soft hover:border-brand disabled:opacity-50"
-                >
-                  Join
-                </button>
-              </div>
-            </div>
-            {groupMsg && <p className="text-xs text-ink-soft/80">{groupMsg}</p>}
-          </div>
-        )}
-      </aside>
-
-      {/* Main column: composer + feed */}
-      <div className="min-w-0">
-        {/* Composer */}
-        <div className="rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
-          <div className="flex gap-3">
-            <Avatar name={viewer.name} url={viewer.avatar || null} />
-            <div className="min-w-0 flex-1">
-              <textarea
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                rows={3}
-                maxLength={3000}
-                placeholder={
-                  audience === "public"
-                    ? "Share something with the community…"
-                    : `Post to ${activeGroup?.name ?? "your group"}…`
-                }
-                className="w-full resize-none rounded-lg border border-stone-2 px-3 py-2 text-sm outline-none focus:border-brand"
-              />
-              {imageUrl && (
-                <div className="mt-2 overflow-hidden rounded-lg border border-stone-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={imageUrl} alt="Attached" className="max-h-72 w-full object-cover" />
-                </div>
-              )}
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  className="rounded-full border border-stone-2 px-3 py-1.5 text-sm font-medium text-ink-soft hover:border-brand disabled:opacity-60"
-                >
-                  {uploading ? "Uploading…" : imageUrl ? "Change photo" : "📷 Photo"}
-                </button>
-                {imageUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setImageUrl("")}
-                    className="text-sm text-ink-soft/60 hover:text-red-600"
-                  >
-                    Remove
-                  </button>
-                )}
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleImage(f);
-                    e.target.value = "";
-                  }}
-                />
-                <select
-                  value={audience}
-                  onChange={(e) => setAudience(e.target.value)}
-                  className="rounded-full border border-stone-2 px-3 py-1.5 text-sm text-ink-soft outline-none focus:border-brand"
-                  aria-label="Who can see this"
-                >
-                  <option value="public">🌍 Public</option>
-                  {groups.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      🔒 {g.name}
-                    </option>
+          {showGroups && (
+            <div className="mt-3 space-y-4 rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
+              <div>
+                <p className="text-sm font-semibold text-ink">Create a group</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {GROUP_PRESETS.map((p) => (
+                    <button
+                      key={p.kind}
+                      type="button"
+                      onClick={() => {
+                        setNewGroupKind(p.kind);
+                        setNewGroupName(p.label);
+                      }}
+                      className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                        newGroupKind === p.kind
+                          ? "border-brand bg-brand/10 text-brand-dark"
+                          : "border-stone-2 text-ink-soft hover:border-brand"
+                      }`}
+                    >
+                      {p.emoji} {p.label}
+                    </button>
                   ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={submitPost}
-                  disabled={posting || uploading || (!body.trim() && !imageUrl)}
-                  className="ml-auto rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  {posting ? "Posting…" : "Post"}
-                </button>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    value={newGroupName}
+                    onChange={(e) => {
+                      setNewGroupName(e.target.value);
+                      setNewGroupKind("custom");
+                    }}
+                    placeholder="Group name"
+                    maxLength={60}
+                    className="w-full rounded-lg border border-stone-2 px-3 py-2 text-sm outline-none focus:border-brand"
+                  />
+                  <button
+                    type="button"
+                    onClick={doCreateGroup}
+                    disabled={groupBusy || !newGroupName.trim()}
+                    className="flex-none rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  >
+                    Create
+                  </button>
+                </div>
               </div>
-              {composerError && (
-                <p role="alert" className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {composerError}
-                </p>
-              )}
+              <div>
+                <p className="text-sm font-semibold text-ink">Join with a code</p>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                    placeholder="ABC123"
+                    maxLength={6}
+                    className="w-full rounded-lg border border-stone-2 px-3 py-2 text-sm uppercase tracking-widest outline-none focus:border-brand"
+                  />
+                  <button
+                    type="button"
+                    onClick={doJoinGroup}
+                    disabled={groupBusy || !joinCode.trim()}
+                    className="flex-none rounded-lg border border-stone-2 px-3 py-2 text-sm font-semibold text-ink-soft hover:border-brand disabled:opacity-50"
+                  >
+                    Join
+                  </button>
+                </div>
+              </div>
+              {groupMsg && <p className="text-xs text-ink-soft/80">{groupMsg}</p>}
+            </div>
+          )}
+        </aside>
+
+        {/* ---------------- CENTER FEED ---------------- */}
+        <div className="flex min-w-0 flex-col gap-5">
+          {/* Hero */}
+          <div
+            className="overflow-hidden rounded-2xl px-7 py-9 text-center text-white shadow-card"
+            style={{
+              background:
+                "radial-gradient(120% 140% at 85% 15%, rgba(243,103,5,0.32), transparent 55%), linear-gradient(160deg, #2f2622, #1c1512)",
+            }}
+          >
+            <p className="mb-2 font-display text-xs font-semibold tracking-[0.28em] text-brand">COMMUNITY</p>
+            <h1 className="mb-3 text-balance font-display text-4xl font-semibold tracking-wide">SHARE &amp; CONNECT</h1>
+            <p className="mx-auto max-w-md text-[15px] leading-relaxed text-white/75">
+              Post updates and photos with the whole community, or privately with a group you create.
+            </p>
+          </div>
+
+          {/* Composer */}
+          <div className="rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
+            <div className="flex gap-3">
+              <Avatar name={viewer.name} url={viewer.avatar || null} size={44} />
+              <div className="min-w-0 flex-1">
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  rows={2}
+                  maxLength={3000}
+                  placeholder={
+                    audience === "public"
+                      ? "Share something with the community…"
+                      : `Post to ${activeGroup?.name ?? "your group"}…`
+                  }
+                  className="w-full resize-none rounded-xl border border-stone-2 bg-stone-4 px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white"
+                />
+                {imageUrl && (
+                  <div className="mt-2 overflow-hidden rounded-lg border border-stone-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageUrl} alt="Attached" className="max-h-72 w-full object-cover" />
+                  </div>
+                )}
+                <div className="mt-3 flex flex-wrap items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    disabled={uploading}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 disabled:opacity-60"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <rect x="3" y="3" width="18" height="18" rx="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    {uploading ? "Uploading…" : imageUrl ? "Change photo" : "Photo"}
+                  </button>
+                  <span className="flex cursor-default items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft/50">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M23 7l-7 5 7 5V7z" />
+                      <rect x="1" y="5" width="15" height="14" rx="2" />
+                    </svg>
+                    Video
+                    <span className="rounded-full bg-brand/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-brand-dark">
+                      Soon
+                    </span>
+                  </span>
+                  <span className="flex cursor-default items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft/50">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M18 20V10M12 20V4M6 20v-6" />
+                    </svg>
+                    Poll
+                    <span className="rounded-full bg-brand/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-brand-dark">
+                      Soon
+                    </span>
+                  </span>
+                  {imageUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl("")}
+                      className="text-sm text-ink-soft/60 hover:text-red-600"
+                    >
+                      Remove
+                    </button>
+                  )}
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleImage(f);
+                      e.target.value = "";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={submitPost}
+                    disabled={posting || uploading || (!body.trim() && !imageUrl)}
+                    className="ml-auto rounded-xl bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-bold text-white shadow-[0_12px_26px_-12px_rgba(243,103,5,0.85)] disabled:opacity-50"
+                  >
+                    {posting ? "Posting…" : "Post"}
+                  </button>
+                </div>
+                {composerError && (
+                  <p role="alert" className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                    {composerError}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Scope heading */}
-        <div className="mt-6 mb-3 flex items-center justify-between gap-3">
-          <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft/50">
-            {scope === "public" ? "Public feed" : activeGroup?.name ?? "Group"}
-          </p>
-          {activeGroup && (
-            <button
-              type="button"
-              onClick={() => setShowMembers((v) => !v)}
-              className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
-            >
-              {showMembers ? "Hide members" : "Members & invites"}
-            </button>
+          {/* Feed heading */}
+          <div className="flex items-center justify-between gap-3 px-1">
+            <h2 className="font-display text-xl font-semibold text-ink">
+              {scope === "public" ? "Public Feed" : activeGroup?.name ?? "Group"}
+            </h2>
+            {activeGroup ? (
+              <button
+                type="button"
+                onClick={() => setShowMembers((v) => !v)}
+                className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+              >
+                {showMembers ? "Hide members" : "Members & invites"}
+              </button>
+            ) : (
+              <span className="text-[13px] text-ink-soft/60">
+                Sort by: <b className="font-semibold text-brand-dark">Recent</b>
+              </span>
+            )}
+          </div>
+
+          {activeGroup && showMembers && (
+            <div className="-mt-2">
+              <GroupMembers group={activeGroup} viewerId={viewer.id} onLeft={handleLeft} />
+            </div>
+          )}
+
+          {/* Feed */}
+          {loadingFeed ? (
+            <p className="py-10 text-center text-sm text-ink-soft/50">Loading…</p>
+          ) : feed.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-10 text-center">
+              <p className="text-sm text-ink-soft/70">
+                {scope === "public"
+                  ? "No posts yet — be the first to share something."
+                  : "No posts in this group yet. Start the conversation."}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {feed.map((p) => (
+                <article key={p.id} className="rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
+                  <div className="flex items-start gap-3">
+                    <Avatar name={p.author_name} url={p.author_avatar} />
+                    <div className="min-w-0 flex-1 leading-tight">
+                      <div className="flex items-center gap-2">
+                        <p className="text-[14.5px] font-semibold text-ink">{p.author_name}</p>
+                        {p.visibility === "group" && (
+                          <span className="rounded-full bg-stone-4 px-2 py-0.5 text-[11px] font-medium text-ink-soft/70">
+                            🔒 Group
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-ink-soft/50">{timeAgo(p.created_at)}</p>
+                    </div>
+                    {p.author_id === viewer.id && (
+                      <button
+                        type="button"
+                        onClick={() => removePost(p.id)}
+                        aria-label="Delete post"
+                        className="flex-none text-ink-soft/30 hover:text-red-600"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <path d="M18 6 6 18M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+
+                  {p.body && <p className="mt-3 whitespace-pre-wrap text-[14.5px] leading-relaxed text-ink">{p.body}</p>}
+
+                  {p.image_url && (
+                    <button
+                      type="button"
+                      onClick={() => setLightbox(p.image_url)}
+                      className="mt-3 block w-full overflow-hidden rounded-xl border border-stone-2"
+                      aria-label="View photo"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={p.image_url}
+                        alt=""
+                        className="max-h-[32rem] w-full cursor-zoom-in object-cover"
+                      />
+                    </button>
+                  )}
+
+                  {(p.like_count > 0 || p.comment_count > 0) && (
+                    <p className="mt-3 text-right text-xs text-ink-soft/50">
+                      {p.like_count > 0 && `${p.like_count} Like${p.like_count === 1 ? "" : "s"}`}
+                      {p.like_count > 0 && p.comment_count > 0 && " · "}
+                      {p.comment_count > 0 && `${p.comment_count} Comment${p.comment_count === 1 ? "" : "s"}`}
+                    </p>
+                  )}
+
+                  <div className="mt-2 flex items-center gap-1 border-t border-stone-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleLike(p)}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold transition-colors hover:bg-stone-4 ${
+                        p.liked_by_me ? "text-brand-dark" : "text-ink-soft hover:text-brand-dark"
+                      }`}
+                    >
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill={p.liked_by_me ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
+                        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" />
+                      </svg>
+                      Like
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleComments(p.id)}
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-dark"
+                    >
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M21 11.5a8.4 8.4 0 0 1-12.8 7.5L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z" />
+                      </svg>
+                      Comment
+                    </button>
+                    <span
+                      className="flex flex-1 cursor-default items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold text-ink-soft/45"
+                      title="Sharing is coming soon"
+                    >
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <circle cx="18" cy="5" r="3" />
+                        <circle cx="6" cy="12" r="3" />
+                        <circle cx="18" cy="19" r="3" />
+                        <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+                      </svg>
+                      Share
+                    </span>
+                  </div>
+
+                  {openComments.has(p.id) && (
+                    <PostComments
+                      postId={p.id}
+                      userId={viewer.id}
+                      onCountChange={(d) => bumpCommentCount(p.id, d)}
+                    />
+                  )}
+                </article>
+              ))}
+            </div>
           )}
         </div>
 
-        {activeGroup && showMembers && (
-          <div className="mb-4">
-            <GroupMembers group={activeGroup} viewerId={viewer.id} onLeft={handleLeft} />
+        {/* ---------------- RIGHT RAIL ---------------- */}
+        <aside className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
+          <div className="rounded-2xl border border-stone-2 bg-white p-5 shadow-card">
+            <h3 className="font-display text-[21px] font-semibold text-ink">Discovery</h3>
+            <p className="mb-5 text-xs text-ink-soft/60">Expand your circle</p>
+
+            {/* Suggested groups (placeholder) */}
+            <div className="mb-6">
+              <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-ink">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-dark">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v8M8 12h8" />
+                </svg>
+                Suggested Groups <Soon />
+              </div>
+              <div className="mb-3 flex items-center gap-3 opacity-70">
+                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-deep text-white">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="M21 15l-5-5L5 21" />
+                  </svg>
+                </span>
+                <span className="leading-tight">
+                  <b className="text-[13.5px] text-ink">2026 Brides UK</b>
+                  <small className="block text-[11.5px] text-ink-soft/60">12.4k members</small>
+                </span>
+                <span className="ml-auto text-xl leading-none text-brand-dark">+</span>
+              </div>
+              <div className="flex items-center gap-3 opacity-70">
+                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-gradient-to-br from-stone-1 to-ink-soft text-white">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M3 2v7a2 2 0 0 0 4 0V2M5 2v20M17 2a5 5 0 0 0-2 4v6h4V6a5 5 0 0 0-2-4zM19 12v10" />
+                  </svg>
+                </span>
+                <span className="leading-tight">
+                  <b className="text-[13.5px] text-ink">Catering Secrets</b>
+                  <small className="block text-[11.5px] text-ink-soft/60">5.8k members</small>
+                </span>
+                <span className="ml-auto text-xl leading-none text-brand-dark">+</span>
+              </div>
+            </div>
+
+            {/* Upcoming events (placeholder) */}
+            <div className="mb-6">
+              <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-ink">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-dark">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+                Upcoming Events <Soon />
+              </div>
+              <div className="rounded-xl border border-stone-2 bg-stone-4 p-3 opacity-80">
+                <p className="text-[10.5px] font-bold tracking-wide text-brand-dark">SEPT 12 · LONDON</p>
+                <p className="mt-1 text-sm font-semibold text-ink">Grand Bridal Expo 2026</p>
+                <p className="mt-2 flex items-center gap-2 text-[11.5px] text-ink-soft/60">
+                  <span className="h-4 w-4 rounded-full bg-stone-5" />
+                  +42 going
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 border-t border-stone-2 pt-4 text-xs text-ink-soft/60">
+              <a href="/legal/accessibility" className="hover:text-brand-dark">Help Center</a>
+              <a href="/legal/privacy" className="hover:text-brand-dark">Privacy Policy</a>
+            </div>
+            <p className="mt-2 text-[11px] text-ink-soft/40">© 2026 Bridal Team Inc.</p>
           </div>
-        )}
-
-        {/* Feed */}
-        {loadingFeed ? (
-          <p className="py-10 text-center text-sm text-ink-soft/50">Loading…</p>
-        ) : feed.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-10 text-center">
-            <p className="text-sm text-ink-soft/70">
-              {scope === "public"
-                ? "No posts yet — be the first to share something."
-                : "No posts in this group yet. Start the conversation."}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {feed.map((p) => (
-              <article key={p.id} className="rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
-                <div className="flex items-start gap-3">
-                  <Avatar name={p.author_name} url={p.author_avatar} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-ink">{p.author_name}</p>
-                      <span className="text-xs text-ink-soft/50">· {timeAgo(p.created_at)}</span>
-                      {p.visibility === "group" && (
-                        <span className="rounded-full bg-stone-4 px-2 py-0.5 text-[11px] font-medium text-ink-soft/70">
-                          🔒 Group
-                        </span>
-                      )}
-                    </div>
-                    {p.body && <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{p.body}</p>}
-                  </div>
-                  {p.author_id === viewer.id && (
-                    <button
-                      type="button"
-                      onClick={() => removePost(p.id)}
-                      aria-label="Delete post"
-                      className="flex-none text-ink-soft/30 hover:text-red-600"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                        <path d="M18 6 6 18M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-
-                {p.image_url && (
-                  <button
-                    type="button"
-                    onClick={() => setLightbox(p.image_url)}
-                    className="mt-3 block w-full overflow-hidden rounded-xl border border-stone-2"
-                    aria-label="View photo"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={p.image_url}
-                      alt=""
-                      className="max-h-[32rem] w-full cursor-zoom-in object-cover"
-                    />
-                  </button>
-                )}
-
-                <div className="mt-3 flex items-center gap-4 text-sm">
-                  <button
-                    type="button"
-                    onClick={() => toggleLike(p)}
-                    className={`flex items-center gap-1.5 transition-colors ${
-                      p.liked_by_me ? "text-brand-dark" : "text-ink-soft/60 hover:text-brand-dark"
-                    }`}
-                  >
-                    <span>{p.liked_by_me ? "♥" : "♡"}</span>
-                    {p.like_count > 0 && <span>{p.like_count}</span>}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toggleComments(p.id)}
-                    className="flex items-center gap-1.5 text-ink-soft/60 transition-colors hover:text-brand-dark"
-                  >
-                    <span>💬</span>
-                    <span>{p.comment_count > 0 ? p.comment_count : "Reply"}</span>
-                  </button>
-                </div>
-
-                {openComments.has(p.id) && (
-                  <PostComments
-                    postId={p.id}
-                    userId={viewer.id}
-                    onCountChange={(d) => bumpCommentCount(p.id, d)}
-                  />
-                )}
-              </article>
-            ))}
-          </div>
-        )}
+        </aside>
       </div>
 
       {/* Image lightbox */}
@@ -606,6 +775,6 @@ export default function Community({
           />
         </div>
       )}
-    </div>
+    </>
   );
 }

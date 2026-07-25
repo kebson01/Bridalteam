@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import PageHero from "@/components/page-hero";
 import Community from "@/components/community/community";
 import { listGroups, listFeed } from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
@@ -39,16 +38,5 @@ export default async function CommunityPage() {
     avatar: (user.user_metadata?.avatar_url as string | undefined) ?? "",
   };
 
-  return (
-    <>
-      <PageHero
-        eyebrow="Community"
-        title="Share & connect"
-        subtitle="Post updates and photos with the whole community, or privately with a group you create."
-      />
-      <section className="mx-auto max-w-5xl px-5 py-10">
-        <Community viewer={viewer} initialGroups={groups} initialFeed={feed} />
-      </section>
-    </>
-  );
+  return <Community viewer={viewer} initialGroups={groups} initialFeed={feed} />;
 }
