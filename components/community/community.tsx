@@ -11,6 +11,7 @@ import {
   createPost,
   deletePost,
   joinGroup,
+  joinPublicGroup,
   listFeed,
   listSavedFeed,
   listTrendingFeed,
@@ -21,6 +22,7 @@ import {
   type AppEvent,
   type FeedPost,
   type PostGroup,
+  type SuggestedGroup,
 } from "@/app/community/actions";
 import { GROUP_PRESETS } from "@/lib/community";
 
@@ -61,25 +63,18 @@ function Avatar({ name, url, size = 40 }: { name: string; url: string | null; si
   );
 }
 
-/** Small "coming soon" chip for placeholder features. */
-function Soon() {
-  return (
-    <span className="ml-auto rounded-full bg-brand/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-brand-dark">
-      Soon
-    </span>
-  );
-}
-
 export default function Community({
   viewer,
   initialGroups,
   initialFeed,
   initialEvents,
+  initialSuggested,
 }: {
   viewer: Viewer;
   initialGroups: PostGroup[];
   initialFeed: FeedPost[];
   initialEvents: AppEvent[];
+  initialSuggested: SuggestedGroup[];
 }) {
   const [groups, setGroups] = useState<PostGroup[]>(initialGroups);
   const [scope, setScope] = useState<string>("public");
@@ -103,7 +98,9 @@ export default function Community({
   const [showGroups, setShowGroups] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupKind, setNewGroupKind] = useState("custom");
+  const [newGroupPublic, setNewGroupPublic] = useState(false);
   const [joinCode, setJoinCode] = useState("");
+  const [suggested, setSuggested] = useState<SuggestedGroup[]>(initialSuggested);
   const [groupMsg, setGroupMsg] = useState<string | null>(null);
   const [groupBusy, startGroup] = useTransition();
 
@@ -350,7 +347,7 @@ export default function Community({
   function doCreateGroup() {
     setGroupMsg(null);
     startGroup(async () => {
-      const res = await createGroup(newGroupName, newGroupKind);
+      const res = await createGroup(newGroupName, newGroupKind, newGroupPublic);
       if (!res.ok || !res.group) {
         setGroupMsg(res.error ?? "Couldn't create group.");
         return;
@@ -358,9 +355,28 @@ export default function Community({
       setGroups((g) => [...g, res.group!]);
       setNewGroupName("");
       setNewGroupKind("custom");
-      setGroupMsg(`Created “${res.group.name}”. Add people below or share code ${res.group.join_code}.`);
+      setNewGroupPublic(false);
+      setGroupMsg(
+        res.group.is_public
+          ? `Created “${res.group.name}”. It's discoverable — others can find and join it. Code: ${res.group.join_code}.`
+          : `Created “${res.group.name}”. Add people below or share code ${res.group.join_code}.`,
+      );
       switchScope(res.group.id);
       setShowMembers(true);
+    });
+  }
+
+  function joinSuggested(g: SuggestedGroup) {
+    setGroupMsg(null);
+    startGroup(async () => {
+      const res = await joinPublicGroup(g.id);
+      if (!res.ok || !res.group) {
+        setGroupMsg(res.error ?? "Couldn't join that group.");
+        return;
+      }
+      setGroups((list) => (list.some((x) => x.id === res.group!.id) ? list : [...list, res.group!]));
+      setSuggested((s) => s.filter((x) => x.id !== g.id));
+      switchScope(res.group.id);
     });
   }
 
@@ -566,6 +582,19 @@ export default function Community({
                     Create
                   </button>
                 </div>
+                <label className="mt-2 flex items-start gap-2 text-xs text-ink-soft">
+                  <input
+                    type="checkbox"
+                    checked={newGroupPublic}
+                    onChange={(e) => setNewGroupPublic(e.target.checked)}
+                    className="mt-0.5 accent-brand"
+                  />
+                  <span>
+                    <span className="font-semibold text-ink">Make discoverable</span> — anyone can find
+                    it under Suggested Groups and join without a code. Leave off for a private,
+                    invite-only group.
+                  </span>
+                </label>
               </div>
               <div>
                 <p className="text-sm font-semibold text-ink">Join with a code</p>
@@ -994,41 +1023,48 @@ export default function Community({
             <h3 className="font-display text-[21px] font-semibold text-ink">Discovery</h3>
             <p className="mb-5 text-xs text-ink-soft/60">Expand your circle</p>
 
-            {/* Suggested groups (placeholder) */}
+            {/* Suggested groups */}
             <div className="mb-6">
               <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-ink">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-dark">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 8v8M8 12h8" />
                 </svg>
-                Suggested Groups <Soon />
+                Suggested Groups
               </div>
-              <div className="mb-3 flex items-center gap-3 opacity-70">
-                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-deep text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="M21 15l-5-5L5 21" />
-                  </svg>
-                </span>
-                <span className="leading-tight">
-                  <b className="text-[13.5px] text-ink">2026 Brides UK</b>
-                  <small className="block text-[11.5px] text-ink-soft/60">12.4k members</small>
-                </span>
-                <span className="ml-auto text-xl leading-none text-brand-dark">+</span>
-              </div>
-              <div className="flex items-center gap-3 opacity-70">
-                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-gradient-to-br from-stone-1 to-ink-soft text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <path d="M3 2v7a2 2 0 0 0 4 0V2M5 2v20M17 2a5 5 0 0 0-2 4v6h4V6a5 5 0 0 0-2-4zM19 12v10" />
-                  </svg>
-                </span>
-                <span className="leading-tight">
-                  <b className="text-[13.5px] text-ink">Catering Secrets</b>
-                  <small className="block text-[11.5px] text-ink-soft/60">5.8k members</small>
-                </span>
-                <span className="ml-auto text-xl leading-none text-brand-dark">+</span>
-              </div>
+              {suggested.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-stone-2 p-3 text-center text-xs text-ink-soft/60">
+                  No public groups to join yet. Tick “Make discoverable” when you create one.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {suggested.map((g) => (
+                    <div key={g.id} className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-deep text-white">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                      </span>
+                      <span className="min-w-0 leading-tight">
+                        <b className="block truncate text-[13.5px] text-ink">{g.name}</b>
+                        <small className="block text-[11.5px] text-ink-soft/60">
+                          {g.member_count} {g.member_count === 1 ? "member" : "members"}
+                        </small>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => joinSuggested(g)}
+                        disabled={groupBusy}
+                        className="ml-auto flex-none rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-brand-dark transition-colors hover:border-brand disabled:opacity-50"
+                      >
+                        Join
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Upcoming events */}

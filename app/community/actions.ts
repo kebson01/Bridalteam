@@ -7,7 +7,16 @@ import { sendEmail, emailLayout } from "@/lib/email";
 import { SITE_URL } from "@/lib/site";
 import { VALID_GROUP_KINDS } from "@/lib/community";
 
-export type PostGroup = { id: string; name: string; join_code: string; owner_id: string; kind: string };
+export type PostGroup = {
+  id: string;
+  name: string;
+  join_code: string;
+  owner_id: string;
+  kind: string;
+  is_public: boolean;
+};
+
+export type SuggestedGroup = { id: string; name: string; kind: string; member_count: number };
 
 export type GroupMember = { user_id: string; name: string; avatar: string | null; is_owner: boolean };
 
@@ -118,7 +127,7 @@ export async function listGroups(): Promise<PostGroup[]> {
   if (!user) return [];
   const { data, error } = await supabase
     .from("post_groups")
-    .select("id, name, join_code, owner_id, kind")
+    .select("id, name, join_code, owner_id, kind, is_public")
     .order("created_at", { ascending: true });
   if (error) {
     console.error("listGroups failed:", error.code, error.message);
@@ -130,6 +139,7 @@ export async function listGroups(): Promise<PostGroup[]> {
 export async function createGroup(
   name: string,
   kind = "custom",
+  isPublic = false,
 ): Promise<{ ok: boolean; group?: PostGroup; error?: string }> {
   const clean = name?.trim().slice(0, 60);
   if (!clean) return { ok: false, error: "Give your group a name." };
@@ -145,12 +155,44 @@ export async function createGroup(
 
   const { data, error } = await supabase
     .from("post_groups")
-    .insert({ owner_id: user.id, name: clean, join_code: code, kind: safeKind })
-    .select("id, name, join_code, owner_id, kind")
+    .insert({ owner_id: user.id, name: clean, join_code: code, kind: safeKind, is_public: isPublic })
+    .select("id, name, join_code, owner_id, kind, is_public")
     .single();
   if (error || !data) {
     console.error("createGroup failed:", error?.code, error?.message);
     return { ok: false, error: "Couldn't create that group. Please try again." };
+  }
+  revalidatePath("/community");
+  return { ok: true, group: data as PostGroup };
+}
+
+/** Public groups the signed-in user could discover and join (not already in). */
+export async function listSuggestedGroups(): Promise<SuggestedGroup[]> {
+  const { supabase, user } = await authed();
+  if (!user) return [];
+  const { data, error } = await supabase.rpc("list_suggested_groups", { lim: 6 });
+  if (error) {
+    console.error("listSuggestedGroups failed:", error.message);
+    return [];
+  }
+  return ((data ?? []) as { id: string; name: string; kind: string; member_count: number | string }[]).map(
+    (g) => ({ id: g.id, name: g.name, kind: g.kind, member_count: Number(g.member_count) }),
+  );
+}
+
+/** Join a public group (no code needed). Refuses private groups. */
+export async function joinPublicGroup(
+  groupId: string,
+): Promise<{ ok: boolean; group?: PostGroup; error?: string }> {
+  if (!groupId) return { ok: false, error: "Missing group." };
+  const { supabase, user } = await authed();
+  if (!user) return { ok: false, error: "sign_in" };
+  const { data, error } = await supabase.rpc("join_public_group", { gid: groupId });
+  if (error) {
+    const msg = /not_public/.test(error.message)
+      ? "That group isn't open to join."
+      : "Couldn't join that group. Please try again.";
+    return { ok: false, error: msg };
   }
   revalidatePath("/community");
   return { ok: true, group: data as PostGroup };
