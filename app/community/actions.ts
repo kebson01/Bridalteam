@@ -709,3 +709,47 @@ export async function toggleEventRsvp(eventId: string, going: boolean): Promise<
     .upsert({ event_id: eventId, user_id: user.id }, { onConflict: "event_id,user_id", ignoreDuplicates: true });
   return { ok: true };
 }
+
+/** Events the signed-in user created (any date), soonest first — for managing them. */
+export async function listMyEvents(): Promise<AppEvent[]> {
+  const { supabase, user } = await authed();
+  if (!user) return [];
+  const { data: events, error } = await supabase
+    .from("events")
+    .select("id, title, location, starts_at, creator_id")
+    .eq("creator_id", user.id)
+    .order("starts_at", { ascending: true })
+    .limit(50);
+  if (error) {
+    console.error("listMyEvents failed:", error.code, error.message);
+    return [];
+  }
+  const rows = events ?? [];
+  const ids = rows.map((e) => e.id);
+  if (ids.length === 0) return [];
+  const { data: rsvps } = await supabase.from("event_rsvps").select("event_id, user_id").in("event_id", ids);
+  const counts = new Map<string, number>();
+  const mine = new Set<string>();
+  for (const r of rsvps ?? []) {
+    counts.set(r.event_id, (counts.get(r.event_id) ?? 0) + 1);
+    if (r.user_id === user.id) mine.add(r.event_id);
+  }
+  return rows.map((e) => ({
+    ...(e as Omit<AppEvent, "going_count" | "rsvped_by_me">),
+    going_count: counts.get(e.id) ?? 0,
+    rsvped_by_me: mine.has(e.id),
+  }));
+}
+
+/** Delete an event (creator only — enforced by RLS). */
+export async function deleteEvent(eventId: string): Promise<{ ok: boolean }> {
+  if (!eventId) return { ok: false };
+  const { supabase, user } = await authed();
+  if (!user) return { ok: false };
+  const { error } = await supabase.from("events").delete().eq("id", eventId);
+  if (error) {
+    console.error("deleteEvent failed:", error.code, error.message);
+    return { ok: false };
+  }
+  return { ok: true };
+}

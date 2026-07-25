@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
+import CommunityManager from "@/components/dashboard/community-manager";
+import { listGroups, listMyEvents } from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
@@ -55,10 +57,8 @@ export default async function DashboardPage() {
 
   const isCompany = org.type === "planner_company";
 
-  // A couple has exactly one wedding — send them straight into it.
-  if (!isCompany && weddings && weddings.length === 1) {
-    redirect(`/w/${weddings[0].id}`);
-  }
+  // Community groups + events the user manages (independent of any wedding).
+  const [myGroups, myEvents] = await Promise.all([listGroups(), listMyEvents()]);
 
   return (
     <>
@@ -115,6 +115,21 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="mx-auto max-w-5xl px-5 pb-16" id="community">
+        <div className="mb-4">
+          <h2 className="font-display text-2xl font-semibold text-ink">Community</h2>
+          <p className="mt-1 text-sm text-ink-soft/70">
+            Create and manage your groups, invites and events here. Browsing, posting and RSVPs
+            happen on the{" "}
+            <Link href="/community" className="font-semibold text-brand-dark hover:underline">
+              Community page
+            </Link>
+            .
+          </p>
+        </div>
+        <CommunityManager viewerId={user.id} initialGroups={myGroups} initialEvents={myEvents} />
       </section>
     </>
   );

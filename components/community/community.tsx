@@ -3,14 +3,11 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { downscaleImage } from "@/lib/image";
+import Link from "next/link";
 import PostComments from "@/components/community/post-comments";
-import GroupMembers from "@/components/community/group-members";
 import {
-  createEvent,
-  createGroup,
   createPost,
   deletePost,
-  joinGroup,
   joinPublicGroup,
   listFeed,
   listSavedFeed,
@@ -24,7 +21,6 @@ import {
   type PostGroup,
   type SuggestedGroup,
 } from "@/app/community/actions";
-import { GROUP_PRESETS } from "@/lib/community";
 
 type Viewer = { id: string; name: string; avatar: string };
 
@@ -94,48 +90,20 @@ export default function Community({
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
 
-  // Groups panel
-  const [showGroups, setShowGroups] = useState(false);
-  const [newGroupName, setNewGroupName] = useState("");
-  const [newGroupKind, setNewGroupKind] = useState("custom");
-  const [newGroupPublic, setNewGroupPublic] = useState(false);
-  const [joinCode, setJoinCode] = useState("");
+  // Group discovery (join only — creating groups lives on the Dashboard)
   const [suggested, setSuggested] = useState<SuggestedGroup[]>(initialSuggested);
   const [groupMsg, setGroupMsg] = useState<string | null>(null);
   const [groupBusy, startGroup] = useTransition();
 
-  // Members panel (per active group) + image lightbox + share feedback.
-  const [showMembers, setShowMembers] = useState(false);
+  // Image lightbox + share feedback.
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Track which posts have their replies expanded.
   const [openComments, setOpenComments] = useState<Set<string>>(new Set());
 
-  // Upcoming events (right rail)
+  // Upcoming events (right rail — view + RSVP; creating events lives on the Dashboard)
   const [events, setEvents] = useState<AppEvent[]>(initialEvents);
-  const [showEventForm, setShowEventForm] = useState(false);
-  const [evTitle, setEvTitle] = useState("");
-  const [evLocation, setEvLocation] = useState("");
-  const [evWhen, setEvWhen] = useState("");
-  const [evMsg, setEvMsg] = useState<string | null>(null);
-  const [evBusy, startEvent] = useTransition();
-
-  function doCreateEvent() {
-    setEvMsg(null);
-    startEvent(async () => {
-      const res = await createEvent({ title: evTitle, location: evLocation, startsAt: evWhen });
-      if (!res.ok || !res.event) {
-        setEvMsg(res.error ?? "Couldn't create event.");
-        return;
-      }
-      setEvents((list) => [...list, res.event!].sort((a, b) => a.starts_at.localeCompare(b.starts_at)));
-      setEvTitle("");
-      setEvLocation("");
-      setEvWhen("");
-      setShowEventForm(false);
-    });
-  }
 
   function toggleRsvp(ev: AppEvent) {
     const nextGoing = !ev.rsvped_by_me;
@@ -161,7 +129,6 @@ export default function Community({
   function switchScope(next: string) {
     setScope(next);
     setAudience(next === "public" || next === "trending" || next === "saved" ? "public" : next);
-    setShowMembers(false);
     startFeed(async () => setFeed(await loadFor(next)));
   }
 
@@ -344,28 +311,6 @@ export default function Community({
     setFeed((f) => f.map((p) => (p.id === id ? { ...p, comment_count: Math.max(0, p.comment_count + delta) } : p)));
   }
 
-  function doCreateGroup() {
-    setGroupMsg(null);
-    startGroup(async () => {
-      const res = await createGroup(newGroupName, newGroupKind, newGroupPublic);
-      if (!res.ok || !res.group) {
-        setGroupMsg(res.error ?? "Couldn't create group.");
-        return;
-      }
-      setGroups((g) => [...g, res.group!]);
-      setNewGroupName("");
-      setNewGroupKind("custom");
-      setNewGroupPublic(false);
-      setGroupMsg(
-        res.group.is_public
-          ? `Created “${res.group.name}”. It's discoverable — others can find and join it. Code: ${res.group.join_code}.`
-          : `Created “${res.group.name}”. Add people below or share code ${res.group.join_code}.`,
-      );
-      switchScope(res.group.id);
-      setShowMembers(true);
-    });
-  }
-
   function joinSuggested(g: SuggestedGroup) {
     setGroupMsg(null);
     startGroup(async () => {
@@ -376,27 +321,6 @@ export default function Community({
       }
       setGroups((list) => (list.some((x) => x.id === res.group!.id) ? list : [...list, res.group!]));
       setSuggested((s) => s.filter((x) => x.id !== g.id));
-      switchScope(res.group.id);
-    });
-  }
-
-  function handleLeft(groupId: string) {
-    setGroups((g) => g.filter((x) => x.id !== groupId));
-    setShowMembers(false);
-    switchScope("public");
-  }
-
-  function doJoinGroup() {
-    setGroupMsg(null);
-    startGroup(async () => {
-      const res = await joinGroup(joinCode);
-      if (!res.ok || !res.group) {
-        setGroupMsg(res.error ?? "Couldn't join.");
-        return;
-      }
-      setGroups((g) => (g.some((x) => x.id === res.group!.id) ? g : [...g, res.group!]));
-      setJoinCode("");
-      setGroupMsg(`Joined “${res.group.name}”.`);
       switchScope(res.group.id);
     });
   }
@@ -528,97 +452,18 @@ export default function Community({
             </button>
           </nav>
 
-          <button
-            type="button"
-            onClick={() => setShowGroups((v) => !v)}
+          <Link
+            href="/dashboard#community"
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-3 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14" />
             </svg>
-            {showGroups ? "Close" : "Create New Group"}
-          </button>
-
-          {showGroups && (
-            <div className="mt-3 space-y-4 rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
-              <div>
-                <p className="text-sm font-semibold text-ink">Create a group</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {GROUP_PRESETS.map((p) => (
-                    <button
-                      key={p.kind}
-                      type="button"
-                      onClick={() => {
-                        setNewGroupKind(p.kind);
-                        setNewGroupName(p.label);
-                      }}
-                      className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                        newGroupKind === p.kind
-                          ? "border-brand bg-brand/10 text-brand-dark"
-                          : "border-stone-2 text-ink-soft hover:border-brand"
-                      }`}
-                    >
-                      {p.emoji} {p.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="mt-2 flex gap-2">
-                  <input
-                    value={newGroupName}
-                    onChange={(e) => {
-                      setNewGroupName(e.target.value);
-                      setNewGroupKind("custom");
-                    }}
-                    placeholder="Group name"
-                    maxLength={60}
-                    className="w-full rounded-lg border border-stone-2 px-3 py-2 text-sm outline-none focus:border-brand"
-                  />
-                  <button
-                    type="button"
-                    onClick={doCreateGroup}
-                    disabled={groupBusy || !newGroupName.trim()}
-                    className="flex-none rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    Create
-                  </button>
-                </div>
-                <label className="mt-2 flex items-start gap-2 text-xs text-ink-soft">
-                  <input
-                    type="checkbox"
-                    checked={newGroupPublic}
-                    onChange={(e) => setNewGroupPublic(e.target.checked)}
-                    className="mt-0.5 accent-brand"
-                  />
-                  <span>
-                    <span className="font-semibold text-ink">Make discoverable</span> — anyone can find
-                    it under Suggested Groups and join without a code. Leave off for a private,
-                    invite-only group.
-                  </span>
-                </label>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-ink">Join with a code</p>
-                <div className="mt-2 flex gap-2">
-                  <input
-                    value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                    placeholder="ABC123"
-                    maxLength={6}
-                    className="w-full rounded-lg border border-stone-2 px-3 py-2 text-sm uppercase tracking-widest outline-none focus:border-brand"
-                  />
-                  <button
-                    type="button"
-                    onClick={doJoinGroup}
-                    disabled={groupBusy || !joinCode.trim()}
-                    className="flex-none rounded-lg border border-stone-2 px-3 py-2 text-sm font-semibold text-ink-soft hover:border-brand disabled:opacity-50"
-                  >
-                    Join
-                  </button>
-                </div>
-              </div>
-              {groupMsg && <p className="text-xs text-ink-soft/80">{groupMsg}</p>}
-            </div>
-          )}
+            Create a group
+          </Link>
+          <p className="mt-2 text-center text-[11px] leading-snug text-ink-soft/50">
+            Create groups &amp; events and manage invites from your Dashboard.
+          </p>
         </aside>
 
         {/* ---------------- CENTER FEED ---------------- */}
@@ -814,13 +659,12 @@ export default function Community({
           <div className="flex items-center justify-between gap-3 px-1">
             <h2 className="font-display text-xl font-semibold text-ink">{scopeTitle}</h2>
             {activeGroup ? (
-              <button
-                type="button"
-                onClick={() => setShowMembers((v) => !v)}
+              <Link
+                href="/dashboard#community"
                 className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
               >
-                {showMembers ? "Hide members" : "Members & invites"}
-              </button>
+                Members &amp; invites →
+              </Link>
             ) : scope === "public" ? (
               <span className="text-[13px] text-ink-soft/60">
                 Sort by: <b className="font-semibold text-brand-dark">Recent</b>
@@ -831,12 +675,6 @@ export default function Community({
               <span className="text-[13px] text-ink-soft/60">Only you can see this</span>
             )}
           </div>
-
-          {activeGroup && showMembers && (
-            <div className="-mt-2">
-              <GroupMembers group={activeGroup} viewerId={viewer.id} onLeft={handleLeft} />
-            </div>
-          )}
 
           {/* Feed */}
           {loadingFeed ? (
@@ -1065,6 +903,7 @@ export default function Community({
                   ))}
                 </div>
               )}
+              {groupMsg && <p className="mt-3 text-xs text-ink-soft/70">{groupMsg}</p>}
             </div>
 
             {/* Upcoming events */}
@@ -1075,53 +914,11 @@ export default function Community({
                   <path d="M16 2v4M8 2v4M3 10h18" />
                 </svg>
                 Upcoming Events
-                <button
-                  type="button"
-                  onClick={() => setShowEventForm((v) => !v)}
-                  className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-lg leading-none text-brand-dark hover:bg-brand/10"
-                  aria-label={showEventForm ? "Close event form" : "Add event"}
-                >
-                  {showEventForm ? "×" : "+"}
-                </button>
               </div>
-
-              {showEventForm && (
-                <div className="mb-3 space-y-2 rounded-xl border border-stone-2 bg-stone-4 p-3">
-                  <input
-                    value={evTitle}
-                    onChange={(e) => setEvTitle(e.target.value)}
-                    placeholder="Event name"
-                    maxLength={120}
-                    className="w-full rounded-lg border border-stone-2 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
-                  />
-                  <input
-                    value={evLocation}
-                    onChange={(e) => setEvLocation(e.target.value)}
-                    placeholder="Location (optional)"
-                    maxLength={120}
-                    className="w-full rounded-lg border border-stone-2 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
-                  />
-                  <input
-                    type="datetime-local"
-                    value={evWhen}
-                    onChange={(e) => setEvWhen(e.target.value)}
-                    className="w-full rounded-lg border border-stone-2 bg-white px-3 py-2 text-sm text-ink-soft outline-none focus:border-brand"
-                  />
-                  <button
-                    type="button"
-                    onClick={doCreateEvent}
-                    disabled={evBusy || !evTitle.trim() || !evWhen}
-                    className="w-full rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    {evBusy ? "Adding…" : "Add event"}
-                  </button>
-                  {evMsg && <p className="text-xs text-red-600">{evMsg}</p>}
-                </div>
-              )}
 
               {events.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-stone-2 p-3 text-center text-xs text-ink-soft/60">
-                  No upcoming events yet. Tap + to add one.
+                  No upcoming events yet. Create one from your Dashboard.
                 </p>
               ) : (
                 <div className="space-y-2">
