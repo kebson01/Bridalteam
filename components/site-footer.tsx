@@ -6,36 +6,18 @@ import InstallAppLink from "@/components/install-app-link";
 // Existing account holders log in through the real auth screen once it exists.
 const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
 
-const COLUMNS = [
-  {
-    title: "Plan",
-    links: [
-      { label: "AI Planner", href: "/planner" },
-      ...(SHOW_VENDOR_DIRECTORY
-        ? [{ label: "Find Vendors", href: "/vendors" }]
-        : []),
-      { label: "Inspiration", href: "/inspiration" },
-      { label: "Pricing", href: "/pricing" },
-    ],
-  },
-  {
-    title: "Connect",
-    links: [
-      { label: "Blog", href: "/blog" },
-      { label: "For vendors", href: "/for-vendors" },
-      { label: "How it works", href: "/#how" },
-      { label: "Log in", href: LOGIN_HREF },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "/about" },
-      { label: "Pricing", href: "/pricing" },
-      { label: "Privacy", href: "/privacy" },
-      { label: "Terms", href: "/terms" },
-    ],
-  },
+// One flat, wrapping row of links — no more three-column tower.
+const LINKS = [
+  { label: "How it works", href: "/#how" },
+  { label: "AI Planner", href: "/planner" },
+  ...(SHOW_VENDOR_DIRECTORY ? [{ label: "Find Vendors", href: "/vendors" }] : []),
+  { label: "Inspiration", href: "/inspiration" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Blog", href: "/blog" },
+  { label: "About", href: "/about" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+  { label: "Log in", href: LOGIN_HREF },
 ];
 
 const SOCIAL = [
@@ -48,74 +30,50 @@ export default function SiteFooter() {
   const year = new Date().getFullYear();
   return (
     <footer className="bg-ink text-white">
-      <div className="mx-auto max-w-6xl px-5 py-10">
-        <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-          {/* Brand */}
-          <div className="max-w-xs">
-            <Image
-              src="/brand/logo.svg"
-              alt="Bridal Team"
-              width={180}
-              height={49}
-              unoptimized
-              className="h-8 w-auto brightness-0 invert"
-            />
-            <p className="mt-3 text-xs leading-relaxed text-white/55">
-              Fun, simple wedding planning — reimagined for today and powered by AI.
-            </p>
-            <div className="mt-4 flex gap-2.5">
-              {SOCIAL.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={s.label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/80 transition-colors hover:border-brand hover:bg-brand hover:text-white"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d={s.d} />
-                  </svg>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Link columns — a compact 3-across grid, even on mobile */}
-          <div className="grid grid-cols-3 gap-6 sm:gap-10">
-            {COLUMNS.map((col) => (
-              <div key={col.title}>
-                <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-amber">
-                  {col.title}
-                </h4>
-                <ul className="mt-3 space-y-2">
-                  {col.links.map((l) => (
-                    <li key={l.label}>
-                      <Link
-                        href={l.href}
-                        className="text-[13px] text-white/60 transition-colors hover:text-white"
-                      >
-                        {l.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+      <div className="mx-auto max-w-6xl px-5 py-7">
+        <div className="flex items-center justify-between gap-4">
+          <Image
+            src="/brand/logo.svg"
+            alt="Bridal Team"
+            width={180}
+            height={49}
+            unoptimized
+            className="h-7 w-auto brightness-0 invert"
+          />
+          <div className="flex gap-2">
+            {SOCIAL.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-brand hover:bg-brand hover:text-white"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path d={s.d} />
+                </svg>
+              </a>
             ))}
           </div>
         </div>
-      </div>
 
-      <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-4 text-xs text-white/45 sm:flex-row">
-          <p>© {year} Bridal Team. All rights reserved.</p>
-          <nav className="flex flex-wrap justify-center gap-4">
-            <Link href="/privacy" className="hover:text-white/80">Privacy</Link>
-            <Link href="/terms" className="hover:text-white/80">Terms</Link>
-            <Link href={LOGIN_HREF} className="hover:text-white/80">Log in</Link>
-            <InstallAppLink className="hover:text-white/80" />
-          </nav>
-        </div>
+        <nav className="mt-5 flex flex-wrap gap-x-5 gap-y-2">
+          {LINKS.map((l) => (
+            <Link
+              key={l.label}
+              href={l.href}
+              className="text-[13px] text-white/60 transition-colors hover:text-white"
+            >
+              {l.label}
+            </Link>
+          ))}
+          <InstallAppLink className="text-[13px] text-white/60 transition-colors hover:text-white" />
+        </nav>
+
+        <p className="mt-5 border-t border-white/10 pt-4 text-xs text-white/40">
+          © {year} Bridal Team. All rights reserved.
+        </p>
       </div>
     </footer>
   );
