@@ -225,8 +225,20 @@ export default function Community({
   // Live updates for the scope currently in view.
   useEffect(() => {
     const supabase = supabaseBrowser();
+    const topic = `community:${scope}`;
+
+    // channel(topic) returns an already-subscribed channel if one with this
+    // topic is still registered on the shared client (e.g. switching scope and
+    // back, or a re-mount). Adding .on("postgres_changes", …) to it then throws
+    // "cannot add postgres_changes callbacks … after subscribe()". Clear any
+    // stale channel of this topic first.
+    supabase
+      .getChannels()
+      .filter((c) => c.topic === `realtime:${topic}`)
+      .forEach((c) => supabase.removeChannel(c));
+
     const channel = supabase
-      .channel(`community:${scope}`)
+      .channel(topic)
       // New posts (RLS ensures group posts only reach members).
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts" }, (payload) => {
         const row = payload.new as FeedPost & { media_type?: string };

@@ -45,8 +45,21 @@ export default function NotificationsBell({ userId }: { userId: string }) {
     });
 
     const supabase = supabaseBrowser();
+    const topic = `notif:${userId}`;
+
+    // The browser Supabase client is shared across mounts, and channel(topic)
+    // hands back an EXISTING channel if one with this topic is still registered
+    // (e.g. left over when the header re-mounts after router.refresh() on login).
+    // That channel is already subscribed, so chaining .on("postgres_changes", …)
+    // onto it throws "cannot add postgres_changes callbacks … after subscribe()".
+    // Drop any stale channel of this topic before (re)subscribing.
+    supabase
+      .getChannels()
+      .filter((c) => c.topic === `realtime:${topic}`)
+      .forEach((c) => supabase.removeChannel(c));
+
     const channel = supabase
-      .channel(`notif:${userId}`)
+      .channel(topic)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
