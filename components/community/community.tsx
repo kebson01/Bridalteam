@@ -15,6 +15,7 @@ import {
   listTrendingFeed,
   togglePostLike,
   toggleSavePost,
+  votePoll,
   type FeedPost,
   type PostGroup,
 } from "@/app/community/actions";
@@ -81,6 +82,8 @@ export default function Community({
   const [uploading, setUploading] = useState(false);
   const [posting, startPost] = useTransition();
   const [composerError, setComposerError] = useState<string | null>(null);
+  const [pollMode, setPollMode] = useState(false);
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
 
@@ -191,7 +194,17 @@ export default function Community({
 
   function submitPost() {
     setComposerError(null);
-    if (!body.trim() && !imageUrl) {
+    const pollLabels = pollMode ? pollOptions.map((o) => o.trim()).filter(Boolean) : [];
+    if (pollMode) {
+      if (!body.trim()) {
+        setComposerError("Add a question for your poll.");
+        return;
+      }
+      if (pollLabels.length < 2) {
+        setComposerError("Add at least two poll options.");
+        return;
+      }
+    } else if (!body.trim() && !imageUrl) {
       setComposerError("Write something or add a photo.");
       return;
     }
@@ -199,8 +212,9 @@ export default function Community({
     startPost(async () => {
       const res = await createPost({
         body,
-        imageUrl: imageUrl || null,
+        imageUrl: pollMode ? null : imageUrl || null,
         mediaType: mediaType === "video" ? "video" : "photo",
+        poll: pollMode ? pollLabels : undefined,
         visibility,
         groupId: visibility === "group" ? audience : null,
       });
@@ -210,6 +224,8 @@ export default function Community({
       }
       setBody("");
       clearMedia();
+      setPollMode(false);
+      setPollOptions(["", ""]);
       // If we posted to the scope we're viewing (or to public while on public), refresh.
       if (audience === scope || (audience === "public" && scope === "public")) refreshFeed();
       else switchScope(audience);
@@ -245,6 +261,22 @@ export default function Community({
         setTimeout(() => setCopiedId((c) => (c === post.id ? null : c)), 1800);
       })
       .catch(() => undefined);
+  }
+
+  function votePollOption(post: FeedPost, optionId: string) {
+    if (!post.poll || post.poll.my_vote === optionId) return;
+    const prev = post.poll.my_vote;
+    setFeed((f) =>
+      f.map((p) => {
+        if (p.id !== post.id || !p.poll) return p;
+        const options = p.poll.options.map((o) => ({
+          ...o,
+          votes: o.votes + (o.id === optionId ? 1 : 0) - (o.id === prev ? 1 : 0),
+        }));
+        return { ...p, poll: { options, total: prev ? p.poll.total : p.poll.total + 1, my_vote: optionId } };
+      }),
+    );
+    votePoll(post.id, optionId);
   }
 
   function removePost(id: string) {
@@ -333,7 +365,7 @@ export default function Community({
         setFeed((f) =>
           f.some((p) => p.id === row.id)
             ? f
-            : [{ ...row, liked_by_me: false, comment_count: 0, saved_by_me: false }, ...f],
+            : [{ ...row, liked_by_me: false, comment_count: 0, saved_by_me: false, poll: null }, ...f],
         );
       })
       // Like counts change on the posts row.
@@ -540,12 +572,52 @@ export default function Community({
                     rows={2}
                     maxLength={3000}
                     placeholder={
-                      audience === "public"
-                        ? "Share something with the community…"
-                        : `Post to ${activeGroup?.name ?? "your group"}…`
+                      pollMode
+                        ? "Ask a question…"
+                        : audience === "public"
+                          ? "Share something with the community…"
+                          : `Post to ${activeGroup?.name ?? "your group"}…`
                     }
                     className="w-full resize-none rounded-xl border border-stone-2 bg-stone-4 px-4 py-3 text-sm outline-none focus:border-brand focus:bg-white"
                   />
+                  {pollMode && (
+                    <div className="mt-3 space-y-2 rounded-xl border border-stone-2 bg-stone-4 p-3">
+                      {pollOptions.map((opt, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <input
+                            value={opt}
+                            onChange={(e) =>
+                              setPollOptions((o) => o.map((x, j) => (j === i ? e.target.value : x)))
+                            }
+                            placeholder={`Option ${i + 1}`}
+                            maxLength={80}
+                            className="w-full rounded-lg border border-stone-2 bg-white px-3 py-2 text-sm outline-none focus:border-brand"
+                          />
+                          {pollOptions.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => setPollOptions((o) => o.filter((_, j) => j !== i))}
+                              aria-label="Remove option"
+                              className="flex-none text-ink-soft/50 hover:text-red-600"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <path d="M18 6 6 18M6 6l12 12" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {pollOptions.length < 4 && (
+                        <button
+                          type="button"
+                          onClick={() => setPollOptions((o) => [...o, ""])}
+                          className="text-sm font-semibold text-brand-dark hover:underline"
+                        >
+                          + Add option
+                        </button>
+                      )}
+                    </div>
+                  )}
                   {imageUrl && (
                     <div className="mt-2 overflow-hidden rounded-lg border border-stone-2">
                       {mediaType === "video" ? (
@@ -557,40 +629,53 @@ export default function Community({
                     </div>
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-1">
+                    {!pollMode && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => fileRef.current?.click()}
+                          disabled={uploading}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 disabled:opacity-60"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <path d="M21 15l-5-5L5 21" />
+                          </svg>
+                          {uploading ? "Uploading…" : mediaType === "photo" ? "Change photo" : "Photo"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => videoRef.current?.click()}
+                          disabled={uploading}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 disabled:opacity-60"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                            <path d="M23 7l-7 5 7 5V7z" />
+                            <rect x="1" y="5" width="15" height="14" rx="2" />
+                          </svg>
+                          {mediaType === "video" ? "Change video" : "Video"}
+                        </button>
+                      </>
+                    )}
                     <button
                       type="button"
-                      onClick={() => fileRef.current?.click()}
-                      disabled={uploading}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 disabled:opacity-60"
+                      onClick={() => {
+                        setPollMode((v) => {
+                          const next = !v;
+                          if (next) clearMedia();
+                          return next;
+                        });
+                      }}
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold transition-colors ${
+                        pollMode ? "bg-brand/10 text-brand-dark" : "text-ink-soft hover:bg-stone-4"
+                      }`}
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <path d="M21 15l-5-5L5 21" />
-                      </svg>
-                      {uploading ? "Uploading…" : mediaType === "photo" ? "Change photo" : "Photo"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => videoRef.current?.click()}
-                      disabled={uploading}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 disabled:opacity-60"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                        <path d="M23 7l-7 5 7 5V7z" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" />
-                      </svg>
-                      {mediaType === "video" ? "Change video" : "Video"}
-                    </button>
-                    <span className="flex cursor-default items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold text-ink-soft/50">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                         <path d="M18 20V10M12 20V4M6 20v-6" />
                       </svg>
                       Poll
-                      <span className="rounded-full bg-brand/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-brand-dark">
-                        Soon
-                      </span>
-                    </span>
+                    </button>
                     {imageUrl && (
                       <button
                         type="button"
@@ -625,7 +710,13 @@ export default function Community({
                     <button
                       type="button"
                       onClick={submitPost}
-                      disabled={posting || uploading || (!body.trim() && !imageUrl)}
+                      disabled={
+                        posting ||
+                        uploading ||
+                        (pollMode
+                          ? !body.trim() || pollOptions.filter((o) => o.trim()).length < 2
+                          : !body.trim() && !imageUrl)
+                      }
                       className="ml-auto rounded-xl bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-bold text-white shadow-[0_12px_26px_-12px_rgba(243,103,5,0.85)] disabled:opacity-50"
                     >
                       {posting ? "Posting…" : "Post"}
@@ -716,6 +807,42 @@ export default function Community({
                   </div>
 
                   {p.body && <p className="mt-3 whitespace-pre-wrap text-[14.5px] leading-relaxed text-ink">{p.body}</p>}
+
+                  {p.poll && (
+                    <div className="mt-3 flex flex-col gap-2">
+                      {p.poll.options.map((o) => {
+                        const total = p.poll!.total;
+                        const pct = total ? Math.round((o.votes / total) * 100) : 0;
+                        const mine = p.poll!.my_vote === o.id;
+                        return (
+                          <button
+                            key={o.id}
+                            type="button"
+                            onClick={() => votePollOption(p, o.id)}
+                            className={`relative overflow-hidden rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                              mine ? "border-brand" : "border-stone-2 hover:border-brand/60"
+                            }`}
+                          >
+                            <span
+                              className="absolute inset-y-0 left-0 bg-brand/10"
+                              style={{ width: `${pct}%` }}
+                            />
+                            <span className="relative flex items-center justify-between gap-2">
+                              <span className={mine ? "font-semibold text-brand-dark" : "text-ink"}>
+                                {o.label}
+                                {mine && " ✓"}
+                              </span>
+                              <span className="text-xs font-medium text-ink-soft/60">{pct}%</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                      <p className="text-xs text-ink-soft/50">
+                        {p.poll.total} {p.poll.total === 1 ? "vote" : "votes"}
+                        {p.poll.my_vote ? " · tap to change" : " · tap an option to vote"}
+                      </p>
+                    </div>
+                  )}
 
                   {p.image_url &&
                     (p.media_type === "video" ? (

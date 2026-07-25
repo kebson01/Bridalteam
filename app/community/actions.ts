@@ -11,6 +11,9 @@ export type PostGroup = { id: string; name: string; join_code: string; owner_id:
 
 export type GroupMember = { user_id: string; name: string; avatar: string | null; is_owner: boolean };
 
+export type PollOption = { id: string; label: string; votes: number };
+export type Poll = { options: PollOption[]; total: number; my_vote: string | null };
+
 export type FeedPost = {
   id: string;
   author_id: string;
@@ -26,15 +29,16 @@ export type FeedPost = {
   liked_by_me: boolean;
   comment_count: number;
   saved_by_me: boolean;
+  poll: Poll | null;
 };
 
 // Columns selected for every feed query — keep in sync with FeedPost's stored fields.
 const POST_COLUMNS =
   "id, author_id, author_name, author_avatar, body, image_url, media_type, visibility, group_id, like_count, created_at";
 
-type PostRow = Omit<FeedPost, "liked_by_me" | "comment_count" | "saved_by_me">;
+type PostRow = Omit<FeedPost, "liked_by_me" | "comment_count" | "saved_by_me" | "poll">;
 
-/** Adds per-viewer flags (liked/saved) and comment counts to a set of post rows. */
+/** Adds per-viewer flags (liked/saved), comment counts and poll data to post rows. */
 async function enrichPosts(
   supabase: Awaited<ReturnType<typeof supabaseServer>>,
   userId: string,
@@ -42,21 +46,51 @@ async function enrichPosts(
 ): Promise<FeedPost[]> {
   const ids = rows.map((p) => p.id);
   if (ids.length === 0) return [];
-  const [{ data: likes }, { data: comments }, { data: saved }] = await Promise.all([
-    supabase.from("post_likes").select("post_id").eq("user_id", userId).in("post_id", ids),
-    supabase.from("post_comments").select("post_id").in("post_id", ids),
-    supabase.from("saved_posts").select("post_id").eq("user_id", userId).in("post_id", ids),
-  ]);
+  const [{ data: likes }, { data: comments }, { data: saved }, { data: pollOpts }, { data: pollVotes }] =
+    await Promise.all([
+      supabase.from("post_likes").select("post_id").eq("user_id", userId).in("post_id", ids),
+      supabase.from("post_comments").select("post_id").in("post_id", ids),
+      supabase.from("saved_posts").select("post_id").eq("user_id", userId).in("post_id", ids),
+      supabase.from("poll_options").select("id, post_id, label, position").in("post_id", ids).order("position", { ascending: true }),
+      supabase.from("poll_votes").select("post_id, option_id, user_id").in("post_id", ids),
+    ]);
   const likedSet = new Set((likes ?? []).map((l) => l.post_id));
   const savedSet = new Set((saved ?? []).map((s) => s.post_id));
   const commentCounts = new Map<string, number>();
   for (const c of comments ?? []) commentCounts.set(c.post_id, (commentCounts.get(c.post_id) ?? 0) + 1);
-  return rows.map((p) => ({
-    ...p,
-    liked_by_me: likedSet.has(p.id),
-    saved_by_me: savedSet.has(p.id),
-    comment_count: commentCounts.get(p.id) ?? 0,
-  }));
+
+  // Poll options grouped by post (already position-ordered), vote tallies, and this user's pick.
+  const optsByPost = new Map<string, { id: string; label: string }[]>();
+  for (const o of pollOpts ?? []) {
+    const arr = optsByPost.get(o.post_id) ?? [];
+    arr.push({ id: o.id, label: o.label });
+    optsByPost.set(o.post_id, arr);
+  }
+  const votesByOption = new Map<string, number>();
+  const myVoteByPost = new Map<string, string>();
+  for (const v of pollVotes ?? []) {
+    votesByOption.set(v.option_id, (votesByOption.get(v.option_id) ?? 0) + 1);
+    if (v.user_id === userId) myVoteByPost.set(v.post_id, v.option_id);
+  }
+
+  return rows.map((p) => {
+    const opts = optsByPost.get(p.id);
+    const poll: Poll | null =
+      opts && opts.length > 0
+        ? {
+            options: opts.map((o) => ({ id: o.id, label: o.label, votes: votesByOption.get(o.id) ?? 0 })),
+            total: opts.reduce((s, o) => s + (votesByOption.get(o.id) ?? 0), 0),
+            my_vote: myVoteByPost.get(p.id) ?? null,
+          }
+        : null;
+    return {
+      ...p,
+      liked_by_me: likedSet.has(p.id),
+      saved_by_me: savedSet.has(p.id),
+      comment_count: commentCounts.get(p.id) ?? 0,
+      poll,
+    };
+  });
 }
 
 async function authed() {
@@ -334,13 +368,17 @@ export async function createPost(input: {
   body: string;
   imageUrl?: string | null;
   mediaType?: "photo" | "video";
+  poll?: string[];
   visibility: "public" | "group";
   groupId?: string | null;
 }): Promise<{ ok: boolean; error?: string }> {
   const body = input.body?.trim().slice(0, 3000) ?? "";
   const mediaUrl = input.imageUrl?.trim() || null;
   const isVideo = input.mediaType === "video";
-  if (!body && !mediaUrl) return { ok: false, error: "Write something or add a photo." };
+  const pollLabels = (input.poll ?? []).map((s) => s.trim()).filter(Boolean).slice(0, 4);
+  const wantsPoll = pollLabels.length >= 2;
+  if (wantsPoll && !body) return { ok: false, error: "Add a question for your poll." };
+  if (!body && !mediaUrl && !wantsPoll) return { ok: false, error: "Write something or add a photo." };
   if (input.visibility === "group" && !input.groupId)
     return { ok: false, error: "Pick a group to post to." };
 
@@ -364,21 +402,50 @@ export async function createPost(input: {
     }
   }
 
-  const { error } = await supabase.from("posts").insert({
-    author_id: user.id,
-    author_name: displayName(user),
-    author_avatar: (user.user_metadata?.avatar_url as string | undefined)?.trim() || null,
-    body: body || null,
-    image_url: mediaUrl,
-    media_type: mediaUrl ? (isVideo ? "video" : "photo") : "text",
-    visibility: input.visibility,
-    group_id: input.visibility === "group" ? input.groupId : null,
-  });
-  if (error) {
-    console.error("createPost failed:", error.code, error.message);
+  const { data: inserted, error } = await supabase
+    .from("posts")
+    .insert({
+      author_id: user.id,
+      author_name: displayName(user),
+      author_avatar: (user.user_metadata?.avatar_url as string | undefined)?.trim() || null,
+      body: body || null,
+      image_url: mediaUrl,
+      media_type: wantsPoll ? "poll" : mediaUrl ? (isVideo ? "video" : "photo") : "text",
+      visibility: input.visibility,
+      group_id: input.visibility === "group" ? input.groupId : null,
+    })
+    .select("id")
+    .single();
+  if (error || !inserted) {
+    console.error("createPost failed:", error?.code, error?.message);
     return { ok: false, error: "Couldn't post that. Please try again." };
   }
+
+  if (wantsPoll) {
+    const rows = pollLabels.map((label, i) => ({
+      post_id: inserted.id,
+      label: label.slice(0, 80),
+      position: i,
+    }));
+    const { error: pollErr } = await supabase.from("poll_options").insert(rows);
+    if (pollErr) console.error("createPost poll options failed:", pollErr.code, pollErr.message);
+  }
+
   revalidatePath("/community");
+  return { ok: true };
+}
+
+/** Cast (or change) the signed-in user's vote in a poll. One vote per poll. */
+export async function votePoll(postId: string, optionId: string): Promise<{ ok: boolean }> {
+  const { supabase, user } = await authed();
+  if (!user || !postId || !optionId) return { ok: false };
+  const { error } = await supabase
+    .from("poll_votes")
+    .upsert({ post_id: postId, option_id: optionId, user_id: user.id }, { onConflict: "post_id,user_id" });
+  if (error) {
+    console.error("votePoll failed:", error.code, error.message);
+    return { ok: false };
+  }
   return { ok: true };
 }
 
