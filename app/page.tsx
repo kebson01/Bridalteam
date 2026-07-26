@@ -3,6 +3,7 @@ import Pillars from "@/components/pillars";
 import AIPlanner from "@/components/ai-planner";
 import Highlights from "@/components/highlights";
 import VendorTeaser from "@/components/vendor-teaser";
+import GetTheApp from "@/components/get-the-app";
 import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <Highlights />
       <AIPlanner />
       {SHOW_VENDOR_DIRECTORY && <VendorTeaser />}
+      <GetTheApp />
     </>
   );
 }
