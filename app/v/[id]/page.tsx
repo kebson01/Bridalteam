@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import { MediaBadge } from "@/components/inspiration-gallery";
+import VendorReviews from "@/components/vendor/vendor-reviews";
+import { listVendorReviews } from "@/app/vendor/review-actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
 
@@ -40,6 +42,12 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
   const { id } = await params;
   const { vendor, media } = await getVendor(id);
   if (!vendor) notFound();
+
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const reviews = await listVendorReviews(id);
 
   const location = [vendor.city, vendor.region].filter(Boolean).join(", ");
 
@@ -98,6 +106,8 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
             )}
           </div>
         </div>
+
+        <VendorReviews vendorOrgId={id} viewerId={user?.id ?? null} initialReviews={reviews} />
       </section>
     </>
   );
