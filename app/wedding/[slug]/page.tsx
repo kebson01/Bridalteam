@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import RsvpForm from "@/components/wedding/rsvp-form";
-import { getPublicWedding } from "@/app/wedding/actions";
+import { getPublicWedding, getPublicRegistry } from "@/app/wedding/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +43,7 @@ export default async function PublicWeddingPage({
   const w = await getPublicWedding(slug);
   if (!w) notFound();
 
+  const registry = await getPublicRegistry(slug);
   const names = coupleNames(w.partner_one, w.partner_two);
   const date = formatDate(w.event_date);
   const location = [w.venue, w.city, w.region].filter(Boolean).join(" · ");
@@ -72,7 +73,28 @@ export default async function PublicWeddingPage({
           </p>
         )}
         <RsvpForm slug={slug} />
-        <p className="mt-8 text-center text-xs text-ink-soft/40">
+
+        {registry.length > 0 && (
+          <div className="mt-12 text-center">
+            <h2 className="font-display text-2xl font-semibold text-ink">Registry</h2>
+            <p className="mt-1 text-sm text-ink-soft/70">Your presence is the gift — but if you'd like to celebrate with us:</p>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              {registry.map((r) => (
+                <a
+                  key={r.id}
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+                >
+                  {r.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <p className="mt-12 text-center text-xs text-ink-soft/40">
           Powered by Bridal Team
         </p>
       </section>

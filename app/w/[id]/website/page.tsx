@@ -3,7 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import WeddingNav from "@/components/wedding-nav";
 import WebsiteManager from "@/components/wedding/website-manager";
-import { listRsvps } from "@/app/wedding/actions";
+import RegistryManager from "@/components/wedding/registry-manager";
+import { listRsvps, listRegistryLinks } from "@/app/wedding/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { SITE_URL } from "@/lib/site";
@@ -36,7 +37,7 @@ export default async function WeddingWebsitePage({
     .maybeSingle();
   if (!wedding) notFound();
 
-  const rsvps = await listRsvps(id);
+  const [rsvps, registry] = await Promise.all([listRsvps(id), listRegistryLinks(id)]);
   const names = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ") || "Your wedding";
   const attending = rsvps.filter((r) => r.attending);
   const declined = rsvps.filter((r) => !r.attending);
@@ -57,6 +58,8 @@ export default async function WeddingWebsitePage({
             initialSlug={wedding.public_slug ?? null}
             siteUrl={SITE_URL}
           />
+
+          <RegistryManager weddingId={id} initialLinks={registry} />
 
           {/* RSVP responses */}
           <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">

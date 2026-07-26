@@ -23,6 +23,21 @@ export type Rsvp = {
   created_at: string;
 };
 
+export type RegistryLink = { id: string; label: string; url: string };
+
+function normalizeUrl(raw: string): string | null {
+  const s = raw?.trim();
+  if (!s) return null;
+  const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+  try {
+    const u = new URL(withScheme);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
 /** Public wedding site data by slug (published only). No auth required. */
 export async function getPublicWedding(slug: string): Promise<PublicWedding | null> {
   if (!slug) return null;
@@ -126,4 +141,74 @@ export async function listRsvps(weddingId: string): Promise<Rsvp[]> {
     return [];
   }
   return (data ?? []) as Rsvp[];
+}
+
+/** Registry links for a wedding (members only, via RLS). */
+export async function listRegistryLinks(weddingId: string): Promise<RegistryLink[]> {
+  if (!weddingId) return [];
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase
+    .from("registry_links")
+    .select("id, label, url")
+    .eq("wedding_id", weddingId)
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (error) {
+    console.error("listRegistryLinks failed:", error.code, error.message);
+    return [];
+  }
+  return (data ?? []) as RegistryLink[];
+}
+
+/** Add a registry link (edit permission enforced by RLS). */
+export async function addRegistryLink(input: {
+  weddingId: string;
+  label: string;
+  url: string;
+}): Promise<{ ok: boolean; link?: RegistryLink; error?: string }> {
+  const label = input.label?.trim().slice(0, 80);
+  const url = normalizeUrl(input.url);
+  if (!label) return { ok: false, error: "Add a name (e.g. Amazon)." };
+  if (!url) return { ok: false, error: "Enter a valid link." };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase
+    .from("registry_links")
+    .insert({ wedding_id: input.weddingId, label, url })
+    .select("id, label, url")
+    .single();
+  if (error || !data) {
+    console.error("addRegistryLink failed:", error?.code, error?.message);
+    return { ok: false, error: "Couldn't add that link." };
+  }
+  revalidatePath(`/w/${input.weddingId}/website`);
+  return { ok: true, link: data as RegistryLink };
+}
+
+/** Remove a registry link (edit permission enforced by RLS). */
+export async function deleteRegistryLink(id: string): Promise<{ ok: boolean }> {
+  if (!id) return { ok: false };
+  const supabase = await supabaseServer();
+  const { error } = await supabase.from("registry_links").delete().eq("id", id);
+  if (error) {
+    console.error("deleteRegistryLink failed:", error.code, error.message);
+    return { ok: false };
+  }
+  return { ok: true };
+}
+
+/** Public registry links for a published wedding site (no auth). */
+export async function getPublicRegistry(slug: string): Promise<RegistryLink[]> {
+  if (!slug) return [];
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc("list_public_registry", { p_slug: slug });
+  if (error) {
+    console.error("getPublicRegistry failed:", error.message);
+    return [];
+  }
+  // RPC returns {label, url}; synthesize a stable key for rendering.
+  return ((data as { label: string; url: string }[] | null) ?? []).map((r, i) => ({
+    id: `${i}`,
+    label: r.label,
+    url: r.url,
+  }));
 }
