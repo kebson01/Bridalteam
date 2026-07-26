@@ -9,31 +9,35 @@ export const metadata: Metadata = {
 
 const TIERS = [
   {
-    name: "Free",
-    price: "$0",
+    name: "Couples",
+    price: "Free",
     note: "forever",
-    blurb: "Everything you need to start planning.",
-    features: ["AI planner (demo)", "Timelines & checklists", "Invite your partner", "Browse vendors"],
+    blurb: "The whole AI planning team — every feature, no paywall.",
+    features: [
+      "Unlimited AI planning assistant",
+      "Timelines, checklists & budget",
+      "Smart vendor matching",
+      "Guest list & community groups",
+      "Inspiration & shared mood boards",
+      "Invite your partner & wedding party",
+    ],
     cta: "Start free",
-    href: "/signup",
-    highlight: false,
-  },
-  {
-    name: "Couple Pro",
-    price: "$12",
-    note: "/ month",
-    blurb: "For couples who want the full AI team.",
-    features: ["Unlimited live AI planning", "Smart vendor matching", "Budget & guest tools", "Shared team workspace", "Priority support"],
-    cta: "Go Pro",
     href: "/signup",
     highlight: true,
   },
   {
-    name: "Vendor",
-    price: "Custom",
-    note: "",
-    blurb: "Get discovered by couples planning now.",
-    features: ["Listed in the directory", "AI vendor matching", "Lead inbox", "Profile & gallery"],
+    name: "Vendor Assistance",
+    price: "$12",
+    note: "/ month",
+    blurb: "For vendors who want to grow — AI help plus premium placement.",
+    features: [
+      "AI assistant for your business",
+      "Featured in the vendor directory",
+      "Lead inbox from couples",
+      "Profile & gallery",
+      "Bulk listing tools",
+      "Priority support",
+    ],
     cta: "For vendors",
     href: "/for-vendors",
     highlight: false,
@@ -45,11 +49,11 @@ export default function PricingPage() {
     <>
       <PageHero
         eyebrow="Simple pricing"
-        title="Plans for every couple"
-        subtitle="Start free and upgrade when you're ready for the full AI planning team. No card required to begin."
+        title="Free for couples"
+        subtitle="Plan your entire wedding with the full AI team — free, forever, no card required. Vendors grow their business with Vendor Assistance for $12/month."
       />
-      <section className="mx-auto max-w-6xl px-5 py-16">
-        <div className="grid gap-6 lg:grid-cols-3">
+      <section className="mx-auto max-w-3xl px-5 py-16">
+        <div className="grid gap-6 sm:grid-cols-2">
           {TIERS.map((t) => (
             <div
               key={t.name}
@@ -61,7 +65,7 @@ export default function PricingPage() {
             >
               {t.highlight && (
                 <span className="mb-3 inline-flex w-fit rounded-full bg-brand px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-                  Most popular
+                  Free forever
                 </span>
               )}
               <h3 className={`text-lg font-medium ${t.highlight ? "text-brand-amber" : "text-brand-dark"}`}>
