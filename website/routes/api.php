@@ -57,6 +57,19 @@ Route::group(['prefix' => 'v1'], function(){
         });
     });
 
+    Route::group(['prefix' => 'community'], function(){
+        // Member auth (public)
+        Route::post('/register', 'CommunityController@registerMember');
+        Route::post('/login', 'VendorController@login'); // any App\User can log in
+
+        // Writes — any logged-in user may post
+        Route::group(['middleware' => 'requireuser'], function(){
+            Route::post('/thread', 'CommunityController@storeThread');
+            Route::post('/thread/{id}/reply', 'CommunityController@storeReply');
+            Route::delete('/reply/{id}', 'CommunityController@deleteReply');
+        });
+    });
+
     Route::group(['prefix' => 'media'], function(){
         Route::group(['middleware' => 'jwt.auth'], function(){
             Route::post('uploadmedia', 'MediaController@uploadMedia');

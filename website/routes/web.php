@@ -39,5 +39,21 @@ Route::get('/gallery', 'PageController@showGalleryPage');
 // Blog route
 Route::get('/blog', 'PageController@showBlogPage');
 
+// --- Community: member auth pages (public) ---
+Route::get('/community/register', 'CommunityController@showRegister');
+Route::get('/community/login', 'CommunityController@showLogin');
+
+// --- Community: public reads (soft auth for personalisation) ---
+Route::group(['middleware' => 'optionaluser'], function () {
+    Route::get('/community', 'CommunityController@showIndex');
+    Route::get('/community/topic/{topic}', 'CommunityController@showTopic');
+    Route::get('/community/thread/{slug}', 'CommunityController@showThread');
+});
+
+// --- Community: auth-gated compose page ---
+Route::group(['middleware' => 'requireuser'], function () {
+    Route::get('/community/new', 'CommunityController@showCompose');
+});
+
 // Catch-all route for custom pages (must be last)
-Route::get('/{slug}', 'PageController@getPage')->where(['slug' => '^(?!vendor|api|admin|blog).*']);
+Route::get('/{slug}', 'PageController@getPage')->where(['slug' => '^(?!vendor|api|admin|blog|community).*']);

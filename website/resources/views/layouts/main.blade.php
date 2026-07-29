@@ -53,6 +53,7 @@
                                 <li><a href="/">Home</a></li>
                                 <li><a href="/gallery">Gallery</a></li>
                                 <li><a href="/vendors">Vendors</a></li>
+                                <li><a href="/community">Community</a></li>
                                 <li><a href="/blog">Blog</a></li>
                             @endif
                         </ul>
@@ -65,8 +66,12 @@
                                     <div><span>Logged in as<br/><span class="name"><?php print $user->firstname . " " . $user->lastname; ?></span></span></div>
                                 </div>          
                                 <ul>
-                                    <li><a href="/vendor/account">My Account</a></li>
-                                    <li><a href="/vendor/<?php print $user->findVendor()->slug; ?>">My Vendor Profile</a></li>
+                                    <li><a href="/community">Community</a></li>
+                                    <?php $navvendor = $user->findVendor(); ?>
+                                    <?php if($navvendor): ?>
+                                        <li><a href="/vendor/account">My Account</a></li>
+                                        <li><a href="/vendor/<?php print $navvendor->slug; ?>">My Vendor Profile</a></li>
+                                    <?php endif; ?>
                                     <li><a class="logout_btn" href="/logout">Logout</a></li>
                                 </ul>
                             </div>
