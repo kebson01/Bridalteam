@@ -67,6 +67,10 @@ Route::group(['prefix' => 'v1'], function(){
             Route::post('/thread', 'CommunityController@storeThread');
             Route::post('/thread/{id}/reply', 'CommunityController@storeReply');
             Route::delete('/reply/{id}', 'CommunityController@deleteReply');
+
+            // Moderation — controller enforces the is_admin check
+            Route::post('/thread/{id}/moderate', 'CommunityController@moderateThread');
+            Route::post('/reply/{id}/moderate', 'CommunityController@moderateReply');
         });
     });
 

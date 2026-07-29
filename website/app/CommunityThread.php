@@ -11,15 +11,17 @@ class CommunityThread extends Model
 
     protected $fillable = [
         'topic', 'title', 'slug', 'body',
-        'author_id', 'author_name', 'author_type', 'reply_count',
+        'author_id', 'author_name', 'author_type', 'reply_count', 'hidden',
     ];
 
     /**
      * Replies belonging to this thread, oldest first.
+     * Hidden (moderated) replies are excluded from public display.
      */
     public function getReplies()
     {
         return CommunityReply::where('thread_id', '=', $this->id)
+            ->where('hidden', '=', false)
             ->orderBy('created_at', 'asc')
             ->get();
     }

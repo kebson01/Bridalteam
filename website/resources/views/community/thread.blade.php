@@ -25,17 +25,28 @@
                                 @if($thread->author_type === 'vendor')<span class="badge" style="color:#b48;">(Vendor)</span>@endif
                             </div>
                             <div class="body">{!! nl2br(e($thread->body)) !!}</div>
+                            @if(!empty($isAdmin))
+                                <div class="mod-controls" style="margin-top:10px;">
+                                    <a class="btn mod-thread" data-thread="{{ $thread->id }}" data-hidden="{{ $thread->hidden ? 1 : 0 }}">{{ $thread->hidden ? 'Unhide thread' : 'Hide thread' }}</a>
+                                </div>
+                            @endif
                         </article>
 
                         <h3>{{ count($replies) }} {{ count($replies) == 1 ? 'Reply' : 'Replies' }}</h3>
                         <ul class="community-replies" style="list-style:none;padding:0;margin:0 0 24px;">
                             @foreach($replies as $reply)
-                                <li class="community-reply" style="border-bottom:1px solid #eee;padding:14px 0;">
+                                <li class="community-reply" style="border-bottom:1px solid #eee;padding:14px 0;{{ $reply->hidden ? 'opacity:0.5;' : '' }}">
                                     <div class="meta" style="color:#888;font-size:0.85em;margin-bottom:6px;">
                                         {{ $reply->author_name }}
                                         @if($reply->author_type === 'vendor')<span class="badge" style="color:#b48;">(Vendor)</span>@endif
+                                        @if(!empty($isAdmin) && $reply->hidden)<span class="badge" style="color:#c00;">(Hidden)</span>@endif
                                     </div>
                                     <div class="body">{!! nl2br(e($reply->body)) !!}</div>
+                                    @if(!empty($isAdmin))
+                                        <div class="mod-controls" style="margin-top:6px;">
+                                            <a class="btn mod-reply" data-reply="{{ $reply->id }}" data-hidden="{{ $reply->hidden ? 1 : 0 }}">{{ $reply->hidden ? 'Unhide' : 'Hide' }}</a>
+                                        </div>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>
@@ -91,6 +102,29 @@ $(function () {
             }
         });
         return false;
+    });
+
+    // Admin moderation: toggle hidden on a thread or reply.
+    function moderate(url, hidden, el) {
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: { hidden: hidden ? 0 : 1 },
+            success: function () { window.location.reload(); },
+            error: function (xhr) {
+                alert((xhr.responseJSON && xhr.responseJSON.error) || "Moderation action failed.");
+            }
+        });
+    }
+
+    $(".mod-thread").click(function () {
+        var $el = $(this);
+        moderate("/api/v1/community/thread/" + $el.data("thread") + "/moderate", $el.data("hidden") == 1, $el);
+    });
+
+    $(".mod-reply").click(function () {
+        var $el = $(this);
+        moderate("/api/v1/community/reply/" + $el.data("reply") + "/moderate", $el.data("hidden") == 1, $el);
     });
 });
 </script>
