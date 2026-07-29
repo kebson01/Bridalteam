@@ -21,6 +21,7 @@ export default function PostComments({
   const [comments, setComments] = useState<PostComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -40,12 +41,15 @@ export default function PostComments({
   function submit() {
     const body = text.trim();
     if (!body) return;
+    setError(null);
     startTransition(async () => {
       const res = await addPostComment(postId, body);
       if (res.ok) {
         setComments((cs) => [...cs, res.comment]);
         setText("");
         onCountChange?.(1);
+      } else if (res.error && res.error !== "empty" && res.error !== "sign_in") {
+        setError(res.error);
       }
     });
   }
@@ -123,6 +127,7 @@ export default function PostComments({
           Reply
         </button>
       </div>
+      {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
     </div>
   );
 }

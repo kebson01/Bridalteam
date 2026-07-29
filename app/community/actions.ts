@@ -6,6 +6,7 @@ import { moderateImage } from "@/lib/moderation";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { SITE_URL } from "@/lib/site";
 import { VALID_GROUP_KINDS } from "@/lib/community";
+import { overRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 export type PostGroup = {
   id: string;
@@ -146,6 +147,10 @@ export async function createGroup(
   const safeKind = VALID_GROUP_KINDS.has(kind) ? kind : "custom";
   const { supabase, user } = await authed();
   if (!user) return { ok: false, error: "sign_in" };
+
+  if (await overRateLimit(supabase, "post_groups", "owner_id", user.id, RATE_LIMITS.group)) {
+    return { ok: false, error: "You're creating groups too fast. Please wait a moment and try again." };
+  }
 
   // Short, unambiguous join code (no easily-confused characters).
   const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -427,6 +432,10 @@ export async function createPost(input: {
   const { supabase, user } = await authed();
   if (!user) return { ok: false, error: "sign_in" };
 
+  if (await overRateLimit(supabase, "posts", "author_id", user.id, RATE_LIMITS.post)) {
+    return { ok: false, error: "You're posting too fast. Please wait a moment and try again." };
+  }
+
   // AI safety check on any image before it goes live. Fails open if unavailable.
   // (Video moderation isn't supported yet, so videos are posted as-is.)
   if (mediaUrl && !isVideo) {
@@ -551,6 +560,10 @@ export async function addPostComment(
   const { supabase, user } = await authed();
   if (!user) return { ok: false, error: "sign_in" };
 
+  if (await overRateLimit(supabase, "post_comments", "user_id", user.id, RATE_LIMITS.comment)) {
+    return { ok: false, error: "You're commenting too fast. Please wait a moment and try again." };
+  }
+
   const { data, error } = await supabase
     .from("post_comments")
     .insert({
@@ -674,6 +687,10 @@ export async function createEvent(input: {
 
   const { supabase, user } = await authed();
   if (!user) return { ok: false, error: "sign_in" };
+
+  if (await overRateLimit(supabase, "events", "creator_id", user.id, RATE_LIMITS.event)) {
+    return { ok: false, error: "You're creating events too fast. Please wait a moment and try again." };
+  }
 
   const { data, error } = await supabase
     .from("events")
