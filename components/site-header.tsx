@@ -9,24 +9,17 @@ import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import NotificationsBell from "@/components/notifications-bell";
 
-// Marketing nav — shown to visitors who aren't signed in.
+// Primary nav — identical whether or not you're signed in, so the header
+// doesn't reshuffle on login. Every destination is a public page (Community is
+// now browsable signed-out). Auth-specific actions — Dashboard, account,
+// log out — live in the right-hand cluster instead.
 const NAV = [
-  { label: "How it works", href: "/#how" },
-  { label: "AI Planner", href: "/planner" },
-  { label: "Guides", href: "/guides" },
-  { label: "Find Vendors", href: "/vendors" },
-  { label: "Inspiration", href: "/inspiration" },
-  { label: "Pricing", href: "/pricing" },
-];
-
-// Signed-in nav — a lean, app-focused menu so the header doesn't feel crowded
-// once you're inside the product. Marketing links (How it works, Guides, Find
-// Vendors, Pricing) stay reachable from the footer.
-const APP_NAV = [
-  { label: "Dashboard", href: "/dashboard" },
   { label: "Community", href: "/community" },
   { label: "AI Planner", href: "/planner" },
   { label: "Inspiration", href: "/inspiration" },
+  { label: "Find Vendors", href: "/vendors" },
+  { label: "Guides", href: "/guides" },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 // "Log in" is for people who already have an account, so once accounts exist it
@@ -113,7 +106,7 @@ export default function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex">
-          {(signedIn ? APP_NAV : NAV).map((item) => (
+          {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -127,6 +120,12 @@ export default function SiteHeader() {
         <div className="hidden items-center gap-4 md:flex">
           {signedIn ? (
             <>
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-dark"
+              >
+                Dashboard
+              </Link>
               {viewer && <NotificationsBell userId={viewer.id} />}
               <Link
                 href="/account"
@@ -196,7 +195,7 @@ export default function SiteHeader() {
       {open && (
         <nav className="border-t border-stone-2 bg-white px-5 py-4 md:hidden">
           <ul className="flex flex-col gap-1">
-            {(signedIn ? APP_NAV : NAV).map((item) => (
+            {NAV.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
@@ -209,6 +208,15 @@ export default function SiteHeader() {
             ))}
             {signedIn ? (
               <>
+                <li>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
+                  >
+                    Dashboard
+                  </Link>
+                </li>
                 <li>
                   <Link
                     href="/account"
