@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { getPost } from "@/app/community/actions";
+import { getPost, getPublicPost } from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Post — Community",
   description: "A post shared from the Bridal Team community.",
-  robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
@@ -35,10 +34,14 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/auth/login?next=/community/p/${id}`);
 
-  const post = await getPost(id);
-  if (!post) notFound();
+  // Signed-out visitors can view public posts; anything else sends them to log
+  // in (a private group post may resolve once they're signed in).
+  const post = user ? await getPost(id) : await getPublicPost(id);
+  if (!post) {
+    if (!user) redirect(`/auth/login?next=/community/p/${id}`);
+    notFound();
+  }
 
   const initial = (post.author_name || "?").charAt(0).toUpperCase();
 
@@ -106,10 +109,10 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
       </article>
 
       <Link
-        href="/community"
+        href={user ? "/community" : "/auth/signup?next=/community"}
         className="mt-5 block w-full rounded-xl bg-gradient-to-r from-brand to-brand-dark py-3 text-center text-sm font-bold text-white shadow-[0_12px_26px_-12px_rgba(243,103,5,0.85)]"
       >
-        Open in Community
+        {user ? "Open in Community" : "Join free to like & comment"}
       </Link>
     </section>
   );

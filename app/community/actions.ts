@@ -51,21 +51,29 @@ type PostRow = Omit<FeedPost, "liked_by_me" | "comment_count" | "saved_by_me" | 
 /** Adds per-viewer flags (liked/saved), comment counts and poll data to post rows. */
 async function enrichPosts(
   supabase: Awaited<ReturnType<typeof supabaseServer>>,
-  userId: string,
+  userId: string | null,
   rows: PostRow[],
 ): Promise<FeedPost[]> {
   const ids = rows.map((p) => p.id);
   if (ids.length === 0) return [];
-  const [{ data: likes }, { data: comments }, { data: saved }, { data: pollOpts }, { data: pollVotes }] =
-    await Promise.all([
+  const [{ data: comments }, { data: pollOpts }, { data: pollVotes }] = await Promise.all([
+    supabase.from("post_comments").select("post_id").in("post_id", ids),
+    supabase.from("poll_options").select("id, post_id, label, position").in("post_id", ids).order("position", { ascending: true }),
+    supabase.from("poll_votes").select("post_id, option_id, user_id").in("post_id", ids),
+  ]);
+
+  // Per-viewer flags only make sense for a signed-in user. Anonymous readers
+  // get everything unliked/unsaved (they can't like or save without an account).
+  let likedSet = new Set<string>();
+  let savedSet = new Set<string>();
+  if (userId) {
+    const [{ data: likes }, { data: saved }] = await Promise.all([
       supabase.from("post_likes").select("post_id").eq("user_id", userId).in("post_id", ids),
-      supabase.from("post_comments").select("post_id").in("post_id", ids),
       supabase.from("saved_posts").select("post_id").eq("user_id", userId).in("post_id", ids),
-      supabase.from("poll_options").select("id, post_id, label, position").in("post_id", ids).order("position", { ascending: true }),
-      supabase.from("poll_votes").select("post_id, option_id, user_id").in("post_id", ids),
     ]);
-  const likedSet = new Set((likes ?? []).map((l) => l.post_id));
-  const savedSet = new Set((saved ?? []).map((s) => s.post_id));
+    likedSet = new Set((likes ?? []).map((l) => l.post_id));
+    savedSet = new Set((saved ?? []).map((s) => s.post_id));
+  }
   const commentCounts = new Map<string, number>();
   for (const c of comments ?? []) commentCounts.set(c.post_id, (commentCounts.get(c.post_id) ?? 0) + 1);
 
@@ -394,6 +402,41 @@ export async function getPost(postId: string): Promise<FeedPost | null> {
   const { data: post } = await supabase.from("posts").select(POST_COLUMNS).eq("id", postId).maybeSingle();
   if (!post) return null;
   const [enriched] = await enrichPosts(supabase, user.id, [post as PostRow]);
+  return enriched ?? null;
+}
+
+/**
+ * Public feed for anonymous visitors — only `public` posts, newest first, with
+ * no per-viewer flags. Works without a session: it relies on the anon-role RLS
+ * policy that exposes public posts (and their comments/polls) to everyone.
+ */
+export async function listPublicFeed(): Promise<FeedPost[]> {
+  const supabase = await supabaseServer();
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select(POST_COLUMNS)
+    .eq("visibility", "public")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    console.error("listPublicFeed failed:", error.code, error.message);
+    return [];
+  }
+  return enrichPosts(supabase, null, (posts ?? []) as PostRow[]);
+}
+
+/** A single public post by id, viewable without an account (for its permalink). */
+export async function getPublicPost(postId: string): Promise<FeedPost | null> {
+  if (!postId) return null;
+  const supabase = await supabaseServer();
+  const { data: post } = await supabase
+    .from("posts")
+    .select(POST_COLUMNS)
+    .eq("id", postId)
+    .eq("visibility", "public")
+    .maybeSingle();
+  if (!post) return null;
+  const [enriched] = await enrichPosts(supabase, null, [post as PostRow]);
   return enriched ?? null;
 }
 

@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Community from "@/components/community/community";
-import { listGroups, listFeed, listUpcomingEvents, listSuggestedGroups } from "@/app/community/actions";
+import PublicFeed from "@/components/community/public-feed";
+import {
+  listGroups,
+  listFeed,
+  listUpcomingEvents,
+  listSuggestedGroups,
+  listPublicFeed,
+} from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Community",
-  description: "Share updates and photos with the Bridal Team community and your private groups.",
-  robots: { index: false, follow: false },
+  description: "Real weddings, advice, and inspiration from the Bridal Team community of couples and vendors.",
 };
 
 export const dynamic = "force-dynamic";
@@ -25,7 +31,12 @@ export default async function CommunityPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/community");
+
+  // Signed-out visitors get a read-only public feed (browse before signup).
+  if (!user) {
+    const feed = await listPublicFeed();
+    return <PublicFeed feed={feed} />;
+  }
 
   const [groups, feed, events, suggested] = await Promise.all([
     listGroups(),
