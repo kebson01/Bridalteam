@@ -18,6 +18,8 @@ export default async function InspirationPage() {
     supabase
       .from("inspiration_images")
       .select("id, image_url, title, theme, colors, media_type, media_url, like_count")
+      // Only curated media and paid vendors' media appear in the public feed.
+      .eq("in_feed", true)
       .order("created_at", { ascending: false }),
     supabase.auth.getUser(),
   ]);

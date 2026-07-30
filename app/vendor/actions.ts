@@ -7,6 +7,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
 import { youtubePoster } from "@/lib/media";
 import { moderateImage } from "@/lib/moderation";
+import { entitlements } from "@/lib/tiers";
 
 // RLS ("Vendor team edits its profile") enforces that the caller belongs to the
 // vendor org, so we update by org_id without an extra permission check.
@@ -76,6 +77,32 @@ export async function addVendorMedia(
   if (!title) return { error: "Give it a title.", added: false };
   if (!url) return { error: mediaType === "photo" ? "Add an image URL." : "Add the link.", added: false };
 
+  const supabase = await supabaseServer();
+
+  // Plan gates: Free tier is capped at a small gallery and never enters the
+  // public Inspiration feed; Pro/Featured are unlimited and feed-visible.
+  const { data: membership } = await supabase
+    .from("org_members")
+    .select("organizations(plan)")
+    .eq("org_id", orgId)
+    .maybeSingle();
+  const plan =
+    (membership?.organizations as unknown as { plan?: string } | null)?.plan ?? "free";
+  const ent = entitlements(plan);
+
+  if (ent.galleryLimit !== null) {
+    const { count } = await supabase
+      .from("inspiration_images")
+      .select("*", { count: "exact", head: true })
+      .eq("vendor_id", orgId);
+    if ((count ?? 0) >= ent.galleryLimit) {
+      return {
+        error: `The Free plan is limited to ${ent.galleryLimit} gallery items. Upgrade to Pro for an unlimited gallery.`,
+        added: false,
+      };
+    }
+  }
+
   // For a photo the URL is the visual; for video/audio the URL is the source and
   // we need a separate visual (poster/cover). Prefer a supplied poster, then a
   // derived one (e.g. a YouTube thumbnail). Never fall back to the raw video URL
@@ -113,7 +140,6 @@ export async function addVendorMedia(
     };
   }
 
-  const supabase = await supabaseServer();
   const { error } = await supabase.from("inspiration_images").insert({
     image_url: imageUrl,
     title,
@@ -123,6 +149,8 @@ export async function addVendorMedia(
     vendor_id: orgId,
     media_type: mediaType,
     media_url: mediaUrl,
+    // Free vendors keep a gallery but don't appear in the public feed.
+    in_feed: ent.canPostInspiration,
   });
 
   if (error) {

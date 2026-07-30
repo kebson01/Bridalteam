@@ -5,8 +5,11 @@ import PageHero from "@/components/page-hero";
 import { MediaBadge } from "@/components/inspiration-gallery";
 import VendorReviews from "@/components/vendor/vendor-reviews";
 import { listVendorReviews } from "@/app/vendor/review-actions";
+import VendorInquiryButton from "@/components/vendor/inquiry-button";
+import TrackView from "@/components/vendor/track-view";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
+import { entitlements } from "@/lib/tiers";
 
 export const dynamic = "force-dynamic";
 
@@ -14,17 +17,18 @@ async function getVendor(id: string) {
   const supabase = await supabaseServer();
   const { data: vendor } = await supabase
     .from("vendor_profiles")
-    .select("org_id, business_name, category, description, city, region, website, email, phone, logo_url, cover_url")
+    .select("org_id, business_name, category, description, city, region, website, email, phone, logo_url, cover_url, organizations(plan)")
     .eq("org_id", id)
     .eq("status", "published")
     .maybeSingle();
-  if (!vendor) return { vendor: null, media: [] };
+  if (!vendor) return { vendor: null, media: [], plan: "free" as string };
+  const plan = (vendor.organizations as unknown as { plan?: string } | null)?.plan ?? "free";
   const { data: media } = await supabase
     .from("inspiration_images")
     .select("id, image_url, title, media_type")
     .eq("vendor_id", id)
     .order("created_at", { ascending: false });
-  return { vendor, media: media ?? [] };
+  return { vendor, media: media ?? [], plan };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -40,8 +44,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function VendorPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { vendor, media } = await getVendor(id);
+  const { vendor, media, plan } = await getVendor(id);
   if (!vendor) notFound();
+
+  const ent = entitlements(plan);
 
   const supabase = await supabaseServer();
   const {
@@ -53,6 +59,7 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
 
   return (
     <>
+      <TrackView orgId={vendor.org_id} />
       <PageHero eyebrow={vendor.category ?? "Vendor"} title={vendor.business_name} />
 
       <section className="mx-auto max-w-5xl px-5 py-12">
@@ -63,6 +70,11 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
         <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_2fr]">
           {/* Info */}
           <aside className="space-y-4">
+            {ent.badge && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                ★ Featured
+              </span>
+            )}
             {vendor.description && (
               <p className="text-sm leading-relaxed text-ink-soft/85">{vendor.description}</p>
             )}
@@ -70,9 +82,9 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
               {location && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Location</dt><dd className="text-ink">{location}</dd></div>
               )}
-              {vendor.website && (
+              {vendor.website && ent.canLinkSite && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Website</dt>
-                  <dd><a href={vendor.website} target="_blank" rel="noopener noreferrer" className="text-brand-dark hover:underline">Visit</a></dd></div>
+                  <dd><a href={`/api/vendor/link?org=${vendor.org_id}`} target="_blank" rel="noopener noreferrer" className="text-brand-dark hover:underline">Visit</a></dd></div>
               )}
               {vendor.email && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Email</dt>
@@ -82,6 +94,15 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Phone</dt><dd className="text-ink">{vendor.phone}</dd></div>
               )}
             </dl>
+            {ent.canReceiveInquiries && (
+              <VendorInquiryButton
+                vendorOrgId={vendor.org_id}
+                signedIn={Boolean(user)}
+                defaultName={(user?.user_metadata?.full_name as string | undefined) ?? ""}
+                defaultEmail={user?.email ?? ""}
+                loginHref={`/auth/login?next=/v/${vendor.org_id}`}
+              />
+            )}
           </aside>
 
           {/* Their work */}

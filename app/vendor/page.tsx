@@ -5,8 +5,13 @@ import VendorProfileForm, { type VendorProfile } from "@/components/vendor-profi
 import VendorMediaManager, { type VendorMedia } from "@/components/vendor-media-manager";
 import VendorBilling from "@/components/vendor-billing";
 import VendorAccountActions from "@/components/vendor-account-actions";
+import VendorInquiries from "@/components/vendor/vendor-inquiries";
+import VendorStats from "@/components/vendor/vendor-stats";
+import { listVendorInquiries } from "@/app/vendor/inquiry-actions";
+import { getVendorStats } from "@/app/vendor/stats-actions";
 import { supabaseServer } from "@/lib/supabase/server";
-import { billingConfigured } from "@/lib/stripe";
+import { proConfigured, featuredConfigured } from "@/lib/stripe";
+import { entitlements } from "@/lib/tiers";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
@@ -62,6 +67,10 @@ export default async function VendorDashboard({
     .eq("vendor_id", org.id)
     .order("created_at", { ascending: false });
 
+  const ent = entitlements(org.plan);
+  const inquiries = ent.canReceiveInquiries ? await listVendorInquiries(org.id) : [];
+  const stats = ent.hasStats ? await getVendorStats(org.id) : null;
+
   return (
     <>
       <PageHero eyebrow="Vendor account" title={profile.business_name} />
@@ -75,11 +84,14 @@ export default async function VendorDashboard({
         <VendorBilling
           plan={org.plan}
           status={org.subscription_status}
-          configured={billingConfigured()}
+          proConfigured={proConfigured()}
+          featuredConfigured={featuredConfigured()}
           flash={billing ?? null}
           cancelAtPeriodEnd={Boolean(org.cancel_at_period_end)}
         />
         <VendorProfileForm profile={profile as VendorProfile} />
+        {stats && <VendorStats stats={stats} />}
+        {ent.canReceiveInquiries && <VendorInquiries initial={inquiries} />}
         <VendorMediaManager orgId={org.id} media={(media ?? []) as VendorMedia[]} />
         <VendorAccountActions orgId={org.id} />
       </section>

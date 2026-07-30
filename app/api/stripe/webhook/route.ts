@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { stripe } from "@/lib/stripe";
+import { stripe, planForPrice } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -36,6 +36,27 @@ export async function POST(req: Request) {
 
   async function applyByCustomer(customerId: string, patch: Record<string, unknown>) {
     await admin!.from("organizations").update(patch).eq("stripe_customer_id", customerId);
+    // Keep the vendor's gallery in/out of the public Inspiration feed in step
+    // with their plan: Pro/Featured media shows in the feed, Free does not.
+    if (typeof patch.plan === "string") {
+      const inFeed = patch.plan !== "free";
+      const { data: orgs } = await admin!
+        .from("organizations")
+        .select("id")
+        .eq("stripe_customer_id", customerId);
+      const ids = (orgs ?? []).map((o) => o.id);
+      if (ids.length > 0) {
+        await admin!.from("inspiration_images").update({ in_feed: inFeed }).in("vendor_id", ids);
+      }
+    }
+  }
+
+  // The plan a subscription grants, from its price. Falls back to 'featured'
+  // (the original single tier) if the price isn't recognised, so a legacy setup
+  // keeps working.
+  function planForSubscription(sub: Stripe.Subscription): "pro" | "featured" {
+    const priceId = sub.items?.data?.[0]?.price?.id;
+    return planForPrice(priceId) ?? "featured";
   }
 
   try {
@@ -43,10 +64,11 @@ export async function POST(req: Request) {
       case "checkout.session.completed": {
         const s = event.data.object as Stripe.Checkout.Session;
         if (s.customer && s.subscription) {
+          const sub = await stripe.subscriptions.retrieve(String(s.subscription));
           await applyByCustomer(String(s.customer), {
             stripe_subscription_id: String(s.subscription),
             subscription_status: "active",
-            plan: "featured",
+            plan: planForSubscription(sub),
             cancel_at_period_end: false,
           });
         }
@@ -58,7 +80,7 @@ export async function POST(req: Request) {
         await applyByCustomer(String(sub.customer), {
           stripe_subscription_id: sub.id,
           subscription_status: sub.status,
-          plan: active ? "featured" : "free",
+          plan: active ? planForSubscription(sub) : "free",
           cancel_at_period_end: sub.cancel_at_period_end,
         });
         break;
