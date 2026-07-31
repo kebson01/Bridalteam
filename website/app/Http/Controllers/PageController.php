@@ -98,6 +98,12 @@ class PageController extends Controller{
         }
     }
 
+    public function showPlannerPage(){
+        // AI Wedding Planner page featuring "Bee", the planning assistant.
+        // Self-contained view; no database dependency required.
+        return view('planner');
+    }
+
     public function showBlogPage(){
         // Dedicated blog page method
         return view('blog', [

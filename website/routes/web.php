@@ -36,6 +36,9 @@ Route::get('/vendor/{slug}', 'PageController@showVendorPage');
 
 Route::get('/gallery', 'PageController@showGalleryPage');
 
+// AI Wedding Planner page (meet Bee, the planning assistant)
+Route::get('/planner', 'PageController@showPlannerPage');
+
 // Blog route
 Route::get('/blog', 'PageController@showBlogPage');
 
