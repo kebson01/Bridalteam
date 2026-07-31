@@ -21,6 +21,9 @@ use Illuminate\Http\Request;
 Route::options('/{any}', function(){ return ''; })->where('any', '.*');
 
 Route::group(['prefix' => 'v1'], function(){
+    // AI Wedding Planner ("Bee") lead capture
+    Route::post('/planner/lead', 'PlannerController@storeLead');
+
     Route::group(['prefix' => 'user'], function(){
         Route::group(['middleware' => 'jwt.auth'], function(){
             Route::get('/', 'UserController@getUserDetails');

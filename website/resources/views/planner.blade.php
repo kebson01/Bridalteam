@@ -187,6 +187,82 @@
     #plannerpage .composer button:hover{ filter:brightness(1.05); }
     #plannerpage .composer button:disabled{ opacity:.55; cursor:default; }
 
+    /* lead capture */
+    #plannerpage .lead-capture{
+        margin-top:26px;
+        border:1px solid #eee4d8;
+        border-radius:18px;
+        background:linear-gradient(180deg,#fffaf3,#fff);
+        box-shadow:0 10px 30px rgba(60,45,30,.06);
+        padding:26px 24px;
+    }
+    #plannerpage .lead-capture h2{
+        margin:0 0 6px;
+        font-size:22px;
+        font-weight:400;
+        color:#4a4038;
+        letter-spacing:.02em;
+    }
+    #plannerpage .lead-capture p.blurb{
+        margin:0 0 18px;
+        font-size:15px;
+        color:#8a7d70;
+        line-height:1.5;
+    }
+    #plannerpage .lead-fields{
+        display:flex;
+        flex-wrap:wrap;
+        gap:12px;
+    }
+    #plannerpage .lead-fields .field{ flex:1 1 200px; }
+    #plannerpage .lead-fields .field.full{ flex:1 1 100%; }
+    #plannerpage .lead-capture label{
+        display:block;
+        font-size:13px;
+        font-weight:700;
+        color:#6b5f54;
+        margin-bottom:6px;
+    }
+    #plannerpage .lead-capture input,
+    #plannerpage .lead-capture textarea{
+        width:100%;
+        border:1px solid #e6dccf;
+        border-radius:12px;
+        padding:12px 15px;
+        font-size:15px;
+        color:#4a4038;
+        outline:none;
+        font-family:inherit;
+    }
+    #plannerpage .lead-capture textarea{ resize:vertical; min-height:66px; }
+    #plannerpage .lead-capture input:focus,
+    #plannerpage .lead-capture textarea:focus{
+        border-color:#e0a96d; box-shadow:0 0 0 3px rgba(224,169,109,.18);
+    }
+    /* honeypot: hidden from humans */
+    #plannerpage .lead-hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+    #plannerpage .lead-actions{
+        display:flex; align-items:center; gap:16px; margin-top:16px; flex-wrap:wrap;
+    }
+    #plannerpage .lead-actions button{
+        border:none;
+        border-radius:999px;
+        padding:13px 34px;
+        font-size:15px;
+        font-weight:700;
+        color:#fff;
+        cursor:pointer;
+        background:linear-gradient(180deg,#f2b976,#e79a4f);
+        transition:filter .15s ease;
+    }
+    #plannerpage .lead-actions button:hover{ filter:brightness(1.05); }
+    #plannerpage .lead-actions button:disabled{ opacity:.55; cursor:default; }
+    #plannerpage .lead-status{ font-size:14.5px; line-height:1.4; }
+    #plannerpage .lead-status.ok{ color:#3f8a52; }
+    #plannerpage .lead-status.err{ color:#c0563c; }
+    #plannerpage .lead-capture.done .lead-fields,
+    #plannerpage .lead-capture.done .lead-actions button{ display:none; }
+
     @media (max-width:640px){
         #plannerpage .planner-hero h1{ font-size:36px; }
         #plannerpage .planner-hero p.sub{ font-size:16px; }
@@ -226,6 +302,34 @@
             <form class="composer" id="beeForm" autocomplete="off">
                 <input type="text" id="beeInput" placeholder="Ask Bee about your wedding&hellip;" aria-label="Ask Bee about your wedding" />
                 <button type="submit" id="beeSend">Send</button>
+            </form>
+        </div>
+
+        <div class="lead-capture" id="leadCapture">
+            <h2>Want a human on your team?</h2>
+            <p class="blurb">Leave your name and email and the Bridal Team will reach out with tailored recommendations for your big day.</p>
+            <form id="leadForm" autocomplete="on">
+                <div class="lead-fields">
+                    <div class="field">
+                        <label for="leadName">Your name</label>
+                        <input type="text" id="leadName" name="name" placeholder="Alex &amp; Jordan" required />
+                    </div>
+                    <div class="field">
+                        <label for="leadEmail">Email</label>
+                        <input type="email" id="leadEmail" name="email" placeholder="you@example.com" required />
+                    </div>
+                    <div class="field full">
+                        <label for="leadMessage">Anything you'd like us to know? <span style="font-weight:400;color:#a99e90;">(optional)</span></label>
+                        <textarea id="leadMessage" name="message" placeholder="Date, city, guest count, vibe&hellip;"></textarea>
+                    </div>
+                </div>
+                <div class="lead-hp" aria-hidden="true">
+                    <label>Company<input type="text" name="company" tabindex="-1" autocomplete="off" /></label>
+                </div>
+                <div class="lead-actions">
+                    <button type="submit" id="leadSubmit">Send my details</button>
+                    <span class="lead-status" id="leadStatus" role="status" aria-live="polite"></span>
+                </div>
             </form>
         </div>
     </div>
@@ -401,6 +505,61 @@
         if (e.target && e.target.classList.contains('chip')) {
             send(e.target.textContent);
         }
+    });
+
+    // ---- Lead capture ----
+    var leadForm = document.getElementById('leadForm');
+    var leadCard = document.getElementById('leadCapture');
+    var leadStatus = document.getElementById('leadStatus');
+    var leadSubmit = document.getElementById('leadSubmit');
+
+    function setStatus(msg, kind) {
+        leadStatus.textContent = msg;
+        leadStatus.className = 'lead-status' + (kind ? ' ' + kind : '');
+    }
+
+    leadForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var payload = {
+            name: document.getElementById('leadName').value.trim(),
+            email: document.getElementById('leadEmail').value.trim(),
+            message: document.getElementById('leadMessage').value.trim(),
+            company: leadForm.elements['company'].value // honeypot
+        };
+
+        if (!payload.name || !payload.email) {
+            setStatus('Please add your name and email.', 'err');
+            return;
+        }
+
+        leadSubmit.disabled = true;
+        setStatus('Sending…', '');
+
+        fetch('/api/v1/planner/lead', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, body: d }; }); })
+        .then(function (res) {
+            if (res.ok && res.body && res.body.ok) {
+                leadCard.classList.add('done');
+                setStatus(res.body.message || 'Thanks! We\'ll be in touch soon. 🐝', 'ok');
+                // Bee acknowledges in the chat too.
+                addMessage('bee', 'Thanks, <strong>' + esc(payload.name) + '</strong>! I\'ve passed your details to the Bridal Team — someone will reach out at <strong>' + esc(payload.email) + '</strong> soon. 🐝');
+            } else {
+                var err = (res.body && res.body.errors)
+                    ? 'Please double-check your name and a valid email.'
+                    : 'Something went wrong. Please try again.';
+                setStatus(err, 'err');
+                leadSubmit.disabled = false;
+            }
+        })
+        .catch(function () {
+            setStatus('Network error — please try again.', 'err');
+            leadSubmit.disabled = false;
+        });
     });
 })();
 </script>
