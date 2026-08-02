@@ -17,6 +17,7 @@ const NAV = [
   { label: "Community", href: "/community" },
   { label: "AI Planner", href: "/planner" },
   { label: "Inspiration", href: "/inspiration" },
+  { label: "Design", href: "/spaces" },
   { label: "Find Vendors", href: "/vendors" },
   { label: "Guides", href: "/guides" },
   { label: "Pricing", href: "/pricing" },
