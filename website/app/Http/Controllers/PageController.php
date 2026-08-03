@@ -163,8 +163,11 @@ class PageController extends Controller{
 
     public function showVendorCategory($category){
         $category = VendorCategory::where("slug", "=", $category)->first();
+        if($category == null){
+            return response()->view('vendor.404', [], 404);
+        }
         $vendors = Vendor::where('category', '=', $category->id)->where('approved', '=', true)->get();
-        $questions = $category->getQuestions()->first();        
+        $questions = $category->getQuestions()->first();
 
         return view('vendor.category', [
             'category' => $category,

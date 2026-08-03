@@ -161,10 +161,13 @@ class VendorController extends Controller
 
     public function getVendor($slug){
         $vendor = Vendor::where('slug', '=', $slug)->first();
+        if($vendor == null){
+            return response()->json(["status" => "Error", "message" => "Vendor not found."], 404);
+        }
         $vendor->media = $vendor->getMedia();
         $category = VendorCategory::find($vendor->category);
         return response()->json([
-            'status' => "OK", 
+            'status' => "OK",
             'vendor' => $vendor,
             'category' => $category
         ]);
@@ -688,11 +691,17 @@ class VendorController extends Controller
                     $card = Stripe::cards()->create($account->stripe_id, $request->cctoken);
                     $charge = Stripe::charges()->create([
                         'customer' => $account->stripe_id,
-                        'amount' => floatval($pricing['total']),
+                        // Stripe expects the amount in the smallest currency unit (cents).
+                        'amount' => (int) round($pricing['total'] * 100),
                         'currency' => 'USD',
                         'capture' => true
-                    ]);              
-                    Log::info('charge result', $charge);      
+                    ]);
+                    // Log only non-sensitive identifiers, never the full charge object.
+                    Log::info('Stripe charge created', [
+                        'charge_id' => isset($charge['id']) ? $charge['id'] : null,
+                        'status'    => isset($charge['status']) ? $charge['status'] : null,
+                        'vendor_id' => $vendor->id,
+                    ]);
                 }catch(\Exception $e){                    
                     return response()->json([
                         'status' => "Error", 

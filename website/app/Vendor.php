@@ -151,6 +151,9 @@ class Vendor extends Model
 
     public function getMessage($id){
         $message = VendorMessage::where('vendor_id', '=', $this->id)->where('id', '=', $id)->first();
+        if($message == null){
+            return null;
+        }
         $message->unread = false;
         $message->save();
         return $message;

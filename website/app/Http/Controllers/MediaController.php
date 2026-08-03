@@ -165,8 +165,8 @@ class MediaController extends Controller
         $media = Media::find($id);
         if($media && $media->status == 2){
             $vendor = Vendor::find($media->vendor_id);
-            $media->vendorname = $vendor->businessname;
-            $media->vendorslug = $vendor->slug;
+            $media->vendorname = $vendor ? $vendor->businessname : null;
+            $media->vendorslug = $vendor ? $vendor->slug : null;
 
             if($media->color != null){
                 $color = MediaColor::find($media->color);
@@ -334,10 +334,13 @@ class MediaController extends Controller
     
     public function getMedia($id){
         $media = Media::find($id);
+        if($media == null){
+            return response()->json(["status" => "Error", "message" => "Media not found."], 404);
+        }
         $vendor = Vendor::find($media->vendor_id);
         $color = MediaColor::find($media->color);
         $theme = MediaTheme::find($media->theme);
-        
+
         $media->colorobj = $color;
         $media->themeobj = $theme;
         return response()->json(["status" => "OK", "media" => $media, "vendor" => $vendor]);

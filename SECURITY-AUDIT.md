@@ -16,11 +16,11 @@
 | 4 | 🟠 High | Unauthenticated HTML/email injection into vendor & admin emails | `VendorController@sendVendorMessage`, `resources/views/email/*` | ✅ Fixed |
 | 5 | 🟠 High | End-of-life framework & dependencies (unpatched CVEs); XXE risk in Excel import | `composer.json`, `VendorController@importVendors` | 🟨 Partial |
 | 6 | 🟠 High | Unauthenticated abuse endpoints (spam / email-bombing / brute force) | `sendVendorMessage`, `login`, `registerVendor` | ✅ Fixed |
-| 7 | 🟡 Medium | Missing null checks → 500 / DoS / info disclosure | multiple controllers | ⬜ Open |
-| 8 | 🟡 Medium | Full Stripe charge object written to logs | `VendorController@saveSubscription:695` | ⬜ Open |
-| 9 | 🟡 Medium | Stripe charge amount sent in dollars, not cents (billing bug) | `saveSubscription`, `submitSubscription` | ⬜ Open |
+| 7 | 🟡 Medium | Missing null checks → 500 / DoS / info disclosure | multiple controllers | ✅ Fixed |
+| 8 | 🟡 Medium | Full Stripe charge object written to logs | `VendorController@saveSubscription:695` | ✅ Fixed |
+| 9 | 🟡 Medium | Stripe charge amount sent in dollars, not cents (billing bug) | `saveSubscription`, `submitSubscription` | ✅ Fixed |
 | 10 | 🟡 Medium | Plaintext / weak secrets in `production.env`; hardcoded `APP_KEY` in entrypoint | `production.env`, `cloudrun/entrypoint.sh` | 🟨 Partial |
-| 11 | ⚪ Low | Debug route, dead code, hardcoded business IDs | `routes/web.php`, `Vendor.php:115` | ⬜ Open |
+| 11 | ⚪ Low | Debug route, dead code, hardcoded business IDs | `routes/web.php`, `Vendor.php:115` | 🟨 Partial |
 
 > **Note:** `production.env` and `.env.gcp` are **not** committed to git history and are excluded by `.dockerignore` (`.env*`, `env.*`), so they are *not* leaked through the repository or the Docker image. They still hold live-looking credentials at rest — see #10.
 
@@ -183,6 +183,8 @@ Several methods dereference a model without checking for `null`, so a bad/guesse
 
 **Fix:** Guard every `find()`/`first()` result and return a proper 404/JSON error.
 
+**✅ Resolution (applied on this branch):** added null guards to `VendorController@getVendor` (404 JSON), `MediaController@getMedia` (404 JSON), `MediaController@getPublicMedia` (null-safe vendor fields), `PageController@showVendorCategory` (renders the 404 view), and `Vendor@getMessage` (returns null instead of dereferencing). Other JWT-scoped lookups already returned "not found" responses.
+
 ---
 
 ## 8. 🟡 Medium — Sensitive payment data logged
@@ -195,6 +197,8 @@ Writes the full Stripe charge object (customer id, outcome, risk data) to applic
 
 **Fix:** Log only a charge id / status; never the full object.
 
+**✅ Resolution (applied on this branch):** the log line now records only `charge_id`, `status`, and `vendor_id` — not the full Stripe charge object.
+
 ---
 
 ## 9. 🟡 Medium — Stripe amount unit bug (billing correctness)
@@ -202,6 +206,10 @@ Writes the full Stripe charge object (customer id, outcome, risk data) to applic
 `saveSubscription` and `submitSubscription` pass `'amount' => floatval($pricing['total'])`. Stripe expects the amount in the currency's **smallest unit (cents)**. A $199.00 plan is charged as 199 cents = **$1.99**. Not an attacker-injected price (pricing is recomputed server-side from the DB, which is good), but a real revenue/integrity bug.
 
 **Fix:** `'amount' => (int) round($pricing['total'] * 100)`.
+
+**✅ Resolution (applied on this branch):** `saveSubscription` now sends `(int) round($pricing['total'] * 100)`. Confirmed prices are stored as dollars (`decimal(5,2)`), so this corrects the ~100× undercharge.
+
+> ⚠️ **Billing-behavior change — verify before deploy.** After this fix, a plan priced `199.00` charges **$199.00** instead of the previous **$1.99**. Test in Stripe test mode first and confirm the price table is what you expect. The dead/unrouted `submitSubscription` still has the old pattern (and a broken `calculateSubscriptionPrice` call) — left untouched pending dead-code removal.
 
 ---
 
@@ -213,10 +221,10 @@ Writes the full Stripe charge object (customer id, outcome, risk data) to applic
 
 ## 11. ⚪ Low — Hygiene
 
-- `routes/web.php` ships a `GET /debug-route` in production — remove.
-- `Vendor@getMonthlyMediaImageLimit:115` hardcodes `if ($this->id != 18202)` business logic.
-- Large blocks of dead "Old Endpoints" in `VendorController` (`vendorLogin`, `submitSubscription`, `uploadMedia`, `getMediaEditorUI`, …) increase attack surface — prune.
-- Stray root-level source files (`PageController_HOTFIX.php`, `ago`) — remove from the repo.
+- `routes/web.php` ships a `GET /debug-route` in production — remove. **✅ Removed on this branch.**
+- `Vendor@getMonthlyMediaImageLimit:115` hardcodes `if ($this->id != 18202)` business logic. **Left as-is** — this is intentional special-casing, not a defect; extract to config only as part of a broader cleanup.
+- Large blocks of dead "Old Endpoints" in `VendorController` (`vendorLogin`, `submitSubscription`, `uploadMedia`, `getMediaEditorUI`, …) increase attack surface — prune. **Still open** — deferred; removing code carries regression risk and warrants its own reviewed change.
+- Stray root-level source files (`PageController_HOTFIX.php`, `ago`) — remove from the repo. **Still open.**
 
 ---
 
