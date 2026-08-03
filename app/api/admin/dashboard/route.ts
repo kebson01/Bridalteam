@@ -8,7 +8,7 @@ const COUNT = { count: "exact" as const, head: true };
 
 /** Dashboard data: overview stats + recent lists for vendors, waitlist, comments. */
 export async function GET(req: Request) {
-  const admin = adminGuard(req);
+  const admin = await adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   // Exact counts (service role → not limited by RLS).
@@ -71,7 +71,7 @@ export async function GET(req: Request) {
 
 /** Moderation actions. */
 export async function POST(req: Request) {
-  const admin = adminGuard(req);
+  const admin = await adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   const body = (await req.json().catch(() => ({}))) as { action?: string; id?: string };

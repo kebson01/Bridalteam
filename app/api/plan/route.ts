@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase";
 import { clientIp } from "@/lib/ai-quota";
 
 export const runtime = "nodejs";
@@ -128,7 +129,7 @@ export async function POST(req: Request) {
   // Meter AI usage against the caller's tier (anon by IP, else per account).
   // Only real (keyed) AI calls are metered — the demo fallback above is free.
   const supabase = await supabaseServer();
-  const { consumeAiQuota } = await import("@/lib/ai-quota");
+  const { consumeAiQuota, anonChatCeilingExceeded } = await import("@/lib/ai-quota");
   const quota = await consumeAiQuota(supabase, "chat", clientIp(req));
   if (!quota.allowed) {
     const msg =
@@ -136,6 +137,24 @@ export async function POST(req: Request) {
         ? "You've reached the demo limit. **Sign up free** to keep chatting with the AI planner."
         : "You've reached your AI chat limit for now. **Upgrade** for more AI help anytime.";
     return NextResponse.json({ reply: msg, demo: false, limited: true }, { status: 200 });
+  }
+
+  // Global backstop for anonymous callers: even if per-IP metering is evaded
+  // (rotated/spoofed IPs), cap total anon AI spend per day so the Anthropic key
+  // can't be run up without bound. Signed-in tiers are unaffected.
+  if (quota.tier === "anon") {
+    const admin = supabaseAdmin();
+    if (admin && (await anonChatCeilingExceeded(admin))) {
+      return NextResponse.json(
+        {
+          reply:
+            "Our AI planner is at capacity for now. **Sign up free** to keep chatting, or try again a little later.",
+          demo: false,
+          limited: true,
+        },
+        { status: 200 },
+      );
+    }
   }
 
   try {

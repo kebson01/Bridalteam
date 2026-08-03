@@ -45,7 +45,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const admin = adminGuard(req);
+  const admin = await adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   const body = (await req.json().catch(() => ({}))) as VenueInput & { rows?: VenueInput[] };
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const admin = adminGuard(req);
+  const admin = await adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   const body = (await req.json().catch(() => ({}))) as VenueInput;
@@ -90,7 +90,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const admin = adminGuard(req);
+  const admin = await adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   const body = (await req.json().catch(() => ({}))) as VenueInput;
