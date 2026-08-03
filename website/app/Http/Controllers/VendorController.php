@@ -777,14 +777,34 @@ class VendorController extends Controller
     }
 
     public function importVendors(Request $request){
-        if($request->importfile){
-            $file = $request->importfile;
+        $file = $request->file('importfile');
 
-            
-            
+        // Validate the upload before handing it to the (legacy) spreadsheet parser.
+        if(!$file || !$file->isValid()){
+            return response()->json(["status" => "Error", "message" => "No valid import file was provided."]);
+        }
 
-            Excel::load($file->getRealPath(), function($reader){         
-                
+        $allowedExtensions = ['xls', 'xlsx', 'csv'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        if(!in_array($extension, $allowedExtensions, true)){
+            return response()->json(["status" => "Error", "message" => "Unsupported file type. Upload an .xls, .xlsx, or .csv file."]);
+        }
+
+        // Cap the size to limit resource abuse (5 MB).
+        if($file->getSize() > 5 * 1024 * 1024){
+            return response()->json(["status" => "Error", "message" => "Import file is too large (max 5 MB)."]);
+        }
+
+        // Defense-in-depth against XXE in the legacy PHPExcel-based reader:
+        // stop libxml from resolving external entities while parsing the file.
+        // (PHP 7.x only; the function is removed in PHP 8, where libxml is safe by default.)
+        if(function_exists('libxml_disable_entity_loader')){
+            libxml_disable_entity_loader(true);
+        }
+
+        if($file){
+            Excel::load($file->getRealPath(), function($reader){
+
                 $results = $reader->toArray();
 
                 $states = array(

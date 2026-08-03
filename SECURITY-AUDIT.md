@@ -14,8 +14,8 @@
 | 2 | 🔴 Critical | JWT signing secret defaults to `changeme`/placeholder → token forgery / account takeover | `config/jwt.php:24`, `cloudrun/entrypoint.sh`, deployment | ✅ Fixed |
 | 3 | 🟠 High | CORS allows any origin/method/header | `config/cors.php` | ✅ Fixed |
 | 4 | 🟠 High | Unauthenticated HTML/email injection into vendor & admin emails | `VendorController@sendVendorMessage`, `resources/views/email/*` | ✅ Fixed |
-| 5 | 🟠 High | End-of-life framework & dependencies (unpatched CVEs); XXE risk in Excel import | `composer.json`, `VendorController@importVendors` | ⬜ Open |
-| 6 | 🟠 High | Unauthenticated abuse endpoints (spam / email-bombing / brute force) | `sendVendorMessage`, `login`, `registerVendor` | ⬜ Open |
+| 5 | 🟠 High | End-of-life framework & dependencies (unpatched CVEs); XXE risk in Excel import | `composer.json`, `VendorController@importVendors` | 🟨 Partial |
+| 6 | 🟠 High | Unauthenticated abuse endpoints (spam / email-bombing / brute force) | `sendVendorMessage`, `login`, `registerVendor` | ✅ Fixed |
 | 7 | 🟡 Medium | Missing null checks → 500 / DoS / info disclosure | multiple controllers | ⬜ Open |
 | 8 | 🟡 Medium | Full Stripe charge object written to logs | `VendorController@saveSubscription:695` | ⬜ Open |
 | 9 | 🟡 Medium | Stripe charge amount sent in dollars, not cents (billing bug) | `saveSubscription`, `submitSubscription` | ⬜ Open |
@@ -146,6 +146,12 @@ The same pattern reaches the **admin** inbox via `registerVendor` (attacker-cont
 
 **Fix:** Prioritize upgrading off Laravel 5.5 to a supported LTS; at minimum move `maatwebsite/excel` to a maintained major version and confirm the XML reader disables external entities. Restrict + authenticate the import endpoint immediately (#1).
 
+**🟨 Partial resolution (applied on this branch):** the import endpoint is now behind admin auth (see #1), and `importVendors` was hardened:
+- Rejects anything that isn't a valid uploaded `.xls` / `.xlsx` / `.csv`, and caps size at 5 MB.
+- Calls `libxml_disable_entity_loader(true)` before parsing to block **XXE** in the legacy PHPExcel reader (PHP 7.x; the function is gone in PHP 8, where libxml defaults to safe).
+
+**Still open:** the underlying framework/dependency upgrade off EOL Laravel 5.5 and `maatwebsite/excel` 2.1. GitHub Dependabot reports 712 alerts on this repo — this needs a dedicated upgrade effort, tracked separately.
+
 ---
 
 ## 6. 🟠 High — Unauthenticated abuse endpoints (spam, email-bombing, brute force)
@@ -155,6 +161,14 @@ The same pattern reaches the **admin** inbox via `registerVendor` (attacker-cont
 - `registerVendor`, `filterVendors`, `getVendorContactFormUI` — unauthenticated and unthrottled beyond the global limit.
 
 **Fix:** Add a dedicated stricter throttle to `login` (e.g. `throttle:5,1` keyed on email+IP), add CAPTCHA + rate limiting to `sendVendorMessage`/`registerVendor`.
+
+**✅ Resolution (applied on this branch):** per-route throttles added in `routes/api.php` (on top of the existing global `throttle:60,1`):
+- `login` → `throttle:5,1` (5/min per IP) to slow brute-force/credential-stuffing.
+- `register` → `throttle:5,10` (5 per 10 min) against automated account creation.
+- `sendvendormessage/{id}` → `throttle:5,10` to stop spam / vendor email-bombing.
+- `verify` → `throttle:10,1`.
+
+**Still recommended:** add a CAPTCHA to the public contact form and registration (front-end + a verification secret) for stronger bot resistance — rate-limiting alone slows but does not stop distributed abuse.
 
 ---
 
