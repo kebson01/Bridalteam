@@ -349,7 +349,7 @@ class VendorController extends Controller
             $message = "<p>Your vendor profile claim has been submitted.  You will be contacted for additional information, or when your claim has been approved.</p>";
             EmailSystem::sendVendorClaimEmail($vendor->id, $message);
 
-            $emailmsg = "A vendor claim has been received from $vendor->pcfirstname $vendor->pclastname <$user->email>.";
+            $emailmsg = "A vendor claim has been received from " . e($vendor->pcfirstname) . " " . e($vendor->pclastname) . " <" . e($user->email) . ">.";
             EmailSystem::sendAdminEmail("Vendor Claim Received - " . $vendor->businessname, $emailmsg);
         }else{
             //Send verification email
@@ -1296,7 +1296,7 @@ class VendorController extends Controller
 
             //Based on vendor level, send message to vendor
             $domain = env('WEBDOMAIN');
-            $message = "<p>You have a new message from " . $request->firstname . " " . $request->lastname . "</p>";
+            $message = "<p>You have a new message from " . e($request->firstname) . " " . e($request->lastname) . "</p>";
             $message .= "<p>To view, log in to your account: <a href='" . $domain . "/vendor/account?tab=messages'>View Message</a></p>";
             EmailSystem::sendVendorEmail($vendor->id, $message);
             return response()->json(["status" => "OK"]);

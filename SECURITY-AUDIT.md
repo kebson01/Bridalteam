@@ -12,8 +12,8 @@
 |---|----------|-------|----------|--------|
 | 1 | 🔴 Critical | Entire admin API is unauthenticated | `routes/api.php`, `AdminController.php` | ✅ Fixed |
 | 2 | 🔴 Critical | JWT signing secret defaults to `changeme`/placeholder → token forgery / account takeover | `config/jwt.php:24`, `cloudrun/entrypoint.sh`, deployment | ✅ Fixed |
-| 3 | 🟠 High | CORS allows any origin/method/header | `config/cors.php` | ⬜ Open |
-| 4 | 🟠 High | Unauthenticated HTML/email injection into vendor & admin emails | `VendorController@sendVendorMessage`, `resources/views/email/*` | ⬜ Open |
+| 3 | 🟠 High | CORS allows any origin/method/header | `config/cors.php` | ✅ Fixed |
+| 4 | 🟠 High | Unauthenticated HTML/email injection into vendor & admin emails | `VendorController@sendVendorMessage`, `resources/views/email/*` | ✅ Fixed |
 | 5 | 🟠 High | End-of-life framework & dependencies (unpatched CVEs); XXE risk in Excel import | `composer.json`, `VendorController@importVendors` | ⬜ Open |
 | 6 | 🟠 High | Unauthenticated abuse endpoints (spam / email-bombing / brute force) | `sendVendorMessage`, `login`, `registerVendor` | ⬜ Open |
 | 7 | 🟡 Medium | Missing null checks → 500 / DoS / info disclosure | multiple controllers | ⬜ Open |
@@ -105,6 +105,8 @@ Any website can call the API from a victim's browser. `supportsCredentials` is `
 
 **Fix:** Restrict `allowedOrigins` to the known front-end origin(s) (`https://bridalteam.com`) and narrow methods/headers to what's used.
 
+**✅ Resolution (applied on this branch):** `config/cors.php` now derives `allowedOrigins` from the `ALLOW_ORIGIN` env var (comma-separated for multiple hosts), falling back to `APP_URL` — never `*`. Methods are limited to `GET/POST/PUT/DELETE/OPTIONS` and headers to `Content-Type/Authorization/X-Requested-With/Accept/Origin`. Set `ALLOW_ORIGIN` in the deploy env to your real front-end origin(s) (e.g. `https://bridalteam.com,https://www.bridalteam.com`).
+
 ---
 
 ## 4. 🟠 High — Unauthenticated HTML/email injection
@@ -126,6 +128,13 @@ The same pattern reaches the **admin** inbox via `registerVendor` (attacker-cont
 **Impact:** Anonymous injection of arbitrary HTML (phishing links, spoofed content, tracking pixels) into emails delivered to vendors and site admins. The message body is also stored (`messagejson`) and surfaced in the vendor account UI, so review the client-side rendering for DOM XSS as well.
 
 **Fix:** Escape user data (`{{ }}`) in templates, or build the email from structured fields and let Blade escape them. Never concatenate request input into an HTML string rendered with `{!! !!}`.
+
+**✅ Resolution (applied on this branch):** Every user-controlled value interpolated into these HTML email bodies is now escaped with Laravel's `e()` helper (HTML-encodes injected markup while leaving the intended `<p>`/`<a>` structure intact):
+- `VendorController@sendVendorMessage` — `firstname` / `lastname` from the public contact form.
+- `VendorController@registerVendor` (claim path) — vendor contact name and user email in the admin notice.
+- `Media@submitForReview` — vendor `businessname` in the admin review notice.
+
+**Still recommended (not in this change):** the stored `messagejson` (including the raw message body) is rendered in the vendor account UI client-side — ensure that JS escapes it (avoid `innerHTML`) to close the DOM-XSS path, and consider validating/normalizing `email`/`brideid` on `sendVendorMessage`.
 
 ---
 
