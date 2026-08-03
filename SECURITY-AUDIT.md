@@ -150,7 +150,7 @@ The same pattern reaches the **admin** inbox via `registerVendor` (attacker-cont
 - Rejects anything that isn't a valid uploaded `.xls` / `.xlsx` / `.csv`, and caps size at 5 MB.
 - Calls `libxml_disable_entity_loader(true)` before parsing to block **XXE** in the legacy PHPExcel reader (PHP 7.x; the function is gone in PHP 8, where libxml defaults to safe).
 
-**Still open:** the underlying framework/dependency upgrade off EOL Laravel 5.5 and `maatwebsite/excel` 2.1. GitHub Dependabot reports 712 alerts on this repo — this needs a dedicated upgrade effort, tracked separately.
+**Still open:** the underlying framework/dependency upgrade off EOL Laravel 5.5 and `maatwebsite/excel` 2.1. GitHub Dependabot reports 712 alerts on this repo — this needs a dedicated, runtime-tested upgrade effort. A concrete staged plan is documented in [`UPGRADE-PLAN.md`](UPGRADE-PLAN.md). It is intentionally **not** executed on this branch: a blind 5.5→modern jump can't be validated without running the app and its tests, and pushing it untested would risk production.
 
 ---
 
@@ -217,14 +217,16 @@ Writes the full Stripe charge object (customer id, outcome, risk data) to applic
 
 `production.env` contains a real-looking `APP_KEY`, guessable DB passwords (`SecureDbPass2024!`, `SecureRootPass2024!`), and no `JWT_SECRET`. It is **not** in git history and **not** baked into the image (excluded by `.dockerignore`), so exposure is limited to whoever can read the deploy host. Still: rotate `APP_KEY` and the DB passwords, use a secrets manager, and set a strong `JWT_SECRET` (#2).
 
+**🟨 Status:** This is primarily an **operations task**, not a code change — the app no longer hardcodes or defaults any secret (see #2), and the examples now document `JWT_SECRET`. The remaining action is to **rotate the live secrets at deploy** and move them into a secret manager; the checklist is in [`UPGRADE-PLAN.md`](UPGRADE-PLAN.md) under "Secrets to rotate at cutover". The repository itself carries no committed secrets.
+
 ---
 
 ## 11. ⚪ Low — Hygiene
 
-- `routes/web.php` ships a `GET /debug-route` in production — remove. **✅ Removed on this branch.**
-- `Vendor@getMonthlyMediaImageLimit:115` hardcodes `if ($this->id != 18202)` business logic. **Left as-is** — this is intentional special-casing, not a defect; extract to config only as part of a broader cleanup.
-- Large blocks of dead "Old Endpoints" in `VendorController` (`vendorLogin`, `submitSubscription`, `uploadMedia`, `getMediaEditorUI`, …) increase attack surface — prune. **Still open** — deferred; removing code carries regression risk and warrants its own reviewed change.
-- Stray root-level source files (`PageController_HOTFIX.php`, `ago`) — remove from the repo. **Still open.**
+- `routes/web.php` ships a `GET /debug-route` in production — remove. **✅ Removed.**
+- Stray tracked file `PageController_HOTFIX.php` — **✅ Removed.** (`ago` exists in the working tree but is **not** git-tracked, so it's a local artifact, not part of the repo — nothing to remove here.)
+- `Vendor@getMonthlyMediaImageLimit:115` hardcodes `if ($this->id != 18202)` business logic. **Left as-is** — intentional special-casing, not a defect; extract to config only as part of a broader cleanup.
+- Large blocks of dead "Old Endpoints" in `VendorController` (`vendorLogin`, `submitSubscription`, `getMediaEditorUI`, …) — **deferred, intentionally.** The dead methods are interleaved with *live* code: `sendVendorMessage` and `getVendorContactFormUI` are routed, and `calculateSubscriptionPrice` (private) is called by the live subscription flow — all sit *after* the `//Old Endpoints` marker. Safe removal is surgical per-method and needs runtime tests to verify nothing live breaks, so it's left for the Stage 0 test-net work in `UPGRADE-PLAN.md`. They're unrouted, so not an active vulnerability.
 
 ---
 
