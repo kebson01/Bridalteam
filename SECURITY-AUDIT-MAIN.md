@@ -17,7 +17,7 @@ The findings below are real but narrower than the Laravel set.
 
 | # | Severity | Issue | Status |
 |---|----------|-------|--------|
-| M1 | 🔴 High | Vendors can self-upgrade to the paid **Featured** tier for free (billing bypass) | ⛔ Needs DB change (SQL ready) |
+| M1 | 🔴 High | Vendors can self-upgrade to the paid **Featured** tier for free (billing bypass) | ✅ Applied to live DB |
 | M2 | 🟠 Medium | Admin gate: no rate limiting, creds in `sessionStorage`, non-constant-time compare | 🟨 Partial |
 | M3 | 🟠 Medium | AI quota bypass / Anthropic cost abuse via spoofable `X-Forwarded-For` | 🟨 Recommend |
 | M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | ✅ Fixed (headers, ex-CSP) |
@@ -47,16 +47,19 @@ await supabase.from('organizations')
 
 …and unlock the entire $79/mo Featured tier for free. They can also overwrite `stripe_customer_id` / `stripe_subscription_id`, corrupting billing reconciliation (or pointing their org at someone else's Stripe customer).
 
-**Fix (DB — needs to be applied to the Supabase project).** Take the billing columns out of reach of `anon`/`authenticated`; leave the user-editable branding columns. The service role bypasses column grants, so the Stripe webhook keeps working. SQL is in [`security/2026-08-fix-org-billing-columns.sql`](security/2026-08-fix-org-billing-columns.sql):
+**Fix (✅ applied to the live DB as migration `restrict_org_billing_column_updates`).** Revoke blanket UPDATE and re-grant only the columns the app legitimately lets a user write. RLS (`is_org_admin`) still applies on top; the service role (Stripe webhook) bypasses column grants, so billing sync is unaffected. SQL in [`security/2026-08-fix-org-billing-columns.sql`](security/2026-08-fix-org-billing-columns.sql):
 
 ```sql
 revoke update on public.organizations from anon, authenticated;
-grant update (name, logo_url, brand_color) on public.organizations to authenticated;
+grant update (name, logo_url, brand_color, stripe_customer_id, cancel_at_period_end)
+  on public.organizations to authenticated;
 ```
 
-After applying, re-test: a vendor can still edit name/logo/brand color; a direct `update({plan:'featured'})` returns 0 rows / permission error; Stripe checkout still flips the plan.
+**Important — column selection matters.** An earlier draft that granted only `name/logo_url/brand_color` would have **broken the live checkout flow**: `app/vendor/billing/actions.ts` writes `stripe_customer_id` (checkout) and `cancel_at_period_end` (cancel/resume) via the *user's* client, so those must stay writable. The locked columns — `plan`, `subscription_status`, `stripe_subscription_id` — are written only by the webhook (service role), so revoking them from `authenticated` closes the bypass with no functional impact.
 
-> Not applied by this audit — the engagement was scoped to **read-only** Supabase access. Apply via the Supabase SQL editor or `apply_migration` once reviewed.
+Verified post-apply: `authenticated` UPDATE columns are now exactly `name, logo_url, brand_color, cancel_at_period_end, stripe_customer_id`; `plan` / `subscription_status` / `stripe_subscription_id` are gone; `anon` has no UPDATE columns.
+
+**Phase 2 (not done — needs a coordinated code change):** move the `stripe_customer_id` write in `billing/actions.ts` to the service role, then also revoke `UPDATE(stripe_customer_id)` from `authenticated`. Lower severity (a user could point their org at another Stripe customer id), but worth closing once the code change ships together.
 
 ---
 
