@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { stripe, priceForPlan, billingConfigured, type PaidPlan } from "@/lib/stripe";
 import { SITE_URL } from "@/lib/site";
 
@@ -46,7 +47,18 @@ async function startCheckoutFor(tier: PaidPlan) {
       metadata: { org_id: ctx.org.id },
     });
     customerId = customer.id;
-    await ctx.supabase.from("organizations").update({ stripe_customer_id: customerId }).eq("id", ctx.org.id);
+    // Persist the Stripe customer id with the service role, not the user's client.
+    // This lets us revoke UPDATE(stripe_customer_id) from `authenticated` (see
+    // security/2026-08-phase2-lock-stripe-customer-id.sql), closing the last way a
+    // signed-in vendor could tamper with their org's billing identifiers. The write
+    // is still scoped to the caller's own org id (resolved from their session above).
+    const admin = supabaseAdmin();
+    if (!admin) redirect("/vendor?billing=unavailable");
+    const { error } = await admin
+      .from("organizations")
+      .update({ stripe_customer_id: customerId })
+      .eq("id", ctx.org.id);
+    if (error) redirect("/vendor?billing=error");
   }
 
   const session = await stripe.checkout.sessions.create({
