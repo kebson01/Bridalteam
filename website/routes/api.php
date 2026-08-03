@@ -71,7 +71,7 @@ Route::group(['prefix' => 'v1'], function(){
         Route::post('public/filter', 'MediaController@getFilteredMedia');
     });
 
-    Route::group(['prefix' => 'admin'], function(){
+    Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function(){
         Route::get('/media', 'AdminController@getAllMedia');
         Route::get('/media/{id}', 'AdminController@getMedia');        
         Route::post('/media/{id}', 'AdminController@saveMedia');

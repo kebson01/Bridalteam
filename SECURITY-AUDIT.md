@@ -8,19 +8,19 @@
 
 ## Summary
 
-| # | Severity | Issue | Location |
-|---|----------|-------|----------|
-| 1 | 🔴 Critical | Entire admin API is unauthenticated | `routes/api.php`, `AdminController.php` |
-| 2 | 🔴 Critical | JWT signing secret defaults to `changeme` (never set) → token forgery / account takeover | `config/jwt.php:24`, deployment |
-| 3 | 🟠 High | CORS allows any origin/method/header | `config/cors.php` |
-| 4 | 🟠 High | Unauthenticated HTML/email injection into vendor & admin emails | `VendorController@sendVendorMessage`, `resources/views/email/*` |
-| 5 | 🟠 High | End-of-life framework & dependencies (unpatched CVEs); XXE risk in Excel import | `composer.json`, `VendorController@importVendors` |
-| 6 | 🟠 High | Unauthenticated abuse endpoints (spam / email-bombing / brute force) | `sendVendorMessage`, `login`, `registerVendor` |
-| 7 | 🟡 Medium | Missing null checks → 500 / DoS / info disclosure | multiple controllers |
-| 8 | 🟡 Medium | Full Stripe charge object written to logs | `VendorController@saveSubscription:695` |
-| 9 | 🟡 Medium | Stripe charge amount sent in dollars, not cents (billing bug) | `saveSubscription`, `submitSubscription` |
-| 10 | 🟡 Medium | Plaintext / weak secrets in `production.env`; `APP_KEY` committed to that file | `production.env` |
-| 11 | ⚪ Low | Debug route, dead code, hardcoded business IDs | `routes/web.php`, `Vendor.php:115` |
+| # | Severity | Issue | Location | Status |
+|---|----------|-------|----------|--------|
+| 1 | 🔴 Critical | Entire admin API is unauthenticated | `routes/api.php`, `AdminController.php` | ✅ Fixed |
+| 2 | 🔴 Critical | JWT signing secret defaults to `changeme`/placeholder → token forgery / account takeover | `config/jwt.php:24`, `cloudrun/entrypoint.sh`, deployment | ✅ Fixed |
+| 3 | 🟠 High | CORS allows any origin/method/header | `config/cors.php` | ⬜ Open |
+| 4 | 🟠 High | Unauthenticated HTML/email injection into vendor & admin emails | `VendorController@sendVendorMessage`, `resources/views/email/*` | ⬜ Open |
+| 5 | 🟠 High | End-of-life framework & dependencies (unpatched CVEs); XXE risk in Excel import | `composer.json`, `VendorController@importVendors` | ⬜ Open |
+| 6 | 🟠 High | Unauthenticated abuse endpoints (spam / email-bombing / brute force) | `sendVendorMessage`, `login`, `registerVendor` | ⬜ Open |
+| 7 | 🟡 Medium | Missing null checks → 500 / DoS / info disclosure | multiple controllers | ⬜ Open |
+| 8 | 🟡 Medium | Full Stripe charge object written to logs | `VendorController@saveSubscription:695` | ⬜ Open |
+| 9 | 🟡 Medium | Stripe charge amount sent in dollars, not cents (billing bug) | `saveSubscription`, `submitSubscription` | ⬜ Open |
+| 10 | 🟡 Medium | Plaintext / weak secrets in `production.env`; hardcoded `APP_KEY` in entrypoint | `production.env`, `cloudrun/entrypoint.sh` | 🟨 Partial |
+| 11 | ⚪ Low | Debug route, dead code, hardcoded business IDs | `routes/web.php`, `Vendor.php:115` | ⬜ Open |
 
 > **Note:** `production.env` and `.env.gcp` are **not** committed to git history and are excluded by `.dockerignore` (`.env*`, `env.*`), so they are *not* leaked through the repository or the Docker image. They still hold live-looking credentials at rest — see #10.
 
@@ -58,6 +58,14 @@ Route::group(['prefix' => 'admin', 'middleware' => ['jwt.auth', 'can:admin']], f
 ```
 Add an `is_admin` flag/role to `users`, register an `admin` Gate/policy, and verify it. Do **not** rely on the URL prefix alone.
 
+**✅ Resolution (applied on this branch):**
+- Added a `users.is_admin` boolean column (migration `2026_08_03_000000_add_is_admin_to_users_table`). It is deliberately excluded from `User::$fillable` so it can never be set via mass assignment.
+- Added `App\Http\Middleware\AdminAuth` — authenticates the JWT and requires `is_admin`, returning `401`/`403` JSON and failing closed on any error.
+- Registered it as the `admin` route middleware (`app/Http/Kernel.php`) and applied it to the admin group: `Route::group(['prefix' => 'admin', 'middleware' => 'admin'], ...)`.
+- Added `php artisan user:make-admin {email} [--revoke]` to grant/revoke admin access.
+
+**Action required after deploy:** run the migration (the entrypoint now does this automatically) and promote your admin account: `php artisan user:make-admin you@example.com`.
+
 ---
 
 ## 2. 🔴 Critical — JWT secret defaults to `changeme` and is never overridden
@@ -72,6 +80,15 @@ Add an `is_admin` flag/role to `users`, register an `admin` Gate/policy, and ver
 **Impact:** An attacker who knows the secret can **forge a valid token for any user id**, defeating every `jwt.auth`-protected endpoint and the `vendortoken` web guard — full vendor account takeover: read private inbound leads/messages (`/me/messages`), change/cancel subscriptions, upload media, edit the profile, etc.
 
 **Fix:** Generate a strong random secret and inject it via environment (`php artisan jwt:secret`, then set `JWT_SECRET` in the deployment env). Rotate it (this invalidates existing tokens — acceptable). Never keep the `changeme` fallback in production.
+
+**Additional discovery during the fix:** `cloudrun/entrypoint.sh` **rewrote `.env` on every container start** with hardcoded values — `APP_ENV=local`, `APP_DEBUG=true`, a fixed `APP_KEY`, and `JWT_SECRET=your_jwt_secret_here`. So the Cloud Run deployment was signing tokens with a known placeholder *regardless* of `config/jwt.php`, **and** running with debug enabled in production.
+
+**✅ Resolution (applied on this branch):**
+- `config/jwt.php` now uses `env('JWT_SECRET')` with **no fallback** — the app fails closed if the secret is unset.
+- `cloudrun/entrypoint.sh` no longer hardcodes any secret. It requires `APP_KEY` and `JWT_SECRET` from the container environment (`: "${JWT_SECRET:?...}"`) and aborts startup if either is missing. It now defaults to `APP_ENV=production` / `APP_DEBUG=false` and builds `.env` entirely from environment variables.
+- `JWT_SECRET` wired into `docker-compose.prod.yml` and documented in `production.env.example`, `env.gcp.example` (and already present in `env.production.example`).
+
+**Action required after deploy:** set a real, random `JWT_SECRET` (and `APP_KEY`) in the deployment environment / secret manager. Generate with `php artisan jwt:secret --show` and `php artisan key:generate --show`. Rotating `JWT_SECRET` invalidates all existing vendor sessions (they will need to log in again) — this is expected and desirable given the old secret was public.
 
 ---
 

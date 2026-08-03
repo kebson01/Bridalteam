@@ -25,67 +25,94 @@ a2enmod rewrite
 # Laravel setup
 cd /var/www/html/website
 
-# Remove any existing .env file and create a new one
+# --- Fail closed on missing secrets -----------------------------------------
+# Secrets MUST be supplied through the container environment (Cloud Run env
+# vars / Secret Manager, docker-compose `environment`, etc). They are never
+# hardcoded here. A missing secret aborts startup rather than silently falling
+# back to a well-known value.
+: "${APP_KEY:?APP_KEY is required. Generate one with 'php artisan key:generate --show' and set it in the deploy environment.}"
+: "${JWT_SECRET:?JWT_SECRET is required. Generate one with 'php artisan jwt:secret --show' and set it in the deploy environment.}"
+
+# Environment-driven configuration with safe production defaults.
+APP_ENV="${APP_ENV:-production}"
+APP_DEBUG="${APP_DEBUG:-false}"
+APP_NAME="${APP_NAME:-Bridalteam}"
+APP_URL="${APP_URL:-http://localhost}"
+
+DB_CONNECTION="${DB_CONNECTION:-mysql}"
+DB_HOST="${DB_HOST:-db}"
+DB_PORT="${DB_PORT:-3306}"
+DB_DATABASE="${DB_DATABASE:-bridalteam}"
+DB_USERNAME="${DB_USERNAME:-bridalteam_user}"
+DB_PASSWORD="${DB_PASSWORD:-}"
+
+CACHE_DRIVER="${CACHE_DRIVER:-file}"
+SESSION_DRIVER="${SESSION_DRIVER:-file}"
+QUEUE_DRIVER="${QUEUE_DRIVER:-sync}"
+REDIS_HOST="${REDIS_HOST:-127.0.0.1}"
+REDIS_PASSWORD="${REDIS_PASSWORD:-null}"
+REDIS_PORT="${REDIS_PORT:-6379}"
+
+MAIL_DRIVER="${MAIL_DRIVER:-smtp}"
+MAIL_HOST="${MAIL_HOST:-smtp.mailtrap.io}"
+MAIL_PORT="${MAIL_PORT:-2525}"
+MAIL_USERNAME="${MAIL_USERNAME:-null}"
+MAIL_PASSWORD="${MAIL_PASSWORD:-null}"
+MAIL_ENCRYPTION="${MAIL_ENCRYPTION:-null}"
+
+ALLOW_ORIGIN="${ALLOW_ORIGIN:-$APP_URL}"
+SEO_SITETITLE="${SEO_SITETITLE:-Bridal Team - Wedding Planning Made Simple}"
+
+echo "Writing .env (APP_ENV=$APP_ENV, APP_DEBUG=$APP_DEBUG)..."
 rm -f .env
-echo "Creating .env file..."
-cat > .env <<'EOF'
-APP_NAME=Bridalteam
-APP_ENV=local
-APP_KEY=base64:lMPLHbZNxs7gCFYIWcmijeP+aOJYYg61th1l1vCBjgI=
-APP_DEBUG=true
-APP_URL=http://localhost
+cat > .env <<EOF
+APP_NAME=${APP_NAME}
+APP_ENV=${APP_ENV}
+APP_KEY=${APP_KEY}
+APP_DEBUG=${APP_DEBUG}
+APP_URL=${APP_URL}
 
 LOG_CHANNEL=stack
 
-DB_CONNECTION=mysql
-DB_HOST=db
-DB_PORT=3306
-DB_DATABASE=bridalteam
-DB_USERNAME=bridalteam_user
-DB_PASSWORD=userpassword
+DB_CONNECTION=${DB_CONNECTION}
+DB_HOST=${DB_HOST}
+DB_PORT=${DB_PORT}
+DB_DATABASE=${DB_DATABASE}
+DB_USERNAME=${DB_USERNAME}
+DB_PASSWORD=${DB_PASSWORD}
 
 BROADCAST_DRIVER=log
-CACHE_DRIVER=file
-SESSION_DRIVER=file
+CACHE_DRIVER=${CACHE_DRIVER}
+SESSION_DRIVER=${SESSION_DRIVER}
 SESSION_LIFETIME=120
-QUEUE_DRIVER=sync
+QUEUE_DRIVER=${QUEUE_DRIVER}
 
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
+REDIS_HOST=${REDIS_HOST}
+REDIS_PASSWORD=${REDIS_PASSWORD}
+REDIS_PORT=${REDIS_PORT}
 
-MAIL_DRIVER=smtp
-MAIL_HOST=smtp.mailtrap.io
-MAIL_PORT=2525
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_ENCRYPTION=null
+MAIL_DRIVER=${MAIL_DRIVER}
+MAIL_HOST=${MAIL_HOST}
+MAIL_PORT=${MAIL_PORT}
+MAIL_USERNAME=${MAIL_USERNAME}
+MAIL_PASSWORD=${MAIL_PASSWORD}
+MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
 
-PUSHER_APP_ID=
-PUSHER_APP_KEY=
-PUSHER_APP_SECRET=
-PUSHER_APP_CLUSTER=mt1
+JWT_SECRET=${JWT_SECRET}
 
-MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
-MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
-
-JWT_SECRET=your_jwt_secret_here
-
-ALLOW_ORIGIN=http://localhost
-SEO_SITETITLE="Bridal Team - Wedding Planning Made Simple"
+ALLOW_ORIGIN=${ALLOW_ORIGIN}
+SEO_SITETITLE="${SEO_SITETITLE}"
 EOF
 
-# Generate app key if needed
-if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
-    echo "Generating Laravel app key..."
-    php artisan key:generate --force
-fi
-
-# Clear Laravel caches to ensure routes work
+# Clear Laravel caches to ensure config/routes reflect the fresh .env
 echo "Clearing Laravel caches..."
 php artisan route:clear
 php artisan config:clear
 php artisan view:clear
+
+# Apply database migrations (adds the users.is_admin column, etc.)
+echo "Running migrations..."
+php artisan migrate --force || echo "WARNING: migrations failed or database unavailable; continuing."
 
 # Set proper permissions for Laravel
 chown -R www-data:www-data storage bootstrap/cache
@@ -93,5 +120,3 @@ chmod -R 775 storage bootstrap/cache
 
 # Start Apache in foreground
 exec apache2-foreground
-
-
