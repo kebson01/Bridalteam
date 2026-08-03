@@ -161,10 +161,13 @@ class VendorController extends Controller
 
     public function getVendor($slug){
         $vendor = Vendor::where('slug', '=', $slug)->first();
+        if($vendor == null){
+            return response()->json(["status" => "Error", "message" => "Vendor not found."], 404);
+        }
         $vendor->media = $vendor->getMedia();
         $category = VendorCategory::find($vendor->category);
         return response()->json([
-            'status' => "OK", 
+            'status' => "OK",
             'vendor' => $vendor,
             'category' => $category
         ]);
@@ -349,7 +352,7 @@ class VendorController extends Controller
             $message = "<p>Your vendor profile claim has been submitted.  You will be contacted for additional information, or when your claim has been approved.</p>";
             EmailSystem::sendVendorClaimEmail($vendor->id, $message);
 
-            $emailmsg = "A vendor claim has been received from $vendor->pcfirstname $vendor->pclastname <$user->email>.";
+            $emailmsg = "A vendor claim has been received from " . e($vendor->pcfirstname) . " " . e($vendor->pclastname) . " <" . e($user->email) . ">.";
             EmailSystem::sendAdminEmail("Vendor Claim Received - " . $vendor->businessname, $emailmsg);
         }else{
             //Send verification email
@@ -688,11 +691,17 @@ class VendorController extends Controller
                     $card = Stripe::cards()->create($account->stripe_id, $request->cctoken);
                     $charge = Stripe::charges()->create([
                         'customer' => $account->stripe_id,
-                        'amount' => floatval($pricing['total']),
+                        // Stripe expects the amount in the smallest currency unit (cents).
+                        'amount' => (int) round($pricing['total'] * 100),
                         'currency' => 'USD',
                         'capture' => true
-                    ]);              
-                    Log::info('charge result', $charge);      
+                    ]);
+                    // Log only non-sensitive identifiers, never the full charge object.
+                    Log::info('Stripe charge created', [
+                        'charge_id' => isset($charge['id']) ? $charge['id'] : null,
+                        'status'    => isset($charge['status']) ? $charge['status'] : null,
+                        'vendor_id' => $vendor->id,
+                    ]);
                 }catch(\Exception $e){                    
                     return response()->json([
                         'status' => "Error", 
@@ -777,14 +786,34 @@ class VendorController extends Controller
     }
 
     public function importVendors(Request $request){
-        if($request->importfile){
-            $file = $request->importfile;
+        $file = $request->file('importfile');
 
-            
-            
+        // Validate the upload before handing it to the (legacy) spreadsheet parser.
+        if(!$file || !$file->isValid()){
+            return response()->json(["status" => "Error", "message" => "No valid import file was provided."]);
+        }
 
-            Excel::load($file->getRealPath(), function($reader){         
-                
+        $allowedExtensions = ['xls', 'xlsx', 'csv'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        if(!in_array($extension, $allowedExtensions, true)){
+            return response()->json(["status" => "Error", "message" => "Unsupported file type. Upload an .xls, .xlsx, or .csv file."]);
+        }
+
+        // Cap the size to limit resource abuse (5 MB).
+        if($file->getSize() > 5 * 1024 * 1024){
+            return response()->json(["status" => "Error", "message" => "Import file is too large (max 5 MB)."]);
+        }
+
+        // Defense-in-depth against XXE in the legacy PHPExcel-based reader:
+        // stop libxml from resolving external entities while parsing the file.
+        // (PHP 7.x only; the function is removed in PHP 8, where libxml is safe by default.)
+        if(function_exists('libxml_disable_entity_loader')){
+            libxml_disable_entity_loader(true);
+        }
+
+        if($file){
+            Excel::load($file->getRealPath(), function($reader){
+
                 $results = $reader->toArray();
 
                 $states = array(
@@ -1296,7 +1325,7 @@ class VendorController extends Controller
 
             //Based on vendor level, send message to vendor
             $domain = env('WEBDOMAIN');
-            $message = "<p>You have a new message from " . $request->firstname . " " . $request->lastname . "</p>";
+            $message = "<p>You have a new message from " . e($request->firstname) . " " . e($request->lastname) . "</p>";
             $message .= "<p>To view, log in to your account: <a href='" . $domain . "/vendor/account?tab=messages'>View Message</a></p>";
             EmailSystem::sendVendorEmail($vendor->id, $message);
             return response()->json(["status" => "OK"]);

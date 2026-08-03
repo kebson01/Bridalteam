@@ -41,7 +41,7 @@ class Media extends Model
         
         $this->save();
         if ($this->vendor_id != 18202) {
-            $emailmsg = "A image/video has been submitted for review from " . $this->vendor()->businessname . " Access the admin portal to review.";
+            $emailmsg = "A image/video has been submitted for review from " . e($this->vendor()->businessname) . " Access the admin portal to review.";
             EmailSystem::sendAdminEmail("Media Review Requested - " . $this->vendor()->businessname, $emailmsg);
         }
         

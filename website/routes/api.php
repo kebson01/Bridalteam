@@ -33,14 +33,17 @@ Route::group(['prefix' => 'v1'], function(){
 
     Route::group(['prefix' => 'vendors'], function(){        
         Route::get('/get/{slug}', 'VendorController@getVendor');
-        Route::post('/login', 'VendorController@login');
+        // Stricter per-IP limit on login to slow credential brute-forcing/stuffing
+        Route::post('/login', 'VendorController@login')->middleware('throttle:5,1');
         Route::get('/categories', 'VendorController@getCategories');
         Route::get('/categories/{slug}', 'VendorController@getCategory');
         Route::post('/filter', 'VendorController@filterVendors');
         Route::get('/regions', 'VendorController@getRegions');
-        Route::post('/register', 'VendorController@registerVendor');
-        Route::get('/verify', 'VendorController@verifyVendor'); 
-        Route::post('/sendvendormessage/{id}', 'VendorController@sendVendorMessage');    
+        // Limit self-service registration to curb automated account creation
+        Route::post('/register', 'VendorController@registerVendor')->middleware('throttle:5,10');
+        Route::get('/verify', 'VendorController@verifyVendor')->middleware('throttle:10,1');
+        // Public, unauthenticated contact form -> sends email; throttle to prevent spam/email-bombing
+        Route::post('/sendvendormessage/{id}', 'VendorController@sendVendorMessage')->middleware('throttle:5,10');
         Route::group(['middleware' => 'jwt.auth'], function(){
             Route::get('/me', 'VendorController@getVendorDetails');
             Route::post('/me', 'VendorController@updateVendor');
@@ -71,7 +74,7 @@ Route::group(['prefix' => 'v1'], function(){
         Route::post('public/filter', 'MediaController@getFilteredMedia');
     });
 
-    Route::group(['prefix' => 'admin'], function(){
+    Route::group(['prefix' => 'admin', 'middleware' => 'admin'], function(){
         Route::get('/media', 'AdminController@getAllMedia');
         Route::get('/media/{id}', 'AdminController@getMedia');        
         Route::post('/media/{id}', 'AdminController@saveMedia');

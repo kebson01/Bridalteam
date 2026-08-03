@@ -29,6 +29,19 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * Note: `is_admin` is intentionally NOT in $fillable so it can never be
+     * set via mass assignment (e.g. registration input). Promote admins only
+     * through the `user:make-admin` artisan command or a trusted seeder.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'is_admin' => 'boolean',
+    ];
+
     public function fullname(){
         return $this->firstname . " " . $this->lastname;
     }
