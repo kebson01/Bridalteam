@@ -63,23 +63,23 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const load = useCallback(async (user: string, pw: string) => {
+  // Fetch dashboard data using the httpOnly admin session cookie (set at login).
+  // Same-origin fetches send the cookie automatically — no password in the browser.
+  const loadDashboard = useCallback(async () => {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/dashboard", {
-        headers: { "x-admin-user": user, "x-admin-password": pw },
-      });
-      const json = await res.json();
+      const res = await fetch("/api/admin/dashboard");
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(json.error ?? "Couldn't load.");
+        // 401 on load just means "no session yet" — show the login form quietly.
+        if (res.status !== 401) setError(json.error ?? "Couldn't load.");
         setUnlocked(false);
+        setData(null);
         return;
       }
       setData(json);
       setUnlocked(true);
-      sessionStorage.setItem("bt_admin_user", user);
-      sessionStorage.setItem("bt_admin_pw", pw);
     } catch {
       setError("Couldn't reach the server.");
     } finally {
@@ -87,36 +87,62 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
+  // Log in: the server verifies the password and sets an httpOnly cookie; we then
+  // load the dashboard with that cookie and drop the password from memory.
+  const login = useCallback(
+    async (user: string, pw: string) => {
+      setBusy(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: user, password: pw }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setError(json.error ?? "Couldn't sign in.");
+          setUnlocked(false);
+          return;
+        }
+        setPassword("");
+        await loadDashboard();
+      } catch {
+        setError("Couldn't reach the server.");
+      } finally {
+        setBusy(false);
+      }
+    },
+    [loadDashboard],
+  );
+
+  // On mount, try any existing session cookie. Nothing is read from storage.
   useEffect(() => {
-    const savedUser = sessionStorage.getItem("bt_admin_user") ?? "";
-    const savedPw = sessionStorage.getItem("bt_admin_pw");
-    if (savedPw) {
-      setUsername(savedUser);
-      setPassword(savedPw);
-      load(savedUser, savedPw);
-    }
-  }, [load]);
+    loadDashboard();
+  }, [loadDashboard]);
 
   async function act(action: string, id: string) {
-    const user = sessionStorage.getItem("bt_admin_user") ?? username;
-    const pw = sessionStorage.getItem("bt_admin_pw") ?? password;
     setBusy(true);
     const res = await fetch("/api/admin/dashboard", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-user": user, "x-admin-password": pw },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action, id }),
     });
     setBusy(false);
-    if (res.ok) load(user, pw);
+    if (res.ok) loadDashboard();
     else {
       const j = await res.json().catch(() => ({}));
+      if (res.status === 401) setUnlocked(false); // session expired → back to login
       setError(j.error ?? "Action failed.");
     }
   }
 
-  function logout() {
-    sessionStorage.removeItem("bt_admin_user");
-    sessionStorage.removeItem("bt_admin_pw");
+  async function logout() {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      // Ignore — clear local state regardless.
+    }
     setUnlocked(false);
     setData(null);
     setUsername("");
@@ -132,7 +158,7 @@ export default function AdminDashboardPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            load(username, password);
+            login(username, password);
           }}
           className="mt-6 space-y-3"
         >
