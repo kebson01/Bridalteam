@@ -1,6 +1,19 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabase";
+
+/** Constant-time string comparison, so password checks don't leak length/content via timing. */
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) {
+    // Still do a comparison of equal-length buffers to avoid an early-exit timing signal.
+    timingSafeEqual(ab, ab);
+    return false;
+  }
+  return timingSafeEqual(ab, bb);
+}
 
 type Credential = { username: string | null; password: string };
 
@@ -59,7 +72,7 @@ export function adminGuard(req: Request): SupabaseClient | NextResponse {
   const providedUser = req.headers.get("x-admin-user") ?? "";
   const providedPassword = req.headers.get("x-admin-password") ?? "";
   const ok = creds.some(
-    (c) => c.password === providedPassword && (c.username === null || c.username === providedUser),
+    (c) => safeEqual(c.password, providedPassword) && (c.username === null || c.username === providedUser),
   );
   if (!ok) {
     return NextResponse.json({ error: "Incorrect username or password." }, { status: 401 });
