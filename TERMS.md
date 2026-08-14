@@ -1,45 +1,44 @@
 <!--
   ============================================================================
   DRAFT TEMPLATE — NOT LEGAL ADVICE.
-  This is a starting-point skeleton generated to cover the specific gaps found
-  in the site audit. It has NOT been reviewed by a lawyer. Before you publish it
-  or take payments, have an attorney licensed in {STATE} review the whole thing —
-  especially the Limitation of Liability, Arbitration/Class-Action Waiver,
-  Governing Law/Venue, and the User Content License sections.
+  Entity (Bridal Team, LLC) and state (Florida), the emails already used on the
+  site, the real subscription prices, and the actual sub-processors are filled
+  in. Everything still needing your input is marked [TODO: ...] — grep for
+  "[TODO" to find them all.
 
-  HOW TO USE:
-  1. Replace every {PLACEHOLDER} below. A full list is at the bottom.
-  2. Keep plan names identical to Pricing and to the Stripe product names
-     ("Vendor — Pro", "Vendor — Featured").
-  3. Set "Last updated" to a full date (Month DD, YYYY), not just a year.
-  4. Have it reviewed by counsel, then paste the finalized prose into
-     app/terms/page.tsx.
+  This has NOT been reviewed by a lawyer. Before you publish it or take payments,
+  have a Florida-licensed attorney review the whole thing — especially the
+  Limitation of Liability, Arbitration/Class-Action Waiver, Governing Law/Venue,
+  and User Content License sections.
+
+  When finalized: set the effective date, resolve the [TODO]s, delete the
+  {...REVIEW_NOTE} markers, and paste the prose into app/terms/page.tsx.
   ============================================================================
 -->
 
 # Terms of Service
 
-**Last updated: {EFFECTIVE_DATE}**
+**Last updated: [TODO: publication date, e.g. "August 13, 2026" — set when finalized]**
 
 These Terms of Service ("Terms") are a binding agreement between you and
-{LEGAL_ENTITY_NAME} ("Bridal Team," "we," "us," or "our"), which operates the
-Bridal Team website and applications (the "Service"). By creating an account,
-accessing, or using the Service, you agree to these Terms and to our
-[Privacy Policy](/privacy). If you do not agree, do not use the Service.
+**Bridal Team, LLC** ("Bridal Team," "we," "us," or "our"), a Florida limited
+liability company, which operates the Bridal Team website and applications (the
+"Service"). By creating an account, accessing, or using the Service, you agree to
+these Terms and to our [Privacy Policy](/privacy). If you do not agree, do not
+use the Service.
 
 ## 1. Who may use the Service
 
-You must be at least 18 years old (or the age of majority in your jurisdiction)
-and able to form a binding contract. If you use the Service on behalf of a
-business (for example, as a wedding vendor), you represent that you are
-authorized to bind that business to these Terms.
+You must be at least 18 years old and able to form a binding contract. If you use
+the Service on behalf of a business (for example, as a wedding vendor), you
+represent that you are authorized to bind that business to these Terms.
 
 ## 2. Your account
 
 You are responsible for the accuracy of the information you provide, for
 safeguarding your credentials, and for all activity under your account. Notify us
-promptly at {SUPPORT_EMAIL} if you suspect unauthorized use. You can delete your
-account at any time from **Account → Delete account**; see Section 12.
+promptly at hello@bridalteam.com if you suspect unauthorized use. You can delete
+your account at any time from **Account → Delete account**; see Section 12.
 
 ## 3. The Service
 
@@ -65,9 +64,9 @@ internet connection and may be rate-limited. Always confirm important details
 This Section applies to paid vendor plans. **Couple accounts are free and are not
 billed.**
 
-**Plans and price.** Paid plans are "Vendor — Pro" at {PRO_PRICE}/month and
-"Vendor — Featured" at {FEATURED_PRICE}/month. Prices are shown at checkout and
-exclude any applicable taxes.
+**Plans and price.** Paid plans are "Vendor — Pro" at $29/month and
+"Vendor — Featured" at $79/month. Prices are shown at checkout and exclude any
+applicable taxes.
 
 **Automatic renewal — please read.** Paid plans are billed in advance on a
 **monthly** basis and **renew automatically for successive monthly terms at the
@@ -79,15 +78,16 @@ billing portal linked there). Cancellation stops future renewals; you keep paid
 features through the end of the period you have already paid for.
 
 **Refunds.** Except where required by law, payments are non-refundable and we do
-not provide refunds or credits for partial periods. {REFUND_POLICY_DETAIL}
+not provide refunds or credits for partial periods. [TODO: confirm your refund
+stance, or state any exceptions.]
 
 **Price changes.** We may change subscription prices. We will give you at least
-{PRICE_CHANGE_NOTICE_DAYS} days' notice before a change takes effect, and the new
-price applies at your next renewal. If you do not agree, cancel before renewal.
+30 days' notice before a change takes effect, and the new price applies at your
+next renewal. If you do not agree, cancel before renewal.
 
-**Payment processing.** Payments are processed by our third-party payment
-processor; we do not store full card numbers. You authorize us and our processor
-to charge your payment method for all amounts due.
+**Payment processing.** Payments are processed by Stripe, our third-party payment
+processor; we do not store full card numbers. You authorize us and Stripe to
+charge your payment method for all amounts due.
 
 ## 6. Your content and license to us
 
@@ -104,7 +104,8 @@ for (a) content others have re-shared or saved, (b) residual backups, and
 (c) content we must retain to comply with law.
 
 You represent that you have the rights to your User Content and that it does not
-infringe others' rights or violate these Terms. {UGC_LICENSE_REVIEW_NOTE}
+infringe others' rights or violate these Terms. {UGC_LICENSE_REVIEW_NOTE — have
+counsel confirm the scope of this license fits how public content is used.}
 
 ## 7. Acceptable use
 
@@ -120,12 +121,12 @@ these Terms.
 Vendors are responsible for the accuracy of their listings, pricing, and
 availability. Listings that have not been claimed or verified by the business may
 be labeled as unverified. If you believe a listing about your business is
-inaccurate, contact {SUPPORT_EMAIL} to claim it or request a correction.
+inaccurate, contact hello@bridalteam.com to claim it or request a correction.
 
 ## 9. Intellectual property
 
 The Service, including its software, design, and trademarks, is owned by
-{LEGAL_ENTITY_NAME} or its licensors and is protected by law. We grant you a
+Bridal Team, LLC or its licensors and is protected by law. We grant you a
 limited, revocable, non-transferable license to use the Service for its intended
 purpose. You may not copy, modify, distribute, or create derivative works except
 as permitted by these Terms.
@@ -154,36 +155,38 @@ remove you from it without deleting the shared plan.
 
 ## 13. Limitation of liability
 
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, {LEGAL_ENTITY_NAME} AND ITS AFFILIATES
-WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
-PUNITIVE DAMAGES, OR FOR LOST PROFITS, DATA, OR GOODWILL. OUR TOTAL LIABILITY FOR
-ANY CLAIM RELATING TO THE SERVICE WILL NOT EXCEED THE GREATER OF
-{LIABILITY_CAP_AMOUNT} OR THE AMOUNTS YOU PAID US IN THE {LIABILITY_CAP_PERIOD}
-BEFORE THE EVENT GIVING RISE TO THE CLAIM. {LIABILITY_REVIEW_NOTE}
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, BRIDAL TEAM, LLC AND ITS AFFILIATES WILL
+NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
+DAMAGES, OR FOR LOST PROFITS, DATA, OR GOODWILL. OUR TOTAL LIABILITY FOR ANY CLAIM
+RELATING TO THE SERVICE WILL NOT EXCEED THE GREATER OF **$100** OR THE AMOUNTS YOU
+PAID US IN THE **12 MONTHS** BEFORE THE EVENT GIVING RISE TO THE CLAIM.
+{LIABILITY_REVIEW_NOTE — confirm the cap and carve-outs with counsel.}
 
 ## 14. Indemnification
 
-You agree to indemnify and hold harmless {LEGAL_ENTITY_NAME} from claims,
-damages, and expenses (including reasonable attorneys' fees) arising from your
-User Content, your use of the Service, or your violation of these Terms or the
-rights of others.
+You agree to indemnify and hold harmless Bridal Team, LLC from claims, damages,
+and expenses (including reasonable attorneys' fees) arising from your User
+Content, your use of the Service, or your violation of these Terms or the rights
+of others.
 
 ## 15. Dispute resolution; arbitration; governing law
 
-{ARBITRATION_REVIEW_NOTE}
+{ARBITRATION_REVIEW_NOTE — this whole section is enforceable only if drafted to
+your situation; have counsel finalize it.}
 
-**Governing law.** These Terms are governed by the laws of the State of {STATE},
+**Governing law.** These Terms are governed by the laws of the State of Florida,
 without regard to its conflict-of-laws rules.
 
-**Arbitration and class-action waiver.** {ARBITRATION_CLAUSE — e.g., any dispute
-will be resolved by binding individual arbitration administered by
-{ARBITRATION_BODY} under its rules, seated in {ARBITRATION_VENUE}; you and we
-waive the right to a jury trial and to participate in a class action. Include any
-required opt-out mechanism and consumer carve-outs.}
+**Arbitration and class-action waiver (suggested — for counsel to finalize).**
+Any dispute will be resolved by binding individual arbitration administered by
+[TODO: arbitration body, e.g. the American Arbitration Association] under its
+Consumer Arbitration Rules, seated in [TODO: county], Florida. You and we waive
+the right to a jury trial and to participate in a class action. [TODO: include
+any opt-out mechanism and consumer carve-outs your attorney recommends.]
 
 **Venue (if not arbitrating).** For any dispute not subject to arbitration, the
-exclusive venue is the state and federal courts located in {COUNTY} County,
-{STATE}.
+exclusive venue is the state and federal courts located in [TODO: county] County,
+Florida.
 
 ## 16. Changes to these Terms
 
@@ -195,19 +198,19 @@ the effective date means you accept the updated Terms.
 
 Questions or legal notices:
 
-- **{LEGAL_ENTITY_NAME}**
-- {NOTICE_ADDRESS}
-- General/support: {SUPPORT_EMAIL}
-- Legal: {LEGAL_EMAIL}
+- **Bridal Team, LLC**
+- [TODO: mailing address for legal notices]
+- General/support: hello@bridalteam.com
+- Legal: legal@bridalteam.com
 
 ## 18. Copyright / DMCA
 
 If you believe content on the Service infringes your copyright, send a notice
 with the information required by 17 U.S.C. §512(c)(3) to our designated agent:
 
-- **DMCA Agent:** {DMCA_AGENT_NAME}
-- {DMCA_AGENT_ADDRESS}
-- {DMCA_AGENT_EMAIL}
+- **DMCA Agent:** [TODO: agent name / role]
+- [TODO: agent mailing address]
+- legal@bridalteam.com
 
 We may remove infringing content and terminate repeat infringers.
 
@@ -221,18 +224,13 @@ acquisition, or sale of assets.
 
 ---
 
-### Placeholders to fill in
+### Still to provide before publishing
 
-- `{LEGAL_ENTITY_NAME}` — exact legal name (e.g., "Bridal Team, LLC")
-- `{EFFECTIVE_DATE}` — full date, e.g., "August 13, 2026"
-- `{STATE}` — governing-law state
-- `{COUNTY}` — county for venue
-- `{NOTICE_ADDRESS}` — mailing address for legal notices
-- `{SUPPORT_EMAIL}` / `{LEGAL_EMAIL}` — reachable, non-obfuscated mailboxes
-- `{DMCA_AGENT_NAME}` / `{DMCA_AGENT_ADDRESS}` / `{DMCA_AGENT_EMAIL}`
-- `{PRO_PRICE}` / `{FEATURED_PRICE}` — must match Stripe + Pricing page
-- `{REFUND_POLICY_DETAIL}` — your actual refund stance
-- `{PRICE_CHANGE_NOTICE_DAYS}` — e.g., 30
-- `{LIABILITY_CAP_AMOUNT}` / `{LIABILITY_CAP_PERIOD}` — e.g., "$100" / "12 months"
-- `{ARBITRATION_BODY}` / `{ARBITRATION_VENUE}` / `{ARBITRATION_CLAUSE}`
-- `{*_REVIEW_NOTE}` — remove after your attorney finalizes each flagged section
+- [TODO] Effective date (set at publication)
+- [TODO] County (for venue + arbitration seat)
+- [TODO] Mailing address for legal notices
+- [TODO] DMCA agent name + mailing address
+- [TODO] Refund policy detail
+- [TODO] Arbitration body (e.g. AAA) + any opt-out/carve-outs
+- Have a Florida-licensed attorney review §6, §13, §15 and remove the
+  {...REVIEW_NOTE} markers.
