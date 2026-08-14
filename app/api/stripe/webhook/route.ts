@@ -1,10 +1,58 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { stripe, planForPrice } from "@/lib/stripe";
+import { stripe, planForPrice, type PaidPlan } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { sendEmail, emailLayout } from "@/lib/email";
+import { SITE_URL } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/** Format a Stripe minor-unit amount, e.g. 1200/"usd" -> "$12.00". */
+function formatAmount(amount: number | null, currency: string | null): string {
+  if (amount == null) return "";
+  const value = (amount / 100).toFixed(2);
+  const cur = (currency ?? "usd").toUpperCase();
+  return cur === "USD" ? `$${value}` : `${value} ${cur}`;
+}
+
+/**
+ * Post-purchase confirmation email for a vendor subscription. Repeats the
+ * auto-renewal facts required at point of sale (plan, price, interval, renewal
+ * terms, how to cancel) — auto-renewal law wants them in the confirmation too.
+ * Best-effort: a send failure must not fail the webhook (Stripe would retry the
+ * whole event), and it's skipped when RESEND_API_KEY isn't set.
+ */
+async function sendSubscriptionConfirmation(session: Stripe.Checkout.Session, plan: PaidPlan) {
+  const to = session.customer_details?.email;
+  if (!to) return;
+
+  const planLabel = plan === "pro" ? "Vendor — Pro" : "Vendor — Featured";
+  const amount = formatAmount(session.amount_total, session.currency);
+  const price = amount ? `${amount} / month` : "billed monthly";
+  const body = `
+    <p>Thanks for subscribing — your listing is now on the <strong>${planLabel}</strong> plan.</p>
+    <p style="margin-top:16px;padding:16px;background:#f6f4f1;border-radius:12px;">
+      <strong>${planLabel}</strong><br/>
+      ${price}<br/>
+      Renews automatically every month until cancelled.<br/>
+      Cancel anytime in Account &rarr; Billing.
+    </p>
+    <p style="margin-top:16px;">You can manage or cancel your subscription at any time from your vendor billing settings.</p>`;
+
+  try {
+    await sendEmail({
+      to,
+      subject: "Your Bridal Team vendor subscription",
+      html: emailLayout("You're subscribed 🎉", body, {
+        label: "Manage billing",
+        url: `${SITE_URL}/vendor`,
+      }),
+    });
+  } catch (err) {
+    console.error("subscription confirmation email failed:", err);
+  }
+}
 
 /**
  * Stripe webhook. Authenticated by Stripe's signature (not a user session), so
@@ -65,12 +113,14 @@ export async function POST(req: Request) {
         const s = event.data.object as Stripe.Checkout.Session;
         if (s.customer && s.subscription) {
           const sub = await stripe.subscriptions.retrieve(String(s.subscription));
+          const plan = planForSubscription(sub);
           await applyByCustomer(String(s.customer), {
             stripe_subscription_id: String(s.subscription),
             subscription_status: "active",
-            plan: planForSubscription(sub),
+            plan,
             cancel_at_period_end: false,
           });
+          await sendSubscriptionConfirmation(s, plan);
         }
         break;
       }

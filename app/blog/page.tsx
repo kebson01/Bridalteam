@@ -4,6 +4,7 @@ import PageHero from "@/components/page-hero";
 import { POSTS_BY_DATE } from "@/lib/blog";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/blog" },
   title: "Blog",
   description: "Wedding planning tips, ideas and inspiration from the Bridal Team.",
 };

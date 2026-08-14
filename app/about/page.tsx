@@ -3,6 +3,7 @@ import Link from "next/link";
 import PageHero from "@/components/page-hero";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about" },
   title: "About",
   description:
     "Bridal Team has helped couples plan happier weddings since 2012 — now rebuilt and powered by AI.",

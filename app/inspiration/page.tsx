@@ -5,6 +5,7 @@ import InspirationGallery, { type InspirationImage } from "@/components/inspirat
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/inspiration" },
   title: "Wedding Inspiration",
   description:
     "Browse wedding looks by theme and color, save your favorites to your wedding, and share them with your party.",

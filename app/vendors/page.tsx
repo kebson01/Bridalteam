@@ -5,6 +5,7 @@ import VendorDirectoryList, { type DirectoryVendor } from "@/components/vendor-d
 import { supabaseServer } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/vendors" },
   title: "Find Wedding Vendors",
   description:
     "Browse photographers, venues, florists, DJs and more — see their work, save what you love, and reach out.",

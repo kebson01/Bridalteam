@@ -31,11 +31,12 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
-  alternates: { canonical: "/" },
+  // No root-level `alternates.canonical` on purpose: it would be inherited by
+  // every page that doesn't set its own, canonicalising the whole site to "/".
+  // Each route supplies its own canonical (most via pageMetadata()).
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    url: "/",
     title: "Bridal Team — Fun, Simple, AI-Powered Wedding Planning",
     description: SITE_DESCRIPTION,
     locale: "en_US",

@@ -4,6 +4,7 @@ import PageHero from "@/components/page-hero";
 import { TIERS } from "@/lib/tiers";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/pricing" },
   title: "Pricing",
   description: "Free for couples. Vendors grow with Pro and Featured plans.",
 };

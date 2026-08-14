@@ -136,6 +136,20 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
         {busy ? "One moment…" : isSignup ? "Create my account" : "Log in"}
       </button>
 
+      {isSignup && (
+        <p className="mt-4 text-center text-xs leading-relaxed text-ink-soft/70">
+          By creating an account, you agree to our{" "}
+          <Link href="/terms" className="font-semibold text-brand-dark">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="font-semibold text-brand-dark">
+            Privacy Policy
+          </Link>
+          .
+        </p>
+      )}
+
       <p className="mt-5 text-center text-sm text-ink-soft/70">
         {isSignup ? (
           <>

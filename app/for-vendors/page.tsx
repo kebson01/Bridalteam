@@ -4,6 +4,7 @@ import PageHero from "@/components/page-hero";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/for-vendors" },
   title: "For Vendors",
   description:
     "List your business, showcase your work, and get discovered by couples planning their wedding right now.",
