@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import InspirationGallery, { type InspirationImage } from "@/components/inspiration-gallery";
 import { supabaseServer } from "@/lib/supabase/server";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/inspiration" },
+export const metadata = pageMetadata({
+  path: "/inspiration",
   title: "Wedding Inspiration",
   description:
     "Browse wedding looks by theme and color, save your favorites to your wedding, and share them with your party.",
-};
+});
 
 export const dynamic = "force-dynamic";
 

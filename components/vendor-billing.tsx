@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   startProCheckout,
   startFeaturedCheckout,
@@ -65,25 +66,39 @@ export default function VendorBilling({
             stats and more.
           </p>
           {anyPaidConfigured ? (
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <TierCard
-                name={TIERS.pro.name}
-                price={TIERS.pro.priceMonthly}
-                blurb="Unlimited gallery, inquiries, links and stats."
-                action={startProCheckout}
-                cta="Upgrade to Pro"
-                disabled={!proConfigured}
-                highlight
-              />
-              <TierCard
-                name={TIERS.featured.name}
-                price={TIERS.featured.priceMonthly}
-                blurb="Everything in Pro, plus top placement and a badge."
-                action={startFeaturedCheckout}
-                cta="Go Featured"
-                disabled={!featuredConfigured}
-              />
-            </div>
+            <>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <TierCard
+                  name={TIERS.pro.name}
+                  price={TIERS.pro.priceMonthly}
+                  blurb="Unlimited gallery, inquiries, links and stats."
+                  action={startProCheckout}
+                  cta="Upgrade to Pro"
+                  disabled={!proConfigured}
+                  highlight
+                />
+                <TierCard
+                  name={TIERS.featured.name}
+                  price={TIERS.featured.priceMonthly}
+                  blurb="Everything in Pro, plus top placement and a badge."
+                  action={startFeaturedCheckout}
+                  cta="Go Featured"
+                  disabled={!featuredConfigured}
+                />
+              </div>
+              {/* Auto-renewal disclosure at the point of sale (CA ARL and
+                  similar): plan price, monthly interval, renewal terms and how
+                  to cancel, stated before the pay button. */}
+              <p className="mt-4 text-xs leading-relaxed text-ink-soft/60">
+                Plans are billed monthly and renew automatically until cancelled.
+                Cancel anytime from this page — you keep your features through the
+                period you&rsquo;ve paid for. By subscribing you agree to our{" "}
+                <Link href="/terms" className="font-semibold text-brand-dark">
+                  Terms
+                </Link>
+                .
+              </p>
+            </>
           ) : (
             <p className="mt-5 rounded-lg bg-stone-4 px-4 py-3 text-sm text-ink-soft/70">
               Paid plans are opening soon.

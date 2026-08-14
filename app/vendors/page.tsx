@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import VendorDirectoryList, { type DirectoryVendor } from "@/components/vendor-directory-list";
 import { supabaseServer } from "@/lib/supabase/server";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/vendors" },
+export const metadata = pageMetadata({
+  path: "/vendors",
   title: "Find Wedding Vendors",
   description:
     "Browse photographers, venues, florists, DJs and more — see their work, save what you love, and reach out.",
-};
+});
 
 export const dynamic = "force-dynamic";
 

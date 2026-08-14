@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/for-vendors" },
+export const metadata = pageMetadata({
+  path: "/for-vendors",
   title: "For Vendors",
   description:
     "List your business, showcase your work, and get discovered by couples planning their wedding right now.",
-};
+});
 
 const BENEFITS = [
   ["Showcase your work", "Add photos, performance videos and audio to the inspiration gallery couples browse every day."],

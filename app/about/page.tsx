@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/about" },
+export const metadata = pageMetadata({
+  path: "/about",
   title: "About",
   description:
     "Bridal Team has helped couples plan happier weddings since 2012 — now rebuilt and powered by AI.",
-};
+});
 
 export default function AboutPage() {
   return (
