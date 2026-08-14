@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toggleLike } from "@/app/inspiration/actions";
+import { SIGNUP_URL } from "@/lib/config";
 
 /**
  * Heart + count. Optimistically flips, then persists. Signed-out users get a
@@ -56,7 +57,7 @@ export default function LikeButton({
       </button>
       {prompt && (
         <p className="mt-1 text-xs text-ink-soft/70">
-          <Link href="/signup" className="font-semibold text-brand-dark">Sign up</Link> to like &amp; save ideas.
+          <Link href={SIGNUP_URL} className="font-semibold text-brand-dark">Sign up</Link> to like &amp; save ideas.
         </p>
       )}
     </div>

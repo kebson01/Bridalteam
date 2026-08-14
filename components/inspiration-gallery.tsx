@@ -6,6 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import { saveInspiration, reportImage } from "@/app/inspiration/actions";
 import LikeButton from "@/components/like-button";
 import ShareButton from "@/components/share-button";
+import { SIGNUP_URL } from "@/lib/config";
 import InspirationComments from "@/components/inspiration-comments";
 import { posterFor, isDirectVideoFile } from "@/lib/media";
 
@@ -337,7 +338,7 @@ function Lightbox({
             ) : status === "signin" ? (
               <div className="text-center">
                 <p className="text-sm text-ink-soft/75">Sign up free to save ideas to your wedding.</p>
-                <Link href="/signup" className="mt-3 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white">
+                <Link href={SIGNUP_URL} className="mt-3 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white">
                   Sign up to save
                 </Link>
               </div>

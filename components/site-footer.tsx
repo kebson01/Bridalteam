@@ -1,10 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SHOW_VENDOR_DIRECTORY, SHOW_PLANNER_APP } from "@/lib/flags";
+import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
+import { LOGIN_URL } from "@/lib/config";
 import InstallAppLink from "@/components/install-app-link";
-
-// Existing account holders log in through the real auth screen once it exists.
-const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
 
 // One flat, wrapping row of links — no more three-column tower.
 const LINKS = [
@@ -17,7 +15,7 @@ const LINKS = [
   { label: "About", href: "/about" },
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
-  { label: "Log in", href: LOGIN_HREF },
+  { label: "Log in", href: LOGIN_URL },
 ];
 
 const SOCIAL = [

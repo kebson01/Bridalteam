@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { SHOW_PLANNER_APP } from "@/lib/flags";
+import { SIGNUP_URL, LOGIN_URL } from "@/lib/config";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import NotificationsBell from "@/components/notifications-bell";
 
@@ -21,10 +22,6 @@ const NAV = [
   { label: "Guides", href: "/guides" },
   { label: "Pricing", href: "/pricing" },
 ];
-
-// "Log in" is for people who already have an account, so once accounts exist it
-// points at the real auth screen — never the pre-launch waitlist.
-const LOGIN_HREF = SHOW_PLANNER_APP ? "/auth/login" : "/login";
 
 type Viewer = { id: string; name: string; firstName: string; avatar: string; email: string };
 
@@ -159,13 +156,13 @@ export default function SiteHeader() {
           ) : (
             <>
               <Link
-                href={LOGIN_HREF}
+                href={LOGIN_URL}
                 className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
               >
                 Log in
               </Link>
               <Link
-                href="/signup"
+                href={SIGNUP_URL}
                 className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(243,103,5,0.7)] transition-transform hover:-translate-y-0.5"
               >
                 Start free
@@ -257,7 +254,7 @@ export default function SiteHeader() {
               <>
                 <li>
                   <Link
-                    href={LOGIN_HREF}
+                    href={LOGIN_URL}
                     onClick={() => setOpen(false)}
                     className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
                   >
@@ -266,7 +263,7 @@ export default function SiteHeader() {
                 </li>
                 <li className="pt-2">
                   <Link
-                    href="/signup"
+                    href={SIGNUP_URL}
                     onClick={() => setOpen(false)}
                     className="block rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-center text-sm font-semibold text-white"
                   >

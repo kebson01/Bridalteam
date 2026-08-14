@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
+import { SIGNUP_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "About",
@@ -60,7 +61,7 @@ export default function AboutPage() {
             .
           </p>
           <Link
-            href="/signup"
+            href={SIGNUP_URL}
             className="mt-6 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-8 py-3 text-sm font-semibold text-white"
           >
             Start planning free

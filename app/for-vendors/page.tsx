@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
+import { VENDOR_SIGNUP_URL, LOGIN_URL } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "For Vendors",
@@ -17,9 +17,7 @@ const BENEFITS = [
 ];
 
 // Vendors register through real signup, landing on vendor onboarding.
-const REGISTER_HREF = SHOW_PLANNER_APP
-  ? "/auth/signup?next=" + encodeURIComponent("/onboarding?type=vendor")
-  : "/signup";
+const REGISTER_HREF = VENDOR_SIGNUP_URL;
 
 export default function ForVendorsPage() {
   return (
@@ -67,7 +65,7 @@ export default function ForVendorsPage() {
             </Link>
             <p className="mt-4 text-xs text-ink-soft/60">
               Already registered?{" "}
-              <Link href={SHOW_PLANNER_APP ? "/auth/login" : "/login"} className="font-semibold text-brand-dark">
+              <Link href={LOGIN_URL} className="font-semibold text-brand-dark">
                 Log in
               </Link>
             </p>
