@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import AuthForm from "@/components/auth-form";
+import { SIGNUPS_OPEN } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Start Free",
@@ -15,6 +17,11 @@ const PERKS = [
 ];
 
 export default function SignupPage() {
+  // Accounts are open: forward this legacy waitlist path to the real signup so
+  // there's one signup flow, not a waitlist and a working account screen side by
+  // side. When accounts aren't open it falls through to the waitlist below.
+  if (SIGNUPS_OPEN) redirect("/auth/signup");
+
   return (
     <>
       <PageHero eyebrow="Early access" title="Join the waitlist" />

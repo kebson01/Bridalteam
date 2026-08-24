@@ -2,6 +2,7 @@ import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import { TIERS } from "@/lib/tiers";
 import { pageMetadata } from "@/lib/site";
+import { SIGNUP_URL } from "@/lib/config";
 
 export const metadata = pageMetadata({
   path: "/pricing",
@@ -88,7 +89,7 @@ export default function PricingPage() {
             The whole AI planning team — every feature, no paywall.
           </p>
           <Link
-            href="/signup"
+            href={SIGNUP_URL}
             className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-dark"
           >
             Start free
