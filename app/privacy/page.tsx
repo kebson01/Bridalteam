@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
 import PageHero from "@/components/page-hero";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/privacy",
   title: "Privacy Policy",
   description: "How Bridal Team handles your data.",
-};
+});
 
 export default function PrivacyPage() {
   return (

@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import { POSTS_BY_DATE } from "@/lib/blog";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/blog",
   title: "Blog",
   description: "Wedding planning tips, ideas and inspiration from the Bridal Team.",
-};
+});
 
 function formatDate(iso: string) {
   return new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {

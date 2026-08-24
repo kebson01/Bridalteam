@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import { TIERS } from "@/lib/tiers";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/pricing",
   title: "Pricing",
   description: "Free for couples. Vendors grow with Pro and Featured plans.",
-};
+});
 
 type VendorTier = {
   name: string;

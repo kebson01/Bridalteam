@@ -1,12 +1,13 @@
-import type { Metadata } from "next";
 import PageHero from "@/components/page-hero";
 import PlannerChat from "@/components/planner-chat";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/planner",
   title: "AI Wedding Planner",
   description:
     "Chat with your AI planning assistant for timelines, budgets, checklists and vendor ideas tailored to your wedding.",
-};
+});
 
 const FEATURES = [
   ["Timelines", "A month-by-month plan tuned to your date."],

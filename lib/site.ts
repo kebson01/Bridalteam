@@ -25,3 +25,47 @@ export const SITE_TAGLINE =
 
 export const SITE_DESCRIPTION =
   "Organize details, find ideas, and collaborate with your team — now supercharged with AI. Plan your whole wedding in one place with Bridal Team.";
+
+/**
+ * Per-route metadata builder. Sets a self-referencing canonical plus matching
+ * Open Graph / Twitter tags, so each page advertises its own URL and card
+ * instead of inheriting the homepage's (the root layout only sets defaults).
+ *
+ * `path` is root-relative ("/pricing"); it resolves against metadataBase.
+ * `ogTitle` defaults to "<title> — Bridal Team" so social cards carry the brand
+ * even though the tab-title template isn't applied to Open Graph titles.
+ */
+export function pageMetadata({
+  path,
+  title,
+  description,
+  ogTitle,
+  images,
+}: {
+  path: string;
+  title: string;
+  description?: string;
+  ogTitle?: string;
+  images?: string[];
+}): import("next").Metadata {
+  const socialTitle = ogTitle ?? `${title} — ${SITE_NAME}`;
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      url: path,
+      title: socialTitle,
+      description,
+      ...(images ? { images } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: socialTitle,
+      description,
+      ...(images ? { images } : {}),
+    },
+  };
+}

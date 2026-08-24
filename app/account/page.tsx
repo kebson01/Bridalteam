@@ -5,6 +5,7 @@ import PageHero from "@/components/page-hero";
 import ProfilePanel from "@/components/account/profile-panel";
 import ChangeEmailPanel from "@/components/account/change-email-panel";
 import SignOutButton from "@/components/account/sign-out-button";
+import DeleteAccount from "@/components/account/delete-account";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
@@ -59,6 +60,21 @@ export default async function AccountPage() {
             Change password
           </Link>
         </div>
+
+        <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
+          <h2 className="text-lg font-medium text-ink">Your data</h2>
+          <p className="mt-1 max-w-md text-sm text-ink-soft/70">
+            Download a copy of your account and planning data as a JSON file.
+          </p>
+          <a
+            href="/api/account/export"
+            className="mt-4 inline-flex rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+          >
+            Download my data
+          </a>
+        </div>
+
+        <DeleteAccount email={email} />
       </section>
     </>
   );
