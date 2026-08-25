@@ -35,23 +35,25 @@ export default async function VendorDashboard({
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login?next=/vendor");
 
-  // Which org is this user in, and is it a vendor?
-  const { data: memberships } = await supabase
-    .from("org_members")
-    .select("organizations(id, type, plan, subscription_status, cancel_at_period_end)")
-    .limit(1);
-  const org = memberships?.[0]?.organizations as unknown as
-    | {
-        id: string;
-        type: string;
-        plan: string;
-        subscription_status: string | null;
-        cancel_at_period_end: boolean | null;
-      }
-    | undefined;
+  // Ask for this user's VENDOR org specifically, rather than reading whichever
+  // org_members row happens to come back first. RLS ("Members read their org" =
+  // is_org_member(id)) already scopes this to orgs they belong to. Taking the
+  // first membership meant someone who is both a couple and a vendor — planning
+  // their own wedding while listing their business — could be bounced to
+  // /dashboard and never reach their vendor account, purely on row order.
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id, plan, subscription_status, cancel_at_period_end")
+    .eq("type", "vendor")
+    .limit(1)
+    .maybeSingle();
 
-  if (!org) redirect("/onboarding");
-  if (org.type !== "vendor") redirect("/dashboard"); // couple/planner → their dashboard
+  if (!org) {
+    // No vendor org. Distinguish "belongs to some other kind of org" (send them
+    // to their own dashboard) from "belongs to none" (they still need onboarding).
+    const { data: anyOrg } = await supabase.from("org_members").select("org_id").limit(1);
+    redirect(anyOrg?.length ? "/dashboard" : "/onboarding");
+  }
 
   const { data: profile } = await supabase
     .from("vendor_profiles")

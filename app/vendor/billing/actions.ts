@@ -6,27 +6,30 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { stripe, priceForPlan, billingConfigured, type PaidPlan } from "@/lib/stripe";
 import { SITE_URL } from "@/lib/site";
 
-/** Resolves the signed-in user's vendor org, or null. */
+/**
+ * Resolves the signed-in user's vendor org, or null.
+ *
+ * Queries `organizations` filtered to type='vendor' rather than reading the
+ * caller's first org_members row. RLS ("Members read their org" =
+ * is_org_member(id)) already scopes this to orgs they belong to, and every
+ * caller here starts or modifies a Stripe subscription — so resolving to
+ * whichever membership row came back first was the wrong shape for the money
+ * path. A vendor who also has a couple org could have had checkout, the billing
+ * portal and cancellation all silently no-op on them.
+ */
 async function vendorOrg() {
   const supabase = await supabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase
-    .from("org_members")
-    .select("organizations(id, type, name, stripe_customer_id, stripe_subscription_id)")
-    .limit(1);
-  const org = data?.[0]?.organizations as unknown as
-    | {
-        id: string;
-        type: string;
-        name: string;
-        stripe_customer_id: string | null;
-        stripe_subscription_id: string | null;
-      }
-    | undefined;
-  if (!org || org.type !== "vendor") return null;
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id, name, stripe_customer_id, stripe_subscription_id")
+    .eq("type", "vendor")
+    .limit(1)
+    .maybeSingle();
+  if (!org) return null;
   return { org, userId: user.id, email: user.email ?? undefined, supabase };
 }
 

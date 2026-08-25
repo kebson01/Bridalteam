@@ -32,22 +32,24 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login?next=/dashboard");
 
-  const { data: memberships } = await supabase
-    .from("org_members")
-    .select("role, organizations(id, name, type)")
-    .limit(1);
+  // This is the couple/planner home, so ask for one of those orgs directly
+  // rather than reading whichever org_members row comes back first. RLS
+  // ("Members read their org") already scopes it to the caller. The old
+  // first-membership read was the mirror of the bug on /vendor: a user who is
+  // both a couple and a vendor could be redirected to /vendor and never reach
+  // their own wedding dashboard, purely on row order.
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id, name, type")
+    .in("type", ["couple", "planner_company"])
+    .limit(1)
+    .maybeSingle();
 
-  const membership = memberships?.[0];
-  if (!membership) redirect("/onboarding");
-
-  const org = membership.organizations as unknown as {
-    id: string;
-    name: string;
-    type: string;
-  };
-
-  // Vendors have their own home.
-  if (org.type === "vendor") redirect("/vendor");
+  if (!org) {
+    // Vendors have their own home; someone with no org at all needs onboarding.
+    const { data: anyOrg } = await supabase.from("org_members").select("org_id").limit(1);
+    redirect(anyOrg?.length ? "/vendor" : "/onboarding");
+  }
 
   // RLS already limits this to weddings this user can reach, so no filter here.
   const { data: weddings } = await supabase
