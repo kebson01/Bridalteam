@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageHero from "@/components/page-hero";
+import JsonLd from "@/components/json-ld";
+import { localBusinessSchema, breadcrumbSchema } from "@/lib/structured-data";
 import { MediaBadge } from "@/components/inspiration-gallery";
 import VendorReviews from "@/components/vendor/vendor-reviews";
 import { listVendorReviews } from "@/app/vendor/review-actions";
@@ -59,6 +61,29 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
 
   return (
     <>
+      <JsonLd
+        data={localBusinessSchema({
+          orgId: vendor.org_id,
+          name: vendor.business_name,
+          description: vendor.description,
+          category: vendor.category,
+          city: vendor.city,
+          region: vendor.region,
+          // Only claim the outbound link the page itself is willing to show.
+          website: ent.canLinkSite ? vendor.website : null,
+          email: vendor.email,
+          phone: vendor.phone,
+          image: vendor.cover_url ?? vendor.logo_url,
+          reviews,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Vendors", path: "/vendors" },
+          { name: vendor.business_name, path: `/v/${vendor.org_id}` },
+        ])}
+      />
       <TrackView orgId={vendor.org_id} />
       <PageHero eyebrow={vendor.category ?? "Vendor"} title={vendor.business_name} />
 

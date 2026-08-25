@@ -46,6 +46,78 @@ export function websiteSchema() {
   };
 }
 
+/**
+ * A published vendor's profile page as a LocalBusiness.
+ *
+ * These are the pages vendors pay to be found on, and they were the only public
+ * page type emitting no structured data at all. LocalBusiness is what lets a
+ * florist in Fort Lauderdale surface for "wedding florist near me" with their
+ * rating and contact details attached, rather than as an anonymous blue link.
+ *
+ * Only ever describe a *published* profile — an unclaimed or draft listing must
+ * not be presented to search engines as a real business.
+ *
+ * The vendor's own website is included only when their plan actually links it
+ * (entitlements().canLinkSite). Advertising an outbound link in the markup that
+ * the page itself withholds would misrepresent what the free tier includes.
+ */
+export function localBusinessSchema(vendor: {
+  orgId: string;
+  name: string;
+  description?: string | null;
+  category?: string | null;
+  city?: string | null;
+  region?: string | null;
+  website?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  image?: string | null;
+  reviews?: { rating: number }[];
+}) {
+  const url = `${SITE_URL}/v/${vendor.orgId}`;
+  const ratings = (vendor.reviews ?? [])
+    .map((r) => r.rating)
+    .filter((n) => typeof n === "number" && n > 0);
+
+  const address =
+    vendor.city || vendor.region
+      ? {
+          "@type": "PostalAddress",
+          ...(vendor.city ? { addressLocality: vendor.city } : {}),
+          ...(vendor.region ? { addressRegion: vendor.region } : {}),
+        }
+      : undefined;
+
+  // Google ignores an aggregateRating with no reviews, and inventing one would
+  // be a rich-result violation — so it's omitted entirely until a rating exists.
+  const aggregateRating = ratings.length
+    ? {
+        "@type": "AggregateRating",
+        ratingValue: +(ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2),
+        reviewCount: ratings.length,
+        bestRating: 5,
+        worstRating: 1,
+      }
+    : undefined;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": `${url}#business`,
+    name: vendor.name,
+    url,
+    ...(vendor.description ? { description: vendor.description } : {}),
+    ...(vendor.category ? { additionalType: vendor.category } : {}),
+    ...(address ? { address } : {}),
+    ...(vendor.phone ? { telephone: vendor.phone } : {}),
+    ...(vendor.email ? { email: vendor.email } : {}),
+    ...(vendor.image ? { image: vendor.image } : {}),
+    ...(vendor.website ? { sameAs: [vendor.website] } : {}),
+    ...(aggregateRating ? { aggregateRating } : {}),
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+  };
+}
+
 export function blogPostingSchema(post: Post) {
   const url = `${SITE_URL}/blog/${post.slug}`;
   return {
