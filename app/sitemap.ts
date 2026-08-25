@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
-import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 import { POSTS } from "@/lib/blog";
 import { GUIDES } from "@/lib/guides";
 
@@ -8,9 +7,12 @@ import { GUIDES } from "@/lib/guides";
  * Public marketing pages only.
  *
  * Deliberately excluded:
- *   /admin/*, /api/*  — private
- *   /login, /signup   — transactional, and accounts aren't wired up yet
- *   /vendors          — hidden until the directory holds real listings
+ *   /admin/*, /api/*   — private
+ *   /signup, /auth/*   — transactional; /signup redirects to /auth/signup
+ *   /dashboard, /w/*   — behind auth
+ *
+ * /vendors and /community are both public and linked from the primary nav, so
+ * they belong here regardless of how much content they hold today.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
@@ -19,8 +21,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/", priority: 1 },
     { path: "/planner", priority: 0.9 },
     { path: "/guides", priority: 0.8 },
+    { path: "/vendors", priority: 0.8 },
     { path: "/inspiration", priority: 0.7 },
     { path: "/pricing", priority: 0.7 },
+    { path: "/community", priority: 0.6 },
     { path: "/about", priority: 0.6 },
     { path: "/blog", priority: 0.6 },
     { path: "/for-vendors", priority: 0.6 },
@@ -28,10 +32,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/privacy", priority: 0.3 },
     { path: "/terms", priority: 0.3 },
   ];
-
-  if (SHOW_VENDOR_DIRECTORY) {
-    routes.splice(2, 0, { path: "/vendors", priority: 0.8 });
-  }
 
   const staticRoutes = routes.map(({ path, priority }) => ({
     url: `${SITE_URL}${path}`,

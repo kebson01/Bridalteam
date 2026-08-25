@@ -35,7 +35,7 @@ export default async function VendorsPage() {
   return (
     <>
       <PageHero
-        eyebrow="Smart vendor matching"
+        eyebrow="Find your team"
         title="Find your dream team"
         subtitle="Browse vendors, see their work, and save your favorites. Or tell the AI planner your style and let it suggest who to book first."
       />

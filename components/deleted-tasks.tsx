@@ -33,7 +33,7 @@ export default function DeletedTasks({
               <input type="hidden" name="wedding_id" value={weddingId} />
               <button
                 type="submit"
-                className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-brand-dark hover:border-brand"
+                className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-brand-text hover:border-brand"
               >
                 Restore
               </button>

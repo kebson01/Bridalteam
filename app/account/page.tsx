@@ -55,7 +55,7 @@ export default async function AccountPage() {
           </p>
           <Link
             href="/auth/forgot-password"
-            className="mt-4 inline-flex rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+            className="mt-4 inline-flex rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
           >
             Change password
           </Link>
@@ -68,7 +68,7 @@ export default async function AccountPage() {
           </p>
           <a
             href="/api/account/export"
-            className="mt-4 inline-flex rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+            className="mt-4 inline-flex rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
           >
             Download my data
           </a>

@@ -59,7 +59,7 @@ const VENDOR_TIERS: VendorTier[] = [
       "Top-of-category placement in your area",
       "Homepage & Inspiration boosts",
       "“Featured” badge on your listing",
-      "Priority in couple recommendations",
+      "Priority placement in search and browse",
     ],
     cta: "Go Featured",
   },
@@ -90,7 +90,7 @@ export default function PricingPage() {
           </p>
           <Link
             href={SIGNUP_URL}
-            className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-dark"
+            className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-text"
           >
             Start free
           </Link>
@@ -118,7 +118,7 @@ export default function PricingPage() {
                   Most popular
                 </span>
               )}
-              <h3 className="text-lg font-medium text-brand-dark">{t.name}</h3>
+              <h3 className="text-lg font-medium text-brand-text">{t.name}</h3>
               <div className="mt-3 flex items-end gap-1">
                 <span className="text-4xl font-semibold text-ink">{t.price}</span>
                 <span className="mb-1 text-sm text-ink-soft/60">{t.note}</span>
@@ -127,7 +127,7 @@ export default function PricingPage() {
               <ul className="mt-6 flex-1 space-y-3">
                 {t.features.map((f) => (
                   <li key={f} className="flex items-start gap-2.5 text-sm">
-                    <span className="mt-0.5 text-brand-dark">
+                    <span className="mt-0.5 text-brand-text">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="m20 6-11 11-5-5" />
                       </svg>

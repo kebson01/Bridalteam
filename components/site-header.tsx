@@ -107,7 +107,7 @@ export default function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-dark"
+              className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-text"
             >
               {item.label}
             </Link>
@@ -119,7 +119,7 @@ export default function SiteHeader() {
             <>
               <Link
                 href="/dashboard"
-                className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-dark"
+                className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-text"
               >
                 Dashboard
               </Link>
@@ -137,18 +137,18 @@ export default function SiteHeader() {
                     className="h-7 w-7 flex-none rounded-full object-cover"
                   />
                 ) : (
-                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-dark">
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-text">
                     {viewer ? initialsOf(viewer) : ""}
                   </span>
                 )}
-                <span className="text-sm font-medium text-ink-soft transition-colors group-hover:text-brand-dark">
+                <span className="text-sm font-medium text-ink-soft transition-colors group-hover:text-brand-text">
                   {viewer ? `Hi, ${viewer.firstName}` : "Account"}
                 </span>
               </Link>
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+                className="rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
               >
                 Log out
               </button>
@@ -157,7 +157,7 @@ export default function SiteHeader() {
             <>
               <Link
                 href={LOGIN_URL}
-                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-dark"
+                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-text"
               >
                 Log in
               </Link>
@@ -228,7 +228,7 @@ export default function SiteHeader() {
                         className="h-9 w-9 flex-none rounded-full object-cover"
                       />
                     ) : (
-                      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-brand/15 text-sm font-semibold text-brand-dark">
+                      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-brand/15 text-sm font-semibold text-brand-text">
                         {viewer ? initialsOf(viewer) : ""}
                       </span>
                     )}

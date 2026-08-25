@@ -50,7 +50,7 @@ export default function PublicFeed({ feed }: { feed: FeedPost[] }) {
           >
             Join free
           </Link>
-          <Link href={login} className="text-sm font-semibold text-ink-soft transition-colors hover:text-brand-dark">
+          <Link href={login} className="text-sm font-semibold text-ink-soft transition-colors hover:text-brand-text">
             Log in
           </Link>
         </div>
@@ -102,7 +102,7 @@ export default function PublicFeed({ feed }: { feed: FeedPost[] }) {
                   </svg>
                   {post.comment_count} {post.comment_count === 1 ? "comment" : "comments"}
                 </span>
-                <Link href={login} className="ml-auto text-xs font-semibold text-brand-dark hover:underline">
+                <Link href={login} className="ml-auto text-xs font-semibold text-brand-text hover:underline">
                   Log in to like &amp; comment
                 </Link>
               </div>

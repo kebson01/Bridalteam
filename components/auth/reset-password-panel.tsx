@@ -69,7 +69,7 @@ export default function ResetPasswordPanel() {
           we&rsquo;ll email it right over.
         </p>
         <p className="mt-6 text-sm text-ink-soft/70">
-          <Link href="/auth/forgot-password" className="font-semibold text-brand-dark">
+          <Link href="/auth/forgot-password" className="font-semibold text-brand-text">
             Send a new link
           </Link>
         </p>

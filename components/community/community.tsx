@@ -534,7 +534,7 @@ export default function Community({
                         <button
                           type="button"
                           onClick={() => setPollOptions((o) => [...o, ""])}
-                          className="text-sm font-semibold text-brand-dark hover:underline"
+                          className="text-sm font-semibold text-brand-text hover:underline"
                         >
                           + Add option
                         </button>
@@ -591,7 +591,7 @@ export default function Community({
                         });
                       }}
                       className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13.5px] font-semibold transition-colors ${
-                        pollMode ? "bg-brand/10 text-brand-dark" : "text-ink-soft hover:bg-stone-4"
+                        pollMode ? "bg-brand/10 text-brand-text" : "text-ink-soft hover:bg-stone-4"
                       }`}
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -661,13 +661,13 @@ export default function Community({
             {activeGroup ? (
               <Link
                 href="/dashboard#community"
-                className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+                className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
               >
                 Members &amp; invites →
               </Link>
             ) : scope === "public" ? (
               <span className="text-[13px] text-ink-soft/60">
-                Sort by: <b className="font-semibold text-brand-dark">Recent</b>
+                Sort by: <b className="font-semibold text-brand-text">Recent</b>
               </span>
             ) : scope === "trending" ? (
               <span className="text-[13px] text-ink-soft/60">Most engaging this week</span>
@@ -744,7 +744,7 @@ export default function Community({
                               style={{ width: `${pct}%` }}
                             />
                             <span className="relative flex items-center justify-between gap-2">
-                              <span className={mine ? "font-semibold text-brand-dark" : "text-ink"}>
+                              <span className={mine ? "font-semibold text-brand-text" : "text-ink"}>
                                 {o.label}
                                 {mine && " ✓"}
                               </span>
@@ -797,7 +797,7 @@ export default function Community({
                       type="button"
                       onClick={() => toggleLike(p)}
                       className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold transition-colors hover:bg-stone-4 ${
-                        p.liked_by_me ? "text-brand-dark" : "text-ink-soft hover:text-brand-dark"
+                        p.liked_by_me ? "text-brand-text" : "text-ink-soft hover:text-brand-text"
                       }`}
                     >
                       <svg width="17" height="17" viewBox="0 0 24 24" fill={p.liked_by_me ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
@@ -808,7 +808,7 @@ export default function Community({
                     <button
                       type="button"
                       onClick={() => toggleComments(p.id)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-dark"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-text"
                     >
                       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                         <path d="M21 11.5a8.4 8.4 0 0 1-12.8 7.5L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z" />
@@ -818,7 +818,7 @@ export default function Community({
                     <button
                       type="button"
                       onClick={() => sharePost(p)}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-dark"
+                      className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-text"
                     >
                       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                         <circle cx="18" cy="5" r="3" />
@@ -832,7 +832,7 @@ export default function Community({
                       type="button"
                       onClick={() => toggleSave(p)}
                       className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-[13.5px] font-semibold transition-colors hover:bg-stone-4 ${
-                        p.saved_by_me ? "text-brand-dark" : "text-ink-soft hover:text-brand-dark"
+                        p.saved_by_me ? "text-brand-text" : "text-ink-soft hover:text-brand-text"
                       }`}
                     >
                       <svg width="17" height="17" viewBox="0 0 24 24" fill={p.saved_by_me ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
@@ -864,7 +864,7 @@ export default function Community({
             {/* Suggested groups */}
             <div className="mb-6">
               <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-ink">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-dark">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-text">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 8v8M8 12h8" />
                 </svg>
@@ -895,7 +895,7 @@ export default function Community({
                         type="button"
                         onClick={() => joinSuggested(g)}
                         disabled={groupBusy}
-                        className="ml-auto flex-none rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-brand-dark transition-colors hover:border-brand disabled:opacity-50"
+                        className="ml-auto flex-none rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-brand-text transition-colors hover:border-brand disabled:opacity-50"
                       >
                         Join
                       </button>
@@ -909,7 +909,7 @@ export default function Community({
             {/* Upcoming events */}
             <div className="mb-6">
               <div className="mb-3 flex items-center gap-2 text-[13px] font-bold text-ink">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-dark">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="text-brand-text">
                   <rect x="3" y="4" width="18" height="18" rx="2" />
                   <path d="M16 2v4M8 2v4M3 10h18" />
                 </svg>
@@ -924,7 +924,7 @@ export default function Community({
                 <div className="space-y-2">
                   {events.map((ev) => (
                     <div key={ev.id} className="rounded-xl border border-stone-2 bg-stone-4 p-3">
-                      <p className="text-[10.5px] font-bold tracking-wide text-brand-dark">
+                      <p className="text-[10.5px] font-bold tracking-wide text-brand-text">
                         {eventWhen(ev.starts_at)}
                         {ev.location ? ` · ${ev.location.toUpperCase()}` : ""}
                       </p>
@@ -939,7 +939,7 @@ export default function Community({
                           className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
                             ev.rsvped_by_me
                               ? "bg-brand text-white"
-                              : "border border-stone-2 text-ink-soft hover:border-brand hover:text-brand-dark"
+                              : "border border-stone-2 text-ink-soft hover:border-brand hover:text-brand-text"
                           }`}
                         >
                           {ev.rsvped_by_me ? "Going ✓" : "RSVP"}
@@ -952,9 +952,9 @@ export default function Community({
             </div>
 
             <div className="flex gap-4 border-t border-stone-2 pt-4 text-xs text-ink-soft/60">
-              <a href="/privacy" className="hover:text-brand-dark">Privacy</a>
-              <a href="/terms" className="hover:text-brand-dark">Terms</a>
-              <a href="/guides" className="hover:text-brand-dark">Guides</a>
+              <a href="/privacy" className="hover:text-brand-text">Privacy</a>
+              <a href="/terms" className="hover:text-brand-text">Terms</a>
+              <a href="/guides" className="hover:text-brand-text">Guides</a>
             </div>
             <p className="mt-2 text-[11px] text-ink-soft/40">© 2026 Bridal Team Inc.</p>
           </div>

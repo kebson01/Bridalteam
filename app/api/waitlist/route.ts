@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabasePublic } from "@/lib/supabase";
+import { supabaseAdmin, supabasePublic } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,9 +28,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
   }
 
-  // The anon key can insert but not read (see the waitlist RLS policy), so the
-  // list can't be scraped back out through this route.
-  const supabase = supabasePublic();
+  // Write with the service-role key so this route is the only way in. The anon
+  // key is public by design, so while it held the INSERT grant anyone could POST
+  // straight to PostgREST and skip the validation above — the DB CHECK
+  // constraints were doing all the work. Falls back to the public client if
+  // SUPABASE_SERVICE_ROLE_KEY isn't configured (local dev), which is why the
+  // anon INSERT policy should only be dropped once every deploy sets the key.
+  //
+  // Either way the list can't be read back out: waitlist has no SELECT policy.
+  const supabase = supabaseAdmin() ?? supabasePublic();
   const { error } = await supabase.from("waitlist").insert({ email, role, source, name });
 
   if (error) {

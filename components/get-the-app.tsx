@@ -33,7 +33,8 @@ export default function GetTheApp() {
           </h2>
           <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-white/70 md:mx-0">
             Install Bridal Team on your phone for one-tap access to your timeline, budget, community
-            and RSVPs. It installs straight from your browser and works even when you're offline.
+            and RSVPs. It installs straight from your browser &mdash; no app store, no download
+            &mdash; and pages you have already opened stay readable if you lose signal.
           </p>
           {isMobile ? (
             <button

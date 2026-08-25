@@ -124,7 +124,7 @@ export default function ProfilePanel({
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="rounded-full border border-stone-2 px-4 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark disabled:opacity-60"
+            className="rounded-full border border-stone-2 px-4 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text disabled:opacity-60"
           >
             {uploading ? "Uploading…" : avatar ? "Change photo" : "Add photo"}
           </button>

@@ -63,7 +63,7 @@ export default function AuthForm({
   if (status === "done") {
     return (
       <div className="rounded-2xl border border-stone-2 bg-white p-8 text-center shadow-card">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-brand-dark">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand/15 text-brand-text">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m20 6-11 11-5-5" />
           </svg>
@@ -178,7 +178,7 @@ export default function AuthForm({
           <>
             {" "}
             Are you a vendor?{" "}
-            <Link href="/for-vendors" className="font-semibold text-brand-dark">
+            <Link href="/for-vendors" className="font-semibold text-brand-text">
               Join here instead
             </Link>
             .

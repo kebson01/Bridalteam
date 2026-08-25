@@ -88,7 +88,7 @@ export default function InspirationComments({
                   className="mt-0.5 h-7 w-7 flex-none rounded-full object-cover"
                 />
               ) : (
-                <span className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-dark">
+                <span className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-text">
                   {c.author_name.charAt(0).toUpperCase()}
                 </span>
               )}
@@ -142,7 +142,7 @@ export default function InspirationComments({
         <button
           type="button"
           onClick={onNeedSignin}
-          className="mt-3 text-left text-sm text-brand-dark"
+          className="mt-3 text-left text-sm text-brand-text"
         >
           Sign in to comment
         </button>

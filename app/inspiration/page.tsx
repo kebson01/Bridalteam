@@ -61,7 +61,7 @@ export default async function InspirationPage() {
           </p>
           <Link
             href="/planner"
-            className="mt-6 inline-flex rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-dark transition-transform hover:-translate-y-0.5"
+            className="mt-6 inline-flex rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-text transition-transform hover:-translate-y-0.5"
           >
             Generate my ideas
           </Link>

@@ -102,7 +102,7 @@ export default function NotificationsBell({ userId }: { userId: string }) {
         type="button"
         onClick={toggle}
         aria-label={`Notifications${unread > 0 ? ` (${unread} unread)` : ""}`}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-dark"
+        className="relative flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-text"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -119,7 +119,7 @@ export default function NotificationsBell({ userId }: { userId: string }) {
         <div className="absolute right-0 z-50 mt-2 w-80 max-w-[90vw] overflow-hidden rounded-2xl border border-stone-2 bg-white shadow-lg">
           <div className="flex items-center justify-between border-b border-stone-2 px-4 py-3">
             <p className="text-sm font-semibold text-ink">Notifications</p>
-            <Link href="/community" onClick={() => setOpen(false)} className="text-xs font-medium text-brand-dark">
+            <Link href="/community" onClick={() => setOpen(false)} className="text-xs font-medium text-brand-text">
               Open community
             </Link>
           </div>

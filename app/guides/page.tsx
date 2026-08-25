@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import JsonLd from "@/components/json-ld";
 import { breadcrumbSchema } from "@/lib/structured-data";
 import { GUIDES } from "@/lib/guides";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/guides",
   title: "Wedding Planning Guides",
   description:
     "Free, in-depth wedding planning guides — checklists, budgets, venues, vendors, guest lists and timelines to help you plan with confidence.",
-  alternates: { canonical: "/guides" },
-};
+});
 
 export default function GuidesPage() {
   return (
@@ -35,14 +35,14 @@ export default function GuidesPage() {
               href={`/guides/${g.slug}`}
               className="flex flex-col rounded-2xl border border-stone-2 bg-white p-6 shadow-card transition-transform hover:-translate-y-1"
             >
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-dark">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-text">
                 <span>{g.category}</span>
                 <span className="text-stone-3">·</span>
                 <span className="text-ink-soft/60">{g.readMinutes} min read</span>
               </div>
               <h2 className="mt-3 text-lg font-medium leading-snug text-ink">{g.title}</h2>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-soft/80">{g.excerpt}</p>
-              <span className="mt-4 text-sm font-semibold text-brand-dark">Read the guide →</span>
+              <span className="mt-4 text-sm font-semibold text-brand-text">Read the guide →</span>
             </Link>
           ))}
         </div>

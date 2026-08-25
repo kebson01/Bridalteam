@@ -63,7 +63,7 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
       <PageHero eyebrow={vendor.category ?? "Vendor"} title={vendor.business_name} />
 
       <section className="mx-auto max-w-5xl px-5 py-12">
-        <Link href="/vendors" className="text-sm font-semibold text-brand-dark hover:text-brand-deep">
+        <Link href="/vendors" className="text-sm font-semibold text-brand-text hover:text-brand-deep">
           ← All vendors
         </Link>
 
@@ -84,11 +84,11 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
               )}
               {vendor.website && ent.canLinkSite && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Website</dt>
-                  <dd><a href={`/api/vendor/link?org=${vendor.org_id}`} target="_blank" rel="noopener noreferrer" className="text-brand-dark hover:underline">Visit</a></dd></div>
+                  <dd><a href={`/api/vendor/link?org=${vendor.org_id}`} target="_blank" rel="noopener noreferrer" className="text-brand-text hover:underline">Visit</a></dd></div>
               )}
               {vendor.email && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Email</dt>
-                  <dd><a href={`mailto:${vendor.email}`} className="text-brand-dark hover:underline">{vendor.email}</a></dd></div>
+                  <dd><a href={`mailto:${vendor.email}`} className="text-brand-text hover:underline">{vendor.email}</a></dd></div>
               )}
               {vendor.phone && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Phone</dt><dd className="text-ink">{vendor.phone}</dd></div>

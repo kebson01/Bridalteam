@@ -48,7 +48,7 @@ export default function PlannerPage() {
                 key={title}
                 className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card"
               >
-                <h3 className="text-lg font-medium text-brand-dark">{title}</h3>
+                <h3 className="text-lg font-medium text-brand-text">{title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink-soft/80">
                   {body}
                 </p>

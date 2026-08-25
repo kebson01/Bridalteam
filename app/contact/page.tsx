@@ -44,7 +44,7 @@ export default function ContactPage() {
               key={c.email}
               className="flex flex-col rounded-2xl border border-stone-2 bg-white p-6 shadow-card"
             >
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-brand-dark">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-brand-text">
                 {c.label}
               </h2>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-soft/80">
@@ -52,7 +52,7 @@ export default function ContactPage() {
               </p>
               <a
                 href={`mailto:${c.email}`}
-                className="mt-4 text-sm font-semibold text-brand-dark hover:underline"
+                className="mt-4 text-sm font-semibold text-brand-text hover:underline"
               >
                 {c.email}
               </a>

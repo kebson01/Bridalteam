@@ -74,7 +74,7 @@ export default async function SingleInspirationPage({
 
   return (
     <section className="mx-auto max-w-3xl px-5 py-12">
-      <Link href="/inspiration" className="text-sm font-semibold text-brand-dark hover:text-brand-deep">
+      <Link href="/inspiration" className="text-sm font-semibold text-brand-text hover:text-brand-deep">
         ← All inspiration
       </Link>
 
@@ -91,7 +91,7 @@ export default async function SingleInspirationPage({
               </p>
               {vendor && (
                 <p className="mt-1 text-sm text-ink-soft/60">
-                  by <span className="font-medium text-brand-dark">{vendor.business_name}</span>
+                  by <span className="font-medium text-brand-text">{vendor.business_name}</span>
                 </p>
               )}
             </div>

@@ -253,7 +253,7 @@ export default function AdminVenuesPage() {
             sessionStorage.removeItem("bt_admin_pw");
             setUnlocked(false);
           }}
-          className="text-sm text-ink-soft/60 hover:text-brand-dark"
+          className="text-sm text-ink-soft/60 hover:text-brand-text"
         >
           Lock
         </button>
@@ -364,7 +364,7 @@ export default function AdminVenuesPage() {
               <div className="flex items-center gap-2">
                 <span className="truncate font-medium text-ink">{v.name}</span>
                 {v.featured && (
-                  <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-brand-dark">
+                  <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-brand-text">
                     Featured
                   </span>
                 )}
@@ -376,7 +376,7 @@ export default function AdminVenuesPage() {
               </p>
             </div>
             <div className="flex flex-none gap-2">
-              <button onClick={() => edit(v)} className="rounded-lg border border-stone-2 px-3 py-1.5 text-sm text-ink-soft hover:border-brand hover:text-brand-dark">
+              <button onClick={() => edit(v)} className="rounded-lg border border-stone-2 px-3 py-1.5 text-sm text-ink-soft hover:border-brand hover:text-brand-text">
                 Edit
               </button>
               <button onClick={() => remove(v.id)} className="rounded-lg border border-stone-2 px-3 py-1.5 text-sm text-red-500 hover:border-red-300">

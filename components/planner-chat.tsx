@@ -26,7 +26,7 @@ function render(text: string) {
       return (
         <li
           key={i}
-          className="ml-4 list-disc marker:text-brand-dark"
+          className="ml-4 list-disc marker:text-brand-text"
           dangerouslySetInnerHTML={{ __html: bolded.replace(/^\s*[-*•]\s+/, "") }}
         />
       );
@@ -100,7 +100,7 @@ export default function PlannerChat({
               <button
                 onClick={() => send(q)}
                 disabled={loading}
-                className="rounded-full border border-stone-2 bg-white px-4 py-2 text-sm text-ink-soft transition-colors hover:border-brand hover:text-brand-dark disabled:opacity-50"
+                className="rounded-full border border-stone-2 bg-white px-4 py-2 text-sm text-ink-soft transition-colors hover:border-brand hover:text-brand-text disabled:opacity-50"
               >
                 {q}
               </button>

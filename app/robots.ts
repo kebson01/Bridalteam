@@ -1,13 +1,13 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
-import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 
 export default function robots(): MetadataRoute.Robots {
+  // /vendors used to be disallowed here, from back when the page 404'd behind
+  // SHOW_VENDOR_DIRECTORY. It no longer reads that flag: it is a public page
+  // with an honest empty state, and it sits in the primary navigation as "Find
+  // Vendors". Blocking a linked, indexable page was the odd one out, so it is
+  // allowed again. SHOW_VENDOR_DIRECTORY now only controls the homepage teaser.
   const disallow = ["/admin", "/api/"];
-
-  // Keep crawlers off the directory while it's hidden; /vendors 404s anyway,
-  // but this avoids burning crawl budget and indexing a dead URL.
-  if (!SHOW_VENDOR_DIRECTORY) disallow.push("/vendors");
 
   return {
     rules: [{ userAgent: "*", allow: "/", disallow }],

@@ -47,7 +47,7 @@ export default function LikeButton({
         onClick={onClick}
         aria-pressed={liked}
         aria-label={liked ? "Unlike" : "Like"}
-        className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-sm font-semibold text-ink shadow backdrop-blur transition-colors hover:text-brand-dark"
+        className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-sm font-semibold text-ink shadow backdrop-blur transition-colors hover:text-brand-text"
       >
         <svg width="16" height="16" viewBox="0 0 24 24"
           fill={liked ? "#e0245e" : "none"} stroke={liked ? "#e0245e" : "currentColor"} strokeWidth="2">
@@ -57,7 +57,7 @@ export default function LikeButton({
       </button>
       {prompt && (
         <p className="mt-1 text-xs text-ink-soft/70">
-          <Link href={SIGNUP_URL} className="font-semibold text-brand-dark">Sign up</Link> to like &amp; save ideas.
+          <Link href={SIGNUP_URL} className="font-semibold text-brand-text">Sign up</Link> to like &amp; save ideas.
         </p>
       )}
     </div>

@@ -119,7 +119,7 @@ export default async function GuidePage({
           </p>
           <Link
             href="/planner"
-            className="mt-5 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-dark transition-transform hover:-translate-y-0.5"
+            className="mt-5 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-text transition-transform hover:-translate-y-0.5"
           >
             Try the AI planner
           </Link>
@@ -138,11 +138,11 @@ export default async function GuidePage({
                 href={`/guides/${g.slug}`}
                 className="flex flex-col rounded-2xl border border-stone-2 bg-white p-6 shadow-card transition-transform hover:-translate-y-1"
               >
-                <span className="text-xs font-semibold uppercase tracking-wider text-brand-dark">
+                <span className="text-xs font-semibold uppercase tracking-wider text-brand-text">
                   {g.category}
                 </span>
                 <h3 className="mt-2 text-base font-medium leading-snug text-ink">{g.title}</h3>
-                <span className="mt-3 text-sm font-semibold text-brand-dark">Read more →</span>
+                <span className="mt-3 text-sm font-semibold text-brand-text">Read more →</span>
               </Link>
             ))}
           </div>

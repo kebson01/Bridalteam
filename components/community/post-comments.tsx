@@ -78,7 +78,7 @@ export default function PostComments({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={c.author_avatar} alt="" className="mt-0.5 h-7 w-7 flex-none rounded-full object-cover" />
               ) : (
-                <span className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-dark">
+                <span className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-text">
                   {c.author_name.charAt(0).toUpperCase()}
                 </span>
               )}

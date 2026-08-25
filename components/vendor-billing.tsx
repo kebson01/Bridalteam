@@ -93,7 +93,7 @@ export default function VendorBilling({
                 Plans are billed monthly and renew automatically until cancelled.
                 Cancel anytime from this page — you keep your features through the
                 period you&rsquo;ve paid for. By subscribing you agree to our{" "}
-                <Link href="/terms" className="font-semibold text-brand-dark">
+                <Link href="/terms" className="font-semibold text-brand-text">
                   Terms
                 </Link>
                 .

@@ -34,14 +34,14 @@ export default function BlogPage() {
               href={`/blog/${p.slug}`}
               className="flex flex-col rounded-2xl border border-stone-2 bg-white p-6 shadow-card transition-transform hover:-translate-y-1"
             >
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-dark">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-text">
                 <span>{p.category}</span>
                 <span className="text-stone-3">·</span>
                 <span className="text-ink-soft/60">{p.readMinutes} min read</span>
               </div>
               <h2 className="mt-3 text-lg font-medium leading-snug text-ink">{p.title}</h2>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-soft/80">{p.excerpt}</p>
-              <span className="mt-4 text-sm font-semibold text-brand-dark">Read more →</span>
+              <span className="mt-4 text-sm font-semibold text-brand-text">Read more →</span>
             </Link>
           ))}
         </div>

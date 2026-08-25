@@ -63,7 +63,7 @@ export default function VendorDirectory({ venues }: { venues: Partial<Venue>[] }
               className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                 category === null
                   ? "border-brand bg-brand text-white"
-                  : "border-stone-2 bg-white text-ink-soft hover:border-brand hover:text-brand-dark"
+                  : "border-stone-2 bg-white text-ink-soft hover:border-brand hover:text-brand-text"
               }`}
             >
               All
@@ -78,7 +78,7 @@ export default function VendorDirectory({ venues }: { venues: Partial<Venue>[] }
                 className={`rounded-full border px-4 py-2 text-sm transition-colors ${
                   c === category
                     ? "border-brand bg-brand text-white"
-                    : "border-stone-2 bg-white text-ink-soft hover:border-brand hover:text-brand-dark"
+                    : "border-stone-2 bg-white text-ink-soft hover:border-brand hover:text-brand-text"
                 }`}
               >
                 {c}
@@ -103,7 +103,7 @@ export default function VendorDirectory({ venues }: { venues: Partial<Venue>[] }
               setQuery("");
               setCategory(null);
             }}
-            className="mt-3 text-sm font-semibold text-brand-dark hover:text-brand-deep"
+            className="mt-3 text-sm font-semibold text-brand-text hover:text-brand-deep"
           >
             Clear filters
           </button>
@@ -120,7 +120,7 @@ export default function VendorDirectory({ venues }: { venues: Partial<Venue>[] }
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={v.image_url} alt={v.name ?? ""} className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-text">
                     {v.category ?? "Venue"}
                   </span>
                 )}
@@ -134,7 +134,7 @@ export default function VendorDirectory({ venues }: { venues: Partial<Venue>[] }
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-lg font-medium text-ink">{v.name}</h3>
                   {v.price && (
-                    <span className="text-sm font-semibold text-brand-dark">{v.price}</span>
+                    <span className="text-sm font-semibold text-brand-text">{v.price}</span>
                   )}
                 </div>
                 {locationOf(v) && (
@@ -143,7 +143,7 @@ export default function VendorDirectory({ venues }: { venues: Partial<Venue>[] }
                 {v.tag && <p className="mt-3 text-sm text-ink-soft/80">{v.tag}</p>}
                 <Link
                   href="/planner"
-                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark hover:text-brand-deep"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-text hover:text-brand-deep"
                 >
                   Ask AI about this venue <span aria-hidden>→</span>
                 </Link>

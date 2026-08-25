@@ -25,7 +25,7 @@ function dueLabel(due: string | null, done: boolean) {
 
   if (done) return { text, tone: "text-ink-soft/50" };
   if (days < 0) return { text: `${text} · overdue`, tone: "text-red-600 font-medium" };
-  if (days <= 14) return { text: `${text} · soon`, tone: "text-brand-dark font-medium" };
+  if (days <= 14) return { text: `${text} · soon`, tone: "text-brand-text font-medium" };
   return { text, tone: "text-ink-soft/60" };
 }
 
@@ -111,7 +111,7 @@ export default function TaskList({
                 className="rounded-2xl border border-stone-2 bg-white px-6 py-4 shadow-card"
               >
                 {d.name && (
-                  <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-brand-dark">
+                  <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-brand-text">
                     {d.name}
                   </h3>
                 )}

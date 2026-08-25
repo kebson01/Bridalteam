@@ -53,7 +53,7 @@ export default function ForgotPasswordPanel() {
           link to reset your password. It expires in an hour.
         </p>
         <p className="mt-6 text-sm text-ink-soft/70">
-          <Link href="/auth/login" className="font-semibold text-brand-dark">
+          <Link href="/auth/login" className="font-semibold text-brand-text">
             Back to log in
           </Link>
         </p>
@@ -101,7 +101,7 @@ export default function ForgotPasswordPanel() {
 
       <p className="mt-5 text-center text-sm text-ink-soft/70">
         Remembered it?{" "}
-        <Link href="/auth/login" className="font-semibold text-brand-dark">
+        <Link href="/auth/login" className="font-semibold text-brand-text">
           Log in
         </Link>
       </p>

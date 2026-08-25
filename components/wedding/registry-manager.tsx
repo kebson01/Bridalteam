@@ -73,7 +73,7 @@ export default function RegistryManager({
             <li key={l.id} className="flex items-center justify-between gap-3 rounded-lg border border-stone-2 px-3 py-2">
               <span className="min-w-0">
                 <b className="text-sm text-ink">{l.label}</b>
-                <a href={l.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-brand-dark hover:underline">
+                <a href={l.url} target="_blank" rel="noopener noreferrer" className="block truncate text-xs text-brand-text hover:underline">
                   {l.url}
                 </a>
               </span>

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Community from "@/components/community/community";
 import PublicFeed from "@/components/community/public-feed";
@@ -11,11 +10,14 @@ import {
 } from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/community",
   title: "Community",
-  description: "Real weddings, advice, and inspiration from the Bridal Team community of couples and vendors.",
-};
+  description:
+    "Real weddings, advice, and inspiration from the Bridal Team community of couples and vendors.",
+});
 
 export const dynamic = "force-dynamic";
 

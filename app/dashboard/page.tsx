@@ -76,7 +76,7 @@ export default async function DashboardPage() {
             </p>
             <Link
               href="/connect"
-              className="rounded-full border border-brand px-5 py-2 text-sm font-semibold text-brand-dark transition-colors hover:bg-brand hover:text-white"
+              className="rounded-full border border-brand px-5 py-2 text-sm font-semibold text-brand-text transition-colors hover:bg-brand hover:text-white"
             >
               Connect a couple
             </Link>
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
           <p className="mt-1 text-sm text-ink-soft/70">
             Create and manage your groups, invites and events here. Browsing, posting and RSVPs
             happen on the{" "}
-            <Link href="/community" className="font-semibold text-brand-dark hover:underline">
+            <Link href="/community" className="font-semibold text-brand-text hover:underline">
               Community page
             </Link>
             .

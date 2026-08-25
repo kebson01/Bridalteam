@@ -49,7 +49,7 @@ export default function VendorInquiries({ initial }: { initial: Inquiry[] }) {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-ink">{i.from_name}</p>
-                  <a href={`mailto:${i.from_email}`} className="text-xs text-brand-dark hover:underline">
+                  <a href={`mailto:${i.from_email}`} className="text-xs text-brand-text hover:underline">
                     {i.from_email}
                   </a>
                 </div>
@@ -60,7 +60,7 @@ export default function VendorInquiries({ initial }: { initial: Inquiry[] }) {
                 <button
                   type="button"
                   onClick={() => markRead(i.id)}
-                  className="mt-2 text-xs font-semibold text-ink-soft/60 hover:text-brand-dark"
+                  className="mt-2 text-xs font-semibold text-ink-soft/60 hover:text-brand-text"
                 >
                   Mark as read
                 </button>

@@ -160,7 +160,7 @@ export default async function WeddingPage({
       {/* Header band */}
       <div className="border-b border-stone-2 bg-white">
         <div className="mx-auto max-w-5xl px-5 py-8">
-          <Link href="/dashboard" className="text-sm font-semibold text-brand-dark hover:text-brand-deep">
+          <Link href="/dashboard" className="text-sm font-semibold text-brand-text hover:text-brand-deep">
             ← All weddings
           </Link>
           <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
@@ -174,7 +174,7 @@ export default async function WeddingPage({
               )}
             </div>
             {wedding.style && (
-              <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-dark">
+              <span className="rounded-full bg-brand/10 px-4 py-1.5 text-sm font-medium text-brand-text">
                 {wedding.style}
               </span>
             )}
@@ -233,7 +233,7 @@ export default async function WeddingPage({
               <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <GeneratePlanButton
                   weddingId={id}
-                  className="w-full rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-dark transition-transform hover:-translate-y-0.5 disabled:opacity-70 sm:w-auto"
+                  className="w-full rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-text transition-transform hover:-translate-y-0.5 disabled:opacity-70 sm:w-auto"
                 >
                   ✨ Build my plan with AI
                 </GeneratePlanButton>
@@ -258,7 +258,7 @@ export default async function WeddingPage({
             <div className="flex items-center gap-4">
               <Link
                 href="/planner"
-                className="text-sm font-semibold text-brand-dark hover:text-brand-deep"
+                className="text-sm font-semibold text-brand-text hover:text-brand-deep"
               >
                 ✨ Ask AI for help
               </Link>

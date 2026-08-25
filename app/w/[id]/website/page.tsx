@@ -66,7 +66,7 @@ export default async function WeddingWebsitePage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-lg font-semibold text-ink">RSVPs</h2>
               <div className="flex gap-4 text-sm">
-                <span className="text-brand-dark">
+                <span className="text-brand-text">
                   <b>{attending.length}</b> attending
                 </span>
                 <span className="text-ink-soft/60">
@@ -98,7 +98,7 @@ export default async function WeddingWebsitePage({
                     </div>
                     <span
                       className={`flex-none rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                        r.attending ? "bg-brand/10 text-brand-dark" : "bg-stone-4 text-ink-soft/60"
+                        r.attending ? "bg-brand/10 text-brand-text" : "bg-stone-4 text-ink-soft/60"
                       }`}
                     >
                       {r.attending ? "Attending" : "Declined"}

@@ -10,11 +10,15 @@ export const metadata = pageMetadata({
     "List your business, showcase your work, and get discovered by couples planning their wedding right now.",
 });
 
+// Keep every line here to something a vendor can actually verify after signing
+// up. The directory is new, so we say so rather than implying an audience that
+// isn't there yet — an overstated promise is the fastest way to lose the first
+// vendors, who are the ones who make the directory worth browsing.
 const BENEFITS = [
-  ["Showcase your work", "Add photos, performance videos and audio to the inspiration gallery couples browse every day."],
-  ["Get discovered", "Couples save and share your work — and it links straight back to your profile."],
-  ["Matched by AI", "Our AI recommends you to couples whose style, budget and location fit what you offer."],
-  ["Your own profile", "A page with your details, gallery and contact info — yours to manage anytime."],
+  ["Showcase your work", "Add photos, performance video and audio to the inspiration gallery couples browse for ideas."],
+  ["Your own profile", "A page with your details, gallery, reviews and contact info — yours to manage anytime."],
+  ["Couples share your work", "When a couple saves or shares one of your images, it links straight back to your profile."],
+  ["Inquiries and stats", "On a paid plan, couples can message you directly, and you can see how often your listing is viewed and clicked."],
 ];
 
 // Vendors register through real signup, landing on vendor onboarding.
@@ -58,6 +62,12 @@ export default function ForVendorsPage() {
               Create your vendor account, build your profile, and start showcasing
               your work to couples today.
             </p>
+            <p className="mx-auto mt-3 max-w-sm rounded-lg bg-stone-4 px-4 py-3 text-xs leading-relaxed text-ink-soft/75">
+              <span className="font-semibold text-ink">The directory is brand new.</span> We are
+              signing up our first vendors now, so early listings get the category to themselves
+              &mdash; but be aware you are joining at the beginning, not into an established
+              audience. A free listing costs nothing to try.
+            </p>
             <Link
               href={REGISTER_HREF}
               className="mt-6 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-8 py-3.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
@@ -66,7 +76,7 @@ export default function ForVendorsPage() {
             </Link>
             <p className="mt-4 text-xs text-ink-soft/60">
               Already registered?{" "}
-              <Link href={LOGIN_URL} className="font-semibold text-brand-dark">
+              <Link href={LOGIN_URL} className="font-semibold text-brand-text">
                 Log in
               </Link>
             </p>

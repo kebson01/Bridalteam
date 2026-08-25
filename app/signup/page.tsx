@@ -33,7 +33,7 @@ export default function SignupPage() {
           <ul className="mt-6 space-y-3">
             {PERKS.map((p) => (
               <li key={p} className="flex items-start gap-3 text-ink-soft/85">
-                <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-brand/15 text-brand-dark">
+                <span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-brand/15 text-brand-text">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <path d="m20 6-11 11-5-5" />
                   </svg>

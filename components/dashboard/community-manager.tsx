@@ -120,7 +120,7 @@ export default function CommunityManager({
       <section className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-xl font-semibold text-ink">Groups</h2>
-          <Link href="/community" className="text-xs font-semibold text-brand-dark hover:underline">
+          <Link href="/community" className="text-xs font-semibold text-brand-text hover:underline">
             Open Community →
           </Link>
         </div>
@@ -138,7 +138,7 @@ export default function CommunityManager({
               }}
               className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
                 newGroupKind === p.kind
-                  ? "border-brand bg-brand/10 text-brand-dark"
+                  ? "border-brand bg-brand/10 text-brand-text"
                   : "border-stone-2 text-ink-soft hover:border-brand"
               }`}
             >
@@ -218,7 +218,7 @@ export default function CommunityManager({
                   <button
                     type="button"
                     onClick={() => setManageGroup((m) => (m === g.id ? null : g.id))}
-                    className="flex-none rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-dark"
+                    className="flex-none rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
                   >
                     {manageGroup === g.id ? "Hide" : "Members & invites"}
                   </button>
@@ -280,7 +280,7 @@ export default function CommunityManager({
               <div key={ev.id} className="flex items-start justify-between gap-2 rounded-xl border border-stone-2 p-3">
                 <span className="min-w-0">
                   <b className="block truncate text-sm text-ink">{ev.title}</b>
-                  <small className="block text-[11.5px] text-brand-dark">
+                  <small className="block text-[11.5px] text-brand-text">
                     {eventWhen(ev.starts_at)}
                     {ev.location ? ` · ${ev.location}` : ""}
                   </small>

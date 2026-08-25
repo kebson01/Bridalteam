@@ -92,7 +92,7 @@ export default function GroupMembers({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={m.avatar} alt="" className="h-8 w-8 flex-none rounded-full object-cover" />
               ) : (
-                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-dark">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-text">
                   {m.name.charAt(0).toUpperCase()}
                 </span>
               )}

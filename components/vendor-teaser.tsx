@@ -23,15 +23,15 @@ export default function VendorTeaser() {
       <div className="relative mx-auto max-w-6xl px-5 text-white">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-amber">
-            Smart vendor matching
+            Find your team
           </p>
           <h2 className="mt-3 text-3xl font-light uppercase tracking-wide sm:text-4xl">
-            Find the right vendors — matched by AI
+            Browse vendors, book with confidence
           </h2>
           <p className="mt-4 text-white/75">
-            Tell Bridal Team your style, budget and location. Our AI reads
-            through the directory and recommends the vendors that actually fit
-            your day — then helps you reach out.
+            Browse by category and see real work before you reach out. Not sure
+            where to start? Tell the AI planner your style, budget and city and
+            it will tell you who to book first and what to ask them.
           </p>
         </div>
 
@@ -50,7 +50,7 @@ export default function VendorTeaser() {
 
         <Link
           href="/vendors"
-          className="mt-10 inline-flex rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-dark shadow-glow transition-transform hover:-translate-y-0.5"
+          className="mt-10 inline-flex rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-text shadow-glow transition-transform hover:-translate-y-0.5"
         >
           Match me with vendors
         </Link>

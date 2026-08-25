@@ -56,7 +56,7 @@ export default function WebsiteManager({
         </div>
         <span
           className={`flex-none rounded-full px-3 py-1 text-xs font-semibold ${
-            published ? "bg-brand/10 text-brand-dark" : "bg-stone-4 text-ink-soft/70"
+            published ? "bg-brand/10 text-brand-text" : "bg-stone-4 text-ink-soft/70"
           }`}
         >
           {published ? "Live" : "Draft"}
@@ -69,7 +69,7 @@ export default function WebsiteManager({
           <button
             type="button"
             onClick={copy}
-            className="flex-none rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-brand-dark shadow-sm"
+            className="flex-none rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-brand-text shadow-sm"
           >
             {copied ? "Copied!" : "Copy link"}
           </button>

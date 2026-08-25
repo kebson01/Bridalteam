@@ -18,7 +18,7 @@ const BLOCKS = [
     img: "/brand/highlight3.jpg",
     tag: "Inspire",
     title: "Find ideas you'll love",
-    body: "Describe your dream day and let AI spin up mood boards, palettes and real vendor ideas that match your style, season and budget.",
+    body: "Filter real wedding photography by theme and colour, save what you love to a shared mood board, and ask the AI planner how to pull the look together on your budget.",
   },
 ];
 
@@ -44,7 +44,7 @@ export default function Highlights() {
               <div className="absolute inset-0 bg-gradient-to-t from-ink/25 to-transparent" />
             </figure>
             <div className={i % 2 === 1 ? "lg:pr-8" : "lg:pl-8"}>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-dark">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-text">
                 {b.tag}
               </p>
               <h3 className="mt-3 text-3xl font-light uppercase tracking-wide text-ink">
@@ -55,7 +55,7 @@ export default function Highlights() {
               </p>
               <Link
                 href="/planner"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-dark transition-colors hover:text-brand-deep"
+                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-text transition-colors hover:text-brand-deep"
               >
                 Try it with AI
                 <span aria-hidden>→</span>

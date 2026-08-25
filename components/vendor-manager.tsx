@@ -128,7 +128,7 @@ function VendorCard({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="mt-3 text-sm font-semibold text-brand-dark hover:text-brand-deep"
+        className="mt-3 text-sm font-semibold text-brand-text hover:text-brand-deep"
       >
         {open ? "Hide details" : "Contact, contract & dates"}
       </button>

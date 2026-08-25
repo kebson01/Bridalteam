@@ -115,7 +115,7 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
           </span>
         ) : (
           <span className="mt-1.5 block text-right">
-            <Link href="/auth/forgot-password" className="text-xs font-medium text-brand-dark">
+            <Link href="/auth/forgot-password" className="text-xs font-medium text-brand-text">
               Forgot password?
             </Link>
           </span>
@@ -139,11 +139,11 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
       {isSignup && (
         <p className="mt-4 text-center text-xs leading-relaxed text-ink-soft/70">
           By creating an account, you agree to our{" "}
-          <Link href="/terms" className="font-semibold text-brand-dark">
+          <Link href="/terms" className="font-semibold text-brand-text">
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" className="font-semibold text-brand-dark">
+          <Link href="/privacy" className="font-semibold text-brand-text">
             Privacy Policy
           </Link>
           .
@@ -154,14 +154,14 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
         {isSignup ? (
           <>
             Already have an account?{" "}
-            <Link href="/auth/login" className="font-semibold text-brand-dark">
+            <Link href="/auth/login" className="font-semibold text-brand-text">
               Log in
             </Link>
           </>
         ) : (
           <>
             New here?{" "}
-            <Link href="/auth/signup" className="font-semibold text-brand-dark">
+            <Link href="/auth/signup" className="font-semibold text-brand-text">
               Create an account
             </Link>
           </>

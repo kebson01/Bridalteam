@@ -90,7 +90,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={v.cover_url} alt={v.business_name} className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-text">
                     {v.category ?? "Vendor"}
                   </span>
                 )}
@@ -110,7 +110,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                 {v.description && (
                   <p className="mt-3 line-clamp-2 text-sm text-ink-soft/80">{v.description}</p>
                 )}
-                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-dark">
+                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-text">
                   View profile <span aria-hidden>→</span>
                 </span>
               </div>

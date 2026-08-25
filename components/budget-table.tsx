@@ -97,7 +97,7 @@ export default function BudgetTable({
         return (
           <section key={category} className="rounded-2xl border border-stone-2 bg-white shadow-card">
             <header className="flex items-baseline justify-between border-b border-stone-2 px-5 py-3">
-              <h2 className={`text-sm font-semibold uppercase tracking-wide ${overlooked ? "text-brand-dark" : "text-ink"}`}>
+              <h2 className={`text-sm font-semibold uppercase tracking-wide ${overlooked ? "text-brand-text" : "text-ink"}`}>
                 {category}
                 {overlooked && (
                   <span className="ml-2 normal-case tracking-normal text-xs font-normal text-ink-soft/60">

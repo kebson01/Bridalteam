@@ -130,7 +130,7 @@ export default function VendorReviews({
         </div>
       ) : (
         <p className="mt-4 rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-5 text-sm text-ink-soft/70">
-          <Link href="/auth/login?next=/vendors" className="font-semibold text-brand-dark hover:underline">
+          <Link href="/auth/login?next=/vendors" className="font-semibold text-brand-text hover:underline">
             Log in
           </Link>{" "}
           to leave a review.

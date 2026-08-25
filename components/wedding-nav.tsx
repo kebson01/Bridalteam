@@ -30,7 +30,7 @@ export default function WeddingNav({
           className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
             it.key === active
               ? "bg-brand text-white"
-              : "text-ink-soft hover:bg-stone-4 hover:text-brand-dark"
+              : "text-ink-soft hover:bg-stone-4 hover:text-brand-text"
           }`}
         >
           {it.label}

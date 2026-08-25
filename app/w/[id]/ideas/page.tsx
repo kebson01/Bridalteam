@@ -50,7 +50,7 @@ export default async function IdeasPage({
     <div className="min-h-screen bg-stone-4/40">
       <div className="border-b border-stone-2 bg-white">
         <div className="mx-auto max-w-5xl px-5 py-8">
-          <Link href={`/w/${id}`} className="text-sm font-semibold text-brand-dark hover:text-brand-deep">
+          <Link href={`/w/${id}`} className="text-sm font-semibold text-brand-text hover:text-brand-deep">
             ← Back to plan
           </Link>
           <h1 className="mt-3 text-3xl font-light uppercase tracking-wide text-ink">Saved ideas</h1>

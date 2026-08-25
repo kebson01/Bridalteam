@@ -41,7 +41,7 @@ export default function ShareButton({
     <button
       type="button"
       onClick={share}
-      className={`inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-sm font-semibold text-ink shadow backdrop-blur transition-colors hover:text-brand-dark ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-sm font-semibold text-ink shadow backdrop-blur transition-colors hover:text-brand-text ${className}`}
     >
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />

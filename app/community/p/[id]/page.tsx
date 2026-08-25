@@ -49,7 +49,7 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
     <section className="mx-auto max-w-2xl px-4 py-8">
       <Link
         href="/community"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft transition-colors hover:text-brand-dark"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft transition-colors hover:text-brand-text"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7" />

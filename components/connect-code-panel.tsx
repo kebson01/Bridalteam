@@ -43,13 +43,13 @@ export default function ConnectCodePanel({
 
       {code ? (
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <span className="rounded-xl border border-dashed border-brand/40 bg-brand/5 px-5 py-2.5 font-mono text-xl tracking-[0.3em] text-brand-dark">
+          <span className="rounded-xl border border-dashed border-brand/40 bg-brand/5 px-5 py-2.5 font-mono text-xl tracking-[0.3em] text-brand-text">
             {code}
           </span>
           <button
             type="button"
             onClick={copy}
-            className="rounded-full border border-stone-2 px-4 py-2 text-sm font-semibold text-ink-soft hover:border-brand hover:text-brand-dark"
+            className="rounded-full border border-stone-2 px-4 py-2 text-sm font-semibold text-ink-soft hover:border-brand hover:text-brand-text"
           >
             {copied ? "Copied!" : "Copy"}
           </button>
@@ -57,7 +57,7 @@ export default function ConnectCodePanel({
             type="button"
             onClick={make}
             disabled={pending}
-            className="text-sm font-medium text-ink-soft/60 hover:text-brand-dark disabled:opacity-50"
+            className="text-sm font-medium text-ink-soft/60 hover:text-brand-text disabled:opacity-50"
           >
             {pending ? "…" : "Generate a new code"}
           </button>

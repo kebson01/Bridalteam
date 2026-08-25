@@ -212,7 +212,7 @@ export default function AdminDashboardPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-light uppercase tracking-wide text-ink">Admin dashboard</h1>
         <div className="flex items-center gap-4 text-sm">
-          <Link href="/admin/venues" className="font-semibold text-brand-dark">Manage venues →</Link>
+          <Link href="/admin/venues" className="font-semibold text-brand-text">Manage venues →</Link>
           <button onClick={logout} className="text-ink-soft/60 hover:text-ink">Lock</button>
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function AdminDashboardPage() {
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map(([label, value, sub]) => (
           <div key={label} className="rounded-2xl border border-stone-2 bg-white p-5 shadow-card">
-            <div className="text-2xl font-semibold text-brand-dark">{value}</div>
+            <div className="text-2xl font-semibold text-brand-text">{value}</div>
             <div className="mt-1 text-xs uppercase tracking-wider text-ink-soft/60">{label}</div>
             {sub && <div className="mt-0.5 text-xs text-ink-soft/50">{sub}</div>}
           </div>

@@ -39,7 +39,7 @@ export default function Hero() {
         <div className="animate-fade-up mt-10 flex flex-col items-center gap-3 sm:flex-row">
           <Link
             href="/planner"
-            className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-dark shadow-glow transition-transform hover:-translate-y-0.5"
+            className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-brand-text shadow-glow transition-transform hover:-translate-y-0.5"
           >
             Try the AI planner
           </Link>

@@ -15,6 +15,21 @@
   --color-brand-dark: #f36705;  /* $siteDarkOrange1 */
   --color-brand-deep: #ec5400;  /* $siteDarkOrange2 */
 
+  /*
+    Brand orange as TEXT on a light ground.
+
+    The palette above is tuned for fills — buttons, gradients, badges — where
+    contrast is measured against white type sitting on the orange. Used the other
+    way round, as orange type on white, $siteDarkOrange1 reaches only 3.11:1,
+    under the 4.5:1 WCAG AA minimum for text below 24px. This is the same hue
+    darkened until it clears that bar (4.7:1), so links and eyebrow labels stay
+    recognisably Bridal Team orange without failing contrast.
+
+    Rule of thumb: brand as a background -> --color-brand / --color-brand-dark.
+    Brand as text -> --color-brand-text.
+  */
+  --color-brand-text: #c35004;
+
   --color-stone-1: #7b7b7b;
   --color-stone-2: #eaeaea;
   --color-stone-3: #9c9c9d;

@@ -29,7 +29,7 @@ export default function AIPlanner() {
           </p>
           <Link
             href="/planner"
-            className="mt-8 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-dark shadow-glow transition-transform hover:-translate-y-0.5"
+            className="mt-8 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-text shadow-glow transition-transform hover:-translate-y-0.5"
           >
             Open the full planner
           </Link>
