@@ -106,10 +106,13 @@ export default function TermsPage() {
               <Lead>Automatic renewal &mdash; please read.</Lead> Paid plans are billed in advance on
               a <Lead>monthly</Lead> basis and <Lead>renew automatically for successive monthly terms
               at the then-current price until you cancel.</Lead> We will charge the payment method on
-              file for each renewal. You may cancel at any time from{" "}
-              <Lead>Account &rarr; Billing</Lead> (or the billing portal linked there). Cancellation
-              stops future renewals; you keep paid features through the end of the period you have
-              already paid for.
+              file for each renewal. You may cancel at any time from your{" "}
+              <Link href="/vendor" className="font-semibold text-brand-text underline-offset-2 hover:underline">
+                vendor dashboard
+              </Link>{" "}
+              &mdash; use <Lead>Cancel subscription</Lead>, or <Lead>Manage billing</Lead> to open the
+              billing portal. Cancellation stops future renewals; you keep paid features through the
+              end of the period you have already paid for.
             </P>
           </Callout>
           <Callout>
