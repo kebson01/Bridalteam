@@ -76,6 +76,7 @@ export default async function GuestsPage({
           initialGuests={guests ?? []}
           loadFailed={guests === null}
           siteUrl={SITE_URL}
+          menu={menu ?? []}
         />
       </div>
     </div>

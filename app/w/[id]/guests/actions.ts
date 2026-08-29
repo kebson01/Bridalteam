@@ -504,3 +504,87 @@ export async function listDishCounts(weddingId: string): Promise<DishCount[] | n
     chosen: tally.get(m.id as string) ?? 0,
   }));
 }
+
+/**
+ * Records a reply on a household's behalf.
+ *
+ * Guests phone, text, or say it at the shops — and the couple shouldn't have to
+ * ask them to go and find the email. This writes exactly what the guest's own
+ * form writes, through the same RPC, so a reply taken over the phone is
+ * indistinguishable from one entered by the guest: same clamping to seats, same
+ * rejection of dishes that aren't on the menu, same replace-the-previous-answer
+ * behaviour.
+ */
+export async function recordReply(
+  weddingId: string,
+  guestId: string,
+  input: {
+    attending: boolean;
+    attendees: { name: string; dish: string }[];
+    dietary: string;
+    note: string;
+  },
+): Promise<Result> {
+  const supabase = await supabaseServer();
+
+  // The RPC is keyed by token, and RLS already limits which guests this user can
+  // read — so fetching the token here is both the lookup and the access check.
+  const { data: guest, error: gErr } = await supabase
+    .from("wedding_guests")
+    .select("token")
+    .eq("id", guestId)
+    .eq("wedding_id", weddingId)
+    .maybeSingle();
+  if (gErr || !guest) {
+    console.error("recordReply lookup failed:", gErr?.code, gErr?.message);
+    return { ok: false, error: "Couldn’t find that guest." };
+  }
+
+  const { error } = await supabase.rpc("submit_guest_rsvp", {
+    p_token: guest.token,
+    p_attending: input.attending,
+    p_attendees: input.attending
+      ? input.attendees.map((a) => ({
+          name: a.name.trim() || null,
+          menu_option_id: a.dish || null,
+        }))
+      : [],
+    p_dietary: input.dietary,
+    p_note: input.note,
+  });
+  if (error) {
+    console.error("recordReply failed:", error.code, error.message);
+    return { ok: false, error: "Couldn’t save that reply. Please try again." };
+  }
+
+  revalidatePath(`/w/${weddingId}/guests`);
+  return { ok: true };
+}
+
+/** Clears a reply, putting the household back to awaiting. */
+export async function clearReply(weddingId: string, guestId: string): Promise<Result> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase
+    .from("wedding_guests")
+    .update({
+      responded_at: null,
+      attending: null,
+      party_size: null,
+      dietary: null,
+      note: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", guestId)
+    .eq("wedding_id", weddingId);
+  if (error) {
+    console.error("clearReply failed:", error.code, error.message);
+    return { ok: false, error: "Couldn’t clear that reply." };
+  }
+  // Their people go too — otherwise the household reads as "awaiting" while
+  // still listing four names and their dishes.
+  const { error: aErr } = await supabase.from("guest_attendees").delete().eq("guest_id", guestId);
+  if (aErr) console.error("clearReply attendees failed:", aErr.code, aErr.message);
+
+  revalidatePath(`/w/${weddingId}/guests`);
+  return { ok: true };
+}

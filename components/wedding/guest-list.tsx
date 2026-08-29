@@ -11,6 +11,8 @@ import {
   type Guest,
 } from "@/app/w/[id]/guests/actions";
 import { canRemind, REMINDER_COOLDOWN_DAYS } from "@/lib/guests";
+import GuestEditor from "@/components/wedding/guest-editor";
+import type { MenuOption } from "@/app/w/[id]/guests/actions";
 
 /** Attending / declined / waiting, as a small coloured chip. */
 function Status({ g }: { g: Guest }) {
@@ -49,11 +51,14 @@ export default function GuestList({
   initialGuests,
   loadFailed = false,
   siteUrl,
+  menu,
 }: {
   weddingId: string;
   initialGuests: Guest[];
   loadFailed?: boolean;
   siteUrl: string;
+  /** Dishes available when recording a reply on someone's behalf. */
+  menu: MenuOption[];
 }) {
   const router = useRouter();
   const [guests, setGuests] = useState<Guest[]>(initialGuests);
@@ -61,6 +66,7 @@ export default function GuestList({
   const [busy, start] = useTransition();
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
 
   // Head counts. `seats` is what was offered; `coming` is what they confirmed.
   const invited = guests.length;
@@ -235,6 +241,12 @@ export default function GuestList({
             Send {uninvitedWithEmail > 0 ? `${uninvitedWithEmail} ` : ""}invitation
             {uninvitedWithEmail === 1 ? "" : "s"}
           </button>
+          <a
+            href={`/w/${weddingId}/guests/export`}
+            className="rounded-full border border-stone-2 px-5 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
+          >
+            Export for caterer
+          </a>
           <button
             type="button"
             onClick={onRemindAll}
@@ -260,7 +272,8 @@ export default function GuestList({
         ) : (
           <ul className="divide-y divide-stone-2/60">
             {guests.map((g) => (
-              <li key={g.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
+              <li key={g.id} className="px-5 py-4">
+                <div className="flex flex-wrap items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-ink">{g.household_name}</p>
                   <p className="truncate text-xs text-ink-soft/60">
@@ -317,6 +330,13 @@ export default function GuestList({
                   >
                     {copied === g.id ? "Copied!" : "Copy link"}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditing(editing === g.id ? null : g.id)}
+                    className="rounded-full border border-stone-2 px-3 py-1.5 text-xs font-semibold text-ink-soft hover:border-brand hover:text-brand-text"
+                  >
+                    {editing === g.id ? "Close" : "Edit"}
+                  </button>
                   {g.email && (
                     <button
                       type="button"
@@ -348,6 +368,21 @@ export default function GuestList({
                     ×
                   </button>
                 </div>
+                </div>
+
+                {editing === g.id && (
+                  <div className="mt-3">
+                    <GuestEditor
+                      weddingId={weddingId}
+                      guest={g}
+                      menu={menu}
+                      onDone={() => {
+                        setEditing(null);
+                        refresh();
+                      }}
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>
