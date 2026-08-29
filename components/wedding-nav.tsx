@@ -9,7 +9,7 @@ export default function WeddingNav({
   active,
 }: {
   weddingId: string;
-  active: "plan" | "budget" | "vendors" | "travel" | "team" | "ideas" | "website";
+  active: "plan" | "budget" | "vendors" | "travel" | "team" | "ideas" | "website" | "details";
 }) {
   const items = [
     { key: "plan", label: "Checklist", href: `/w/${weddingId}` },
@@ -19,10 +19,14 @@ export default function WeddingNav({
     { key: "travel", label: "Travel", href: `/w/${weddingId}/travel` },
     { key: "team", label: "Team", href: `/w/${weddingId}/team` },
     { key: "website", label: "Website", href: `/w/${weddingId}/website` },
+    // Last: details are set at onboarding and edited rarely, so this sits at the
+    // end rather than competing with the day-to-day sections.
+    { key: "details", label: "Details", href: `/w/${weddingId}/details` },
   ] as const;
 
   return (
-    <nav className="mt-4 flex gap-1">
+    // Wraps on narrow screens — eight pills no longer fit one mobile row.
+    <nav className="mt-4 flex flex-wrap gap-1">
       {items.map((it) => (
         <Link
           key={it.key}
