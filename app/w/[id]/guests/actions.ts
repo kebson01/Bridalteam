@@ -26,15 +26,24 @@ export interface Guest {
   attending: boolean | null;
   party_size: number | null;
   meal: string | null;
+  /** Allergies and dietary needs for the household, separate from dish choice. */
+  dietary: string | null;
   note: string | null;
   reminded_at: string | null;
   reminder_count: number;
+  /** Who's actually coming from this household, and what each is eating. */
+  attendees: Attendee[];
+}
+
+export interface Attendee {
+  name: string | null;
+  dish: string | null;
 }
 
 export type Result = { ok: boolean; error?: string; sent?: number; added?: number };
 
 const GUEST_COLUMNS =
-  "id, household_name, email, seats, token, invited_at, responded_at, attending, party_size, meal, note, reminded_at, reminder_count";
+  "id, household_name, email, seats, token, invited_at, responded_at, attending, party_size, meal, dietary, note, reminded_at, reminder_count";
 
 /**
  * A guest's personal RSVP link.
@@ -58,7 +67,40 @@ export async function listGuests(weddingId: string): Promise<Guest[] | null> {
     console.error("listGuests failed:", error.code, error.message);
     return null; // null = couldn't load, [] = nobody invited yet
   }
-  return (data ?? []) as Guest[];
+
+  const guests = (data ?? []) as Omit<Guest, "attendees">[];
+  if (guests.length === 0) return [];
+
+  // Who is coming, and what each of them ordered. Totals alone answer "how many
+  // chickens"; place cards and seating need "which chicken is whose".
+  const [{ data: rows, error: aErr }, { data: menu, error: mErr }] = await Promise.all([
+    supabase
+      .from("guest_attendees")
+      .select("guest_id, name, menu_option_id, position")
+      .in("guest_id", guests.map((g) => g.id))
+      .order("position", { ascending: true }),
+    supabase.from("wedding_menu_options").select("id, name").eq("wedding_id", weddingId),
+  ]);
+  if (aErr || mErr) {
+    // The list itself loaded; only the breakdown didn't. Show the households
+    // rather than failing the whole page over the detail.
+    console.error("listGuests attendees failed:", aErr?.message, mErr?.message);
+    return guests.map((g) => ({ ...g, attendees: [] }));
+  }
+
+  const dishName = new Map((menu ?? []).map((m) => [m.id as string, m.name as string]));
+  const byGuest = new Map<string, Attendee[]>();
+  for (const r of rows ?? []) {
+    const gid = r.guest_id as string;
+    const list = byGuest.get(gid) ?? [];
+    list.push({
+      name: (r.name as string | null) ?? null,
+      dish: r.menu_option_id ? (dishName.get(r.menu_option_id as string) ?? null) : null,
+    });
+    byGuest.set(gid, list);
+  }
+
+  return guests.map((g) => ({ ...g, attendees: byGuest.get(g.id) ?? [] }));
 }
 
 /**

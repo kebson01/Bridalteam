@@ -266,9 +266,28 @@ export default function GuestList({
                   <p className="truncate text-xs text-ink-soft/60">
                     {g.email ?? "No email — share their link by hand"}
                   </p>
-                  {g.responded_at && (g.meal || g.note) && (
+                  {/* Who's coming and what each ordered. The totals in the
+                      Menu panel answer "how many chickens"; this is the bit you
+                      write place cards and a seating chart from. */}
+                  {g.attendees.length > 0 && (
+                    <ul className="mt-1.5 space-y-0.5">
+                      {g.attendees.map((a, i) => (
+                        <li key={i} className="text-xs text-ink-soft/75">
+                          <span className="font-medium text-ink-soft">
+                            {a.name?.trim() || `Guest ${i + 1}`}
+                          </span>
+                          {a.dish ? (
+                            <span> — {a.dish}</span>
+                          ) : (
+                            <span className="italic text-ink-soft/50"> — no dish chosen</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {g.responded_at && (g.dietary || g.meal || g.note) && (
                     <p className="mt-1 truncate text-xs text-ink-soft/70">
-                      {[g.meal, g.note].filter(Boolean).join(" · ")}
+                      {[g.dietary || g.meal, g.note].filter(Boolean).join(" · ")}
                     </p>
                   )}
                 </div>
