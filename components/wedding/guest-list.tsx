@@ -26,9 +26,14 @@ function Status({ g }: { g: Guest }) {
     );
   }
   if (g.attending) {
+    // Show the shortfall when a household is bringing fewer than invited.
+    // "2 of 4" is the number that matters for catering and seating, and it's
+    // invisible if only the confirmed count is printed.
+    const short = g.party_size != null && g.party_size < g.seats;
     return (
       <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-800">
-        Coming{g.party_size ? ` · ${g.party_size}` : ""}
+        Coming
+        {g.party_size ? ` · ${g.party_size}${short ? ` of ${g.seats}` : ""}` : ""}
       </span>
     );
   }

@@ -116,6 +116,12 @@ export default function GuestRsvpForm({
 
       {attending === true && (
         <>
+          {/* Only a household with more than one seat has a number to choose.
+              The options stop at the seats offered, so a guest can say fewer are
+              coming but never more — the database clamps to the same ceiling, so
+              a tampered form can't add people either. Each option spells out
+              "2 of 4" rather than a bare "2", so the cap is legible in the
+              control itself and not just in the line above it. */}
           {invite.seats > 1 && (
             <label className="mt-6 block text-sm font-medium text-ink-soft">
               How many of you are coming?
@@ -126,10 +132,15 @@ export default function GuestRsvpForm({
               >
                 {Array.from({ length: invite.seats }, (_, i) => i + 1).map((n) => (
                   <option key={n} value={n}>
-                    {n} {n === 1 ? "person" : "people"}
+                    {n} of {invite.seats} {n === 1 ? "person" : "people"}
                   </option>
                 ))}
               </select>
+              <span className="mt-1.5 block text-xs font-normal text-ink-soft/60">
+                {partySize < invite.seats
+                  ? `We'll let them know ${invite.seats - partySize} of you can't make it.`
+                  : "Let us know if fewer of you can make it — just pick a smaller number."}
+              </span>
             </label>
           )}
 
