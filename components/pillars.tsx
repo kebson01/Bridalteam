@@ -24,7 +24,7 @@ const PILLARS = [
   {
     tag: "Budget",
     title: "Budget & RSVPs",
-    body: "AI estimates a realistic budget from your headcount and priorities — including the costs people forget — then tracks what you spend and collects RSVPs on your wedding website.",
+    body: "Turn your total into a realistic category breakdown — including the costs first-timers forget — then track what you actually spend and collect RSVPs on your wedding website.",
     icon: (
       <path d="M3 6h18v12H3zM3 10h18M7 15h4M12 3a3 3 0 0 1 0 6 3 3 0 0 1 0-6Z" />
     ),

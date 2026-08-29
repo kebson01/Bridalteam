@@ -91,9 +91,17 @@ export default async function BudgetPage({
             tone={overEstimate ? "text-red-600" : "text-ink"}
           />
           <Stat label="Paid so far" value={money(totalPaid)} />
+          {/* Unallocated, not "remaining to pay". Total minus payments just
+              repeats the Total tile until money starts moving; what a couple
+              needs while planning is how much budget they haven't committed.
+              Goes red once estimates exceed the total, matching the warning
+              below, which already keys off estimates rather than payments.
+              Falls back to a payment view when no total is set, since
+              "unallocated" is meaningless without one. */}
           <Stat
-            label={total > 0 ? "Remaining" : "Not yet paid"}
-            value={total > 0 ? money(total - totalPaid) : money(totalEst - totalPaid)}
+            label={total > 0 ? "Unallocated" : "Not yet paid"}
+            value={total > 0 ? money(total - totalEst) : money(totalEst - totalPaid)}
+            tone={overEstimate ? "text-red-600" : undefined}
           />
         </div>
 
