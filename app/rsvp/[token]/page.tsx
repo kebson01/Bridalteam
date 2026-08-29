@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import GuestRsvpForm from "@/components/wedding/guest-rsvp-form";
+import GuestRsvpForm, { type RsvpContext } from "@/components/wedding/guest-rsvp-form";
 import { supabasePublic } from "@/lib/supabase";
 
 export const metadata: Metadata = {
@@ -11,20 +11,18 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export interface GuestInvite {
-  household_name: string;
-  seats: number;
-  responded_at: string | null;
-  attending: boolean | null;
-  party_size: number | null;
-  meal: string | null;
-  note: string | null;
-  partner_one: string | null;
-  partner_two: string | null;
-  event_date: string | null;
-  city: string | null;
-  venue: string | null;
-  welcome_message: string | null;
+interface InviteDoc {
+  household: RsvpContext["household"];
+  wedding: {
+    partner_one: string | null;
+    partner_two: string | null;
+    event_date: string | null;
+    city: string | null;
+    venue: string | null;
+    welcome_message: string | null;
+  };
+  menu: RsvpContext["menu"];
+  attendees: RsvpContext["attendees"];
 }
 
 /**
@@ -51,20 +49,20 @@ export default async function RsvpPage({
     console.error("get_guest_invite failed:", error.code, error.message);
     notFound();
   }
-  const invite = (Array.isArray(data) ? data[0] : data) as GuestInvite | undefined;
-  if (!invite) notFound();
+  const invite = data as InviteDoc | null;
+  if (!invite?.household) notFound();
 
-  const couple =
-    [invite.partner_one, invite.partner_two].filter(Boolean).join(" & ") || "Our wedding";
-  const when = invite.event_date
-    ? new Date(`${invite.event_date}T00:00:00`).toLocaleDateString("en-US", {
+  const w = invite.wedding;
+  const couple = [w.partner_one, w.partner_two].filter(Boolean).join(" & ") || "Our wedding";
+  const when = w.event_date
+    ? new Date(`${w.event_date}T00:00:00`).toLocaleDateString("en-US", {
         weekday: "long",
         month: "long",
         day: "numeric",
         year: "numeric",
       })
     : null;
-  const where = [invite.venue, invite.city].filter(Boolean).join(", ");
+  const where = [w.venue, w.city].filter(Boolean).join(", ");
 
   return (
     <div className="min-h-screen bg-stone-4/40">
@@ -82,13 +80,16 @@ export default async function RsvpPage({
       </section>
 
       <section className="mx-auto max-w-2xl px-5 py-12">
-        {invite.welcome_message && (
+        {w.welcome_message && (
           <p className="mb-8 whitespace-pre-line text-center leading-relaxed text-ink-soft/85">
-            {invite.welcome_message}
+            {w.welcome_message}
           </p>
         )}
 
-        <GuestRsvpForm token={token} invite={invite} />
+        <GuestRsvpForm
+          token={token}
+          ctx={{ household: invite.household, menu: invite.menu ?? [], attendees: invite.attendees ?? [] }}
+        />
       </section>
     </div>
   );

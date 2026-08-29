@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import GuestList from "@/components/wedding/guest-list";
 import WeddingNav from "@/components/wedding-nav";
-import { listGuests } from "./actions";
+import MenuManager from "@/components/wedding/menu-manager";
+import { listGuests, listMenu, listDishCounts } from "./actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
@@ -36,7 +37,11 @@ export default async function GuestsPage({
     .maybeSingle();
   if (!wedding) notFound();
 
-  const guests = await listGuests(id);
+  const [guests, menu, counts] = await Promise.all([
+    listGuests(id),
+    listMenu(id),
+    listDishCounts(id),
+  ]);
   const names = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ");
 
   return (
@@ -57,6 +62,15 @@ export default async function GuestsPage({
           Everyone you&rsquo;re inviting, and who&rsquo;s replied. Each household gets its own
           private link — only people you invite can RSVP.
         </p>
+        <div className="mb-6">
+          <MenuManager
+            weddingId={id}
+            menu={menu ?? []}
+            counts={counts ?? []}
+            loadFailed={menu === null || counts === null}
+          />
+        </div>
+
         <GuestList
           weddingId={id}
           initialGuests={guests ?? []}

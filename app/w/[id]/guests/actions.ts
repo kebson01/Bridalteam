@@ -338,3 +338,127 @@ export async function sendReminders(weddingId: string, guestId?: string): Promis
   }
   return { ok: true, sent };
 }
+
+/* ────────────────────────────── Menu ────────────────────────────── */
+
+export interface MenuOption {
+  id: string;
+  name: string;
+  description: string | null;
+  position: number;
+}
+
+/** A dish and how many people have chosen it — what the caterer actually needs. */
+export interface DishCount {
+  id: string;
+  name: string;
+  chosen: number;
+}
+
+export async function listMenu(weddingId: string): Promise<MenuOption[] | null> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase
+    .from("wedding_menu_options")
+    .select("id, name, description, position")
+    .eq("wedding_id", weddingId)
+    .order("position", { ascending: true });
+  if (error) {
+    console.error("listMenu failed:", error.code, error.message);
+    return null;
+  }
+  return (data ?? []) as MenuOption[];
+}
+
+export async function addMenuOption(
+  weddingId: string,
+  name: string,
+  description: string,
+): Promise<Result> {
+  const clean = name.trim().slice(0, 120);
+  if (!clean) return { ok: false, error: "Give the dish a name." };
+
+  const supabase = await supabaseServer();
+  // Append to the end of the menu.
+  const { data: last } = await supabase
+    .from("wedding_menu_options")
+    .select("position")
+    .eq("wedding_id", weddingId)
+    .order("position", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("wedding_menu_options").insert({
+    wedding_id: weddingId,
+    name: clean,
+    description: description.trim().slice(0, 300) || null,
+    position: (last?.position ?? 0) + 1,
+  });
+  if (error) {
+    console.error("addMenuOption failed:", error.code, error.message);
+    return { ok: false, error: "Couldn’t add that dish. Please try again." };
+  }
+  revalidatePath(`/w/${weddingId}/guests`);
+  return { ok: true };
+}
+
+/**
+ * Removes a dish.
+ *
+ * guest_attendees.menu_option_id is ON DELETE SET NULL, so anyone who already
+ * chose this dish keeps their place at the table and simply shows as having no
+ * dish — deleting a menu item must not quietly un-invite people.
+ */
+export async function deleteMenuOption(weddingId: string, optionId: string): Promise<Result> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase.from("wedding_menu_options").delete().eq("id", optionId);
+  if (error) {
+    console.error("deleteMenuOption failed:", error.code, error.message);
+    return { ok: false, error: "Couldn’t remove that dish." };
+  }
+  revalidatePath(`/w/${weddingId}/guests`);
+  return { ok: true };
+}
+
+/** Per-dish totals across everyone who has replied yes. */
+export async function listDishCounts(weddingId: string): Promise<DishCount[] | null> {
+  const supabase = await supabaseServer();
+
+  // Two plain queries rather than one embedded join. PostgREST can filter on an
+  // embedded resource, but a subtly wrong relationship name fails by returning
+  // the wrong rows instead of an error — and wrong catering numbers are worse
+  // than an extra round trip. RLS scopes all of these to this wedding anyway.
+  const [{ data: menu, error: mErr }, { data: guestRows, error: gErr }] = await Promise.all([
+    supabase
+      .from("wedding_menu_options")
+      .select("id, name, position")
+      .eq("wedding_id", weddingId)
+      .order("position", { ascending: true }),
+    supabase.from("wedding_guests").select("id").eq("wedding_id", weddingId),
+  ]);
+  if (mErr || gErr) {
+    console.error("listDishCounts failed:", mErr?.message, gErr?.message);
+    return null;
+  }
+
+  const guestIds = (guestRows ?? []).map((g) => g.id as string);
+  const tally = new Map<string, number>();
+  if (guestIds.length > 0) {
+    const { data: rows, error: aErr } = await supabase
+      .from("guest_attendees")
+      .select("menu_option_id")
+      .in("guest_id", guestIds);
+    if (aErr) {
+      console.error("listDishCounts attendees failed:", aErr.code, aErr.message);
+      return null;
+    }
+    for (const r of rows ?? []) {
+      const id = (r as { menu_option_id: string | null }).menu_option_id;
+      if (id) tally.set(id, (tally.get(id) ?? 0) + 1);
+    }
+  }
+  return (menu ?? []).map((m) => ({
+    id: m.id as string,
+    name: m.name as string,
+    chosen: tally.get(m.id as string) ?? 0,
+  }));
+}

@@ -2,44 +2,83 @@
 
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import type { GuestInvite } from "@/app/rsvp/[token]/page";
+
+export interface MenuChoice {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+export interface RsvpContext {
+  household: {
+    name: string;
+    seats: number;
+    responded_at: string | null;
+    attending: boolean | null;
+    party_size: number | null;
+    dietary: string | null;
+    note: string | null;
+  };
+  menu: MenuChoice[];
+  attendees: { name: string | null; menu_option_id: string | null }[];
+}
+
+type Person = { name: string; dish: string };
 
 /**
  * The guest's reply.
  *
- * Calls submit_guest_rsvp directly from the browser with the anon key. That's
- * safe because the function is SECURITY DEFINER, keyed by the token, and can
- * only ever touch the one household the token belongs to — and because guests
- * have no account, there's no session for a server action to use anyway. The
- * database clamps the head count to the seats offered, so a tampered form can't
- * add people.
+ * Calls submit_guest_rsvp from the browser with the anon key. That's safe
+ * because the function is SECURITY DEFINER, keyed by the token, and can only
+ * touch the one household it belongs to — and guests have no account, so
+ * there's no session for a server action to use. The database independently
+ * caps the party at the seats offered and ignores any dish that isn't on this
+ * wedding's menu, so a tampered form can't add people or invent a meal.
  */
 export default function GuestRsvpForm({
   token,
-  invite,
+  ctx,
 }: {
   token: string;
-  invite: GuestInvite;
+  ctx: RsvpContext;
 }) {
-  const alreadyReplied = Boolean(invite.responded_at);
+  const { household, menu, attendees } = ctx;
+  const alreadyReplied = Boolean(household.responded_at);
+  const hasMenu = menu.length > 0;
 
   const [attending, setAttending] = useState<boolean | null>(
-    alreadyReplied ? invite.attending : null,
+    alreadyReplied ? household.attending : null,
   );
-  const [partySize, setPartySize] = useState<number>(
-    invite.party_size && invite.party_size > 0 ? invite.party_size : invite.seats,
-  );
-  const [meal, setMeal] = useState(invite.meal ?? "");
-  const [note, setNote] = useState(invite.note ?? "");
+
+  // One row per person coming. Seeded from a previous reply if there is one,
+  // otherwise a full house — most invitations are accepted in full, and it's
+  // easier to remove a row than to add several.
+  const [people, setPeople] = useState<Person[]>(() => {
+    if (attendees.length > 0) {
+      return attendees.map((a) => ({ name: a.name ?? "", dish: a.menu_option_id ?? "" }));
+    }
+    return Array.from({ length: household.seats }, () => ({ name: "", dish: "" }));
+  });
+
+  const [dietary, setDietary] = useState(household.dietary ?? "");
+  const [note, setNote] = useState(household.note ?? "");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(alreadyReplied);
   const [editing, setEditing] = useState(!alreadyReplied);
   const [error, setError] = useState<string | null>(null);
 
+  function setPerson(i: number, patch: Partial<Person>) {
+    setPeople((prev) => prev.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (attending === null) {
       setError("Please let us know if you can make it.");
+      return;
+    }
+    if (attending && people.length === 0) {
+      setError("Add at least one person, or let us know you can't make it.");
       return;
     }
     setBusy(true);
@@ -48,8 +87,10 @@ export default function GuestRsvpForm({
     const { error: err } = await supabaseBrowser().rpc("submit_guest_rsvp", {
       p_token: token,
       p_attending: attending,
-      p_party_size: attending ? partySize : 0,
-      p_meal: meal,
+      p_attendees: attending
+        ? people.map((p) => ({ name: p.name.trim() || null, menu_option_id: p.dish || null }))
+        : [],
+      p_dietary: dietary,
       p_note: note,
     });
 
@@ -71,7 +112,7 @@ export default function GuestRsvpForm({
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-ink-soft/75">
           {attending
-            ? `We've got you down for ${partySize} ${partySize === 1 ? "person" : "people"}.`
+            ? `We've got you down for ${people.length} ${people.length === 1 ? "person" : "people"}.`
             : "We're sorry you can't make it — you'll be missed."}
         </p>
         <button
@@ -87,10 +128,10 @@ export default function GuestRsvpForm({
 
   return (
     <form onSubmit={submit} className="rounded-2xl border border-stone-2 bg-white p-8 shadow-card">
-      <h2 className="text-xl font-medium text-ink">{invite.household_name}</h2>
+      <h2 className="text-xl font-medium text-ink">{household.name}</h2>
       <p className="mt-1 text-sm text-ink-soft/75">
-        {invite.seats > 1
-          ? `Your invitation is for ${invite.seats} people.`
+        {household.seats > 1
+          ? `Your invitation is for ${household.seats} people.`
           : "Your invitation is for one."}
       </p>
 
@@ -116,40 +157,80 @@ export default function GuestRsvpForm({
 
       {attending === true && (
         <>
-          {/* Only a household with more than one seat has a number to choose.
-              The options stop at the seats offered, so a guest can say fewer are
-              coming but never more — the database clamps to the same ceiling, so
-              a tampered form can't add people either. Each option spells out
-              "2 of 4" rather than a bare "2", so the cap is legible in the
-              control itself and not just in the line above it. */}
-          {invite.seats > 1 && (
-            <label className="mt-6 block text-sm font-medium text-ink-soft">
-              How many of you are coming?
-              <select
-                value={partySize}
-                onChange={(e) => setPartySize(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border border-stone-2 px-3 py-2 text-sm text-ink outline-none focus:border-brand"
-              >
-                {Array.from({ length: invite.seats }, (_, i) => i + 1).map((n) => (
-                  <option key={n} value={n}>
-                    {n} of {invite.seats} {n === 1 ? "person" : "people"}
-                  </option>
-                ))}
-              </select>
-              <span className="mt-1.5 block text-xs font-normal text-ink-soft/60">
-                {partySize < invite.seats
-                  ? `We'll let them know ${invite.seats - partySize} of you can't make it.`
-                  : "Let us know if fewer of you can make it — just pick a smaller number."}
-              </span>
-            </label>
-          )}
+          <div className="mt-7">
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-sm font-semibold text-ink">
+                Who&rsquo;s coming{household.seats > 1 ? ` — ${people.length} of ${household.seats}` : ""}
+              </h3>
+              {household.seats > 1 && people.length < household.seats && (
+                <button
+                  type="button"
+                  onClick={() => setPeople((p) => [...p, { name: "", dish: "" }])}
+                  className="text-xs font-semibold text-brand-text hover:underline"
+                >
+                  + Add someone
+                </button>
+              )}
+            </div>
 
-          <label className="mt-5 block text-sm font-medium text-ink-soft">
-            Any dietary needs?
+            <div className="mt-3 space-y-3">
+              {people.map((p, i) => (
+                <div key={i} className="rounded-xl border border-stone-2 p-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={p.name}
+                      onChange={(e) => setPerson(i, { name: e.target.value })}
+                      placeholder={i === 0 ? "Your name" : `Guest ${i + 1}`}
+                      className="w-full rounded-lg border border-stone-2 px-3 py-2 text-sm text-ink outline-none focus:border-brand"
+                    />
+                    {/* Removing a row is how you say fewer are coming. Never
+                        below one — that's what "declines" is for. */}
+                    {people.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setPeople((prev) => prev.filter((_, idx) => idx !== i))}
+                        aria-label={`Remove guest ${i + 1}`}
+                        className="px-1 text-lg leading-none text-ink-soft/40 hover:text-red-600"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+
+                  {hasMenu && (
+                    <select
+                      value={p.dish}
+                      onChange={(e) => setPerson(i, { dish: e.target.value })}
+                      className="mt-2 w-full rounded-lg border border-stone-2 px-3 py-2 text-sm text-ink outline-none focus:border-brand"
+                    >
+                      <option value="">Choose a dish…</option>
+                      {menu.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                          {m.description ? ` — ${m.description}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {household.seats > 1 && (
+              <p className="mt-2 text-xs text-ink-soft/60">
+                {people.length < household.seats
+                  ? `We'll let them know ${household.seats - people.length} of you can't make it.`
+                  : "Remove anyone who can't make it — you can't add more than you were invited for."}
+              </p>
+            )}
+          </div>
+
+          <label className="mt-6 block text-sm font-medium text-ink-soft">
+            Any allergies or dietary needs?
             <input
-              value={meal}
-              onChange={(e) => setMeal(e.target.value)}
-              placeholder="e.g. Vegetarian, nut allergy"
+              value={dietary}
+              onChange={(e) => setDietary(e.target.value)}
+              placeholder="e.g. nut allergy for Chidi"
               className="mt-1 w-full rounded-lg border border-stone-2 px-3 py-2 text-sm text-ink outline-none focus:border-brand"
             />
           </label>
