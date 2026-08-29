@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import RsvpForm from "@/components/wedding/rsvp-form";
 import { getPublicWedding, getPublicRegistry } from "@/app/wedding/actions";
 
 export const dynamic = "force-dynamic";
@@ -72,7 +71,18 @@ export default async function PublicWeddingPage({
             {w.welcome_message}
           </p>
         )}
-        <RsvpForm slug={slug} />
+        {/* RSVP is invite-only: replies come through each household's personal
+            link, so this shared page no longer carries an open form. The
+            database agrees — submit_rsvp's EXECUTE grant was revoked, so an
+            open form here could only ever fail. */}
+        <div className="rounded-2xl border border-stone-2 bg-white p-8 text-center shadow-card">
+          <h2 className="text-xl font-medium text-ink">RSVP</h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-ink-soft/75">
+            Each invitation has its own private link. Please reply using the link in your
+            invitation &mdash; if you can&rsquo;t find it, just ask us and we&rsquo;ll send it
+            again.
+          </p>
+        </div>
 
         {registry.length > 0 && (
           <div className="mt-12 text-center">

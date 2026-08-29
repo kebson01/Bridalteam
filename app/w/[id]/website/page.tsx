@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import WeddingNav from "@/components/wedding-nav";
 import WebsiteManager from "@/components/wedding/website-manager";
 import RegistryManager from "@/components/wedding/registry-manager";
-import { listRsvps, listRegistryLinks } from "@/app/wedding/actions";
+import { listRegistryLinks } from "@/app/wedding/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { SITE_URL } from "@/lib/site";
@@ -37,11 +38,8 @@ export default async function WeddingWebsitePage({
     .maybeSingle();
   if (!wedding) notFound();
 
-  const [rsvps, registry] = await Promise.all([listRsvps(id), listRegistryLinks(id)]);
+  const registry = await listRegistryLinks(id);
   const names = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ") || "Your wedding";
-  const attending = rsvps.filter((r) => r.attending);
-  const declined = rsvps.filter((r) => !r.attending);
-  const headcount = attending.reduce((s, r) => s + r.party_size, 0);
 
   return (
     <>
@@ -61,52 +59,26 @@ export default async function WeddingWebsitePage({
 
           <RegistryManager weddingId={id} initialLinks={registry} />
 
-          {/* RSVP responses */}
+          {/* RSVPs live on the Guests tab now.
+              Replies used to arrive through an open form on the public page and
+              landed in `rsvps`. RSVP is invite-only since the guest list
+              shipped: each household replies through its own link and the
+              answer is stored against their row. Listing the old table here
+              would show an empty box forever, so this points at the real one
+              rather than duplicating it. */}
           <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-display text-lg font-semibold text-ink">RSVPs</h2>
-              <div className="flex gap-4 text-sm">
-                <span className="text-brand-text">
-                  <b>{attending.length}</b> attending
-                </span>
-                <span className="text-ink-soft/60">
-                  <b>{headcount}</b> total guests
-                </span>
-                <span className="text-ink-soft/60">
-                  <b>{declined.length}</b> declined
-                </span>
-              </div>
-            </div>
-
-            {rsvps.length === 0 ? (
-              <p className="mt-4 rounded-xl border border-dashed border-stone-2 bg-stone-4 p-6 text-center text-sm text-ink-soft/60">
-                No RSVPs yet. Publish your site and share the link to start collecting responses.
-              </p>
-            ) : (
-              <ul className="mt-4 divide-y divide-stone-2">
-                {rsvps.map((r) => (
-                  <li key={r.id} className="flex items-start justify-between gap-3 py-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-ink">
-                        {r.guest_name}
-                        {r.attending && r.party_size > 1 && (
-                          <span className="font-normal text-ink-soft/60"> +{r.party_size - 1}</span>
-                        )}
-                      </p>
-                      {r.meal && <p className="text-xs text-ink-soft/60">Meal: {r.meal}</p>}
-                      {r.note && <p className="mt-0.5 text-xs italic text-ink-soft/70">“{r.note}”</p>}
-                    </div>
-                    <span
-                      className={`flex-none rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                        r.attending ? "bg-brand/10 text-brand-text" : "bg-stone-4 text-ink-soft/60"
-                      }`}
-                    >
-                      {r.attending ? "Attending" : "Declined"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <h2 className="font-display text-lg font-semibold text-ink">RSVPs</h2>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-soft/75">
+              Replies come in through each household&rsquo;s private invitation link. Your guest
+              list shows who&rsquo;s been invited, who&rsquo;s replied and who you&rsquo;re still
+              waiting on.
+            </p>
+            <Link
+              href={`/w/${id}/guests`}
+              className="mt-4 inline-flex rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
+            >
+              Open your guest list
+            </Link>
           </div>
         </div>
       </section>

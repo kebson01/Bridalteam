@@ -9,7 +9,7 @@ export default function WeddingNav({
   active,
 }: {
   weddingId: string;
-  active: "plan" | "budget" | "vendors" | "travel" | "team" | "ideas" | "website" | "details";
+  active: "plan" | "budget" | "vendors" | "travel" | "team" | "ideas" | "website" | "details" | "guests";
 }) {
   const items = [
     { key: "plan", label: "Checklist", href: `/w/${weddingId}` },
@@ -18,6 +18,7 @@ export default function WeddingNav({
     { key: "ideas", label: "Ideas", href: `/w/${weddingId}/ideas` },
     { key: "travel", label: "Travel", href: `/w/${weddingId}/travel` },
     { key: "team", label: "Team", href: `/w/${weddingId}/team` },
+    { key: "guests", label: "Guests", href: `/w/${weddingId}/guests` },
     { key: "website", label: "Website", href: `/w/${weddingId}/website` },
     // Last: details are set at onboarding and edited rarely, so this sits at the
     // end rather than competing with the day-to-day sections.
