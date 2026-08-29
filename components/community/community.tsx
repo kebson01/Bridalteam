@@ -5,6 +5,7 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import { downscaleImage } from "@/lib/image";
 import Link from "next/link";
 import PostComments from "@/components/community/post-comments";
+import { shortDate } from "@/lib/dates";
 import {
   createPost,
   deletePost,
@@ -39,7 +40,7 @@ function timeAgo(iso: string): string {
 
 function eventWhen(iso: string): string {
   const d = new Date(iso);
-  const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
+  const date = shortDate(d).toUpperCase();
   const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   return `${date} · ${time}`;
 }

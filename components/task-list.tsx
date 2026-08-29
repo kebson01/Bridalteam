@@ -1,4 +1,5 @@
 import { toggleTask, addTask, deleteTask } from "@/app/w/[id]/actions";
+import { shortDate } from "@/lib/dates";
 
 export interface TaskRow {
   id: string;
@@ -21,7 +22,9 @@ function dueLabel(due: string | null, done: boolean) {
   if (!due) return null;
   const date = new Date(`${due}T00:00:00`);
   const days = Math.ceil((date.getTime() - Date.now()) / 86_400_000);
-  const text = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  // Carries the year for anything outside the current one — a wedding plan
+  // always spans at least two calendar years, so "Oct 29" alone is ambiguous.
+  const text = shortDate(date);
 
   if (done) return { text, tone: "text-ink-soft/50" };
   if (days < 0) return { text: `${text} · overdue`, tone: "text-red-600 font-medium" };
