@@ -103,17 +103,38 @@ export default async function DashboardPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {weddings.map((w) => (
-              <Link
+              <div
                 key={w.id}
-                href={`/w/${w.id}`}
                 className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card transition-transform hover:-translate-y-1"
               >
-                <h2 className="text-lg font-medium text-ink">
-                  {[w.partner_one, w.partner_two].filter(Boolean).join(" & ") || "Untitled wedding"}
-                </h2>
-                <p className="mt-1 text-sm text-ink-soft/70">{formatDate(w.event_date)}</p>
-                {w.city && <p className="mt-1 text-sm text-ink-soft/70">{w.city}</p>}
-              </Link>
+                <Link href={`/w/${w.id}`} className="block">
+                  <h2 className="text-lg font-medium text-ink">
+                    {[w.partner_one, w.partner_two].filter(Boolean).join(" & ") || "Untitled wedding"}
+                  </h2>
+                  <p className="mt-1 text-sm text-ink-soft/70">{formatDate(w.event_date)}</p>
+                  {w.city && <p className="mt-1 text-sm text-ink-soft/70">{w.city}</p>}
+                </Link>
+
+                {/* The sections people actually come back for. Guests in
+                    particular was three levels deep and effectively unfindable
+                    — couples were reaching for Community instead. */}
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-stone-2 pt-4">
+                  {[
+                    ["Checklist", `/w/${w.id}`],
+                    ["Guests", `/w/${w.id}/guests`],
+                    ["Budget", `/w/${w.id}/budget`],
+                    ["Website", `/w/${w.id}/website`],
+                  ].map(([label, href]) => (
+                    <Link
+                      key={label}
+                      href={href}
+                      className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}

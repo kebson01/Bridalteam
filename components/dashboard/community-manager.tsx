@@ -236,7 +236,7 @@ export default function CommunityManager({
                     onClick={() => setManageGroup((m) => (m === g.id ? null : g.id))}
                     className="flex-none rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
                   >
-                    {manageGroup === g.id ? "Hide" : "Members & invites"}
+                    {manageGroup === g.id ? "Hide" : "Manage members"}
                   </button>
                 </div>
                 {manageGroup === g.id && (

@@ -289,12 +289,19 @@ export async function addGroupMembers(
         notFound.map((to) =>
           sendEmail({
             to,
-            subject: `${inviterName} invited you to “${group.name}” on Bridal Team`,
+            // Names the feature in the subject. Couples were creating a group
+            // called "Invitees" and mailing their wedding guests this, which
+            // asks for a signup — wedding guests never need an account.
+            subject: `${inviterName} added you to the “${group.name}” group on Bridal Team`,
             html: emailLayout(
-              `You're invited to “${group.name}”`,
-              `${inviterName} added you to their private group on Bridal Team. ` +
-                `Create a free account, then join with code <strong>${group.join_code}</strong>.`,
-              { label: "Join on Bridal Team", url: `${SITE_URL}/auth/signup?next=/community` },
+              `Join the “${group.name}” group`,
+              `${inviterName} added you to their private group on Bridal Team — a place to ` +
+                `share updates and photos. Create a free account, then join with code ` +
+                `<strong>${group.join_code}</strong>.` +
+                `<br><br><span style="font-size:13px;color:#666">This is a community group, ` +
+                `not a wedding invitation. If you were expecting to RSVP, look for a separate ` +
+                `email with an “RSVP now” button — that one needs no account.</span>`,
+              { label: "Join the group", url: `${SITE_URL}/auth/signup?next=/community` },
             ),
           }).catch(() => undefined),
         ),

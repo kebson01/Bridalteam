@@ -477,6 +477,23 @@ export default function Community({
           <p className="mt-2 text-center text-[11px] leading-snug text-ink-soft/50">
             Create groups &amp; events and manage invites from your Dashboard.
           </p>
+
+          {/* Community groups and wedding guests are different things that both
+              say "invite". People reach for this one first because it's in the
+              main nav, then email their guests a "create an account" link by
+              mistake. Point them at the right door. */}
+          <div className="mt-4 rounded-xl border border-stone-2 bg-stone-4/60 p-3 text-center">
+            <p className="text-[11px] leading-snug text-ink-soft/70">
+              Inviting <b className="text-ink">wedding guests</b>? Groups here are for chatting
+              with other couples — guests don&rsquo;t need an account.
+            </p>
+            <Link
+              href="/dashboard"
+              className="mt-2 inline-block text-[11px] font-semibold text-brand-text hover:underline"
+            >
+              Go to your guest list →
+            </Link>
+          </div>
         </aside>
 
         {/* ---------------- CENTER FEED ---------------- */}
