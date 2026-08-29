@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import TravelManager, { type TravelItem } from "@/components/travel-manager";
 import WeddingNav from "@/components/wedding-nav";
 import { supabaseServer } from "@/lib/supabase/server";
+import { flashFrom } from "@/lib/flash";
+import FlashBanner from "@/components/flash-banner";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
@@ -15,11 +17,15 @@ export const dynamic = "force-dynamic";
 
 export default async function TravelPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
+  // Failure message from a server action that bounced back here.
+  const flash = flashFrom(await searchParams);
 
   const supabase = await supabaseServer();
   const {
@@ -56,6 +62,7 @@ export default async function TravelPage({
       </div>
 
       <div className="mx-auto max-w-4xl px-5 py-10">
+        <FlashBanner message={flash} />
         <TravelManager items={(items ?? []) as TravelItem[]} weddingId={id} />
       </div>
     </div>

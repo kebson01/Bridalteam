@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import BudgetTable, { type BudgetItem } from "@/components/budget-table";
 import WeddingNav from "@/components/wedding-nav";
 import { supabaseServer } from "@/lib/supabase/server";
+import { flashFrom } from "@/lib/flash";
+import FlashBanner from "@/components/flash-banner";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { BUDGET_CATEGORY_ORDER } from "@/lib/budget-template";
 import { seedBudget } from "./actions";
@@ -31,11 +33,15 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: str
 
 export default async function BudgetPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
+  // Failure message from a server action that bounced back here.
+  const flash = flashFrom(await searchParams);
 
   const supabase = await supabaseServer();
   const {
@@ -82,6 +88,8 @@ export default async function BudgetPage({
       </div>
 
       <div className="mx-auto max-w-4xl px-5 py-10">
+        <FlashBanner message={flash} />
+
         {/* Summary */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <Stat label="Total budget" value={total > 0 ? money(total) : "—"} />

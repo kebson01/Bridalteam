@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { failWith } from "@/lib/flash";
 import { BUDGET_TEMPLATE } from "@/lib/budget-template";
 
 // All of these run as the signed-in user; RLS enforces edit access, so there's
@@ -19,7 +20,7 @@ export async function seedBudget(weddingId: string) {
     p_wedding_id: weddingId,
     p_template: BUDGET_TEMPLATE,
   });
-  if (error) console.error("seedBudget failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/budget`, "Couldn’t build your starter budget. Please try again.", error);
   revalidatePath(`/w/${weddingId}/budget`);
 }
 
@@ -49,7 +50,7 @@ export async function addBudgetItem(
     estimated_cents: toCents(estimatedDollars),
     position: (last?.position ?? 0) + 1,
   });
-  if (error) console.error("addBudgetItem failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/budget`, "Couldn’t add that line item. Please try again.", error);
   revalidatePath(`/w/${weddingId}/budget`);
 }
 
@@ -65,7 +66,7 @@ export async function updateBudgetItem(
     .from("budget_items")
     .update({ estimated_cents: toCents(estimatedDollars), paid_cents: toCents(paidDollars) })
     .eq("id", id);
-  if (error) console.error("updateBudgetItem failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/budget`, "Couldn’t save that amount. Please try again.", error);
   revalidatePath(`/w/${weddingId}/budget`);
 }
 
@@ -73,6 +74,6 @@ export async function deleteBudgetItem(id: string, weddingId: string) {
   if (!id || !weddingId) return;
   const supabase = await supabaseServer();
   const { error } = await supabase.from("budget_items").delete().eq("id", id);
-  if (error) console.error("deleteBudgetItem failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/budget`, "Couldn’t delete that line item. Please try again.", error);
   revalidatePath(`/w/${weddingId}/budget`);
 }

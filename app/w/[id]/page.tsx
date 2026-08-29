@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import TaskList, { type GroupedPlan, type TaskRow } from "@/components/task-list";
 import DeletedTasks, { type DeletedTask } from "@/components/deleted-tasks";
 import { supabaseServer } from "@/lib/supabase/server";
+import { flashFrom } from "@/lib/flash";
+import FlashBanner from "@/components/flash-banner";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { TEMPLATE_TASK_COUNT } from "@/lib/plan-template";
 import { seedExpertPlan } from "./actions";
@@ -74,11 +76,15 @@ function Stat({
 
 export default async function WeddingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
+  // Failure message from a server action that bounced back here.
+  const flash = flashFrom(await searchParams);
 
   const supabase = await supabaseServer();
   const {
@@ -184,6 +190,7 @@ export default async function WeddingPage({
       </div>
 
       <div className="mx-auto max-w-5xl px-5 py-10">
+        <FlashBanner message={flash} />
         {/* Stat tiles */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <Stat label="Countdown" value={countdownValue} sub={countdownSub} />

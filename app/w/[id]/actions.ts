@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { failWith } from "@/lib/flash";
 import { PLAN_TEMPLATE } from "@/lib/plan-template";
 
 /**
@@ -19,7 +20,7 @@ export async function seedExpertPlan(formData: FormData) {
     p_template: PLAN_TEMPLATE,
   });
 
-  if (error) console.error("seedExpertPlan failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}`, "Couldn’t build your checklist. Please try again.", error);
   revalidatePath(`/w/${weddingId}`);
 }
 
@@ -44,7 +45,7 @@ export async function toggleTask(formData: FormData) {
     .update({ completed_at: completed ? null : new Date().toISOString() })
     .eq("id", id);
 
-  if (error) console.error("toggleTask failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}`, "Couldn’t update that task. Please try again.", error);
   revalidatePath(`/w/${weddingId}`);
 }
 
@@ -76,7 +77,7 @@ export async function addTask(formData: FormData) {
     position: (last?.position ?? 0) + 1,
   });
 
-  if (error) console.error("addTask failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}`, "Couldn’t add that task. Please try again.", error);
   revalidatePath(`/w/${weddingId}`);
 }
 
@@ -93,7 +94,7 @@ export async function deleteTask(formData: FormData) {
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id);
 
-  if (error) console.error("deleteTask failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}`, "Couldn’t delete that task. Please try again.", error);
   revalidatePath(`/w/${weddingId}`);
 }
 
@@ -105,7 +106,7 @@ export async function restoreTask(formData: FormData) {
 
   const supabase = await supabaseServer();
   const { error } = await supabase.from("tasks").update({ deleted_at: null }).eq("id", id);
-  if (error) console.error("restoreTask failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}`, "Couldn’t restore that task. Please try again.", error);
   revalidatePath(`/w/${weddingId}`);
 }
 
@@ -122,6 +123,6 @@ export async function purgeTask(formData: FormData) {
     .delete()
     .eq("id", id)
     .not("deleted_at", "is", null);
-  if (error) console.error("purgeTask failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}`, "Couldn’t remove that task for good. Please try again.", error);
   revalidatePath(`/w/${weddingId}`);
 }

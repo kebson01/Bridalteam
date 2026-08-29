@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { failWith } from "@/lib/flash";
 
 // RLS enforces edit access; no permission checks in application code.
 
@@ -26,7 +27,7 @@ export async function addVendor(weddingId: string, name: string, category: strin
     category: category.trim().slice(0, 80) || null,
     position: (last?.position ?? 0) + 1,
   });
-  if (error) console.error("addVendor failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/vendors`, "Couldn’t add that vendor. Please try again.", error);
   revalidatePath(`/w/${weddingId}/vendors`);
 }
 
@@ -78,7 +79,7 @@ export async function updateVendor(id: string, weddingId: string, patch: VendorP
 
   const supabase = await supabaseServer();
   const { error } = await supabase.from("wedding_vendors").update(update).eq("id", id);
-  if (error) console.error("updateVendor failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/vendors`, "Couldn’t save that change. Please try again.", error);
   revalidatePath(`/w/${weddingId}/vendors`);
 }
 
@@ -86,6 +87,6 @@ export async function deleteVendor(id: string, weddingId: string) {
   if (!id || !weddingId) return;
   const supabase = await supabaseServer();
   const { error } = await supabase.from("wedding_vendors").delete().eq("id", id);
-  if (error) console.error("deleteVendor failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/vendors`, "Couldn’t delete that vendor. Please try again.", error);
   revalidatePath(`/w/${weddingId}/vendors`);
 }

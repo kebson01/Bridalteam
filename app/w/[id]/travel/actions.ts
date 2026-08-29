@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
+import { failWith } from "@/lib/flash";
 
 // RLS enforces edit access.
 
@@ -27,7 +28,7 @@ export async function addTravelItem(weddingId: string, kind: string, title: stri
     title: t,
     position: (last?.position ?? 0) + 1,
   });
-  if (error) console.error("addTravelItem failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/travel`, "Couldn’t add that. Please try again.", error);
   revalidatePath(`/w/${weddingId}/travel`);
 }
 
@@ -67,7 +68,7 @@ export async function updateTravelItem(id: string, weddingId: string, patch: Tra
 
   const supabase = await supabaseServer();
   const { error } = await supabase.from("travel_items").update(update).eq("id", id);
-  if (error) console.error("updateTravelItem failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/travel`, "Couldn’t save that change. Please try again.", error);
   revalidatePath(`/w/${weddingId}/travel`);
 }
 
@@ -75,6 +76,6 @@ export async function deleteTravelItem(id: string, weddingId: string) {
   if (!id || !weddingId) return;
   const supabase = await supabaseServer();
   const { error } = await supabase.from("travel_items").delete().eq("id", id);
-  if (error) console.error("deleteTravelItem failed:", error.code, error.message);
+  if (error) failWith(`/w/${weddingId}/travel`, "Couldn’t delete that. Please try again.", error);
   revalidatePath(`/w/${weddingId}/travel`);
 }
