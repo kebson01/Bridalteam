@@ -130,8 +130,24 @@ function displayName(user: {
   );
 }
 
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * What the list* helpers return.
+ *
+ * `[]` means the query ran and there is genuinely nothing there. `null` means
+ * the query failed. These used to be the same thing — every one of them
+ * swallowed its error and returned `[]` — so a broken query rendered "No posts
+ * yet, be the first to share something." A brand-new community looked exactly
+ * like a broken one, and nobody would ever report it.
+ *
+ * Callers coalesce `null` to an empty array for rendering and use the null-ness
+ * to show "couldn't load" in place of the empty state. Signed-out still returns
+ * `[]`, because that is not a failure — there is simply nothing to show.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
 /** Groups the signed-in user belongs to (owner or member). */
-export async function listGroups(): Promise<PostGroup[]> {
+export async function listGroups(): Promise<PostGroup[] | null> {
   const { supabase, user } = await authed();
   if (!user) return [];
   const { data, error } = await supabase
@@ -140,7 +156,7 @@ export async function listGroups(): Promise<PostGroup[]> {
     .order("created_at", { ascending: true });
   if (error) {
     console.error("listGroups failed:", error.code, error.message);
-    return [];
+    return null;
   }
   return (data ?? []) as PostGroup[];
 }
@@ -180,13 +196,13 @@ export async function createGroup(
 }
 
 /** Public groups the signed-in user could discover and join (not already in). */
-export async function listSuggestedGroups(): Promise<SuggestedGroup[]> {
+export async function listSuggestedGroups(): Promise<SuggestedGroup[] | null> {
   const { supabase, user } = await authed();
   if (!user) return [];
   const { data, error } = await supabase.rpc("list_suggested_groups", { lim: 6 });
   if (error) {
     console.error("listSuggestedGroups failed:", error.message);
-    return [];
+    return null;
   }
   return ((data ?? []) as { id: string; name: string; kind: string; member_count: number | string }[]).map(
     (g) => ({ id: g.id, name: g.name, kind: g.kind, member_count: Number(g.member_count) }),
@@ -212,14 +228,14 @@ export async function joinPublicGroup(
 }
 
 /** Members of a group (caller must be a member). */
-export async function listGroupMembers(groupId: string): Promise<GroupMember[]> {
+export async function listGroupMembers(groupId: string): Promise<GroupMember[] | null> {
   if (!groupId) return [];
   const { supabase, user } = await authed();
   if (!user) return [];
   const { data, error } = await supabase.rpc("list_group_members", { gid: groupId });
   if (error) {
     console.error("listGroupMembers failed:", error.message);
-    return [];
+    return null;
   }
   return (data ?? []) as GroupMember[];
 }
@@ -329,7 +345,7 @@ export async function joinGroup(code: string): Promise<{ ok: boolean; group?: Po
 }
 
 /** Feed for a scope: "public" or a group id. Newest first. */
-export async function listFeed(scope: string): Promise<FeedPost[]> {
+export async function listFeed(scope: string): Promise<FeedPost[] | null> {
   const { supabase, user } = await authed();
   if (!user) return [];
 
@@ -344,13 +360,13 @@ export async function listFeed(scope: string): Promise<FeedPost[]> {
   const { data: posts, error } = await query;
   if (error) {
     console.error("listFeed failed:", error.code, error.message);
-    return [];
+    return null;
   }
   return enrichPosts(supabase, user.id, (posts ?? []) as PostRow[]);
 }
 
 /** Trending: public posts from the last 7 days, ranked by likes + comments. */
-export async function listTrendingFeed(): Promise<FeedPost[]> {
+export async function listTrendingFeed(): Promise<FeedPost[] | null> {
   const { supabase, user } = await authed();
   if (!user) return [];
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -363,7 +379,7 @@ export async function listTrendingFeed(): Promise<FeedPost[]> {
     .limit(60);
   if (error) {
     console.error("listTrendingFeed failed:", error.code, error.message);
-    return [];
+    return null;
   }
   const enriched = await enrichPosts(supabase, user.id, (posts ?? []) as PostRow[]);
   return enriched
@@ -372,7 +388,7 @@ export async function listTrendingFeed(): Promise<FeedPost[]> {
 }
 
 /** Posts the signed-in user has saved (bookmarked), newest-saved first. */
-export async function listSavedFeed(): Promise<FeedPost[]> {
+export async function listSavedFeed(): Promise<FeedPost[] | null> {
   const { supabase, user } = await authed();
   if (!user) return [];
   const { data: saved, error } = await supabase
@@ -383,7 +399,7 @@ export async function listSavedFeed(): Promise<FeedPost[]> {
     .limit(100);
   if (error) {
     console.error("listSavedFeed failed:", error.code, error.message);
-    return [];
+    return null;
   }
   const order = (saved ?? []).map((s) => s.post_id);
   if (order.length === 0) return [];
@@ -410,7 +426,7 @@ export async function getPost(postId: string): Promise<FeedPost | null> {
  * no per-viewer flags. Works without a session: it relies on the anon-role RLS
  * policy that exposes public posts (and their comments/polls) to everyone.
  */
-export async function listPublicFeed(): Promise<FeedPost[]> {
+export async function listPublicFeed(): Promise<FeedPost[] | null> {
   const supabase = await supabaseServer();
   const { data: posts, error } = await supabase
     .from("posts")
@@ -420,7 +436,7 @@ export async function listPublicFeed(): Promise<FeedPost[]> {
     .limit(100);
   if (error) {
     console.error("listPublicFeed failed:", error.code, error.message);
-    return [];
+    return null;
   }
   return enrichPosts(supabase, null, (posts ?? []) as PostRow[]);
 }
@@ -578,7 +594,7 @@ export type PostComment = {
   created_at: string;
 };
 
-export async function listPostComments(postId: string): Promise<PostComment[]> {
+export async function listPostComments(postId: string): Promise<PostComment[] | null> {
   if (!postId) return [];
   const { supabase } = await authed();
   const { data, error } = await supabase
@@ -588,7 +604,7 @@ export async function listPostComments(postId: string): Promise<PostComment[]> {
     .order("created_at", { ascending: true });
   if (error) {
     console.error("listPostComments failed:", error.code, error.message);
-    return [];
+    return null;
   }
   return (data ?? []) as PostComment[];
 }
@@ -687,7 +703,7 @@ export type AppEvent = {
 };
 
 /** Upcoming community events (soonest first), with RSVP counts for the viewer. */
-export async function listUpcomingEvents(): Promise<AppEvent[]> {
+export async function listUpcomingEvents(): Promise<AppEvent[] | null> {
   const { supabase, user } = await authed();
   if (!user) return [];
   const { data: events, error } = await supabase
@@ -698,7 +714,7 @@ export async function listUpcomingEvents(): Promise<AppEvent[]> {
     .limit(6);
   if (error) {
     console.error("listUpcomingEvents failed:", error.code, error.message);
-    return [];
+    return null;
   }
   const rows = events ?? [];
   const ids = rows.map((e) => e.id);
@@ -771,7 +787,7 @@ export async function toggleEventRsvp(eventId: string, going: boolean): Promise<
 }
 
 /** Events the signed-in user created (any date), soonest first — for managing them. */
-export async function listMyEvents(): Promise<AppEvent[]> {
+export async function listMyEvents(): Promise<AppEvent[] | null> {
   const { supabase, user } = await authed();
   if (!user) return [];
   const { data: events, error } = await supabase
@@ -782,7 +798,7 @@ export async function listMyEvents(): Promise<AppEvent[]> {
     .limit(50);
   if (error) {
     console.error("listMyEvents failed:", error.code, error.message);
-    return [];
+    return null;
   }
   const rows = events ?? [];
   const ids = rows.map((e) => e.id);

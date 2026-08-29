@@ -66,17 +66,21 @@ export default function Community({
   initialFeed,
   initialEvents,
   initialSuggested,
+  loadFailed,
 }: {
   viewer: Viewer;
   initialGroups: PostGroup[];
   initialFeed: FeedPost[];
   initialEvents: AppEvent[];
   initialSuggested: SuggestedGroup[];
+  /** Which server-side lists failed to load, as opposed to being empty. */
+  loadFailed?: { groups: boolean; feed: boolean; events: boolean; suggested: boolean };
 }) {
   const [groups, setGroups] = useState<PostGroup[]>(initialGroups);
   const [scope, setScope] = useState<string>("public");
   const [feed, setFeed] = useState<FeedPost[]>(initialFeed);
   const [loadingFeed, startFeed] = useTransition();
+  const [feedFailed, setFeedFailed] = useState(Boolean(loadFailed?.feed));
 
   // Composer
   const [body, setBody] = useState("");
@@ -121,7 +125,7 @@ export default function Community({
   const isView = scope === "trending" || scope === "saved"; // read-only feed views
   const postable = !isView;
 
-  function loadFor(s: string): Promise<FeedPost[]> {
+  function loadFor(s: string): Promise<FeedPost[] | null> {
     if (s === "trending") return listTrendingFeed();
     if (s === "saved") return listSavedFeed();
     return listFeed(s);
@@ -130,11 +134,19 @@ export default function Community({
   function switchScope(next: string) {
     setScope(next);
     setAudience(next === "public" || next === "trending" || next === "saved" ? "public" : next);
-    startFeed(async () => setFeed(await loadFor(next)));
+    startFeed(async () => {
+      const rows = await loadFor(next);
+      setFeedFailed(rows === null);
+      setFeed(rows ?? []);
+    });
   }
 
   function refreshFeed() {
-    startFeed(async () => setFeed(await loadFor(scope)));
+    startFeed(async () => {
+      const rows = await loadFor(scope);
+      setFeedFailed(rows === null);
+      setFeed(rows ?? []);
+    });
   }
 
   async function handleImage(file: File) {
@@ -683,7 +695,9 @@ export default function Community({
           ) : feed.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-10 text-center">
               <p className="text-sm text-ink-soft/70">
-                {scope === "public"
+                {feedFailed
+                  ? "We couldn’t load these posts just now. Please refresh to try again."
+                  : scope === "public"
                   ? "No posts yet — be the first to share something."
                   : scope === "trending"
                     ? "Nothing trending yet — the most-liked and most-discussed posts of the week show up here."

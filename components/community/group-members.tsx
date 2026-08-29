@@ -27,12 +27,15 @@ export default function GroupMembers({
   const [loading, setLoading] = useState(true);
   const [emails, setEmails] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busy, startTransition] = useTransition();
 
   function refresh() {
     setLoading(true);
     listGroupMembers(group.id).then((m) => {
-      setMembers(m);
+      // null means the query failed; [] means the group genuinely has no one else.
+      setLoadFailed(m === null);
+      setMembers(m ?? []);
       setLoading(false);
     });
   }
@@ -85,6 +88,10 @@ export default function GroupMembers({
       <div className="mt-3 space-y-2">
         {loading ? (
           <p className="text-sm text-ink-soft/50">Loading…</p>
+        ) : loadFailed ? (
+          <p className="text-sm text-red-700">
+            Couldn&rsquo;t load this group&rsquo;s members. Please refresh to try again.
+          </p>
         ) : (
           members.map((m) => (
             <div key={m.user_id} className="flex items-center gap-2">

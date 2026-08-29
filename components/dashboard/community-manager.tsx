@@ -30,10 +30,13 @@ export default function CommunityManager({
   viewerId,
   initialGroups,
   initialEvents,
+  loadFailed = false,
 }: {
   viewerId: string;
   initialGroups: PostGroup[];
   initialEvents: AppEvent[];
+  /** A list failed to load, as opposed to being empty. */
+  loadFailed?: boolean;
 }) {
   const [groups, setGroups] = useState<PostGroup[]>(initialGroups);
   const [events, setEvents] = useState<AppEvent[]>(initialEvents);
@@ -116,7 +119,19 @@ export default function CommunityManager({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <>
+      {/* One notice for the whole section: if either list failed to load, what
+          follows is incomplete, and saying nothing would pass it off as empty. */}
+      {loadFailed && (
+        <p
+          role="alert"
+          className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+        >
+          We couldn&rsquo;t load your groups and events just now, so this may be incomplete.
+          Please refresh to try again.
+        </p>
+      )}
+      <div className="grid gap-6 lg:grid-cols-2">
       {/* -------- Groups -------- */}
       <section className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
         <div className="mb-4 flex items-center justify-between">
@@ -302,6 +317,7 @@ export default function CommunityManager({
           </div>
         )}
       </section>
-    </div>
+      </div>
+    </>
   );
 }

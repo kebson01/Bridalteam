@@ -22,6 +22,7 @@ export default function PostComments({
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -29,7 +30,9 @@ export default function PostComments({
     setLoading(true);
     listPostComments(postId).then((c) => {
       if (active) {
-        setComments(c);
+        // null means the query failed; [] means there are genuinely no comments.
+        setLoadFailed(c === null);
+        setComments(c ?? []);
         setLoading(false);
       }
     });
@@ -69,6 +72,8 @@ export default function PostComments({
       <div className="space-y-3">
         {loading ? (
           <p className="text-sm text-ink-soft/50">Loading…</p>
+        ) : loadFailed ? (
+          <p className="text-sm text-red-700">Couldn&rsquo;t load replies. Please try again.</p>
         ) : comments.length === 0 ? (
           <p className="text-sm text-ink-soft/50">No replies yet.</p>
         ) : (

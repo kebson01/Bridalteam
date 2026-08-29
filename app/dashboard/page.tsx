@@ -131,7 +131,12 @@ export default async function DashboardPage() {
             .
           </p>
         </div>
-        <CommunityManager viewerId={user.id} initialGroups={myGroups} initialEvents={myEvents} />
+        <CommunityManager
+          viewerId={user.id}
+          initialGroups={myGroups ?? []}
+          initialEvents={myEvents ?? []}
+          loadFailed={myGroups === null || myEvents === null}
+        />
       </section>
     </>
   );

@@ -37,7 +37,7 @@ export default async function CommunityPage() {
   // Signed-out visitors get a read-only public feed (browse before signup).
   if (!user) {
     const feed = await listPublicFeed();
-    return <PublicFeed feed={feed} />;
+    return <PublicFeed feed={feed ?? []} loadFailed={feed === null} />;
   }
 
   const [groups, feed, events, suggested] = await Promise.all([
@@ -46,6 +46,16 @@ export default async function CommunityPage() {
     listUpcomingEvents(),
     listSuggestedGroups(),
   ]);
+
+  // null from any of these means the query failed, not that the list is empty.
+  // Pass the distinction through so the page can say "couldn't load" instead of
+  // claiming there's nothing here.
+  const loadFailed = {
+    groups: groups === null,
+    feed: feed === null,
+    events: events === null,
+    suggested: suggested === null,
+  };
 
   const viewer = {
     id: user.id,
@@ -59,10 +69,11 @@ export default async function CommunityPage() {
   return (
     <Community
       viewer={viewer}
-      initialGroups={groups}
-      initialFeed={feed}
-      initialEvents={events}
-      initialSuggested={suggested}
+      initialGroups={groups ?? []}
+      initialFeed={feed ?? []}
+      initialEvents={events ?? []}
+      initialSuggested={suggested ?? []}
+      loadFailed={loadFailed}
     />
   );
 }

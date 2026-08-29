@@ -31,7 +31,14 @@ function Avatar({ name, url }: { name: string; url: string | null }) {
   );
 }
 
-export default function PublicFeed({ feed }: { feed: FeedPost[] }) {
+export default function PublicFeed({
+  feed,
+  loadFailed = false,
+}: {
+  feed: FeedPost[];
+  /** The query failed, as opposed to the feed genuinely being empty. */
+  loadFailed?: boolean;
+}) {
   const signup = "/auth/signup?next=/community";
   const login = "/auth/login?next=/community";
 
@@ -57,7 +64,11 @@ export default function PublicFeed({ feed }: { feed: FeedPost[] }) {
       </header>
 
       {feed.length === 0 ? (
-        <p className="py-16 text-center text-sm text-ink-soft/60">No posts yet. Be the first — join the community!</p>
+        <p className="py-16 text-center text-sm text-ink-soft/60">
+          {loadFailed
+            ? "We couldn’t load the community feed just now. Please refresh to try again."
+            : "No posts yet. Be the first — join the community!"}
+        </p>
       ) : (
         <div className="space-y-4">
           {feed.map((post) => (
