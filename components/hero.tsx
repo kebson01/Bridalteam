@@ -14,10 +14,8 @@ export default function Hero() {
           sizes="100vw"
           className="animate-slow-zoom object-cover object-center"
         />
-        {/* A lighter brand wash — enough for white-text contrast, but the
-            photo now reads through it. Darker toward the bottom where the
-            buttons and stats sit. */}
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-deep/35 via-brand-dark/35 to-ink/65" />
+        {/* the original site's signature orange wash */}
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-deep/70 via-brand-dark/65 to-ink/80" />
       </div>
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center px-5 py-28 text-center sm:py-36">
