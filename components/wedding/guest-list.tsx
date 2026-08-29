@@ -7,15 +7,21 @@ import {
   deleteGuest,
   sendInvites,
   updateGuest,
+  sendReminders,
   type Guest,
 } from "@/app/w/[id]/guests/actions";
+import { canRemind, REMINDER_COOLDOWN_DAYS } from "@/lib/guests";
 
 /** Attending / declined / waiting, as a small coloured chip. */
 function Status({ g }: { g: Guest }) {
   if (!g.responded_at) {
     return (
       <span className="rounded-full bg-stone-4 px-2.5 py-1 text-xs font-medium text-ink-soft/70">
-        {g.invited_at ? "Awaiting reply" : "Not invited yet"}
+        {!g.invited_at
+          ? "Not invited yet"
+          : g.reminder_count > 0
+            ? `Awaiting reply · ${g.reminder_count} reminder${g.reminder_count === 1 ? "" : "s"}`
+            : "Awaiting reply"}
       </span>
     );
   }
@@ -87,6 +93,27 @@ export default function GuestList({
     });
   }
 
+  function onRemindAll() {
+    setMsg(null);
+    start(async () => {
+      const res = await sendReminders(weddingId);
+      setMsg({
+        text: res.ok ? `Sent ${res.sent} reminder${res.sent === 1 ? "" : "s"}.` : res.error ?? "Couldn't send.",
+        ok: Boolean(res.ok),
+      });
+      refresh();
+    });
+  }
+
+  function onRemindOne(id: string) {
+    setMsg(null);
+    start(async () => {
+      const res = await sendReminders(weddingId, id);
+      setMsg({ text: res.ok ? "Reminder sent." : res.error ?? "Couldn't send.", ok: Boolean(res.ok) });
+      refresh();
+    });
+  }
+
   function onSendOne(id: string) {
     setMsg(null);
     start(async () => {
@@ -122,6 +149,9 @@ export default function GuestList({
   }
 
   const uninvitedWithEmail = guests.filter((g) => g.email && !g.invited_at).length;
+  // Same rule the server enforces, so the button never promises a send that
+  // the cooldown will refuse.
+  const remindable = guests.filter((g) => canRemind(g)).length;
 
   return (
     <div className="space-y-6">
@@ -200,6 +230,20 @@ export default function GuestList({
             Send {uninvitedWithEmail > 0 ? `${uninvitedWithEmail} ` : ""}invitation
             {uninvitedWithEmail === 1 ? "" : "s"}
           </button>
+          <button
+            type="button"
+            onClick={onRemindAll}
+            disabled={busy || remindable === 0}
+            className="rounded-full border border-stone-2 px-5 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text disabled:opacity-50"
+            title={
+              remindable === 0
+                ? `No one to remind — everyone has replied or was nudged in the last ${REMINDER_COOLDOWN_DAYS} days`
+                : undefined
+            }
+          >
+            Remind {remindable > 0 ? `${remindable} ` : ""}non-responder
+            {remindable === 1 ? "" : "s"}
+          </button>
         </div>
 
         {guests.length === 0 ? (
@@ -257,6 +301,18 @@ export default function GuestList({
                       className="rounded-full border border-stone-2 px-3 py-1.5 text-xs font-semibold text-ink-soft hover:border-brand hover:text-brand-text disabled:opacity-50"
                     >
                       {g.invited_at ? "Resend" : "Send invite"}
+                    </button>
+                  )}
+                  {/* Only offered when the cooldown would actually let it
+                      through, so the button can't be pressed into an error. */}
+                  {canRemind(g) && (
+                    <button
+                      type="button"
+                      onClick={() => onRemindOne(g.id)}
+                      disabled={busy}
+                      className="rounded-full border border-brand/40 px-3 py-1.5 text-xs font-semibold text-brand-text hover:border-brand disabled:opacity-50"
+                    >
+                      Remind
                     </button>
                   )}
                   <button

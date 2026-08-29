@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { SITE_URL } from "@/lib/site";
+import { REMINDER_COOLDOWN_DAYS, reminderCutoff } from "@/lib/guests";
 
 /**
  * The guest list and its invitations.
@@ -26,12 +27,14 @@ export interface Guest {
   party_size: number | null;
   meal: string | null;
   note: string | null;
+  reminded_at: string | null;
+  reminder_count: number;
 }
 
 export type Result = { ok: boolean; error?: string; sent?: number; added?: number };
 
 const GUEST_COLUMNS =
-  "id, household_name, email, seats, token, invited_at, responded_at, attending, party_size, meal, note";
+  "id, household_name, email, seats, token, invited_at, responded_at, attending, party_size, meal, note, reminded_at, reminder_count";
 
 /**
  * A guest's personal RSVP link.
@@ -225,6 +228,106 @@ export async function sendInvites(weddingId: string, guestId?: string): Promise<
     await supabase
       .from("wedding_guests")
       .update({ invited_at: new Date().toISOString() })
+      .eq("id", g.id);
+    sent++;
+  }
+
+  revalidatePath(`/w/${weddingId}/guests`);
+  if (sent === 0) {
+    return { ok: false, error: "Couldn’t send. Email isn’t configured on the server." };
+  }
+  return { ok: true, sent };
+}
+
+/** A gentler second note — not a repeat of the invitation. */
+function reminderEmail(guest: Guest, couple: string, dateLine: string) {
+  const link = inviteLink(guest.token);
+  return emailLayout(
+    "A gentle reminder",
+    `<p style="margin:0 0 14px">Hi ${escapeHtml(guest.household_name)},</p>
+     <p style="margin:0 0 14px">
+       We're still hoping to hear from you about <b>${escapeHtml(couple)}</b>'s
+       wedding${escapeHtml(dateLine)}. They're finalising numbers, so even a "sorry,
+       can't make it" is a real help.
+     </p>
+     <p style="margin:0 0 8px">It only takes a moment.</p>
+     <p style="margin:18px 0 0;font-size:13px;color:#666">
+       This link is just for you — please don&rsquo;t forward it.
+     </p>`,
+    { label: "Reply now", url: link },
+  );
+}
+
+/**
+ * Nudges households who were invited and haven't replied.
+ *
+ * Pass a guest id for one, or omit it to chase everyone eligible. "Eligible"
+ * means invited, still silent, reachable by email, and not already nudged
+ * within the cooldown — enforced here in the query, not by the UI hiding the
+ * button, because this is the operation that could otherwise mail somebody's
+ * guests over and over.
+ */
+export async function sendReminders(weddingId: string, guestId?: string): Promise<Result> {
+  const supabase = await supabaseServer();
+
+  const { data: wedding } = await supabase
+    .from("weddings")
+    .select("partner_one, partner_two, event_date")
+    .eq("id", weddingId)
+    .maybeSingle();
+  if (!wedding) return { ok: false, error: "Couldn’t find that wedding." };
+
+  const cutoff = reminderCutoff().toISOString();
+  let q = supabase
+    .from("wedding_guests")
+    .select(GUEST_COLUMNS)
+    .eq("wedding_id", weddingId)
+    .not("email", "is", null)
+    .not("invited_at", "is", null)
+    .is("responded_at", null)
+    .or(`reminded_at.is.null,reminded_at.lt.${cutoff}`);
+  if (guestId) q = q.eq("id", guestId);
+
+  const { data: guests, error } = await q;
+  if (error) {
+    console.error("sendReminders lookup failed:", error.code, error.message);
+    return { ok: false, error: "Couldn’t load your guest list." };
+  }
+
+  const list = (guests ?? []) as Guest[];
+  if (list.length === 0) {
+    return {
+      ok: false,
+      error: guestId
+        ? `Nothing to send — they've either replied, have no email, or were reminded in the last ${REMINDER_COOLDOWN_DAYS} days.`
+        : `No one to remind right now. Everyone has either replied or was nudged in the last ${REMINDER_COOLDOWN_DAYS} days.`,
+    };
+  }
+
+  const couple = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ") || "The couple";
+  const dateLine = wedding.event_date
+    ? ` on ${new Date(`${wedding.event_date}T00:00:00`).toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })}`
+    : "";
+
+  let sent = 0;
+  for (const g of list) {
+    const { sent: ok } = await sendEmail({
+      to: g.email as string,
+      subject: `Still hoping to hear from you — ${couple}'s wedding`,
+      html: reminderEmail(g, couple, dateLine),
+    });
+    if (!ok) continue;
+    await supabase
+      .from("wedding_guests")
+      .update({
+        reminded_at: new Date().toISOString(),
+        reminder_count: (g.reminder_count ?? 0) + 1,
+      })
       .eq("id", g.id);
     sent++;
   }
