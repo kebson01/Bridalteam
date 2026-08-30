@@ -28,7 +28,7 @@ export function organizationSchema() {
     url: SITE_URL,
     logo: { "@type": "ImageObject", url: LOGO_URL },
     description: SITE_DESCRIPTION,
-    foundingDate: "2012",
+    foundingDate: "2014",
     sameAs: SOCIAL_PROFILES,
   };
 }
