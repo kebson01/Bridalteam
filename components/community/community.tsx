@@ -988,7 +988,7 @@ export default function Community({
               <a href="/terms" className="hover:text-brand-text">Terms</a>
               <a href="/guides" className="hover:text-brand-text">Guides</a>
             </div>
-            <p className="mt-2 text-[11px] text-ink-soft/40">© 2026 Bridal Team Inc.</p>
+            <p className="mt-2 text-[11px] text-ink-soft/40">© {new Date().getFullYear()} Bridal Team Inc.</p>
           </div>
         </aside>
       </div>
