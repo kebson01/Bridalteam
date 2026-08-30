@@ -17,13 +17,17 @@ import { downscaleImage } from "@/lib/image";
 export default function CoverPhoto({
   weddingId,
   initialUrl,
+  initialPosition = 50,
 }: {
   weddingId: string;
   initialUrl: string | null;
+  /** Vertical focal point, 0 (top) to 100 (bottom). */
+  initialPosition?: number;
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState<string | null>(initialUrl);
+  const [position, setPosition] = useState(initialPosition);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -57,7 +61,7 @@ export default function CoverPhoto({
       }
 
       const { data } = supabase.storage.from("wedding-media").getPublicUrl(path);
-      const res = await setWeddingCover(weddingId, data.publicUrl);
+      const res = await setWeddingCover(weddingId, data.publicUrl, position);
       if (!res.ok) {
         setError(res.error ?? "Couldn’t save that photo.");
         return;
@@ -70,6 +74,14 @@ export default function CoverPhoto({
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
     }
+  }
+
+  function savePosition() {
+    start(async () => {
+      const res = await setWeddingCover(weddingId, url, position);
+      if (!res.ok) setError(res.error ?? "Couldn’t save that.");
+      router.refresh();
+    });
   }
 
   function remove() {
@@ -94,12 +106,42 @@ export default function CoverPhoto({
       </p>
 
       {url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={url}
-          alt="Your wedding page photo"
-          className="mt-4 aspect-[16/7] w-full rounded-xl object-cover"
-        />
+        <>
+          {/* Same aspect ratio and crop rule as the real hero, so this preview
+              is what guests actually see rather than an approximation. */}
+          <div className="relative mt-4 aspect-[16/7] w-full overflow-hidden rounded-xl bg-ink">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={url}
+              alt="Your wedding page photo"
+              style={{ objectPosition: `center ${position}%` }}
+              className="h-full w-full object-cover"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/60 to-ink/80" />
+            <p className="pointer-events-none absolute inset-0 flex items-center justify-center font-display text-2xl font-light text-white">
+              Your names
+            </p>
+          </div>
+
+          <label className="mt-3 block text-sm font-medium text-ink-soft">
+            Which part of the photo to show
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={position}
+              onChange={(e) => setPosition(Number(e.target.value))}
+              onPointerUp={() => savePosition()}
+              onKeyUp={() => savePosition()}
+              className="mt-2 w-full accent-[var(--color-brand)]"
+            />
+            <span className="mt-1 flex justify-between text-xs font-normal text-ink-soft/60">
+              <span>Top of photo</span>
+              <span>Bottom</span>
+            </span>
+          </label>
+        </>
       )}
 
       {error && (

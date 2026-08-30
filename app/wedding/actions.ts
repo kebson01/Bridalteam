@@ -13,6 +13,8 @@ export type PublicWedding = {
   welcome_message: string | null;
   /** Hero photo for the guest page, uploaded by the couple. */
   cover_image_url: string | null;
+  /** Vertical focal point of that photo, 0 (top) to 100 (bottom). */
+  cover_position: number | null;
 };
 
 export type Rsvp = {
@@ -226,11 +228,21 @@ export async function getPublicRegistry(slug: string): Promise<RegistryLink[]> {
 export async function setWeddingCover(
   weddingId: string,
   url: string | null,
+  position?: number,
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await supabaseServer();
+  const patch: Record<string, unknown> = {
+    cover_image_url: url,
+    updated_at: new Date().toISOString(),
+  };
+  // Clamped here as well as by the CHECK constraint, so a bad value is a no-op
+  // rather than a failed save the couple has to decipher.
+  if (position !== undefined) {
+    patch.cover_position = Math.min(Math.max(Math.round(position), 0), 100);
+  }
   const { data, error } = await supabase
     .from("weddings")
-    .update({ cover_image_url: url, updated_at: new Date().toISOString() })
+    .update(patch)
     .eq("id", weddingId)
     .select("id")
     .maybeSingle();

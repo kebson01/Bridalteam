@@ -51,7 +51,7 @@ export default async function PublicWeddingPage({
     <>
       {/* Hero */}
       <section
-        className="relative overflow-hidden px-5 py-20 text-center text-white sm:py-28"
+        className="relative flex min-h-[26rem] flex-col justify-center overflow-hidden px-5 py-20 text-center text-white sm:min-h-[32rem] sm:py-28"
         style={{
           background:
             "radial-gradient(120% 130% at 80% 10%, rgba(243,103,5,0.35), transparent 55%), linear-gradient(160deg, #2f2622, #1c1512)",
@@ -66,6 +66,7 @@ export default async function PublicWeddingPage({
               src={w.cover_image_url}
               alt=""
               aria-hidden="true"
+              style={{ objectPosition: `center ${w.cover_position ?? 50}%` }}
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/60 to-ink/80" />

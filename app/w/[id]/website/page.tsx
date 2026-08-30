@@ -34,7 +34,7 @@ export default async function WeddingWebsitePage({
 
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url")
+    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position")
     .eq("id", id)
     .maybeSingle();
   if (!wedding) notFound();
@@ -58,7 +58,11 @@ export default async function WeddingWebsitePage({
             siteUrl={SITE_URL}
           />
 
-          <CoverPhoto weddingId={id} initialUrl={wedding.cover_image_url ?? null} />
+          <CoverPhoto
+            weddingId={id}
+            initialUrl={wedding.cover_image_url ?? null}
+            initialPosition={wedding.cover_position ?? 50}
+          />
 
           <RegistryManager weddingId={id} initialLinks={registry} />
 
