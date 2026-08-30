@@ -8,6 +8,7 @@ import {
   sendInvites,
   updateGuest,
   sendReminders,
+  assignTable,
   type Guest,
 } from "@/app/w/[id]/guests/actions";
 import { canRemind, REMINDER_COOLDOWN_DAYS } from "@/lib/guests";
@@ -146,6 +147,14 @@ export default function GuestList({
     });
   }
 
+  function onTable(attendeeId: string, tableName: string) {
+    start(async () => {
+      const res = await assignTable(weddingId, attendeeId, tableName);
+      if (!res.ok) setMsg({ text: res.error ?? "Couldn't save that table.", ok: false });
+      refresh();
+    });
+  }
+
   function onSeats(g: Guest, seats: number) {
     start(async () => {
       await updateGuest(weddingId, g.id, { seats });
@@ -247,6 +256,12 @@ export default function GuestList({
           >
             Export for caterer
           </a>
+          <a
+            href={`/w/${weddingId}/guests/print`}
+            className="rounded-full border border-stone-2 px-5 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
+          >
+            Place cards &amp; seating
+          </a>
           <button
             type="button"
             onClick={onRemindAll}
@@ -285,15 +300,27 @@ export default function GuestList({
                   {g.attendees.length > 0 && (
                     <ul className="mt-1.5 space-y-0.5">
                       {g.attendees.map((a, i) => (
-                        <li key={i} className="text-xs text-ink-soft/75">
+                        <li key={a.id} className="flex flex-wrap items-center gap-2 text-xs text-ink-soft/75">
                           <span className="font-medium text-ink-soft">
                             {a.name?.trim() || `Guest ${i + 1}`}
                           </span>
                           {a.dish ? (
-                            <span> — {a.dish}</span>
+                            <span>— {a.dish}</span>
                           ) : (
-                            <span className="italic text-ink-soft/50"> — no dish chosen</span>
+                            <span className="italic text-ink-soft/50">— no dish chosen</span>
                           )}
+                          {/* Seating is done by typing a label, not by creating
+                              a table first — couples move names around. */}
+                          <input
+                            defaultValue={a.table_name ?? ""}
+                            onBlur={(e) => {
+                              const v = e.target.value.trim();
+                              if (v !== (a.table_name ?? "")) onTable(a.id, v);
+                            }}
+                            placeholder="Table"
+                            aria-label={`Table for ${a.name?.trim() || `guest ${i + 1}`}`}
+                            className="w-24 rounded border border-stone-2 px-2 py-0.5 text-xs text-ink outline-none focus:border-brand"
+                          />
                         </li>
                       ))}
                     </ul>

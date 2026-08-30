@@ -36,8 +36,11 @@ export interface Guest {
 }
 
 export interface Attendee {
+  id: string;
   name: string | null;
   dish: string | null;
+  /** Free-text table label. Null = not seated yet. */
+  table_name: string | null;
 }
 
 export type Result = { ok: boolean; error?: string; sent?: number; added?: number };
@@ -76,7 +79,7 @@ export async function listGuests(weddingId: string): Promise<Guest[] | null> {
   const [{ data: rows, error: aErr }, { data: menu, error: mErr }] = await Promise.all([
     supabase
       .from("guest_attendees")
-      .select("guest_id, name, menu_option_id, position")
+      .select("id, guest_id, name, menu_option_id, position, table_name")
       .in("guest_id", guests.map((g) => g.id))
       .order("position", { ascending: true }),
     supabase.from("wedding_menu_options").select("id, name").eq("wedding_id", weddingId),
@@ -94,8 +97,10 @@ export async function listGuests(weddingId: string): Promise<Guest[] | null> {
     const gid = r.guest_id as string;
     const list = byGuest.get(gid) ?? [];
     list.push({
+      id: r.id as string,
       name: (r.name as string | null) ?? null,
       dish: r.menu_option_id ? (dishName.get(r.menu_option_id as string) ?? null) : null,
+      table_name: (r.table_name as string | null) ?? null,
     });
     byGuest.set(gid, list);
   }
@@ -585,6 +590,31 @@ export async function clearReply(weddingId: string, guestId: string): Promise<Re
   const { error: aErr } = await supabase.from("guest_attendees").delete().eq("guest_id", guestId);
   if (aErr) console.error("clearReply attendees failed:", aErr.code, aErr.message);
 
+  revalidatePath(`/w/${weddingId}/guests`);
+  return { ok: true };
+}
+
+/**
+ * Seats one person at a table.
+ *
+ * Free text on purpose — "Table 4", "Head table", "Oak". RLS on guest_attendees
+ * already limits this to weddings the caller can edit, so there's no ownership
+ * check here; a stray id simply updates nothing.
+ */
+export async function assignTable(
+  weddingId: string,
+  attendeeId: string,
+  tableName: string,
+): Promise<Result> {
+  const supabase = await supabaseServer();
+  const { error } = await supabase
+    .from("guest_attendees")
+    .update({ table_name: tableName.trim().slice(0, 60) || null })
+    .eq("id", attendeeId);
+  if (error) {
+    console.error("assignTable failed:", error.code, error.message);
+    return { ok: false, error: "Couldn’t save that table." };
+  }
   revalidatePath(`/w/${weddingId}/guests`);
   return { ok: true };
 }
