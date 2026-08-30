@@ -5,6 +5,7 @@ import PageHero from "@/components/page-hero";
 import WeddingNav from "@/components/wedding-nav";
 import WebsiteManager from "@/components/wedding/website-manager";
 import RegistryManager from "@/components/wedding/registry-manager";
+import CoverPhoto from "@/components/wedding/cover-photo";
 import { listRegistryLinks } from "@/app/wedding/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
@@ -33,7 +34,7 @@ export default async function WeddingWebsitePage({
 
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message")
+    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url")
     .eq("id", id)
     .maybeSingle();
   if (!wedding) notFound();
@@ -56,6 +57,8 @@ export default async function WeddingWebsitePage({
             initialSlug={wedding.public_slug ?? null}
             siteUrl={SITE_URL}
           />
+
+          <CoverPhoto weddingId={id} initialUrl={wedding.cover_image_url ?? null} />
 
           <RegistryManager weddingId={id} initialLinks={registry} />
 

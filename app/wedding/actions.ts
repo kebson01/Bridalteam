@@ -11,6 +11,8 @@ export type PublicWedding = {
   city: string | null;
   region: string | null;
   welcome_message: string | null;
+  /** Hero photo for the guest page, uploaded by the couple. */
+  cover_image_url: string | null;
 };
 
 export type Rsvp = {
@@ -211,4 +213,33 @@ export async function getPublicRegistry(slug: string): Promise<RegistryLink[]> {
     label: r.label,
     url: r.url,
   }));
+}
+
+/**
+ * Sets or clears the wedding page's hero photo.
+ *
+ * The file itself is uploaded straight to storage from the browser (where the
+ * bucket policy checks can_edit_wedding on the folder); this only records the
+ * resulting URL. Passing null clears it. RLS on `weddings` decides whether the
+ * write lands, so there's no ownership check here.
+ */
+export async function setWeddingCover(
+  weddingId: string,
+  url: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase
+    .from("weddings")
+    .update({ cover_image_url: url, updated_at: new Date().toISOString() })
+    .eq("id", weddingId)
+    .select("id")
+    .maybeSingle();
+  if (error) {
+    console.error("setWeddingCover failed:", error.code, error.message);
+    return { ok: false, error: "Couldn’t save that photo." };
+  }
+  if (!data) return { ok: false, error: "You don’t have permission to edit this wedding." };
+
+  revalidatePath(`/w/${weddingId}/website`);
+  return { ok: true };
 }

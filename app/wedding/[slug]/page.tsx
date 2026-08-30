@@ -51,18 +51,34 @@ export default async function PublicWeddingPage({
     <>
       {/* Hero */}
       <section
-        className="px-5 py-20 text-center text-white sm:py-28"
+        className="relative overflow-hidden px-5 py-20 text-center text-white sm:py-28"
         style={{
           background:
             "radial-gradient(120% 130% at 80% 10%, rgba(243,103,5,0.35), transparent 55%), linear-gradient(160deg, #2f2622, #1c1512)",
         }}
       >
+        {/* The couple's photo sits behind the gradient rather than replacing
+            it, so white text stays readable whatever they upload. */}
+        {w.cover_image_url && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={w.cover_image_url}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/60 to-ink/80" />
+          </>
+        )}
+        <div className="relative">
         <p className="font-display text-xs font-semibold tracking-[0.32em] text-brand">TOGETHER WITH THEIR FAMILIES</p>
         <h1 className="mx-auto mt-4 max-w-3xl text-balance font-display text-5xl font-semibold tracking-wide sm:text-6xl">
           {names}
         </h1>
         {date && <p className="mt-5 text-lg text-white/80">{date}</p>}
         {location && <p className="mt-1 text-sm uppercase tracking-[0.15em] text-white/55">{location}</p>}
+        </div>
       </section>
 
       <section className="mx-auto max-w-xl px-5 py-14">
