@@ -1,14 +1,19 @@
 /**
  * Feature flags.
  *
- * SHOW_VENDOR_DIRECTORY — the /vendors directory is hidden at launch because
- * the `vendors` table currently holds seeded sample data (no websites, no
- * images, invented business names) rather than real, bookable vendors.
- * Publishing it as-is would misrepresent fictional listings as real ones.
+ * SHOW_VENDOR_DIRECTORY — surfaces the *entry points* to /vendors: the footer
+ * link and the homepage teaser. It no longer gates the page itself.
  *
- * To bring it back once the table holds real listings, set
- * NEXT_PUBLIC_SHOW_VENDOR_DIRECTORY=true. Nothing else needs to change:
- * the page, the admin tools and the queries all still work.
+ * It was originally an all-or-nothing hide, because /vendors then rendered the
+ * `vendors` table, which holds seeded sample data (invented business names, no
+ * websites, no images) that would have read as real listings. That page now
+ * reads `vendor_profiles` and shows only rows a vendor published themselves —
+ * so with nothing published it shows an honest empty state instead of fiction,
+ * and is safe to leave reachable. The seeded `vendors` table survives only
+ * behind /admin/venues; nothing public renders it.
+ *
+ * Set NEXT_PUBLIC_SHOW_VENDOR_DIRECTORY=true to advertise the directory in the
+ * nav and on the homepage once there are real listings worth sending people to.
  *
  * Note this is read at build time (NEXT_PUBLIC_*), so flipping it requires
  * a rebuild/redeploy, not just an env change on a running server.

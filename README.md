@@ -14,11 +14,22 @@ core of the experience.
   (`app/globals.css`): the signature orange (`#ff8c1c` / `#f36705`), near-black
   `#222`, and grays, with Jost (a free Futura-PT stand-in) + Raleway.
 - **Modern homepage** (`app/page.tsx`) — hero with the original tagline and
-  orange wash, the four AI pillars, alternating highlight sections, an AI vendor
-  matching band, and the original footer structure.
+  orange wash, the four AI pillars, alternating highlight sections, and the
+  original footer structure.
 - **Live AI planning assistant** (`components/ai-planner.tsx` +
-  `app/api/plan/route.ts`) — a chat demo that gives real, tailored guidance on
-  timelines, budgets, checklists and vendors.
+  `app/api/plan/route.ts`) — chat that gives real, tailored guidance on
+  timelines, budgets, checklists and vendor sequencing.
+- **The wedding workspace** (`app/w/[id]/`) — timeline, budget, guest list with
+  invite-only RSVP, menu and dish-per-guest, printable place cards and seating
+  chart, caterer export, travel, ideas, team and vendors, plus a public wedding
+  website at `/wedding/[slug]` with a cover photo.
+- **Community and inspiration** (`app/community/`, `app/inspiration/`) — groups,
+  posts, polls, events and shared mood boards, readable signed-out.
+- **The vendor side** (`app/vendor/`, `app/for-vendors/`) — self-serve profiles,
+  a lead inbox, reviews and Stripe-billed Free / Pro / Featured tiers
+  (`lib/tiers.ts`).
+- **Published legal** (`app/terms`, `app/privacy`) — rendered from `TERMS.md`
+  and `PRIVACY.md` through `components/legal-doc.tsx` so they can't drift.
 
 ## The four AI pillars
 
@@ -58,14 +69,19 @@ project (URL + publishable key) is baked into `lib/supabase.ts` as a default, so
 the directory works with no configuration — reads are guarded by row-level
 security (public can read; nobody can write with the public key).
 
-Data lives in the `vendors` table (`name`, `category`, `city`, `state`, `price`,
-`capacity`, `tag`, `description`, `image_url`, `website`, `featured`) and already
-covers every category — venues, photographers, caterers, music and more. You can
-add vendors three ways:
+There are **two vendor tables**, and they are not interchangeable:
 
-1. **The admin page** — visit `/admin/venues` (see below).
-2. **The Supabase dashboard** — Table editor → `vendors`.
-3. **Bulk import** — upload a CSV into the `vendors` table.
+- **`vendor_profiles`** backs everything public. A vendor creates their own
+  account, fills in their profile and publishes it; `/vendors` lists only rows
+  with `status = 'published'`, ordered so Featured-plan vendors come first. With
+  nothing published the page shows an empty state rather than invented listings.
+- **`vendors`** is the older admin-curated table (`name`, `category`, `city`,
+  `state`, `price`, `capacity`, `tag`, `description`, `image_url`, `website`,
+  `featured`). It still holds ~29 seeded sample rows and is reachable **only**
+  through `/admin/venues` — no public page renders it.
+
+So the way a vendor gets listed today is by signing up and publishing a profile.
+`/admin/venues` remains for curating the legacy table.
 
 ### Managing vendors from `/admin/venues`
 
@@ -92,8 +108,24 @@ This repository is the new, self-contained version of Bridal Team. The original
 2012/13 Laravel + WordPress + blog codebase was removed when the project was
 rebuilt; it remains recoverable in the git history if ever needed.
 
+## Launch state
+
+The app is feature-complete and builds clean. The signed-in product — accounts,
+onboarding, the dashboard and the wedding workspace — sits behind one build-time
+flag, `NEXT_PUBLIC_SHOW_PLANNER_APP`. `lib/config.ts` reads it as `SIGNUPS_OPEN`,
+which is the single source of truth for where every "Start free" CTA, `/signup`
+and `/login` point: the waitlist while it's off, the real auth screens once it's
+on. Because it's a `NEXT_PUBLIC_*` flag it is read at build time, so opening
+accounts means setting it **and redeploying**.
+
+Before flipping it, make sure the server-only keys are set in production —
+`STRIPE_SECRET_KEY` and the price/webhook ids, `RESEND_API_KEY`,
+`ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`. Each one
+degrades quietly rather than erroring (see `.env.example`), so a missing key
+looks like a working site until a vendor tries to pay or an invite never sends.
+
 ## Next steps (not yet built)
 
-- Supabase Auth for couple accounts + shared team workspaces
 - Surface the non-venue categories in the directory UI (the data already has them)
-- Wire the matching AI to query real venue/vendor data
+- Wire the matching AI to query real vendor data
+- Automated tests and a CI check — there are currently none
