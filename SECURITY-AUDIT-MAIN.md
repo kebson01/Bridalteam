@@ -20,14 +20,15 @@ The findings below are real but narrower than the Laravel set.
 | M1 | 🔴 High | Vendors can self-upgrade to the paid **Featured** tier for free (billing bypass) | ✅ Closed — both phases |
 | M2 | 🟠 Medium | Admin gate: no rate limiting, creds in `sessionStorage`, non-constant-time compare | ✅ Fixed |
 | M3 | 🟠 Medium | AI quota bypass / Anthropic cost abuse via spoofable `X-Forwarded-For` | ✅ Fixed |
-| M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | 🟨 Headers shipped; CSP needs `CSP_ENFORCE=true` |
-| M5 | 🟡 Low | Supabase leaked-password protection (HIBP) disabled | ⬜ Open — dashboard toggle |
+| M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | 🟨 Policy fixed + verified; needs `CSP_ENFORCE=true` |
+| M5 | 🟡 Low | Supabase leaked-password protection (HIBP) disabled | ✅ Enabled |
 | M6 | 🟡 Low | `vendor/track` inserts arbitrary `org` stats with service role, unauthenticated | ✅ Fixed |
-| M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ⬜ Noise |
+| M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ✅ Narrowed (25 → 18 anon) |
+| M8 | 🟡 Low | `consume_ai_quota` is anon-callable, so the global AI ceiling can be tripped on purpose | ⬜ Open — found 2026-09-14 |
 
-> **Status as of 2026-09-14.** Five of the seven are closed in both code and the
-> live database. What is left is two settings, not two code changes: enforce the
-> CSP (M4) and turn on leaked-password protection (M5). Live Supabase security
+> **Status as of 2026-09-14.** Six of the seven are closed. The only thing left
+> is flipping `CSP_ENFORCE=true` in the environment (M4) — the policy itself has
+> been corrected and verified enforcing in a real browser. Live Supabase security
 > advisors report **0 ERROR-level** findings.
 
 ---
@@ -104,11 +105,22 @@ As defense in depth, `anonChatCeilingExceeded()` caps total anonymous chat calls
 
 **The CSP took two attempts.** A nonce-based policy shipped first and could never have been enforced: most routes are statically prerendered, so Next has no request to mint a nonce for and emits zero nonced scripts, while middleware still advertised a fresh nonce — and the whole response, header included, is CDN-cached for days. Production served `/` and `/pricing` with 0 nonced scripts against header nonces 14.7 and 6.4 days old; flipping the enforce switch would have blocked every script on the marketing site. It was replaced with a policy carrying no per-request state, correct on static, dynamic and cached responses alike (`script-src` trades the nonce for `'unsafe-inline'`; every other directive still does real work). `CSP_STRICT=true` opts back into nonce + `'strict-dynamic'` once the marketing routes render dynamically.
 
-**⬜ Remaining:** the policy still ships as `Content-Security-Policy-Report-Only`. Set `CSP_ENFORCE=true` to enforce it — safe now, unlike before, but click through the marketing pages once after.
+**Two directives were missing, and both would have broken silently on enforce** (found 2026-09-14 by walking the app, not by reading the policy):
+
+- **`frame-src` was absent entirely**, so frames fell back to `default-src 'self'`. The inspiration gallery embeds YouTube and Vimeo players (`components/inspiration-gallery.tsx::toEmbed`), so every embedded video would have rendered as an empty box. Now `frame-src 'self' https://www.youtube.com https://player.vimeo.com`.
+- **`form-action 'self'`** would have blocked vendor checkout. `startCheckoutFor` redirects to `checkout.stripe.com` and the portal to `billing.stripe.com`; Chrome exempts redirects from `form-action`, but Firefox and Safari do not, so a no-JS "Subscribe" POST would have died mid-redirect on those browsers. Both hosts are now named.
+
+**Verified enforcing.** Built the app, served it with `CSP_ENFORCE=true`, and drove Chromium across 15 routes (`/`, `/pricing`, `/for-vendors`, `/about`, `/contact`, `/guides`, `/blog`, `/terms`, `/privacy`, `/planner`, `/signup`, `/login`, `/vendors`, `/auth/login`, `/auth/signup`): **zero `securitypolicyviolation` events, React hydrated on every one**. A targeted probe then confirmed the additions do real work — YouTube and Vimeo iframes load, while an unlisted host is still blocked by `frame-src`.
+
+**⬜ Remaining:** the policy still ships as `Content-Security-Policy-Report-Only`. Set `CSP_ENFORCE=true` in the environment to enforce it. Note the verification above covered signed-out routes only — a local signed-in session wasn't possible here — so walk one authenticated workspace page after flipping it.
 
 ## M5 — 🟡 Low: Enable leaked-password protection
 
-Supabase advisor: HaveIBeenPwned check is off. Enable **Auth → Passwords → "Leaked password protection"** in the dashboard. One toggle, no code.
+Supabase advisor: HaveIBeenPwned check was off, so known-breached passwords were accepted at signup and password change.
+
+**✅ Enabled** (2026-09-14). Confirmed in the dashboard under Authentication → Bot and Abuse Protection ("Prevent use of leaked passwords" reads ENABLED), and the `auth_leaked_password_protection` advisory no longer appears.
+
+**Worth noting while you're on that screen:** *Enable Captcha protection* is still **off**. It wasn't in the original audit's scope and isn't a vulnerability, but it is the control that stops scripted signups, and it starts mattering the moment accounts open to the public.
 
 ## M6 — 🟡 Low: `vendor/track` accepts arbitrary org
 
@@ -118,21 +130,44 @@ Supabase advisor: HaveIBeenPwned check is off. Enable **Auth → Passwords → "
 
 ## M7 — ⚪ Info: SECURITY DEFINER advisor warnings
 
-The 56 `*_security_definer_function_executable` advisories are expected for this design — the functions are the RLS-authorization layer and each checks `auth.uid()` / ownership internally (spot-checked ~12, including every state-changing one). No action needed beyond awareness; revoking `EXECUTE` from `anon` on the purely-authenticated ones (e.g. `add_group_members_by_email`, `set_wedding_website`) would quiet the linter without behavior change.
+The `*_security_definer_function_executable` advisories are expected for this design — the functions are the RLS-authorization layer and each checks `auth.uid()` / ownership internally (spot-checked ~12, including every state-changing one).
+
+**✅ Narrowed** (2026-09-14). `EXECUTE` is revoked from `anon` on the seven functions only signed-in users ever call: `add_group_members_by_email`, `is_group_owner`, `join_public_group`, `list_group_members`, `list_suggested_groups`, `remove_group_member`, `set_wedding_website`. SQL and full reasoning in [`security/2026-09-revoke-anon-execute-on-signed-in-rpcs.sql`](security/2026-09-revoke-anon-execute-on-signed-in-rpcs.sql); applied to the live DB. The anon advisory count fell **25 → 18**.
+
+Two things that analysis turned up, both worth remembering before anyone extends this:
+
+1. **`revoke ... from anon` is usually a no-op here.** Most of these functions grant EXECUTE to `PUBLIC` (`=X/postgres` in `proacl`), not to `anon`, so you must revoke from `public` as well or nothing changes — while `has_function_privilege('anon', …)` keeps reporting `true` and looks like a failed revoke.
+2. **13 of the flagged functions are RLS policy predicates** (`can_edit_wedding`, `is_org_member`, `can_see_post`, …). Policy expressions evaluate as the *calling* role, so revoking those from `anon` does not "quiet the linter without behavior change" — it breaks every public read on the site. They must stay.
+
+The **18 remaining anon advisories are all correct and should stay**: those 13 predicates, plus the 5 genuinely public RPCs (`get_public_wedding`, `list_public_registry`, `get_guest_invite`, `submit_guest_rsvp`, `consume_ai_quota`). The 34 `authenticated` advisories are the design working as intended — those functions are *for* signed-in users.
 
 ---
 
+## M8 — 🟡 Low: the anon AI ceiling can be tripped deliberately
+
+*Found 2026-09-14 while working M7, not part of the original audit.*
+
+`consume_ai_quota(p_kind, p_ip)` has to stay executable by `anon`, because `app/api/plan/route.ts` meters anonymous chat through the caller's own Supabase client, and the function reads `auth.uid()` to decide the tier. So it is callable directly at `/rest/v1/rpc/consume_ai_quota` with the publishable key and any `p_ip` the caller likes. Each call inserts a row into `ai_usage`.
+
+The M3 fix stopped this being a *cost* problem — `clientIp()` is no longer forgeable, so an attacker can't mint themselves unlimited real chat turns. What's left is an **availability** problem, and it comes from the M3 backstop itself: `anonChatCeilingExceeded()` counts every `ai_usage` row with a `subject` like `ip:%` in the last 24h and cuts anonymous chat off above `AI_ANON_DAILY_GLOBAL_CAP` (default 1000). Those rows don't have to come from the app. Roughly a thousand direct RPC calls — trivially scripted, no account needed — turn the planner off for every signed-out visitor for a day. The same trick can burn a chosen visitor's 5-a-day bucket by passing their IP, and bloats the table.
+
+**Proposed fix (not applied — it changes a function signature and a call site, so it wants its own change):** pass the user id in explicitly, `consume_ai_quota(p_kind, p_ip, p_uid)`, call it with the service-role client from the two API routes that already derive both values server-side, then revoke EXECUTE from `anon` and `authenticated` so only the service role can write quota rows at all. That closes the hole rather than raising the cap, and it also drops `consume_ai_quota` off the anon advisory list.
+
+Until then the exposure is a disabled demo chat, not data loss or spend — which is why this is Low and not a launch blocker.
+
 ## Remediation priority
 
-Everything that needed code or SQL is done. Both remaining items are settings in a
-dashboard, and both should be handled before accounts open:
-
-1. **M5** — turn on leaked-password protection (Supabase → Auth → Passwords). One
-   toggle. It matters from the first real signup, not later.
-2. **M4** — set `CSP_ENFORCE=true` so the policy stops being advisory, then click
-   through the marketing pages once.
+1. **M4** — set `CSP_ENFORCE=true`. The policy is corrected and verified across 15
+   signed-out routes; walk one signed-in workspace page after flipping it, since
+   that path couldn't be exercised locally.
+2. **M8** — close the quota RPC when convenient. Low severity, and the fix is
+   small, but it is the last thing an anonymous stranger can still reach.
+3. **Captcha** — not an audit finding, but Supabase's Captcha protection is off
+   and accounts are about to open to the public.
 
 Then re-run the advisors after the first week of real traffic. The design that
-makes 56 SECURITY DEFINER functions the authorization layer (M7) is sound but
+makes SECURITY DEFINER functions the authorization layer (M7) is sound but
 unforgiving: every new RPC has to authorize internally, and the linter won't tell
-you which one forgot.
+you which one forgot. Two rules for anyone extending it — never revoke `anon`
+EXECUTE on a function used in an RLS policy, and remember the grant usually lives
+on `PUBLIC` rather than on `anon`.
