@@ -17,13 +17,18 @@ The findings below are real but narrower than the Laravel set.
 
 | # | Severity | Issue | Status |
 |---|----------|-------|--------|
-| M1 | 🔴 High | Vendors can self-upgrade to the paid **Featured** tier for free (billing bypass) | ✅ Applied to live DB |
-| M2 | 🟠 Medium | Admin gate: no rate limiting, creds in `sessionStorage`, non-constant-time compare | 🟨 Partial |
-| M3 | 🟠 Medium | AI quota bypass / Anthropic cost abuse via spoofable `X-Forwarded-For` | 🟨 Recommend |
-| M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | ✅ Fixed (headers, ex-CSP) |
-| M5 | 🟡 Low | Supabase leaked-password protection (HIBP) disabled | ⬜ Dashboard toggle |
-| M6 | 🟡 Low | `vendor/track` inserts arbitrary `org` stats with service role, unauthenticated | ⬜ Open |
+| M1 | 🔴 High | Vendors can self-upgrade to the paid **Featured** tier for free (billing bypass) | ✅ Closed — both phases |
+| M2 | 🟠 Medium | Admin gate: no rate limiting, creds in `sessionStorage`, non-constant-time compare | ✅ Fixed |
+| M3 | 🟠 Medium | AI quota bypass / Anthropic cost abuse via spoofable `X-Forwarded-For` | ✅ Fixed |
+| M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | 🟨 Headers shipped; CSP needs `CSP_ENFORCE=true` |
+| M5 | 🟡 Low | Supabase leaked-password protection (HIBP) disabled | ⬜ Open — dashboard toggle |
+| M6 | 🟡 Low | `vendor/track` inserts arbitrary `org` stats with service role, unauthenticated | ✅ Fixed |
 | M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ⬜ Noise |
+
+> **Status as of 2026-09-14.** Five of the seven are closed in both code and the
+> live database. What is left is two settings, not two code changes: enforce the
+> CSP (M4) and turn on leaked-password protection (M5). Live Supabase security
+> advisors report **0 ERROR-level** findings.
 
 ---
 
@@ -59,7 +64,7 @@ grant update (name, logo_url, brand_color, stripe_customer_id, cancel_at_period_
 
 Verified post-apply: `authenticated` UPDATE columns are now exactly `name, logo_url, brand_color, cancel_at_period_end, stripe_customer_id`; `plan` / `subscription_status` / `stripe_subscription_id` are gone; `anon` has no UPDATE columns.
 
-**Phase 2 (not done — needs a coordinated code change):** move the `stripe_customer_id` write in `billing/actions.ts` to the service role, then also revoke `UPDATE(stripe_customer_id)` from `authenticated`. Lower severity (a user could point their org at another Stripe customer id), but worth closing once the code change ships together.
+**Phase 2 (✅ done).** The `stripe_customer_id` write in `billing/actions.ts` now goes through the service-role client, scoped to the caller's own org id, so `authenticated` no longer needs the column. The revoke in [`security/2026-08-phase2-lock-stripe-customer-id.sql`](security/2026-08-phase2-lock-stripe-customer-id.sql) has been applied to the live DB in the required order (code deployed first). Verified 2026-09-14: `authenticated` now holds UPDATE on exactly `brand_color, cancel_at_period_end, logo_url, name`, and `anon` on none. The last billing-identifier tamper vector — a vendor pointing their org at someone else's Stripe customer — is closed.
 
 ---
 
@@ -71,7 +76,15 @@ Verified post-apply: `authenticated` UPDATE columns are now exactly `name, logo_
 2. **Credentials persisted in `sessionStorage`** (`app/admin/page.tsx`) and replayed as headers on every request — readable by any same-origin XSS, and left in plaintext in the browser.
 3. **Non-constant-time comparison** (`c.password === providedPassword`) — a timing side channel (low practical risk over the network, but free to fix).
 
-**Fixes.** ✅ Constant-time comparison applied (`timingSafeEqual`) in `lib/admin-auth.ts`. **Still recommended:** (a) add rate limiting / lockout on the admin endpoints (e.g. a small `admin_login_attempts` table or an edge KV counter keyed by IP), and (b) replace the `sessionStorage` password with a short-lived, httpOnly, server-set session cookie so the raw password never lives in the browser. Ensure `ADMIN_PASSWORD` is long and random regardless.
+**Fixes (✅ all three applied).**
+
+1. **Rate limiting** — per-IP lockout on admin credential checks, backed by an `admin_login_attempts` table, so `ADMIN_PASSWORD` can't be brute-forced online.
+2. **Session cookies** — new `/api/admin/login` and `/api/admin/logout` issue an httpOnly, Secure, SameSite=Strict cookie backed by `admin_sessions` (only a token *hash* is stored). The admin page logs in through that flow and no longer keeps the password in `sessionStorage`. `adminGuard` accepts the cookie or the legacy headers, both rate-limited.
+3. **Constant-time comparison** — `timingSafeEqual` in `lib/admin-auth.ts`.
+
+Both new tables are RLS-enabled with no policies (service-role only); migration in [`security/2026-08-admin-hardening-tables.sql`](security/2026-08-admin-hardening-tables.sql), applied to the live DB.
+
+**Still on you:** make `ADMIN_PASSWORD` long and random. The rate limiter buys time against guessing; it doesn't rescue a weak passphrase.
 
 ---
 
@@ -79,13 +92,19 @@ Verified post-apply: `authenticated` UPDATE columns are now exactly `name, logo_
 
 `lib/ai-quota.ts::clientIp()` returns the **leftmost** `X-Forwarded-For` entry, which a client can set arbitrarily. Anonymous AI chat is metered per IP (`consume_ai_quota`, 5/day). By rotating a spoofed `X-Forwarded-For`, an anonymous user resets the bucket every request → **unbounded calls against your `ANTHROPIC_API_KEY`**. (The `consume_ai_quota` RPC is also directly anon-callable with an arbitrary `p_ip`, same root cause.)
 
-**Fix (recommended — platform-specific).** Derive the client IP from a source the client can't forge: on Vercel use `x-vercel-forwarded-for` / the `@vercel/functions` `ipAddress()`; behind a single trusted proxy take the **right-most** XFF hop, not the left-most. As defense in depth, add a small global anon ceiling so a spoofed-IP flood still can't run the key up. Left as a recommendation because the correct trusted source depends on the deploy platform (unknown from the repo) and I can't verify it without a staging deploy.
+**Fix (✅ applied).** `clientIp()` now trusts the hop the outermost proxy we control actually observed — counting in from the **right** of `X-Forwarded-For`, not the forgeable left-most — so forging the header no longer resets the bucket. The app deploys on **DigitalOcean App Platform**, which puts one trusted hop in front, hence the default of 1; `AI_TRUSTED_PROXY_HOPS` raises it if another proxy is added (Cloudflare in front → 2). Getting that count wrong is the one way this regresses, so re-check it whenever the edge changes.
+
+As defense in depth, `anonChatCeilingExceeded()` caps total anonymous chat calls per day across all IPs (`AI_ANON_DAILY_GLOBAL_CAP`, default 1000), so even a flood from rotated addresses can't run the Anthropic key up. It deliberately **fails open** on a metering error — a Supabase hiccup must not take chat down — which trades a bounded cost risk for availability.
 
 ---
 
 ## M4 — 🟡 Low: Missing security headers
 
-`next.config.ts` sets no security headers. ✅ Added `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Strict-Transport-Security`, and a minimal `Permissions-Policy` via `headers()`. **A Content-Security-Policy was intentionally left out** — a wrong CSP breaks the app (Supabase, Stripe, Anthropic, Next inline runtime), and I can't test it here. Add a CSP as a separate, staging-tested change.
+`next.config.ts` sets no security headers. ✅ Added `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Strict-Transport-Security`, and a minimal `Permissions-Policy` via `headers()`.
+
+**The CSP took two attempts.** A nonce-based policy shipped first and could never have been enforced: most routes are statically prerendered, so Next has no request to mint a nonce for and emits zero nonced scripts, while middleware still advertised a fresh nonce — and the whole response, header included, is CDN-cached for days. Production served `/` and `/pricing` with 0 nonced scripts against header nonces 14.7 and 6.4 days old; flipping the enforce switch would have blocked every script on the marketing site. It was replaced with a policy carrying no per-request state, correct on static, dynamic and cached responses alike (`script-src` trades the nonce for `'unsafe-inline'`; every other directive still does real work). `CSP_STRICT=true` opts back into nonce + `'strict-dynamic'` once the marketing routes render dynamically.
+
+**⬜ Remaining:** the policy still ships as `Content-Security-Policy-Report-Only`. Set `CSP_ENFORCE=true` to enforce it — safe now, unlike before, but click through the marketing pages once after.
 
 ## M5 — 🟡 Low: Enable leaked-password protection
 
@@ -93,7 +112,9 @@ Supabase advisor: HaveIBeenPwned check is off. Enable **Auth → Passwords → "
 
 ## M6 — 🟡 Low: `vendor/track` accepts arbitrary org
 
-`app/api/vendor/track/route.ts` inserts a `vendor_events` row with a caller-supplied `org`, unauthenticated, using the service role and no rate limit. The code notes it's a vanity metric, but anyone can inflate any vendor's view/click counts or bloat the table. Consider validating the org exists + is published and adding a light rate limit.
+`app/api/vendor/track/route.ts` inserted a `vendor_events` row with a caller-supplied `org`, unauthenticated, using the service role and no rate limit. The code notes it's a vanity metric, but anyone could inflate any vendor's view/click counts or bloat the table.
+
+**Fix (✅ applied).** The org id must now be a well-formed UUID belonging to a **published** vendor before anything is inserted, plus a light per-IP fixed-window rate limit (60/min). That limit is a module-level in-memory counter, which works because the app runs as a persistent Node process on App Platform — it would need an external store if this ever moved to per-request serverless isolates. It blunts automated inflation; it is not a security boundary, and doesn't need to be for a vanity metric.
 
 ## M7 — ⚪ Info: SECURITY DEFINER advisor warnings
 
@@ -103,7 +124,15 @@ The 56 `*_security_definer_function_executable` advisories are expected for this
 
 ## Remediation priority
 
-1. **Apply M1** (billing column grants) — active, trivially exploitable revenue loss. SQL is ready.
-2. **M2** rate-limit + session-cookie the admin gate; ensure a strong `ADMIN_PASSWORD`.
-3. **M3** trusted client IP + global anon AI ceiling.
-4. **M5** (one toggle), **M4** CSP follow-up, **M6** hardening.
+Everything that needed code or SQL is done. Both remaining items are settings in a
+dashboard, and both should be handled before accounts open:
+
+1. **M5** — turn on leaked-password protection (Supabase → Auth → Passwords). One
+   toggle. It matters from the first real signup, not later.
+2. **M4** — set `CSP_ENFORCE=true` so the policy stops being advisory, then click
+   through the marketing pages once.
+
+Then re-run the advisors after the first week of real traffic. The design that
+makes 56 SECURITY DEFINER functions the authorization layer (M7) is sound but
+unforgiving: every new RPC has to authorize internally, and the linter won't tell
+you which one forgot.

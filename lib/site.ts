@@ -3,15 +3,27 @@
  * robots. bridalteam.net already 301s here, so .com is the canonical host.
  *
  * Override with NEXT_PUBLIC_SITE_URL for preview/staging deployments so they
- * don't advertise production URLs. On Vercel, VERCEL_PROJECT_PRODUCTION_URL is
- * used as a fallback when no explicit value is set.
+ * don't advertise production URLs. Failing that, fall back to whatever host the
+ * platform reports: DigitalOcean App Platform (where this deploys) sets APP_URL
+ * to the live app URL. VERCEL_PROJECT_PRODUCTION_URL is kept behind it so a
+ * preview built on Vercel still names itself rather than claiming to be
+ * production; drop that line once nothing deploys there.
+ *
+ * APP_URL arrives with a scheme and VERCEL_PROJECT_PRODUCTION_URL without one,
+ * so normalise both to a bare origin.
  */
+function withScheme(host: string): string {
+  const trimmed = host.replace(/\/+$/, "");
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 function resolveSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (explicit) return explicit.replace(/\/+$/, "");
 
-  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  if (vercel) return `https://${vercel.replace(/\/+$/, "")}`;
+  const platform =
+    process.env.APP_URL?.trim() || process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (platform) return withScheme(platform);
 
   return "https://bridalteam.com";
 }
