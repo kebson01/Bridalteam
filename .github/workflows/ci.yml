@@ -1,0 +1,54 @@
+name: CI
+
+# The repository had no automated checks at all, so every regression between
+# pushes was caught by hand or not at all. This runs the two things a
+# contributor would run locally, on every pull request and on main.
+#
+# No secrets are needed: lib/supabase.ts falls back to the publishable
+# credentials and lib/site.ts to the canonical origin, so `next build`
+# completes without touching the network or any private key. Keep it that way —
+# a build that needs a secret can't be verified on a fork's pull request.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # Lets anyone re-run the checks from the Actions tab without pushing —
+  # useful when a run failed for a reason outside the diff, or when Actions
+  # was switched on after the event that should have triggered a run. The
+  # "Run workflow" button only appears once this file is on the default branch.
+  workflow_dispatch:
+
+# A newer push to the same branch makes the in-flight run irrelevant.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the Node the app is developed and deployed on.
+          node-version: '22'
+          cache: npm
+
+      # `ci` not `install`: installs exactly what package-lock.json pins and
+      # fails if the lockfile and package.json have drifted apart.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
