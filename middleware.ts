@@ -43,6 +43,25 @@ const PROTECTED = ["/dashboard", "/onboarding", "/w"];
  * can point anywhere (low risk for images) plus blob:/data: for avatar cropping.
  * style-src keeps 'unsafe-inline' — Next/Tailwind emit inline styles, and style
  * injection is far lower risk than script injection.
+ *
+ * Two directives name third parties because the app genuinely navigates to and
+ * embeds them; both were found by walking the app rather than by reading the
+ * policy, and both would have broken silently the moment CSP_ENFORCE was set:
+ *
+ *   frame-src   — the inspiration gallery embeds YouTube and Vimeo players
+ *                 (components/inspiration-gallery.tsx::toEmbed). Without this
+ *                 the directive falls back to default-src 'self' and every
+ *                 embedded video renders as an empty box.
+ *   form-action — vendor checkout redirects to checkout.stripe.com and the
+ *                 billing portal to billing.stripe.com. Chrome exempts
+ *                 redirects from form-action, but Firefox and Safari do not,
+ *                 so on those browsers a no-JS "Subscribe" POST would be
+ *                 blocked mid-redirect. Naming the hosts costs nothing and
+ *                 removes the browser-dependent failure.
+ *
+ * Anything else added later that loads a cross-origin script, iframe, or
+ * fetch target needs its own entry here — check before enabling a feature,
+ * not after a support ticket.
  */
 function buildCsp(nonce: string, strict: boolean): string {
   const supabaseHttp = SUPABASE_URL;
@@ -60,9 +79,10 @@ function buildCsp(nonce: string, strict: boolean): string {
     `connect-src 'self' ${supabaseHttp} ${supabaseWss}`,
     `worker-src 'self' blob:`,
     `manifest-src 'self'`,
+    `frame-src 'self' https://www.youtube.com https://player.vimeo.com`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
-    `form-action 'self'`,
+    `form-action 'self' https://checkout.stripe.com https://billing.stripe.com`,
     `object-src 'none'`,
     `upgrade-insecure-requests`,
   ].join("; ");
