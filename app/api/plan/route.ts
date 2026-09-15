@@ -128,9 +128,21 @@ export async function POST(req: Request) {
 
   // Meter AI usage against the caller's tier (anon by IP, else per account).
   // Only real (keyed) AI calls are metered — the demo fallback above is free.
+  // Metering runs with the service-role client so quota rows can only be written
+  // by us — see consumeAiQuota. The uid comes from the caller's own session; a
+  // signed-out visitor meters by trusted IP instead.
   const supabase = await supabaseServer();
-  const { consumeAiQuota, anonChatCeilingExceeded } = await import("@/lib/ai-quota");
-  const quota = await consumeAiQuota(supabase, "chat", clientIp(req));
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { consumeAiQuota, anonChatCeilingExceeded, QUOTA_UNMETERED } = await import("@/lib/ai-quota");
+  const admin = supabaseAdmin();
+  if (!admin) {
+    console.error("AI quota not metered: SUPABASE_SERVICE_ROLE_KEY is not set.");
+  }
+  const quota = admin
+    ? await consumeAiQuota(admin, "chat", clientIp(req), user?.id ?? null)
+    : QUOTA_UNMETERED;
   if (!quota.allowed) {
     const msg =
       quota.tier === "anon"
@@ -143,7 +155,6 @@ export async function POST(req: Request) {
   // (rotated/spoofed IPs), cap total anon AI spend per day so the Anthropic key
   // can't be run up without bound. Signed-in tiers are unaffected.
   if (quota.tier === "anon") {
-    const admin = supabaseAdmin();
     if (admin && (await anonChatCeilingExceeded(admin))) {
       return NextResponse.json(
         {

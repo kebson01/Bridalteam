@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { PLAN_TEMPLATE } from "@/lib/plan-template";
-import { consumeAiQuota, clientIp } from "@/lib/ai-quota";
+import { consumeAiQuota, clientIp, QUOTA_UNMETERED } from "@/lib/ai-quota";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,9 +80,17 @@ export async function POST(req: Request) {
   // Meter AI generations against the caller's tier. If they're out of quota,
   // fall back to the expert template (still a full plan) rather than blocking —
   // so a couple always gets a plan, they just don't spend AI they don't have.
+  // Metered with the service-role client so quota rows can only be written by
+  // us; the uid is this route's already-authenticated user.
   let quotaOk = true;
   if (apiKey) {
-    const quota = await consumeAiQuota(supabase, "generate", clientIp(req));
+    const admin = supabaseAdmin();
+    if (!admin) {
+      console.error("AI quota not metered: SUPABASE_SERVICE_ROLE_KEY is not set.");
+    }
+    const quota = admin
+      ? await consumeAiQuota(admin, "generate", clientIp(req), user.id)
+      : QUOTA_UNMETERED;
     quotaOk = quota.allowed;
   }
 

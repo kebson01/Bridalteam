@@ -24,7 +24,7 @@ The findings below are real but narrower than the Laravel set.
 | M5 | 🟡 Low | Supabase leaked-password protection (HIBP) disabled | ✅ Enabled |
 | M6 | 🟡 Low | `vendor/track` inserts arbitrary `org` stats with service role, unauthenticated | ✅ Fixed |
 | M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ✅ Narrowed (25 → 18 anon) |
-| M8 | 🟡 Low | `consume_ai_quota` is anon-callable, so the global AI ceiling can be tripped on purpose | ⬜ Open — found 2026-09-14 |
+| M8 | 🟡 Low | `consume_ai_quota` is anon-callable, so the global AI ceiling can be tripped on purpose | 🟨 Phase 1 done; phase 2 waits on deploy |
 
 > **Status as of 2026-09-14.** Six of the seven are closed. The only thing left
 > is flipping `CSP_ENFORCE=true` in the environment (M4) — the policy itself has
@@ -151,17 +151,19 @@ The **18 remaining anon advisories are all correct and should stay**: those 13 p
 
 The M3 fix stopped this being a *cost* problem — `clientIp()` is no longer forgeable, so an attacker can't mint themselves unlimited real chat turns. What's left is an **availability** problem, and it comes from the M3 backstop itself: `anonChatCeilingExceeded()` counts every `ai_usage` row with a `subject` like `ip:%` in the last 24h and cuts anonymous chat off above `AI_ANON_DAILY_GLOBAL_CAP` (default 1000). Those rows don't have to come from the app. Roughly a thousand direct RPC calls — trivially scripted, no account needed — turn the planner off for every signed-out visitor for a day. The same trick can burn a chosen visitor's 5-a-day bucket by passing their IP, and bloats the table.
 
-**Proposed fix (not applied — it changes a function signature and a call site, so it wants its own change):** pass the user id in explicitly, `consume_ai_quota(p_kind, p_ip, p_uid)`, call it with the service-role client from the two API routes that already derive both values server-side, then revoke EXECUTE from `anon` and `authenticated` so only the service role can write quota rows at all. That closes the hole rather than raising the cap, and it also drops `consume_ai_quota` off the anon advisory list.
+**Fix — phase 1 (✅ applied).** Added an overload `consume_ai_quota(p_kind, p_ip, p_uid)` that takes the user id as an argument instead of reading `auth.uid()`, granted to `service_role` **only** (migration `add_service_role_only_consume_ai_quota_with_uid`). `lib/ai-quota.ts` and both API routes now meter through `supabaseAdmin()`, passing the uid from the session and the IP from the trusted proxy hop — both of which the server already had. Quota rows can no longer be written by anyone but us.
 
-Until then the exposure is a disabled demo chat, not data loss or spend — which is why this is Low and not a launch blocker.
+**Phase 2 (⬜ deferred by design).** The 2-arg version is still there, because the currently-deployed code calls it. Dropping it is [`security/2026-09-phase2-lock-consume-ai-quota.sql`](security/2026-09-phase2-lock-consume-ai-quota.sql), to be run **after** this code deploys — the same ordering discipline M1 phase 2 needed. Running it early doesn't break chat (metering fails open) but does leave chat un-metered, which is a spend risk.
+
+Until phase 2 lands the exposure is unchanged: a disabled demo chat, not data loss or spend — which is why this stays Low and is not a launch blocker.
 
 ## Remediation priority
 
 1. **M4** — set `CSP_ENFORCE=true`. The policy is corrected and verified across 15
    signed-out routes; walk one signed-in workspace page after flipping it, since
    that path couldn't be exercised locally.
-2. **M8** — close the quota RPC when convenient. Low severity, and the fix is
-   small, but it is the last thing an anonymous stranger can still reach.
+2. **M8 phase 2** — after the next deploy, confirm a signed-out chat still meters,
+   then run `security/2026-09-phase2-lock-consume-ai-quota.sql`. Order matters.
 3. **Captcha** — not an audit finding, but Supabase's Captcha protection is off
    and accounts are about to open to the public.
 

@@ -58,19 +58,40 @@ export interface QuotaResult {
 }
 
 /**
- * Checks and consumes one unit of AI quota via the consume_ai_quota RPC. Fails
- * OPEN (allows the call) only if the quota check itself errors — we never want a
- * metering hiccup to break the product — but that path is logged.
+ * Checks and consumes one unit of AI quota via the consume_ai_quota RPC.
+ *
+ * Takes the SERVICE-ROLE client and an explicit user id (null when signed out).
+ * This is deliberate. The older 2-arg overload read auth.uid() itself, which
+ * meant it had to be executable by `anon` — and therefore callable straight from
+ * PostgREST with the publishable key. Each such call inserts an ai_usage row, so
+ * roughly a thousand of them would trip the global anonymous ceiling below and
+ * switch the planner off for every signed-out visitor for a day. The 3-arg
+ * overload is granted to service_role only, so quota rows can only be written by
+ * the server, which already derives both the uid and a trusted IP.
+ *
+ * Fails OPEN (allows the call) if the quota check itself errors — a metering
+ * hiccup must never break the product — but that path is logged.
  */
 export async function consumeAiQuota(
-  supabase: SupabaseClient,
+  admin: SupabaseClient,
   kind: "chat" | "generate",
   ip: string,
+  uid: string | null,
 ): Promise<QuotaResult> {
-  const { data, error } = await supabase.rpc("consume_ai_quota", { p_kind: kind, p_ip: ip });
+  const { data, error } = await admin.rpc("consume_ai_quota", {
+    p_kind: kind,
+    p_ip: ip,
+    p_uid: uid,
+  });
   if (error) {
     console.error("consume_ai_quota failed:", error.code, error.message);
-    return { allowed: true, used: 0, limit: 0, tier: "free" };
+    return { allowed: true, used: 0, limit: 0, tier: uid ? "free" : "anon" };
   }
   return data as QuotaResult;
 }
+
+/**
+ * Quota result used when metering can't run at all (no service-role key
+ * configured). Fails open for the same reason consumeAiQuota does.
+ */
+export const QUOTA_UNMETERED: QuotaResult = { allowed: true, used: 0, limit: 0, tier: "free" };
