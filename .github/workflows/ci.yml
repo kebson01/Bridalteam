@@ -13,6 +13,11 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Lets anyone re-run the checks from the Actions tab without pushing —
+  # useful when a run failed for a reason outside the diff, or when Actions
+  # was switched on after the event that should have triggered a run. The
+  # "Run workflow" button only appears once this file is on the default branch.
+  workflow_dispatch:
 
 # A newer push to the same branch makes the in-flight run irrelevant.
 concurrency:
