@@ -45,6 +45,17 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
+Before opening a pull request, run what CI runs:
+
+```bash
+npm run typecheck   # tsc --noEmit
+npm run build
+```
+
+Both go green on a clean checkout with no environment variables set — the
+Supabase publishable credentials and the canonical site URL have defaults — so
+a failure here is a real one.
+
 ### AI: demo mode vs. live Claude
 
 The planner works out of the box in **demo mode** — smart, deterministic
@@ -128,4 +139,5 @@ looks like a working site until a vendor tries to pay or an invite never sends.
 
 - Surface the non-venue categories in the directory UI (the data already has them)
 - Wire the matching AI to query real vendor data
-- Automated tests and a CI check — there are currently none
+- A test suite — CI typechecks and builds every pull request
+  (`.github/workflows/ci.yml`), but nothing asserts behaviour yet
