@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import Captcha from "@/components/auth/captcha";
+import { CAPTCHA_REQUIRED } from "@/lib/captcha";
 
 type Mode = "login" | "signup";
 
@@ -21,6 +23,15 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkEmail, setCheckEmail] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  // Bumping this remounts the widget for a fresh token — Turnstile tokens are
+  // single use, so a retry after any failure needs a new one.
+  const [captchaNonce, setCaptchaNonce] = useState(0);
+
+  function resetCaptcha() {
+    setCaptchaToken(null);
+    setCaptchaNonce((n) => n + 1);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,11 +46,13 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next ?? "/onboarding")}`,
+          captchaToken: captchaToken ?? undefined,
         },
       });
 
       if (error) {
         setError(error.message);
+        resetCaptcha();
         setBusy(false);
         return;
       }
@@ -51,9 +64,14 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
         return;
       }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: { captchaToken: captchaToken ?? undefined },
+      });
       if (error) {
         setError(error.message);
+        resetCaptcha();
         setBusy(false);
         return;
       }
@@ -128,9 +146,15 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
         </p>
       )}
 
+      <Captcha
+        key={captchaNonce}
+        onToken={setCaptchaToken}
+        action={isSignup ? "signup" : "login"}
+      />
+
       <button
         type="submit"
-        disabled={busy}
+        disabled={busy || (CAPTCHA_REQUIRED && !captchaToken)}
         className="w-full rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
       >
         {busy ? "One moment…" : isSignup ? "Create my account" : "Log in"}

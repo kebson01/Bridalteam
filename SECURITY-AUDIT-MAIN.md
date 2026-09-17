@@ -20,16 +20,22 @@ The findings below are real but narrower than the Laravel set.
 | M1 | 🔴 High | Vendors can self-upgrade to the paid **Featured** tier for free (billing bypass) | ✅ Closed — both phases |
 | M2 | 🟠 Medium | Admin gate: no rate limiting, creds in `sessionStorage`, non-constant-time compare | ✅ Fixed |
 | M3 | 🟠 Medium | AI quota bypass / Anthropic cost abuse via spoofable `X-Forwarded-For` | ✅ Fixed |
-| M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | 🟨 Policy fixed + verified; needs `CSP_ENFORCE=true` |
+| M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | ✅ Enforcing in production |
 | M5 | 🟡 Low | Supabase leaked-password protection (HIBP) disabled | ✅ Enabled |
 | M6 | 🟡 Low | `vendor/track` inserts arbitrary `org` stats with service role, unauthenticated | ✅ Fixed |
 | M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ✅ Narrowed (25 → 18 anon) |
 | M8 | 🟡 Low | `consume_ai_quota` is anon-callable, so the global AI ceiling can be tripped on purpose | 🟨 Phase 1 done; phase 2 waits on deploy |
+| M9 | 🔴 High | **Live abuse**: unprotected auth endpoints used for fake signups, credential stuffing and password-reset mail | 🟨 Captcha built; needs key + Supabase toggle |
 
-> **Status as of 2026-09-14.** Six of the seven are closed. The only thing left
-> is flipping `CSP_ENFORCE=true` in the environment (M4) — the policy itself has
-> been corrected and verified enforcing in a real browser. Live Supabase security
-> advisors report **0 ERROR-level** findings.
+> **Status as of 2026-09-17.** Seven of the eight original findings are closed —
+> M4 included: production now serves `Content-Security-Policy` rather than
+> Report-Only, carrying the `frame-src` and `form-action` fixes, so the policy is
+> live and enforcing. M8 phase 2 waits on a deploy check.
+>
+> **M9 supersedes all of it in priority.** The site opened to the public around 11
+> September, and the auth endpoints have been under automated abuse since. That is
+> the live problem; everything above is settled work. Live Supabase security
+> advisors still report **0 ERROR-level** findings.
 
 ---
 
@@ -112,7 +118,11 @@ As defense in depth, `anonChatCeilingExceeded()` caps total anonymous chat calls
 
 **Verified enforcing.** Built the app, served it with `CSP_ENFORCE=true`, and drove Chromium across 15 routes (`/`, `/pricing`, `/for-vendors`, `/about`, `/contact`, `/guides`, `/blog`, `/terms`, `/privacy`, `/planner`, `/signup`, `/login`, `/vendors`, `/auth/login`, `/auth/signup`): **zero `securitypolicyviolation` events, React hydrated on every one**. A targeted probe then confirmed the additions do real work — YouTube and Vimeo iframes load, while an unlisted host is still blocked by `frame-src`.
 
-**⬜ Remaining:** the policy still ships as `Content-Security-Policy-Report-Only`. Set `CSP_ENFORCE=true` in the environment to enforce it. Note the verification above covered signed-out routes only — a local signed-in session wasn't possible here — so walk one authenticated workspace page after flipping it.
+**✅ Live and enforcing** (confirmed 2026-09-17). `curl -sI https://bridalteam.com/` returns `content-security-policy`, not `-Report-Only`, carrying both the `frame-src` and `form-action` additions. Worth appreciating what that means: with enforcement on and `frame-src` still missing, `default-src 'self'` would have been blocking every YouTube and Vimeo embed in the inspiration gallery, and Firefox and Safari would have been killing the Stripe checkout redirect.
+
+The header doubles as a deploy fingerprint. No CSP at all = pre-Aug-3 build; `nonce-…` in `script-src` = the Aug 3–24 build that could never have been enforced; `'unsafe-inline'` with no `frame-src` = Aug 24 to Sep 15; `frame-src … youtube … vimeo` = current.
+
+**⬜ One check outstanding:** the 15-route sweep covered signed-out pages only, because a local signed-in session wasn't possible. Open one workspace page and glance at the console for violations.
 
 ## M5 — 🟡 Low: Enable leaked-password protection
 
@@ -157,15 +167,41 @@ The M3 fix stopped this being a *cost* problem — `clientIp()` is no longer for
 
 Until phase 2 lands the exposure is unchanged: a disabled demo chat, not data loss or spend — which is why this stays Low and is not a launch blocker.
 
+## M9 — 🔴 High: the auth endpoints are being actively abused
+
+*Found 2026-09-17, in production. Not a theoretical finding — this was happening while it was diagnosed.*
+
+**What.** The site went live around 11 September. By the 17th it had 49 accounts and looked like early organic traction. It wasn't. Reading `auth_logs` and `edge_logs`:
+
+- **Every single `/signup` request** came from a Tor exit or a datacenter IP. Cloudflare reported country `T1` (its code for Tor) across ~14 different exit operators — Emerald Onion, DFRI, Artikel10, Foundation for Applied Privacy, CIA Triad Security, QuxLabs, StealthVM — all sharing one malformed user-agent whose string literally begins with a `"` character, at trust score 29/100, three requests per address before rotating. Exactly one request in 24 hours scored above 90.
+- **48 credential-stuffing attempts** against `/token` in 24 hours, same infrastructure.
+- **28 password-reset sends** through `/recover` in 24 hours, to addresses the attacker chooses.
+- The handful of accounts that *looked* real (business and university domains) were confirmed by **corporate email security scanners** auto-fetching the link — visible as repeated `/verify` hits, one success followed by several "One-time token not found". No human was ever present: confirm and sign-in within 30–60 seconds, then nothing, ever.
+
+**Why it matters more than the fake rows.** The `/recover` abuse means our domain sends unsolicited mail to harvested addresses at scale. That earns spam complaints against our sending reputation, and when that goes, the confirmation emails real customers need start landing in spam — a failure that is slow to notice and slow to undo.
+
+**Fix (🟨 built, not yet active).** Cloudflare Turnstile on all three abused endpoints — signup, login and password reset — wired through `options.captchaToken`. See [`lib/captcha.ts`](lib/captcha.ts) and [`components/auth/captcha.tsx`](components/auth/captcha.tsx). `challenges.cloudflare.com` is added to `script-src`, `frame-src` and `connect-src`, without which the enforcing CSP would silently block the widget.
+
+**⚠️ Two-step activation, and the order is not optional.** Supabase rejects any auth request lacking a token the moment its captcha setting is enabled:
+
+1. Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and deploy. Tokens start flowing; Supabase ignores them, so nothing changes for users.
+2. **Then** enable Authentication → Bot and Abuse Protection with the Turnstile *secret* key.
+
+Reversing those steps locks out every real signup and login until the deploy catches up. With no key set the widget doesn't render and the forms behave exactly as before, which is what makes step 1 safe to ship alone.
+
+**Also worth doing:** tighten Authentication → Rate Limits for `/signup`, `/token` and `/recover` (there are no real users to inconvenience), and purge the fake accounts once the tap is closed — not before, or they simply come back.
+
 ## Remediation priority
 
-1. **M4** — set `CSP_ENFORCE=true`. The policy is corrected and verified across 15
-   signed-out routes; walk one signed-in workspace page after flipping it, since
-   that path couldn't be exercised locally.
-2. **M8 phase 2** — after the next deploy, confirm a signed-out chat still meters,
-   then run `security/2026-09-phase2-lock-consume-ai-quota.sql`. Order matters.
-3. **Captcha** — not an audit finding, but Supabase's Captcha protection is off
-   and accounts are about to open to the public.
+1. **M9 — the only urgent one.** The abuse is live and costs sending reputation
+   every day it runs. Create the Turnstile widget, set the site key, deploy,
+   *then* enable the Supabase toggle. Follow with the rate limits, and purge the
+   fake accounts last.
+2. **M8 phase 2** — after the next deploy, confirm a signed-out chat still meters
+   (an `ai_usage` row with an `ip:` subject appears), then run
+   `security/2026-09-phase2-lock-consume-ai-quota.sql`. Order matters.
+3. **M4's last check** — open one signed-in workspace page and look for CSP
+   violations in the console, the one surface the route sweep couldn't reach.
 
 Then re-run the advisors after the first week of real traffic. The design that
 makes SECURITY DEFINER functions the authorization layer (M7) is sound but
