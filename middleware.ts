@@ -52,6 +52,13 @@ const PROTECTED = ["/dashboard", "/onboarding", "/w"];
  *                 (components/inspiration-gallery.tsx::toEmbed). Without this
  *                 the directive falls back to default-src 'self' and every
  *                 embedded video renders as an empty box.
+ *   script-src / frame-src / connect-src also name challenges.cloudflare.com
+ *                 for Cloudflare Turnstile, which guards signup, login and
+ *                 password reset (see lib/captcha.ts). All three are needed:
+ *                 the script, the challenge iframe, and its own XHR. Since
+ *                 this policy is enforcing in production, a missing entry
+ *                 means the widget never loads and — once Supabase is set to
+ *                 require a token — nobody can sign up at all.
  *   form-action — vendor checkout redirects to checkout.stripe.com and the
  *                 billing portal to billing.stripe.com. Chrome exempts
  *                 redirects from form-action, but Firefox and Safari do not,
@@ -66,9 +73,13 @@ const PROTECTED = ["/dashboard", "/onboarding", "/w"];
 function buildCsp(nonce: string, strict: boolean): string {
   const supabaseHttp = SUPABASE_URL;
   const supabaseWss = SUPABASE_URL.replace(/^https:/, "wss:");
+  // Cloudflare Turnstile: a script on our page, an iframe for the challenge,
+  // and its own XHR back home. Named in script-src, frame-src and connect-src
+  // below. Remove all three together if the captcha is ever dropped.
+  const turnstile = "https://challenges.cloudflare.com";
   const scriptSrc = strict
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`
-    : `script-src 'self' 'unsafe-inline'`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${turnstile}`
+    : `script-src 'self' 'unsafe-inline' ${turnstile}`;
   return [
     `default-src 'self'`,
     scriptSrc,
@@ -76,10 +87,10 @@ function buildCsp(nonce: string, strict: boolean): string {
     `img-src 'self' blob: data: https:`,
     `font-src 'self' data:`,
     `media-src 'self' https:`,
-    `connect-src 'self' ${supabaseHttp} ${supabaseWss}`,
+    `connect-src 'self' ${supabaseHttp} ${supabaseWss} ${turnstile}`,
     `worker-src 'self' blob:`,
     `manifest-src 'self'`,
-    `frame-src 'self' https://www.youtube.com https://player.vimeo.com`,
+    `frame-src 'self' https://www.youtube.com https://player.vimeo.com ${turnstile}`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
     `form-action 'self' https://checkout.stripe.com https://billing.stripe.com`,

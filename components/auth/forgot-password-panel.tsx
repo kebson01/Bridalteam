@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import Captcha from "@/components/auth/captcha";
+import { CAPTCHA_REQUIRED } from "@/lib/captcha";
 
 /**
  * Requests a password-reset email. Supabase sends a link back through
@@ -18,6 +20,8 @@ export default function ForgotPasswordPanel() {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaNonce, setCaptchaNonce] = useState(0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,12 +33,16 @@ export default function ForgotPasswordPanel() {
       redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
         "/auth/reset-password",
       )}`,
+      captchaToken: captchaToken ?? undefined,
     });
 
     // Only surface genuine failures (e.g. rate limiting). A missing account is
     // not reported back, so the confirmation is identical either way.
     if (error && !/user|email/i.test(error.message)) {
       setError(error.message);
+      // Single-use token: a retry needs a fresh widget.
+      setCaptchaToken(null);
+      setCaptchaNonce((n) => n + 1);
       setBusy(false);
       return;
     }
@@ -91,9 +99,11 @@ export default function ForgotPasswordPanel() {
         </p>
       )}
 
+      <Captcha key={captchaNonce} onToken={setCaptchaToken} action="password-reset" />
+
       <button
         type="submit"
-        disabled={busy}
+        disabled={busy || (CAPTCHA_REQUIRED && !captchaToken)}
         className="w-full rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
       >
         {busy ? "Sending…" : "Send reset link"}
