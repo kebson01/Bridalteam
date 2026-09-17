@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import Captcha from "@/components/auth/captcha";
 import { CAPTCHA_REQUIRED } from "@/lib/captcha";
+import { authErrorMessage } from "@/lib/auth-errors";
 
 type Mode = "login" | "signup";
 
@@ -27,10 +28,51 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
   // Bumping this remounts the widget for a fresh token — Turnstile tokens are
   // single use, so a retry after any failure needs a new one.
   const [captchaNonce, setCaptchaNonce] = useState(0);
+  const [resent, setResent] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
 
   function resetCaptcha() {
     setCaptchaToken(null);
     setCaptchaNonce((n) => n + 1);
+  }
+
+  // Counts the resend cooldown down to zero.
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  /**
+   * Re-sends the signup confirmation. Supabase rate-limits this server-side;
+   * the local cooldown is so the button doesn't invite hammering into that
+   * limit, which would only earn the user a 429.
+   */
+  async function handleResend() {
+    setBusy(true);
+    setResendError(null);
+    setResent(false);
+
+    const supabase = supabaseBrowser();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next ?? "/onboarding")}`,
+        captchaToken: captchaToken ?? undefined,
+      },
+    });
+
+    if (error) {
+      console.error("resend failed:", error.code, error.message);
+      setResendError(authErrorMessage(error, "signup"));
+    } else {
+      setResent(true);
+      setCooldown(60);
+    }
+    resetCaptcha();
+    setBusy(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -51,7 +93,8 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
       });
 
       if (error) {
-        setError(error.message);
+        console.error("signUp failed:", error.code, error.message);
+        setError(authErrorMessage(error, "signup"));
         resetCaptcha();
         setBusy(false);
         return;
@@ -70,7 +113,8 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
         options: { captchaToken: captchaToken ?? undefined },
       });
       if (error) {
-        setError(error.message);
+        console.error("signInWithPassword failed:", error.code, error.message);
+        setError(authErrorMessage(error, "login"));
         resetCaptcha();
         setBusy(false);
         return;
@@ -90,6 +134,57 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
           We sent a confirmation link to{" "}
           <span className="font-medium text-ink">{email}</span>. Open it and
           you&rsquo;ll land straight in your planner.
+        </p>
+
+        <p className="mx-auto mt-5 max-w-sm text-xs leading-relaxed text-ink-soft/60">
+          Nothing there? Look in spam or promotions — it can take a minute to
+          arrive. You need to confirm before you can log in.
+        </p>
+
+        {resendError && (
+          <p role="alert" className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-left text-sm text-red-700">
+            {resendError}
+          </p>
+        )}
+
+        {resent && !resendError && (
+          <p role="status" className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
+            Sent again to {email}.
+          </p>
+        )}
+
+        {/* Resend needs its own token: the one from signup is already spent. */}
+        <div className="mt-5">
+          <Captcha key={`resend-${captchaNonce}`} onToken={setCaptchaToken} action="resend" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={busy || cooldown > 0 || (CAPTCHA_REQUIRED && !captchaToken)}
+          className="mt-1 rounded-full border border-stone-2 px-6 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text disabled:opacity-50 disabled:hover:border-stone-2 disabled:hover:text-ink-soft"
+        >
+          {busy
+            ? "Sending…"
+            : cooldown > 0
+              ? `Resend in ${cooldown}s`
+              : "Resend the confirmation email"}
+        </button>
+
+        <p className="mt-6 text-sm text-ink-soft/70">
+          Wrong address?{" "}
+          <button
+            type="button"
+            onClick={() => {
+              setCheckEmail(false);
+              setResent(false);
+              setResendError(null);
+              resetCaptcha();
+            }}
+            className="font-semibold text-brand-text underline-offset-2 hover:underline"
+          >
+            Start over
+          </button>
         </p>
       </div>
     );

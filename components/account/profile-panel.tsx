@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { authErrorMessage } from "@/lib/auth-errors";
 import { squareAvatar } from "@/lib/image";
 
 /** Initials fallback when there's no avatar yet. */
@@ -47,7 +48,8 @@ export default function ProfilePanel({
     const { error } = await supabase.auth.updateUser({ data: { full_name: name.trim() } });
     setSavingName(false);
     if (error) {
-      setError(error.message);
+      console.error("updateUser(full_name) failed:", error.code, error.message);
+      setError(authErrorMessage(error, "update"));
       return;
     }
     setFlash("Name saved.");

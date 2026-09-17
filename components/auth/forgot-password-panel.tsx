@@ -5,6 +5,7 @@ import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import Captcha from "@/components/auth/captcha";
 import { CAPTCHA_REQUIRED } from "@/lib/captcha";
+import { authErrorMessage } from "@/lib/auth-errors";
 
 /**
  * Requests a password-reset email. Supabase sends a link back through
@@ -39,7 +40,8 @@ export default function ForgotPasswordPanel() {
     // Only surface genuine failures (e.g. rate limiting). A missing account is
     // not reported back, so the confirmation is identical either way.
     if (error && !/user|email/i.test(error.message)) {
-      setError(error.message);
+      console.error("resetPasswordForEmail failed:", error.code, error.message);
+      setError(authErrorMessage(error, "reset"));
       // Single-use token: a retry needs a fresh widget.
       setCaptchaToken(null);
       setCaptchaNonce((n) => n + 1);

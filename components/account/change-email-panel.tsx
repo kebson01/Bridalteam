@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { authErrorMessage } from "@/lib/auth-errors";
 
 /**
  * Lets a signed-in user change their account email. Supabase's "secure email
@@ -34,7 +35,8 @@ export default function ChangeEmailPanel({ currentEmail }: { currentEmail: strin
     );
 
     if (error) {
-      setError(error.message);
+      console.error("updateUser(email) failed:", error.code, error.message);
+      setError(authErrorMessage(error, "update"));
       setBusy(false);
       return;
     }

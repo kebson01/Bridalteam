@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
+import { authErrorMessage } from "@/lib/auth-errors";
 
 type Status = "checking" | "ready" | "no_session" | "done";
 
@@ -44,7 +45,8 @@ export default function ResetPasswordPanel() {
     const supabase = supabaseBrowser();
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      setError(error.message);
+      console.error("updateUser(password) failed:", error.code, error.message);
+      setError(authErrorMessage(error, "update"));
       setBusy(false);
       return;
     }
