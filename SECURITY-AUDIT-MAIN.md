@@ -23,19 +23,23 @@ The findings below are real but narrower than the Laravel set.
 | M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | ✅ Enforcing in production |
 | M5 | 🟡 Low | Supabase leaked-password protection (HIBP) disabled | ✅ Enabled |
 | M6 | 🟡 Low | `vendor/track` inserts arbitrary `org` stats with service role, unauthenticated | ✅ Fixed |
-| M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ✅ Narrowed (25 → 18 anon) |
-| M8 | 🟡 Low | `consume_ai_quota` is anon-callable, so the global AI ceiling can be tripped on purpose | 🟨 Phase 1 done; phase 2 waits on deploy |
-| M9 | 🔴 High | **Live abuse**: unprotected auth endpoints used for fake signups, credential stuffing and password-reset mail | 🟨 Captcha built; needs key + Supabase toggle |
+| M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ✅ Narrowed (25 → 17 anon) |
+| M8 | 🟡 Low | `consume_ai_quota` is anon-callable, so the global AI ceiling can be tripped on purpose | ✅ Closed — both phases |
+| M9 | 🔴 High | **Live abuse**: unprotected auth endpoints used for fake signups, credential stuffing and password-reset mail | ✅ Closed — Turnstile live and verified |
 
-> **Status as of 2026-09-17.** Seven of the eight original findings are closed —
-> M4 included: production now serves `Content-Security-Policy` rather than
-> Report-Only, carrying the `frame-src` and `form-action` fixes, so the policy is
-> live and enforcing. M8 phase 2 waits on a deploy check.
+> **Status as of 2026-09-18. All nine findings are closed.** M4 enforces in
+> production, M8 phase 2 has been applied, and M9 — the one that was live — is
+> shut: Cloudflare Turnstile now guards signup, sign-in and password reset, and
+> the whole chain was verified end to end by a real password grant at 00:56 UTC.
+> Live Supabase security advisors report **0 ERROR-level** findings.
 >
-> **M9 supersedes all of it in priority.** The site opened to the public around 11
-> September, and the auth endpoints have been under automated abuse since. That is
-> the live problem; everything above is settled work. Live Supabase security
-> advisors still report **0 ERROR-level** findings.
+> Two caveats worth carrying forward rather than forgetting. The Turnstile wall
+> has never been *directly* observed rejecting the attacker — it went quiet
+> before the control went live, so what we have is 12h+ of silence against
+> earlier 20–53 minute gaps, plus proof the mechanism rejects tokenless requests
+> (our own attempts, caught during setup). And per-IP rate limits would not have
+> stopped this actor anyway: it rotated Tor exits every ~3 requests. A new row in
+> `auth.users` is the signal to watch.
 
 ---
 
@@ -149,7 +153,7 @@ Two things that analysis turned up, both worth remembering before anyone extends
 1. **`revoke ... from anon` is usually a no-op here.** Most of these functions grant EXECUTE to `PUBLIC` (`=X/postgres` in `proacl`), not to `anon`, so you must revoke from `public` as well or nothing changes — while `has_function_privilege('anon', …)` keeps reporting `true` and looks like a failed revoke.
 2. **13 of the flagged functions are RLS policy predicates** (`can_edit_wedding`, `is_org_member`, `can_see_post`, …). Policy expressions evaluate as the *calling* role, so revoking those from `anon` does not "quiet the linter without behavior change" — it breaks every public read on the site. They must stay.
 
-The **18 remaining anon advisories are all correct and should stay**: those 13 predicates, plus the 5 genuinely public RPCs (`get_public_wedding`, `list_public_registry`, `get_guest_invite`, `submit_guest_rsvp`, `consume_ai_quota`). The 34 `authenticated` advisories are the design working as intended — those functions are *for* signed-in users.
+The **17 remaining anon advisories are all correct and should stay**: those 13 predicates, plus the 4 genuinely public RPCs (`get_public_wedding`, `list_public_registry`, `get_guest_invite`, `submit_guest_rsvp`). `consume_ai_quota` was on this list until M8 phase 2 dropped its anon-reachable overload on 2026-09-18; it is no longer reachable signed-out, so the count fell 18 → 17. The 34 `authenticated` advisories are the design working as intended — those functions are *for* signed-in users.
 
 ---
 
@@ -163,9 +167,9 @@ The M3 fix stopped this being a *cost* problem — `clientIp()` is no longer for
 
 **Fix — phase 1 (✅ applied).** Added an overload `consume_ai_quota(p_kind, p_ip, p_uid)` that takes the user id as an argument instead of reading `auth.uid()`, granted to `service_role` **only** (migration `add_service_role_only_consume_ai_quota_with_uid`). `lib/ai-quota.ts` and both API routes now meter through `supabaseAdmin()`, passing the uid from the session and the IP from the trusted proxy hop — both of which the server already had. Quota rows can no longer be written by anyone but us.
 
-**Phase 2 (⬜ deferred by design).** The 2-arg version is still there, because the currently-deployed code calls it. Dropping it is [`security/2026-09-phase2-lock-consume-ai-quota.sql`](security/2026-09-phase2-lock-consume-ai-quota.sql), to be run **after** this code deploys — the same ordering discipline M1 phase 2 needed. Running it early doesn't break chat (metering fails open) but does leave chat un-metered, which is a spend risk.
+**Phase 2 (✅ applied 2026-09-18, migration `drop_anon_reachable_consume_ai_quota`).** The 2-arg overload is gone — [`security/2026-09-phase2-lock-consume-ai-quota.sql`](security/2026-09-phase2-lock-consume-ai-quota.sql). The ordering discipline M1 phase 2 needed was followed: the deploy went first, and the gate was evidence rather than elapsed time — a signed-out chat on `/planner` wrote `ai_usage` row `ip:104.23.248.116` at 22:44:25, proving the routes now meter through the 3-arg version via `supabaseAdmin()` and nothing calls the 2-arg one. Running the drop before that would not have broken chat (metering fails open) but would have left it un-metered, which is a spend risk.
 
-Until phase 2 lands the exposure is unchanged: a disabled demo chat, not data loss or spend — which is why this stays Low and is not a launch blocker.
+Verified after applying, impersonating the role with `set local role anon`: `to_regprocedure('public.consume_ai_quota(text,text)')` is null, and `anon` holds no EXECUTE on the 3-arg overload. `service_role` keeps it; `anon` and `authenticated` hold nothing. The RPC is no longer reachable at `/rest/v1/rpc/consume_ai_quota` with the publishable key, so `ai_usage` rows can only be written by us.
 
 ## M9 — 🔴 High: the auth endpoints are being actively abused
 
@@ -193,15 +197,21 @@ Reversing those steps locks out every real signup and login until the deploy cat
 
 ## Remediation priority
 
-1. **M9 — the only urgent one.** The abuse is live and costs sending reputation
-   every day it runs. Create the Turnstile widget, set the site key, deploy,
-   *then* enable the Supabase toggle. Follow with the rate limits, and purge the
-   fake accounts last.
-2. **M8 phase 2** — after the next deploy, confirm a signed-out chat still meters
-   (an `ai_usage` row with an `ip:` subject appears), then run
-   `security/2026-09-phase2-lock-consume-ai-quota.sql`. Order matters.
-3. **M4's last check** — open one signed-in workspace page and look for CSP
+1. **M4's last check** — open one signed-in workspace page and look for CSP
    violations in the console, the one surface the route sweep couldn't reach.
+   The policy is enforcing, so a directive we missed is a live breakage, not a
+   report.
+2. **Auth rate limits** — reviewed 2026-09-18 and deliberately left at their
+   current values. Worth revisiting before a public announcement, in the units
+   the dashboard actually uses: token refresh and verification are per **5
+   minutes** there, not per hour as the docs table implies. The highest-value
+   field is *sending emails*, because it is the only project-wide limit and the
+   only one the Tor actor could not dodge by rotating addresses.
+3. **Re-check the Turnstile widget's hostname list** if the site ever moves or
+   gains a subdomain. A missing hostname is error `110200`, which Cloudflare
+   renders as "Unable to connect to website" — indistinguishable from an ad
+   blocker unless you read the code. `components/auth/captcha.tsx` now logs and
+   surfaces it.
 
 Then re-run the advisors after the first week of real traffic. The design that
 makes SECURITY DEFINER functions the authorization layer (M7) is sound but
