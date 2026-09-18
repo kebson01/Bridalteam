@@ -1,6 +1,16 @@
 -- Security fix (M8 — Phase 2): close the anon-reachable AI quota RPC.
 --
--- ⚠️ NOT APPLIED. ORDERING MATTERS — APPLY ONLY AFTER THE CODE CHANGE IS DEPLOYED.
+-- ✅ APPLIED to the live DB 2026-09-18 as migration
+-- `drop_anon_reachable_consume_ai_quota`.
+--
+-- The ordering requirement below was met by evidence, not by elapsed time: a
+-- signed-out chat on /planner wrote ai_usage row `ip:104.23.248.116` at
+-- 22:44:25 UTC, which proves the deployed routes meter through the 3-arg
+-- overload via supabaseAdmin() and that nothing calls the 2-arg version.
+--
+-- Verified after applying, impersonating the role with `set local role anon`:
+-- to_regprocedure('public.consume_ai_quota(text,text)') is null, and anon holds
+-- no EXECUTE on the 3-arg overload. Only service_role can reach it.
 --
 -- ── The problem ─────────────────────────────────────────────────────────────
 -- consume_ai_quota(p_kind, p_ip) reads auth.uid() to decide the caller's tier,
