@@ -28,7 +28,8 @@ type TurnstileApi = {
       sitekey: string;
       callback: (token: string) => void;
       "expired-callback"?: () => void;
-      "error-callback"?: () => void;
+      // Turnstile passes a numeric code as a string; see isConfigError below.
+      "error-callback"?: (code?: string) => void;
       "timeout-callback"?: () => void;
       theme?: "light" | "dark" | "auto";
       action?: string;
@@ -42,6 +43,38 @@ declare global {
     turnstile?: TurnstileApi;
   }
 }
+
+/**
+ * Turnstile reports failures to `error-callback` as a numeric code string, and
+ * the code is the only thing that separates two problems that look identical
+ * on screen. Cloudflare's own error box says "Unable to connect to website"
+ * for both, which reads like a network fault even when it is our misconfigured
+ * widget.
+ *
+ *   110xxx — integration errors: 110100/110110 an unknown or invalid sitekey,
+ *            110200 the page's hostname is not on the widget's allowed-domains
+ *            list, 110420 an action the widget rejects, 110430 a bad parameter.
+ *            Nobody on the visitor's side can fix these and the widget will not
+ *            recover on its own; an operator has to change the widget in the
+ *            Cloudflare dashboard (or the deployed key). We take Cloudflare's
+ *            box down and say so, with the code, rather than leaving a visitor
+ *            clicking Troubleshoot at a problem that is ours.
+ *   others — transient: network blips, a timed-out challenge, the 300xxx and
+ *            600xxx execution errors. Turnstile retries these itself, so we log
+ *            the code and otherwise keep out of its way.
+ *
+ * Every code is logged either way. Without that, diagnosing this needs DevTools
+ * on the affected visitor's machine, which in practice means it never happens.
+ */
+function isConfigError(code: string | undefined): boolean {
+  return typeof code === "string" && code.startsWith("110");
+}
+
+type Failure =
+  /** The script never loaded — blocker, network filter, or a missing CSP entry. */
+  | { kind: "blocked" }
+  /** The widget loaded but is misconfigured and will not recover. */
+  | { kind: "config"; code: string };
 
 /** Loads the Turnstile script once per page, shared across widgets. */
 function loadTurnstile(): Promise<TurnstileApi> {
@@ -89,7 +122,7 @@ export default function Captcha({
   const onTokenRef = useRef(onToken);
   onTokenRef.current = onToken;
 
-  const [blocked, setBlocked] = useState(false);
+  const [failure, setFailure] = useState<Failure | null>(null);
 
   useEffect(() => {
     if (!CAPTCHA_SITE_KEY) return;
@@ -106,7 +139,24 @@ export default function Captcha({
             theme: "light",
             callback: (token) => onTokenRef.current(token),
             "expired-callback": () => onTokenRef.current(null),
-            "error-callback": () => onTokenRef.current(null),
+            "error-callback": (code) => {
+              console.error(
+                `[turnstile] error-callback code=${code ?? "unknown"} sitekey=${CAPTCHA_SITE_KEY.slice(0, 8)}… host=${window.location.hostname}`,
+              );
+              onTokenRef.current(null);
+              if (cancelled || !isConfigError(code)) return;
+              // Unrecoverable: drop Cloudflare's box so ours is the only one.
+              const id = widgetIdRef.current;
+              if (id && window.turnstile) {
+                try {
+                  window.turnstile.remove(id);
+                } catch {
+                  // Already gone; the message below is what matters.
+                }
+                widgetIdRef.current = null;
+              }
+              setFailure({ kind: "config", code: code as string });
+            },
             "timeout-callback": () => onTokenRef.current(null),
           }) ?? null;
       })
@@ -115,7 +165,7 @@ export default function Captcha({
         // missing. Say so plainly instead of letting the submit fail later with
         // Supabase's opaque "captcha protection: request disallowed".
         if (!cancelled) {
-          setBlocked(true);
+          setFailure({ kind: "blocked" });
           onTokenRef.current(null);
         }
       });
@@ -136,12 +186,24 @@ export default function Captcha({
 
   if (!CAPTCHA_SITE_KEY) return null;
 
-  if (blocked) {
+  if (failure?.kind === "blocked") {
     return (
       <p role="alert" className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
         We couldn&rsquo;t load the security check. Disable any ad or script blocker for
         this page and reload, and it&rsquo;ll appear.
       </p>
+    );
+  }
+
+  if (failure?.kind === "config") {
+    return (
+      <div role="alert" className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <p>
+          Our security check is misconfigured, so you can&rsquo;t sign in right now.
+          This one&rsquo;s on us — please try again shortly.
+        </p>
+        <p className="mt-1 text-xs text-amber-700">Turnstile error {failure.code}</p>
+      </div>
     );
   }
 
