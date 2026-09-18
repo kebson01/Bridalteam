@@ -1,13 +1,15 @@
 name: CI
 
 # The repository had no automated checks at all, so every regression between
-# pushes was caught by hand or not at all. This runs the two things a
-# contributor would run locally, on every pull request and on main.
+# pushes was caught by hand or not at all. This runs what a contributor would
+# run locally, on every pull request and on main.
 #
 # No secrets are needed: lib/supabase.ts falls back to the publishable
 # credentials and lib/site.ts to the canonical origin, so `next build`
 # completes without touching the network or any private key. Keep it that way —
-# a build that needs a secret can't be verified on a fork's pull request.
+# a build that needs a secret can't be verified on a fork's pull request. The
+# same rule is why the test suite mocks Supabase and Turnstile rather than
+# talking to them; see vitest.config.mts.
 
 on:
   pull_request:
@@ -29,7 +31,7 @@ permissions:
 
 jobs:
   verify:
-    name: Typecheck and build
+    name: Typecheck, test and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -49,6 +51,13 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      # Before the build: these fail in about two seconds and catch the class of
+      # regression `tsc` cannot see — a CSP directive dropped, an auth error
+      # message collapsing into the generic fallback, a form field that stops
+      # being submitted. All of those compile perfectly.
+      - name: Test
+        run: npm test
 
       - name: Build
         run: npm run build
