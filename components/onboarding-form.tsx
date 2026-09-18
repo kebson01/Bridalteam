@@ -6,6 +6,10 @@ import { createWorkspace, type OnboardingState } from "@/app/onboarding/actions"
 const INPUT =
   "mt-1.5 w-full rounded-lg border border-stone-2 px-4 py-3 text-sm text-ink outline-none focus:border-brand disabled:opacity-60";
 
+// Only `partner_one` is actually required (see app/onboarding/actions.ts), but
+// nothing on the form said so, so every field read as obligatory.
+const OPTIONAL = "ml-1 text-xs font-normal text-ink-soft/55";
+
 export default function OnboardingForm({
   initialType = "couple",
 }: {
@@ -61,7 +65,9 @@ export default function OnboardingForm({
             <input required name="business_name" disabled={pending} placeholder="Bloom & Vine Florals" className={INPUT} />
           </label>
           <label className="block">
-            <span className="text-sm font-medium text-ink-soft">Category</span>
+            <span className="text-sm font-medium text-ink-soft">
+              Category <span className={OPTIONAL}>optional</span>
+            </span>
             <input name="vendor_category" disabled={pending} placeholder="Florist, Photographer, Venue…" className={INPUT} />
           </label>
         </div>
@@ -78,43 +84,79 @@ export default function OnboardingForm({
               <input required name="partner_one" disabled={pending} placeholder="Alex" className={INPUT} />
             </label>
             <label className="block">
-              <span className="text-sm font-medium text-ink-soft">Partner&rsquo;s name</span>
+              <span className="text-sm font-medium text-ink-soft">
+                Partner&rsquo;s name <span className={OPTIONAL}>optional</span>
+              </span>
               <input name="partner_two" disabled={pending} placeholder="Sam" className={INPUT} />
             </label>
           </div>
 
-          <div className="mb-4 grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-medium text-ink-soft">Wedding date</span>
-              <input type="date" name="event_date" disabled={pending} className={INPUT} />
-              <span className="mt-1.5 block text-xs text-ink-soft/60">
-                Not sure yet? Leave it blank.
-              </span>
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-ink-soft">City</span>
-              <input name="city" disabled={pending} placeholder="Austin, TX" className={INPUT} />
-            </label>
-          </div>
-
-          <div className="mb-4 grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-medium text-ink-soft">Guests (roughly)</span>
-              <input type="number" name="guest_count" min={0} disabled={pending} placeholder="150" className={INPUT} />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-ink-soft">Budget</span>
-              <input name="budget" inputMode="decimal" disabled={pending} placeholder="35000" className={INPUT} />
-            </label>
-          </div>
-
           <label className="mb-6 block">
-            <span className="text-sm font-medium text-ink-soft">Style or vibe</span>
-            <input name="style" disabled={pending} placeholder="Rustic autumn, candlelight, vineyard" className={INPUT} />
+            <span className="text-sm font-medium text-ink-soft">
+              Wedding date <span className={OPTIONAL}>optional</span>
+            </span>
+            <input type="date" name="event_date" disabled={pending} className={INPUT} />
             <span className="mt-1.5 block text-xs text-ink-soft/60">
-              The more you tell us, the better your plan will be.
+              No date yet? Leave it blank — we&rsquo;ll plan backwards from one later.
             </span>
           </label>
+
+          {/*
+            City, guests, budget and style are what make a generated plan
+            specific rather than generic, so they are worth asking for — but
+            none of them are required, and showing all seven fields at once made
+            setup read as a form to fill in before anything happens. Collapsed
+            by default, one click away, with the payoff stated so skipping is an
+            informed choice rather than a guess.
+
+            <details> keeps this working with JS disabled, and inputs inside a
+            closed <details> are still submitted, so the server action is
+            unchanged.
+          */}
+          <details className="group mb-6 rounded-xl border border-stone-2">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm [&::-webkit-details-marker]:hidden">
+              <span>
+                <span className="font-medium text-ink">Add a few details</span>
+                <span className="mt-0.5 block text-xs text-ink-soft/70">
+                  Optional — the more we know, the more specific your plan.
+                </span>
+              </span>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                className="size-5 shrink-0 text-ink-soft/60 transition-transform group-open:rotate-180"
+              >
+                <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </summary>
+
+            <div className="border-t border-stone-2 px-4 pb-4 pt-4">
+              <div className="mb-4 grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-medium text-ink-soft">City</span>
+                  <input name="city" disabled={pending} placeholder="Austin, TX" className={INPUT} />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-medium text-ink-soft">Guests (roughly)</span>
+                  <input type="number" name="guest_count" min={0} disabled={pending} placeholder="150" className={INPUT} />
+                </label>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-medium text-ink-soft">Budget</span>
+                  <input name="budget" inputMode="decimal" disabled={pending} placeholder="35000" className={INPUT} />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-medium text-ink-soft">Style or vibe</span>
+                  <input name="style" disabled={pending} placeholder="Rustic autumn, vineyard" className={INPUT} />
+                </label>
+              </div>
+            </div>
+          </details>
         </>
       )}
 
