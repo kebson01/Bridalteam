@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import Captcha from "@/components/auth/captcha";
+import { readAttribution } from "@/lib/attribution";
 import { CAPTCHA_REQUIRED } from "@/lib/captcha";
 import { authErrorMessage } from "@/lib/auth-errors";
 
@@ -83,12 +84,21 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
     const supabase = supabaseBrowser();
 
     if (isSignup) {
+      // Which ad or link brought them here, captured on the page they landed
+      // on and carried across the navigation to this form. Rides along in user
+      // metadata rather than its own table: no migration, no RLS to get wrong,
+      // and it is read with one group-by. Treat it as a hint, not a fact —
+      // metadata is writable by the account holder, so it is fine for judging
+      // a campaign and wrong for anything that needs to be trustworthy.
+      const attribution = readAttribution();
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next ?? "/onboarding")}`,
           captchaToken: captchaToken ?? undefined,
+          ...(attribution ? { data: attribution } : {}),
         },
       });
 
