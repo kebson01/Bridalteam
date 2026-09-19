@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 
 type Role = "user" | "assistant";
@@ -81,7 +82,23 @@ export default function PlannerChat({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [demoNotice, setDemoNotice] = useState(false);
+  /**
+   * Set once the quota is spent. The API used to say "Sign up free" in bold
+   * markdown and nothing rendered it as a link, so the one moment a visitor is
+   * most interested — they just tried to ask another question and were stopped
+   * — was a dead end with nothing to click.
+   */
+  const [cta, setCta] = useState<"signup" | "upgrade" | null>(null);
+  /** The caller's own tier, learned from the first reply. Only "anon" is nudged. */
+  const [tier, setTier] = useState<string | null>(null);
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Answers given so far, not counting the canned opener.
+  const answers = messages.filter((m) => m.role === "assistant").length - 1;
+  // One gentle offer after the second answer — they have seen it work by then,
+  // and it lands before the wall rather than at it.
+  const showNudge = tier === "anon" && !cta && !nudgeDismissed && answers >= 2;
 
   async function send(text: string) {
     const content = text.trim();
@@ -102,6 +119,8 @@ export default function PlannerChat({
       });
       const data = await res.json();
       setDemoNotice(Boolean(data.demo));
+      if (data.limited) setCta(data.cta === "upgrade" ? "upgrade" : "signup");
+      if (typeof data.tier === "string") setTier(data.tier);
       setMessages((m) => [
         ...m,
         { role: "assistant", content: data.reply ?? "Sorry, I hit a snag. Try again?" },
@@ -184,27 +203,92 @@ export default function PlannerChat({
           )}
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            send(input);
-          }}
-          className="mt-3 flex items-center gap-2"
-        >
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your wedding…"
-            className="flex-1 rounded-full border border-stone-2 bg-white px-4 py-3 text-sm text-ink outline-none focus:border-brand"
-          />
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+        {/*
+          The offer, one answer before the wall. Dismissible, shown once, and
+          only to anonymous visitors — a signed-in couple already has all of
+          this and would just be nagged.
+        */}
+        {showNudge && (
+          <div className="mt-3 flex items-start gap-3 rounded-2xl border border-brand/30 bg-brand-wash/60 px-4 py-3">
+            <p className="flex-1 text-sm leading-relaxed text-ink-soft">
+              Like where this is going?{" "}
+              <Link href="/auth/signup" className="font-semibold text-brand-text underline">
+                Create a free account
+              </Link>{" "}
+              and we&rsquo;ll keep this conversation, plus your checklist, budget and
+              guest list.
+            </p>
+            <button
+              type="button"
+              onClick={() => setNudgeDismissed(true)}
+              aria-label="Dismiss"
+              className="-mr-1 shrink-0 rounded-full px-2 py-0.5 text-lg leading-none text-ink-soft/50 transition-colors hover:text-ink-soft"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+
+        {/*
+          The wall itself. Replaces the input rather than sitting beside it:
+          leaving a live box there invites another question that can only
+          produce the same refusal.
+
+          Links go to /auth/signup, not the shorter /signup: that path is a
+          legacy waitlist page that only redirects to the real screen while
+          SIGNUPS_OPEN is true, and a conversion button is the last place
+          that should quietly become a waitlist form.
+        */}
+        {cta ? (
+          <div className="mt-3 rounded-2xl border border-brand/40 bg-brand-wash px-5 py-4 text-center">
+            <p className="text-sm font-semibold text-ink">
+              {cta === "signup"
+                ? "That\u2019s the end of the demo"
+                : "You\u2019ve used your AI chats for now"}
+            </p>
+            <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-ink-soft">
+              {cta === "signup"
+                ? "Create a free account to keep planning \u2014 your conversation, checklist, budget and guest list all get saved, and you can invite your partner."
+                : "Upgrade for more AI help, or come back a little later."}
+            </p>
+            <Link
+              href={cta === "signup" ? "/auth/signup" : "/pricing"}
+              className="mt-3 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
+            >
+              {cta === "signup" ? "Create my free account" : "See plans"}
+            </Link>
+            {cta === "signup" && (
+              <p className="mt-2 text-xs text-ink-soft/70">
+                Free, no card needed.{" "}
+                <Link href="/auth/login" className="underline">
+                  Already have an account?
+                </Link>
+              </p>
+            )}
+          </div>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              send(input);
+            }}
+            className="mt-3 flex items-center gap-2"
           >
-            Send
-          </button>
-        </form>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about your wedding…"
+              className="flex-1 rounded-full border border-stone-2 bg-white px-4 py-3 text-sm text-ink outline-none focus:border-brand"
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+            >
+              Send
+            </button>
+          </form>
+        )}
 
         {demoNotice && (
           <p className="px-3 pb-1 pt-2 text-center text-[11px] text-stone-1">

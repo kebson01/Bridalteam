@@ -146,9 +146,16 @@ export async function POST(req: Request) {
   if (!quota.allowed) {
     const msg =
       quota.tier === "anon"
-        ? "You've reached the demo limit. **Sign up free** to keep chatting with the AI planner."
-        : "You've reached your AI chat limit for now. **Upgrade** for more AI help anytime.";
-    return NextResponse.json({ reply: msg, demo: false, limited: true }, { status: 200 });
+        ? "You've reached the demo limit. Create a free account to keep planning — your conversation, checklist and budget all get saved."
+        : "You've reached your AI chat limit for now. Upgrade for more AI help anytime.";
+    // `cta` rather than asking the client to read the prose: the copy is free
+    // to change without breaking the button, and the client has no other way
+    // to tell an anonymous visitor from a signed-in one (this page is
+    // statically prerendered, so it has no session at render time).
+    return NextResponse.json(
+      { reply: msg, demo: false, limited: true, cta: quota.tier === "anon" ? "signup" : "upgrade" },
+      { status: 200 },
+    );
   }
 
   // Global backstop for anonymous callers: even if per-IP metering is evaded
@@ -159,9 +166,10 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           reply:
-            "Our AI planner is at capacity for now. **Sign up free** to keep chatting, or try again a little later.",
+            "Our AI planner is at capacity for now. Create a free account to keep chatting, or try again a little later.",
           demo: false,
           limited: true,
+          cta: "signup",
         },
         { status: 200 },
       );
@@ -225,7 +233,7 @@ export async function POST(req: Request) {
       data?.content?.map((c: { text?: string }) => c.text ?? "").join("").trim() ||
       demoReply(clean);
 
-    return NextResponse.json({ reply, demo: false });
+    return NextResponse.json({ reply, demo: false, tier: quota.tier });
   } catch (err) {
     console.error("Anthropic API request threw:", err);
     return NextResponse.json({ reply: demoReply(clean), demo: true });
