@@ -14,11 +14,45 @@ const STARTER: Msg = {
     "Hi! I'm your Bridal Team planning assistant. Tell me about your wedding — a date, a city, a guest count, a vibe — and I'll help with timelines, budgets, checklists and vendor ideas. What are we planning?",
 };
 
-// Very small markdown-ish renderer (headings, bold, bullets) — no deps.
-function render(text: string) {
+/**
+ * Escapes the five HTML-significant characters.
+ *
+ * This has to run BEFORE the markdown-ish replacements below, which
+ * deliberately insert real tags — escaping afterwards would neuter those too.
+ * Ordering within the function matters as well: `&` first, or the entities the
+ * later replacements produce get double-escaped into visible `&amp;lt;`.
+ *
+ * Neither `*` nor `#` is HTML-significant, so escaping first leaves the
+ * markdown syntax intact and the capture groups carry already-escaped text.
+ */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * Very small markdown-ish renderer (headings, bold, bullets) — no deps.
+ *
+ * The output goes through dangerouslySetInnerHTML, so everything that is not
+ * one of the three tags below has to arrive as text. Before escapeHtml() was
+ * added, a model reply went in raw: ask the planner to echo
+ * `<img src=x onerror=…>` and it rendered as a live element, and because the
+ * CSP carries `script-src 'unsafe-inline'` the handler would run.
+ *
+ * Scope was small — chat lives in useState, is never persisted and never
+ * shared, so the only person who could trigger it is the one typing the
+ * prompt — but "only self-XSS" is a property of today's storage choice, not of
+ * this function. Persist the transcript or show it to a partner and it stops
+ * being self-inflicted, silently.
+ */
+export function renderMessage(text: string) {
   const lines = text.split("\n");
   return lines.map((line, i) => {
-    const bolded = line
+    const bolded = escapeHtml(line)
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/^#{1,3}\s*(.+)$/, '<span class="font-semibold text-ink">$1</span>');
     const isBullet = /^\s*[-*•]\s+/.test(line);
@@ -135,7 +169,7 @@ export default function PlannerChat({
                     : "max-w-[90%] space-y-1 rounded-2xl rounded-bl-sm bg-white px-4 py-3 text-sm leading-relaxed text-ink-soft shadow-sm"
                 }
               >
-                {m.role === "assistant" ? render(m.content) : m.content}
+                {m.role === "assistant" ? renderMessage(m.content) : m.content}
               </div>
             </div>
           ))}
