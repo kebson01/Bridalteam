@@ -179,7 +179,30 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
         max_tokens: 1024,
-        system: SYSTEM_PROMPT,
+        // The system prompt is ~2.4k tokens, identical on every request, and
+        // sent ahead of the messages — so it is the whole cacheable prefix.
+        // Marking it cuts those tokens to roughly a tenth of input price on a
+        // hit, which on a chat this size is most of the input bill.
+        //
+        // Two things make this safe rather than clever. The cache is scoped to
+        // our API key, not the visitor, and the prompt is byte-identical for
+        // everyone — so the first chat of any five-minute window warms it and
+        // every concurrent visitor reads it. And Sonnet 5's minimum cacheable
+        // prefix is 1024 tokens: shorter prefixes silently don't cache at all,
+        // with no error. If SYSTEM_PROMPT is ever trimmed below that, this
+        // quietly stops working — check usage.cache_read_input_tokens rather
+        // than assuming.
+        //
+        // The default 5-minute TTL costs 1.25x on a write, so a lone visitor
+        // asking one question and leaving pays about 0.1c more. Break-even is
+        // two requests, which any real conversation passes.
+        system: [
+          {
+            type: "text",
+            text: SYSTEM_PROMPT,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
         messages: clean.map((m) => ({ role: m.role, content: m.content })),
       }),
     });
