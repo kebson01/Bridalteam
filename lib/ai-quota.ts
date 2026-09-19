@@ -31,10 +31,25 @@ export function clientIp(req: Request): string {
  *
  * Reads with the service-role client (bypasses RLS). Fails OPEN on any error or
  * a non-positive cap — a metering hiccup must never take chat down. Tune with
- * AI_ANON_DAILY_GLOBAL_CAP (default 1000/day).
+ * AI_ANON_DAILY_GLOBAL_CAP.
+ *
+ * The default is 200/day, not 1000. At Claude Sonnet 5 rates a chat turn runs
+ * about $0.011, so 1000 was roughly $11/day — sustained, since the window
+ * rolls daily rather than monthly — from traffic that is by definition not
+ * signed up. 200 caps that near $2/day and is still far more anonymous chat
+ * than this site has ever seen in a day.
+ *
+ * Deliberately a code default rather than a value someone has to remember to
+ * set in the environment: an unset variable should land on the safe number.
+ * Raise it here or override per-environment once real demand justifies it —
+ * and note the window is a rolling 24 hours, so a burst pushes the ceiling out
+ * rather than resetting at midnight.
+ *
+ * Tripping it is not an outage: anonymous callers get a "planner is at
+ * capacity, sign up free" reply and signed-in tiers are untouched.
  */
 export async function anonChatCeilingExceeded(admin: SupabaseClient): Promise<boolean> {
-  const cap = Number.parseInt(process.env.AI_ANON_DAILY_GLOBAL_CAP ?? "1000", 10);
+  const cap = Number.parseInt(process.env.AI_ANON_DAILY_GLOBAL_CAP ?? "200", 10);
   if (!Number.isFinite(cap) || cap <= 0) return false;
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { count, error } = await admin
