@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
+import ConsentSettings from "@/components/consent-settings";
 import { pageMetadata } from "@/lib/site";
 import {
   Item,
@@ -29,6 +30,13 @@ const SUBPROCESSORS = [
   { provider: "DigitalOcean", purpose: "Application hosting", data: "Usage / request data" },
   { provider: "Cloudflare", purpose: "CDN, security, DNS", data: "Request metadata, IP address" },
   { provider: "Pexels", purpose: "Inspiration imagery", data: "Image requests" },
+  // Listed because §6 now discloses it. Only receives anything from visitors who
+  // accept the banner; decline and no request to Google is ever made.
+  {
+    provider: "Google Analytics",
+    purpose: "Website usage analytics (with your consent)",
+    data: "Page views, referrer, approximate location, device",
+  },
 ];
 
 export default function PrivacyPage() {
@@ -37,7 +45,7 @@ export default function PrivacyPage() {
       <PageHero eyebrow="Legal" title="Privacy Policy" />
       <LegalBody>
         <div className="space-y-4">
-          <LastUpdated date="August 24, 2026" />
+          <LastUpdated date="September 19, 2026" />
           <Preamble>
             <P>
               This Privacy Policy explains how <Lead>Bridal Team, LLC</Lead> (&ldquo;Bridal
@@ -128,11 +136,24 @@ export default function PrivacyPage() {
         <Section n={6} title="Cookies and similar technologies">
           <P>
             We use cookies and local storage that are necessary to run the Service &mdash; for
-            example, to keep you signed in and to remember your session. <Lead>We do not run
-            third-party advertising or analytics trackers,</Lead> so there is no consent banner to
-            dismiss. You can control cookies through your browser; disabling essential cookies may
-            break core features such as signing in.
+            example, to keep you signed in and to remember your session. You can control cookies
+            through your browser; disabling essential cookies may break core features such as
+            signing in.
           </P>
+          <P>
+            We also use <strong>Google Analytics</strong> to understand how people find and use the
+            Service &mdash; which pages they visit and where they arrived from. It sets cookies and
+            sends that activity to Google, who act as our processor for it.{" "}
+            <Lead>We ask first, and nothing loads until you agree.</Lead> If you decline, no
+            analytics script is loaded and no analytics cookie is set &mdash; the Service works
+            exactly the same either way. We do not use Google Analytics&rsquo; advertising
+            features, and we do not pass it your name, email address or anything from your wedding
+            plans.
+          </P>
+          <P>
+            You can change your mind at any time, and it takes effect from your next page view:
+          </P>
+          <ConsentSettings />
           <P>
             If you arrive from an advertisement or a tagged link, we note which one in your
             browser&rsquo;s session storage and attach it to your account if you go on to sign up,

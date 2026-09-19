@@ -82,13 +82,23 @@ data region and processing terms before publishing; update as your stack changes
 | DigitalOcean | Application hosting | Usage/request data |
 | Cloudflare | CDN, security, DNS | Request metadata, IP |
 | Pexels | Inspiration imagery | Image requests |
+| Google Analytics | Website usage analytics (with your consent) | Page views, referrer, approximate location, device |
 
 ## 6. Cookies and similar technologies
 
 We use cookies and local storage that are necessary to run the Service (for
-example, to keep you signed in) and, where applicable, to understand usage. You
-can control cookies through your browser; disabling essential cookies may break
-core features. [TODO: describe any consent banner and analytics you add.]
+example, to keep you signed in). You can control cookies through your browser;
+disabling essential cookies may break core features.
+
+We also use **Google Analytics** to understand how people find and use the
+Service. It sets cookies and sends that activity to Google, who act as our
+processor for it. We ask first: a consent banner appears on your first visit and
+no analytics script is loaded and no analytics cookie is set unless you accept.
+Declining changes nothing about how the Service works. You can change your
+choice at any time from the "Cookies and similar technologies" section of the
+privacy page at https://bridalteam.com/privacy, and it takes effect from your
+next page view. We do not enable Google Analytics' advertising features, and we
+do not send it your name, email address, or anything from your wedding plans.
 
 ## 7. Data retention
 
@@ -156,6 +166,5 @@ Questions or privacy requests:
 - [TODO] Effective date (set at publication)
 - [TODO] Mailing address
 - [TODO] Confirm each sub-processor's data region (esp. Supabase) for §5 and §11
-- [TODO] Analytics/cookie-banner description if you add one (§6)
 - Have a Florida-licensed attorney confirm which state privacy laws apply and
   finalize §9/§11, then remove the {...NOTE} markers.

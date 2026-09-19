@@ -1,4 +1,5 @@
 import { SUPABASE_URL } from "@/lib/supabase";
+import { analyticsConfigured } from "@/lib/analytics";
 
 /**
  * Builds the Content-Security-Policy.
@@ -61,6 +62,16 @@ import { SUPABASE_URL } from "@/lib/supabase";
  *                 blocked mid-redirect. Naming the hosts costs nothing and
  *                 removes the browser-dependent failure.
  *
+ *   script-src / connect-src also name Google's analytics hosts, but ONLY
+ *                 when NEXT_PUBLIC_GA_MEASUREMENT_ID is set. Widening the
+ *                 policy for a tracker that isn't configured would weaken it
+ *                 for nothing, and a deployment that drops the id gets the
+ *                 tighter policy back automatically. Note that the gate is on
+ *                 configuration, not consent: the header is one per response
+ *                 and is CDN-cached, so it cannot vary per visitor. CSP is a
+ *                 ceiling on what the page *may* load — components/analytics
+ *                 .tsx is what decides whether anything is loaded at all.
+ *
  * Anything else added later that loads a cross-origin script, iframe, or
  * fetch target needs its own entry here — check before enabling a feature,
  * not after a support ticket.
@@ -72,9 +83,22 @@ export function buildCsp(nonce: string, strict: boolean): string {
   // and its own XHR back home. Named in script-src, frame-src and connect-src
   // below. Remove all three together if the captcha is ever dropped.
   const turnstile = "https://challenges.cloudflare.com";
+  // Google Analytics: the gtag loader comes from googletagmanager.com and then
+  // beacons to google-analytics.com. The wildcards are not decoration —
+  // GA4 collects via region-specific subdomains (region1.google-analytics.com
+  // and friends), so naming the bare host alone drops data from most of the
+  // world while looking correct from a US test.
+  const ga = analyticsConfigured()
+    ? {
+        script: " https://www.googletagmanager.com",
+        connect:
+          " https://www.google-analytics.com https://*.google-analytics.com" +
+          " https://*.analytics.google.com https://www.googletagmanager.com",
+      }
+    : { script: "", connect: "" };
   const scriptSrc = strict
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${turnstile}`
-    : `script-src 'self' 'unsafe-inline' ${turnstile}`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${turnstile}${ga.script}`
+    : `script-src 'self' 'unsafe-inline' ${turnstile}${ga.script}`;
   return [
     `default-src 'self'`,
     scriptSrc,
@@ -82,7 +106,7 @@ export function buildCsp(nonce: string, strict: boolean): string {
     `img-src 'self' blob: data: https:`,
     `font-src 'self' data:`,
     `media-src 'self' https:`,
-    `connect-src 'self' ${supabaseHttp} ${supabaseWss} ${turnstile}`,
+    `connect-src 'self' ${supabaseHttp} ${supabaseWss} ${turnstile}${ga.connect}`,
     `worker-src 'self' blob:`,
     `manifest-src 'self'`,
     `frame-src 'self' https://www.youtube.com https://player.vimeo.com ${turnstile}`,

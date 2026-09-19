@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { buildCsp } from "./csp";
 import { SUPABASE_URL } from "./supabase";
 
@@ -80,5 +80,62 @@ describe("buildCsp", () => {
     expect(strict.get("script-src")).not.toContain("'unsafe-inline'");
     // Turnstile still has to survive the strict path.
     expect(strict.get("script-src")).toContain(TURNSTILE);
+  });
+});
+
+/**
+ * Google Analytics widens the policy, but only when it is actually configured.
+ *
+ * Both halves matter and neither is visible without a test. Forget the hosts
+ * and GA silently collects nothing in production while looking fine in dev
+ * (where CSP is Report-Only). Add them unconditionally and every deployment
+ * that never set a measurement ID carries a weaker script-src for a tracker it
+ * does not run.
+ *
+ * GA_MEASUREMENT_ID is read once at module load, like every NEXT_PUBLIC value,
+ * so each case needs a fresh import rather than just a changed env var.
+ */
+describe("buildCsp — Google Analytics", () => {
+  const GTM = "https://www.googletagmanager.com";
+
+  async function cspWithGaId(id: string | undefined) {
+    vi.resetModules();
+    if (id === undefined) vi.stubEnv("NEXT_PUBLIC_GA_MEASUREMENT_ID", "");
+    else vi.stubEnv("NEXT_PUBLIC_GA_MEASUREMENT_ID", id);
+    const mod = await import("./csp");
+    return directives(mod.buildCsp("test-nonce", false));
+  }
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  it("names googletagmanager in script-src when configured", async () => {
+    const d = await cspWithGaId("G-TESTID1234");
+    expect(d.get("script-src")).toContain(GTM);
+  });
+
+  it("allows the regional collection subdomains, not just the bare host", async () => {
+    // GA4 beacons to region1.google-analytics.com and friends. Naming only the
+    // apex host passes a US smoke test and drops most international traffic.
+    const d = await cspWithGaId("G-TESTID1234");
+    const connect = d.get("connect-src") ?? "";
+    expect(connect).toContain("https://*.google-analytics.com");
+    expect(connect).toContain("https://*.analytics.google.com");
+  });
+
+  it("keeps the tighter policy when no measurement id is set", async () => {
+    const d = await cspWithGaId(undefined);
+    expect(d.get("script-src")).not.toContain("google");
+    expect(d.get("connect-src")).not.toContain("google");
+  });
+
+  it("still allows Turnstile and Supabase when analytics is on", async () => {
+    // The GA entries are appended to existing directives, so this guards
+    // against a concatenation bug taking signup offline.
+    const d = await cspWithGaId("G-TESTID1234");
+    expect(d.get("script-src")).toContain(TURNSTILE);
+    expect(d.get("connect-src")).toContain(SUPABASE_URL);
   });
 });
