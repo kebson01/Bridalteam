@@ -133,6 +133,13 @@ export default function PrivacyPage() {
             dismiss. You can control cookies through your browser; disabling essential cookies may
             break core features such as signing in.
           </P>
+          <P>
+            If you arrive from an advertisement or a tagged link, we note which one in your
+            browser&rsquo;s session storage and attach it to your account if you go on to sign up,
+            so that we can tell which campaigns are worth running. That note is first-party and
+            stays with us: no advertising network is involved, nothing is shared, and if you
+            don&rsquo;t sign up it is discarded when you close the tab.
+          </P>
         </Section>
 
         <Section n={7} title="Data retention">
