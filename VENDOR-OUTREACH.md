@@ -248,6 +248,18 @@ Sent-to-published conversion is the number that tells you whether the message
 or the product is the problem. If people reply warmly and never publish, the
 friction is in the flow, not the pitch — go fix the flow.
 
+## Ask for the link
+
+When a vendor claims their listing and is pleased with it, ask them to link to
+it from their own site. One line in the follow-up email, and most say yes
+because it costs them nothing.
+
+This is not a courtesy — it is the highest-value thing the vendor programme
+produces for the couples side. Local, topically relevant inbound links are
+exactly what a new wedding domain needs to rank, they are almost impossible to
+buy honestly, and every vendor is a chance at one. See the flywheel section in
+`COUPLES-ACQUISITION.md`.
+
 ## When to stop doing this by hand
 
 At roughly **50 published listings in one metro**, the directory becomes worth
