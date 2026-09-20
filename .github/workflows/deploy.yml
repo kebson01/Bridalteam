@@ -1,0 +1,98 @@
+name: Deploy
+
+# Deploys main to DigitalOcean App Platform.
+#
+# ⚠️ TURN OFF AUTODEPLOY FIRST. App Platform's GitHub integration deploys on
+# every push to the connected branch, and that is almost certainly how this app
+# has been deploying until now. Adding this workflow without switching that off
+# gives you two deployments per merge, racing each other. In the DO dashboard:
+# App → Settings → your component → Source → uncheck "Autodeploy". If you would
+# rather keep Autodeploy, delete this file — it buys you the CI gate below and
+# little else.
+#
+# What this adds over Autodeploy: nothing ships unless typecheck, tests and
+# build have passed. Autodeploy fires on the push itself, so a commit that
+# fails CI still gets built and deployed; App Platform would fail its own build
+# and keep the previous release, but you burn a build and find out from the
+# dashboard rather than from a red check.
+
+on:
+  # Deliberately not `push`. Keying off CI's completion is what guarantees the
+  # ordering — a `push` trigger races the checks rather than waiting for them.
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  # A manual button, for redeploying after an environment-variable change.
+  # NEXT_PUBLIC_* flags are read at build time (lib/flags.ts), so changing one
+  # in the dashboard does nothing until something rebuilds — this is that
+  # something.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never cancel a deploy in flight: `doctl apps create-deployment --wait` holds
+# the job open while App Platform builds, and killing it here would leave a
+# deployment running with nothing watching it.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to App Platform
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # On workflow_run this fires for failed CI runs too, so the conclusion has
+    # to be checked explicitly. workflow_dispatch has no such field, hence the
+    # event-name arm.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      # Secrets are not available to job-level `if`, so the "is this configured
+      # yet?" question is answered here and every later step keys off it. The
+      # point is that a repository without the secrets set still finishes
+      # GREEN: a permanent red X on main teaches people to ignore the checks,
+      # which is worse than not having this workflow at all.
+      - name: Check for deploy credentials
+        id: creds
+        env:
+          TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          APP_ID: ${{ secrets.DIGITALOCEAN_APP_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$APP_ID" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Explain the skip
+        if: steps.creds.outputs.configured != 'true'
+        run: |
+          echo "::notice::Deploy skipped — DIGITALOCEAN_ACCESS_TOKEN and/or DIGITALOCEAN_APP_ID are not set."
+          echo "Add both under Settings → Secrets and variables → Actions, then re-run."
+          echo "Get the app id with:  doctl apps list"
+          echo "Until then this app keeps deploying however it does today."
+
+      - name: Install doctl
+        if: steps.creds.outputs.configured == 'true'
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      # --wait is the whole point: without it the command returns the moment
+      # the deployment is queued, and a green check would mean "asked App
+      # Platform to build", not "the new code is serving". With it, this job
+      # fails when the deployment fails.
+      - name: Create deployment
+        if: steps.creds.outputs.configured == 'true'
+        run: doctl apps create-deployment "$APP_ID" --wait
+        env:
+          APP_ID: ${{ secrets.DIGITALOCEAN_APP_ID }}
+
+      - name: Report
+        if: steps.creds.outputs.configured == 'true'
+        run: echo "::notice::Deployed ${{ github.sha }} to App Platform."

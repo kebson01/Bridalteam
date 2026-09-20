@@ -140,6 +140,36 @@ Before flipping it, make sure the server-only keys are set in production —
 degrades quietly rather than erroring (see `.env.example`), so a missing key
 looks like a working site until a vendor tries to pay or an invite never sends.
 
+## Deploying
+
+The app runs on **DigitalOcean App Platform**. Historically it deployed through
+App Platform's own GitHub integration — Autodeploy on every push to `main` —
+which builds whatever was pushed, whether or not CI passed.
+
+`.github/workflows/deploy.yml` replaces that with a deploy gated on CI: it runs
+only after the **CI** workflow completes successfully on `main`, then calls
+`doctl apps create-deployment --wait`, so a green check means the new code is
+serving rather than merely queued. There is also a manual **Run workflow**
+button, which is what you want after changing a `NEXT_PUBLIC_*` flag — those
+are read at build time (`lib/flags.ts`), so changing one in the dashboard does
+nothing until something rebuilds.
+
+**Turn Autodeploy off before using it**, or every merge deploys twice, racing
+itself: App → Settings → the component → Source → uncheck *Autodeploy*. If you
+would rather keep Autodeploy, delete the workflow — it buys you the CI gate and
+little else.
+
+Two repository secrets are required (Settings → Secrets and variables →
+Actions):
+
+| Secret | Where it comes from |
+|---|---|
+| `DIGITALOCEAN_ACCESS_TOKEN` | DO → API → Tokens, with write scope on Apps |
+| `DIGITALOCEAN_APP_ID` | `doctl apps list`, or the id in the app's dashboard URL |
+
+Without them the workflow runs, reports why it skipped, and **passes** — a
+permanent red X on `main` would just train everyone to ignore the checks.
+
 ## Next steps
 
 The rebuild's engineering backlog is drained. All nine findings in
