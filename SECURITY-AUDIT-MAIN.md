@@ -197,10 +197,30 @@ Reversing those steps locks out every real signup and login until the deploy cat
 
 ## Remediation priority
 
-1. **M4's last check** — open one signed-in workspace page and look for CSP
-   violations in the console, the one surface the route sweep couldn't reach.
-   The policy is enforcing, so a directive we missed is a live breakage, not a
-   report.
+1. **M4's last check** — 🟨 mostly done 2026-09-20, one gap left. The app was
+   walked in a real Chromium with `CSP_ENFORCE=true`, built with the production
+   flags on (`NEXT_PUBLIC_SHOW_PLANNER_APP`, the vendor directory, a Turnstile
+   site key), listening for `securitypolicyviolation`: **38 route loads, 0
+   violations**, every response carrying the enforcing header. The same walk
+   logged every request the browser attempted and found exactly **one** external
+   origin — `challenges.cloudflare.com`, for the Turnstile script, which the
+   browser *tried* to fetch, and a fetch attempted is a fetch the policy
+   allowed. Five more directives the signed-in surfaces depend on are now
+   regression-tested in [`lib/csp.test.ts`](lib/csp.test.ts) (img-src
+   blob:/data:/https:, worker-src, manifest-src, font-src, plus a guard that
+   fails if any host is added to the policy without a deliberate edit).
+
+   **What is still unchecked:** the pages behind the login gate —
+   `/dashboard`, `/onboarding` and `/w/[id]/*` — redirect to `/auth/login`
+   without a session, and Supabase now requires a Turnstile token, so no
+   session could be minted outside a real browser. They redirected correctly
+   with the enforcing header attached, but their own rendered content was never
+   loaded. The one external connection unique to them is the Supabase realtime
+   websocket (`components/notifications-bell.tsx`,
+   `components/community/community.tsx`), which `connect-src` names by deriving
+   it from `SUPABASE_URL` rather than hand-typing it — so it cannot drift — and
+   which is asserted in the test file. Residual risk is low but not zero:
+   **sign in once and glance at the console** to close it for good.
 2. **Auth rate limits** — reviewed 2026-09-18 and deliberately left at their
    current values. Worth revisiting before a public announcement, in the units
    the dashboard actually uses: token refresh and verification are per **5
