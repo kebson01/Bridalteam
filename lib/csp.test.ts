@@ -55,6 +55,53 @@ describe("buildCsp", () => {
     expect(connect).toContain(SUPABASE_URL.replace(/^https:/, "wss:"));
   });
 
+  it("allows the image sources the workspace actually renders", () => {
+    // blob:/data: for the cropper preview before an upload lands, https: for
+    // cover photos, vendor logos and inspiration images, which can point at any
+    // host. Dropping blob: breaks the preview only after a file is chosen —
+    // past the point most manual testing stops.
+    const img = d.get("img-src") ?? "";
+    expect(img).toContain("blob:");
+    expect(img).toContain("data:");
+    expect(img).toContain("https:");
+  });
+
+  it("allows the service worker and the manifest the PWA install needs", () => {
+    // Chrome will not offer "Install" without a service worker with a fetch
+    // handler (public/sw.js) and a reachable manifest (app/manifest.ts).
+    expect(d.get("worker-src")).toContain("'self'");
+    expect(d.get("worker-src")).toContain("blob:");
+    expect(d.get("manifest-src")).toBe("'self'");
+  });
+
+  it("keeps font-src local, which holds only while fonts are self-hosted", () => {
+    // next/font/google downloads Jost and Raleway at build time and serves them
+    // from /_next/static/media, so 'self' is enough. Switching to a <link> at
+    // fonts.googleapis.com would need that host in style-src and
+    // fonts.gstatic.com in font-src — and would fail silently as a fallback
+    // font rather than as an error.
+    expect(d.get("font-src")).toBe("'self' data:");
+  });
+
+  it("names no external host beyond the ones we deliberately allow", () => {
+    // A walk of the app under the enforcing policy (2026-09-20) found exactly
+    // one external origin requested by the browser: Turnstile. This asserts the
+    // reverse direction — that nothing gets added to the policy without a
+    // deliberate edit here — so a new third party can't be waved through as a
+    // one-line policy change.
+    const hosts = new Set(
+      csp.match(/https?:\/\/[^\s;]+/g)?.map((u) => new URL(u).origin) ?? [],
+    );
+    expect([...hosts].sort()).toEqual([
+      "https://billing.stripe.com",
+      "https://challenges.cloudflare.com",
+      "https://checkout.stripe.com",
+      "https://player.vimeo.com",
+      "https://www.youtube.com",
+      SUPABASE_URL,
+    ].sort());
+  });
+
   it("keeps the directives that close off injection escalation", () => {
     expect(d.get("object-src")).toBe("'none'");
     expect(d.get("base-uri")).toBe("'self'");

@@ -28,8 +28,12 @@ core of the experience.
 - **The vendor side** (`app/vendor/`, `app/for-vendors/`) — self-serve profiles,
   a lead inbox, reviews and Stripe-billed Free / Pro / Featured tiers
   (`lib/tiers.ts`).
-- **Published legal** (`app/terms`, `app/privacy`) — rendered from `TERMS.md`
-  and `PRIVACY.md` through `components/legal-doc.tsx` so they can't drift.
+- **Published legal** (`app/terms`, `app/privacy`) — hand-written pages built
+  from the primitives in `components/legal-doc.tsx`, both dated 24 August 2026.
+  The root `TERMS.md` / `PRIVACY.md` are the earlier drafts those pages were
+  written from, not their source: nothing imports them, and they still carry
+  unresolved `[TODO: ...]` placeholders (arbitration body, county, notice
+  address). Edit the pages, not the markdown.
 
 ## The four AI pillars
 
@@ -49,10 +53,11 @@ Before opening a pull request, run what CI runs:
 
 ```bash
 npm run typecheck   # tsc --noEmit
+npm test            # vitest run
 npm run build
 ```
 
-Both go green on a clean checkout with no environment variables set — the
+All three go green on a clean checkout with no environment variables set — the
 Supabase publishable credentials and the canonical site URL have defaults — so
 a failure here is a real one.
 
@@ -135,9 +140,22 @@ Before flipping it, make sure the server-only keys are set in production —
 degrades quietly rather than erroring (see `.env.example`), so a missing key
 looks like a working site until a vendor tries to pay or an invite never sends.
 
-## Next steps (not yet built)
+## Next steps
 
-- Surface the non-venue categories in the directory UI (the data already has them)
-- Wire the matching AI to query real vendor data
-- A test suite — CI typechecks and builds every pull request
-  (`.github/workflows/ci.yml`), but nothing asserts behaviour yet
+The rebuild's engineering backlog is drained. All nine findings in
+`SECURITY-AUDIT-MAIN.md` are closed, and CI typechecks, tests and builds every
+pull request (`.github/workflows/ci.yml`). What's left is mostly not code:
+
+- **Vendor supply.** `vendor_profiles` has no published rows, so `/vendors`
+  renders its empty state and stays hidden behind
+  `NEXT_PUBLIC_SHOW_VENDOR_DIRECTORY`. Two follow-ons wait on real listings
+  existing rather than on anything being built: surfacing the non-venue
+  categories in the directory UI (the data already has them), and wiring the
+  matching AI to query real vendor data.
+- **A funnel you can see.** `lib/attribution.ts` records which ad brought a
+  signup, but only at the moment of signup — nothing counts visits or drop-off,
+  so paid traffic would arrive unmeasured.
+- **One signed-in CSP glance.** See remediation item 1 in
+  `SECURITY-AUDIT-MAIN.md`: the enforcing policy has been walked across 38
+  route loads with zero violations, but the pages behind the login gate could
+  only be reached as redirects.
