@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { track } from "@/lib/events";
 
 type Role = "user" | "assistant";
 interface Msg {
@@ -118,8 +119,16 @@ export default function PlannerChat({
         }),
       });
       const data = await res.json();
+      // Counted on a successful reply rather than on submit, so a dropped
+      // request is not recorded as someone engaging with the planner.
+      track("planner_message");
       setDemoNotice(Boolean(data.demo));
-      if (data.limited) setCta(data.cta === "upgrade" ? "upgrade" : "signup");
+      if (data.limited) {
+        // The conversion moment: they asked one more question and were stopped.
+        // Fires at most once a session -- the CTA replaces the input.
+        track("planner_limit");
+        setCta(data.cta === "upgrade" ? "upgrade" : "signup");
+      }
       if (typeof data.tier === "string") setTier(data.tier);
       setMessages((m) => [
         ...m,

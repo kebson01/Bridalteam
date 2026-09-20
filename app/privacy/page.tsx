@@ -134,6 +134,15 @@ export default function PrivacyPage() {
             break core features such as signing in.
           </P>
           <P>
+            We do count how the site is used &mdash; how many people opened a particular guide,
+            how many tried the AI planner, how many went on to create an account. Those counts are
+            recorded on our own servers and contain <Lead>no identifier of any kind:</Lead> no IP
+            address, no account id, no session id, no cookie and no fingerprint. Two of those
+            records cannot be connected to each other, so they cannot describe you or reconstruct
+            where you went &mdash; even by us, with full access to our own database. They tell us
+            how many, never who.
+          </P>
+          <P>
             If you arrive from an advertisement or a tagged link, we note which one in your
             browser&rsquo;s session storage and attach it to your account if you go on to sign up,
             so that we can tell which campaigns are worth running. That note is first-party and

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import Captcha from "@/components/auth/captcha";
 import { readAttribution } from "@/lib/attribution";
+import { track } from "@/lib/events";
 import { CAPTCHA_REQUIRED } from "@/lib/captcha";
 import { authErrorMessage } from "@/lib/auth-errors";
 
@@ -109,6 +110,13 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
         setBusy(false);
         return;
       }
+
+      // Counted here, before the session branch below, because this is the
+      // single point at which the account exists. With email confirmation on
+      // there is a user and no session, and that is still a signup -- counting
+      // it only on the session path would undercount every real one.
+      const src = attribution?.utm_source ?? attribution?.referrer_host ?? undefined;
+      track("signup_success", undefined, src);
 
       // With email confirmation on, there's a user but no session yet.
       if (!data.session) {

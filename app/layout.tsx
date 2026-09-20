@@ -5,6 +5,7 @@ import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import ServiceWorker from "@/components/service-worker";
 import AttributionCapture from "@/components/attribution-capture";
+import PageViewTracker from "@/components/page-view-tracker";
 import InstallApp from "@/components/install-app";
 import JsonLd from "@/components/json-ld";
 import { organizationSchema, websiteSchema } from "@/lib/structured-data";
@@ -102,6 +103,7 @@ export default function RootLayout({
         <SiteFooter />
         <ServiceWorker />
         <AttributionCapture />
+        <PageViewTracker />
         <InstallApp />
       </body>
     </html>

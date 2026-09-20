@@ -20,3 +20,17 @@ afterEach(cleanup);
 if (!Element.prototype.scrollTo) {
   Element.prototype.scrollTo = function scrollTo() {};
 }
+
+// jsdom has no navigator.sendBeacon, so lib/events.ts::track() falls through to
+// its fetch fallback — which lands on whatever `fetch` a component test has
+// mocked, adding phantom calls to a spy that exists to assert something else.
+// A component under test would then fail on a metrics call it never made.
+// Stubbing the beacon keeps funnel counting entirely out of the way of tests,
+// and matches what a real browser does anyway.
+if (!navigator.sendBeacon) {
+  Object.defineProperty(navigator, "sendBeacon", {
+    value: () => true,
+    writable: true,
+    configurable: true,
+  });
+}
