@@ -28,8 +28,12 @@ core of the experience.
 - **The vendor side** (`app/vendor/`, `app/for-vendors/`) — self-serve profiles,
   a lead inbox, reviews and Stripe-billed Free / Pro / Featured tiers
   (`lib/tiers.ts`).
-- **Published legal** (`app/terms`, `app/privacy`) — rendered from `TERMS.md`
-  and `PRIVACY.md` through `components/legal-doc.tsx` so they can't drift.
+- **Published legal** (`app/terms`, `app/privacy`) — hand-written pages built
+  from the primitives in `components/legal-doc.tsx`, both dated 24 August 2026.
+  The root `TERMS.md` / `PRIVACY.md` are the earlier drafts those pages were
+  written from, not their source: nothing imports them, and they still carry
+  unresolved `[TODO: ...]` placeholders (arbitration body, county, notice
+  address). Edit the pages, not the markdown.
 
 ## The four AI pillars
 
