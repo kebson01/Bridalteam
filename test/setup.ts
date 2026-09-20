@@ -11,6 +11,22 @@ import "@testing-library/jest-dom/vitest";
 // `globals` is on and no per-file cleanup is registered.
 afterEach(cleanup);
 
+// jsdom keeps ONE sessionStorage/localStorage for the whole file, so anything
+// a component writes outlives the test that wrote it. A real visitor always
+// arrives with empty storage, which is what every test here assumes — without
+// this, a planner draft saved by one test restores itself into the next and
+// makes assertions depend on test order. Found the hard way: it turned a
+// passing conversion test red the moment the planner started persisting
+// transcripts.
+afterEach(() => {
+  try {
+    sessionStorage.clear();
+    localStorage.clear();
+  } catch {
+    // Storage disabled in this environment; nothing to reset.
+  }
+});
+
 // jsdom implements no layout, so Element.prototype.scrollTo doesn't exist at
 // all. Any component that scrolls a container to the bottom throws inside
 // requestAnimationFrame — after the assertions have already passed, so the
