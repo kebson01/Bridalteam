@@ -7,7 +7,11 @@ export default function robots(): MetadataRoute.Robots {
   // with an honest empty state, and it sits in the primary navigation as "Find
   // Vendors". Blocking a linked, indexable page was the odd one out, so it is
   // allowed again. SHOW_VENDOR_DIRECTORY now only controls the homepage teaser.
-  const disallow = ["/admin", "/api/"];
+  // /claim/<token> carries its own credential in the URL: a claim link in a
+  // search result is a claim link anyone can use. The pages also set
+  // robots: { index: false }, but that only helps once a crawler has already
+  // fetched the URL, which is exactly what we would rather it never did.
+  const disallow = ["/admin", "/api/", "/claim"];
 
   return {
     rules: [{ userAgent: "*", allow: "/", disallow }],

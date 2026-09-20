@@ -102,3 +102,53 @@ export function entitlements(plan: string | null | undefined): Entitlements {
 export function planAtLeast(plan: string | null | undefined, min: Plan): boolean {
   return PLAN_RANK[normalizePlan(plan)] >= PLAN_RANK[min];
 }
+
+/**
+ * The shape `effectivePlan` reads. Matches the `organizations` columns, so a
+ * row can be passed straight in.
+ */
+export type PlanSource = {
+  plan?: string | null;
+  /** A plan granted by us rather than bought — see effectivePlan(). */
+  comp_plan?: string | null;
+  /** When the comp lapses. null = open-ended. */
+  comp_expires_at?: string | null;
+};
+
+/**
+ * The plan a vendor's features should actually be gated on: the better of what
+ * they pay for and what we've comped them.
+ *
+ * Founding vendors are the reason this exists. The directory launched with no
+ * couples in it, so the honest pitch to an early vendor cannot be leads — and
+ * a Free listing hides the one asset they care most about, the link to their
+ * own website. Comping Pro costs nothing while nobody is paying, and makes the
+ * listing worth claiming.
+ *
+ * **Why not just set `plan`.** `organizations.plan` means "what Stripe says",
+ * and the M1 fix in SECURITY-AUDIT-MAIN.md is built on that: `plan` was
+ * revoked from `authenticated` precisely so a vendor could not award
+ * themselves a paid tier. A row reading `plan = 'pro'` with no
+ * `stripe_subscription_id` is exactly what that exploit leaves behind, so
+ * writing comps there would make a granted tier indistinguishable from a
+ * stolen one in the data, and a later audit unable to tell them apart. A
+ * separate column keeps `plan` honest, makes comps greppable, and lets them
+ * expire.
+ *
+ * Takes the *higher* of the two rather than preferring the comp: a comped
+ * vendor who later subscribes to Featured must not be dragged back down to a
+ * leftover Pro comp.
+ */
+export function effectivePlan(org: PlanSource | null | undefined, now: Date = new Date()): Plan {
+  const paid = normalizePlan(org?.plan);
+  const expiry = org?.comp_expires_at ? new Date(org.comp_expires_at) : null;
+  // An unparseable expiry is treated as expired: failing toward the *lower*
+  // tier is the safe direction for an entitlement, and a bad timestamp should
+  // not silently hand out a paid feature forever.
+  const compLive = !expiry || (!Number.isNaN(expiry.getTime()) && expiry > now);
+  const comp = compLive ? normalizePlan(org?.comp_plan) : "free";
+  return PLAN_RANK[comp] > PLAN_RANK[paid] ? comp : paid;
+}
+
+/** The columns `effectivePlan` needs, for a PostgREST `select`. */
+export const PLAN_COLUMNS = "plan, comp_plan, comp_expires_at";

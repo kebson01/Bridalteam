@@ -7,7 +7,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
 import { youtubePoster } from "@/lib/media";
 import { moderateImage } from "@/lib/moderation";
-import { entitlements } from "@/lib/tiers";
+import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 
 // RLS ("Vendor team edits its profile") enforces that the caller belongs to the
 // vendor org, so we update by org_id without an extra permission check.
@@ -83,11 +83,10 @@ export async function addVendorMedia(
   // public Inspiration feed; Pro/Featured are unlimited and feed-visible.
   const { data: membership } = await supabase
     .from("org_members")
-    .select("organizations(plan)")
+    .select(`organizations(${PLAN_COLUMNS})`)
     .eq("org_id", orgId)
     .maybeSingle();
-  const plan =
-    (membership?.organizations as unknown as { plan?: string } | null)?.plan ?? "free";
+  const plan = effectivePlan(membership?.organizations as unknown as PlanSource | null);
   const ent = entitlements(plan);
 
   if (ent.galleryLimit !== null) {
