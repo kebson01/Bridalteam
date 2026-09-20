@@ -83,15 +83,49 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
+      # Preflight, because a failing deploy should name its own cause. Three
+      # rounds were lost to a bare "405" that could equally have meant a wrong
+      # id or a token without write access; this separates them in one run.
+      #
+      # Nothing here can change production: `apps list` and `apps get` are both
+      # reads.
+      - name: Preflight — prove the id resolves before deploying
+        if: steps.creds.outputs.configured == 'true'
+        env:
+          RAW_APP_ID: ${{ secrets.DIGITALOCEAN_APP_ID }}
+        run: |
+          # GitHub does NOT trim secrets. A trailing newline from pasting sends
+          # the request to /v2/apps/<id>%0A/deployments — a path that matches no
+          # route, and no amount of re-pasting the id fixes it because the
+          # newline comes back every time.
+          APP_ID="$(printf '%s' "$RAW_APP_ID" | tr -d '[:space:]')"
+          echo "app id length after trimming: ${#APP_ID} (a DigitalOcean app id is 36)"
+          if [ "${#APP_ID}" -ne "${#RAW_APP_ID}" ]; then
+            echo "::warning::The stored secret had surrounding whitespace — that alone can cause a 405."
+          fi
+          case "$APP_ID" in
+            *[!0-9a-fA-F-]*)
+              echo "::warning::The id contains characters that are not hex or '-'. It may be a full URL or the app NAME rather than its id." ;;
+          esac
+          echo "APP_ID=$APP_ID" >> "$GITHUB_ENV"
+
+          echo "--- apps this token can see ---"
+          doctl apps list --format ID,Spec.Name --no-header \
+            || echo "::warning::'apps list' failed: this token cannot read Apps at all."
+
+          echo "--- reading this specific app ---"
+          doctl apps get "$APP_ID" --format ID,Spec.Name --no-header \
+            || echo "::error::Could not READ this app. If 'apps list' above worked, the id is wrong; if it also failed, the token lacks Apps access."
+
       # --wait is the whole point: without it the command returns the moment
       # the deployment is queued, and a green check would mean "asked App
       # Platform to build", not "the new code is serving". With it, this job
       # fails when the deployment fails.
+      #
+      # APP_ID comes from GITHUB_ENV above, so it is the trimmed value.
       - name: Create deployment
         if: steps.creds.outputs.configured == 'true'
         run: doctl apps create-deployment "$APP_ID" --wait
-        env:
-          APP_ID: ${{ secrets.DIGITALOCEAN_APP_ID }}
 
       - name: Report
         if: steps.creds.outputs.configured == 'true'
