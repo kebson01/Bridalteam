@@ -3,6 +3,7 @@ import PageHero from "@/components/page-hero";
 import VendorDirectoryList, { type DirectoryVendor } from "@/components/vendor-directory-list";
 import { supabaseServer } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/site";
+import { effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 
 export const metadata = pageMetadata({
   path: "/vendors",
@@ -20,14 +21,17 @@ export default async function VendorsPage() {
   // the org's plan so Featured vendors can be surfaced first.
   const { data: vendors } = await supabase
     .from("vendor_profiles")
-    .select("org_id, business_name, category, description, city, region, logo_url, cover_url, organizations(plan)")
+    .select(
+      `org_id, business_name, category, description, city, region, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
+    )
     .eq("status", "published")
     .order("business_name");
 
   const list: DirectoryVendor[] = (vendors ?? [])
     .map((v) => ({
       ...v,
-      featured: (v.organizations as unknown as { plan?: string } | null)?.plan === "featured",
+      featured:
+        effectivePlan(v.organizations as unknown as PlanSource | null) === "featured",
     }))
     // Featured first, then alphabetical (already ordered by name).
     .sort((a, b) => Number(b.featured) - Number(a.featured)) as DirectoryVendor[];

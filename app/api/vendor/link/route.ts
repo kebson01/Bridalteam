@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { entitlements } from "@/lib/tiers";
+import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,12 +19,12 @@ export async function GET(req: Request) {
   const supabase = await supabaseServer();
   const { data: vendor } = await supabase
     .from("vendor_profiles")
-    .select("website, organizations(plan)")
+    .select(`website, organizations(${PLAN_COLUMNS})`)
     .eq("org_id", org)
     .eq("status", "published")
     .maybeSingle();
 
-  const plan = (vendor?.organizations as unknown as { plan?: string } | null)?.plan ?? "free";
+  const plan = effectivePlan(vendor?.organizations as unknown as PlanSource | null);
   const website = vendor?.website ?? "";
   if (!website || !entitlements(plan).canLinkSite) {
     return NextResponse.redirect(new URL(`/v/${org}`, req.url));

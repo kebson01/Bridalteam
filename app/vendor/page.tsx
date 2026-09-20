@@ -11,7 +11,7 @@ import { listVendorInquiries } from "@/app/vendor/inquiry-actions";
 import { getVendorStats } from "@/app/vendor/stats-actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { proConfigured, featuredConfigured } from "@/lib/stripe";
-import { entitlements } from "@/lib/tiers";
+import { entitlements, effectivePlan, PLAN_COLUMNS } from "@/lib/tiers";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
@@ -43,7 +43,7 @@ export default async function VendorDashboard({
   // /dashboard and never reach their vendor account, purely on row order.
   const { data: org } = await supabase
     .from("organizations")
-    .select("id, plan, subscription_status, cancel_at_period_end")
+    .select(`id, subscription_status, cancel_at_period_end, ${PLAN_COLUMNS}`)
     .eq("type", "vendor")
     .limit(1)
     .maybeSingle();
@@ -69,7 +69,7 @@ export default async function VendorDashboard({
     .eq("vendor_id", org.id)
     .order("created_at", { ascending: false });
 
-  const ent = entitlements(org.plan);
+  const ent = entitlements(effectivePlan(org));
   const inquiries = ent.canReceiveInquiries ? await listVendorInquiries(org.id) : [];
   const stats = ent.hasStats ? await getVendorStats(org.id) : null;
 
