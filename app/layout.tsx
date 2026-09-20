@@ -12,16 +12,32 @@ import { organizationSchema, websiteSchema } from "@/lib/structured-data";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 
 // Jost is a free geometric sans that stands in for the original Futura-PT.
+//
+// No `weight` on either, deliberately — but NOT for the reason it looks like.
+// Both families already shipped as variable fonts whether or not `weight` was
+// listed: builds with and without it emit byte-identical woff2 files (8 files,
+// 176,184 bytes, same content hashes, same 2 preloaded). Listing weights never
+// produced static cuts in this version of next/font; it only narrowed the
+// `font-weight` descriptor in the generated @font-face rules. So this change
+// saves nothing, and anyone reaching for it as a payload win should measure
+// first — that measurement is why the claim is stated here rather than
+// repeated.
+//
+// What it does fix is real. Raleway was declared `font-weight: 300 400 500
+// 600`, and the app uses `font-bold` (700) on eight non-heading elements —
+// only h1-h4 take the display font, so those are all Raleway. With no face
+// declared at 700 the browser fell back to 600 and SYNTHESISED the bold: a
+// smeared, algorithmically-fattened approximation of a cut that was sitting
+// unused inside the very file already being downloaded. Declaring the full
+// `100 900` range makes every weight the genuine one, for free.
 const jost = Jost({
   variable: "--font-jost",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
 const raleway = Raleway({
   variable: "--font-raleway",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
 });
 
 export const metadata: Metadata = {
