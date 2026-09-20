@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { track } from "@/lib/events";
+import { readDraft, saveDraft, type DraftMessage } from "@/lib/planner-draft";
 
 type Role = "user" | "assistant";
 interface Msg {
@@ -44,11 +46,22 @@ function escapeHtml(text: string): string {
  * `<img src=x onerror=…>` and it rendered as a live element, and because the
  * CSP carries `script-src 'unsafe-inline'` the handler would run.
  *
- * Scope was small — chat lives in useState, is never persisted and never
- * shared, so the only person who could trigger it is the one typing the
- * prompt — but "only self-XSS" is a property of today's storage choice, not of
- * this function. Persist the transcript or show it to a partner and it stops
- * being self-inflicted, silently.
+ * That comment used to say the transcript "is never persisted and never
+ * shared", and warned that persisting it would stop the problem being
+ * self-inflicted. It is now persisted — lib/planner-draft.ts keeps it in
+ * sessionStorage so it survives the walk to /auth/signup — so the warning has
+ * been cashed in and is worth restating precisely rather than deleting.
+ *
+ * It is still self-XSS, for two reasons that both have to hold. sessionStorage
+ * is per-tab and same-origin, so no second person ever reads that transcript;
+ * and escapeHtml() below neutralises the payload on the way to the DOM
+ * regardless of where the text came from. readDraft() additionally drops any
+ * entry that is not {role, content} with a string body, because storage is
+ * writable by the visitor's own extensions and this value gets rendered.
+ *
+ * What would break it: showing a transcript to a partner, restoring one across
+ * accounts, or rendering it anywhere that does not go through escapeHtml().
+ * Any of those turns this into a real XSS, silently.
  */
 export function renderMessage(text: string) {
   const lines = text.split("\n");
@@ -94,6 +107,25 @@ export default function PlannerChat({
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Restored in an effect rather than as lazy initial state: this component is
+  // still server-rendered, and reading sessionStorage during render would
+  // either throw there or hand the client different markup than the server
+  // produced. Same reason AttributionCapture does its work in an effect.
+  useEffect(() => {
+    const draft = readDraft();
+    if (draft?.length) setMessages([STARTER, ...(draft as Msg[])]);
+  }, []);
+
+  // Persist on every change. The conversation has to survive the navigation to
+  // /auth/signup -- losing it there means someone clicked the CTA, handed over
+  // an email, and came back to an empty box, which is the worst possible
+  // moment to throw their work away. The opener is dropped: it is canned, and
+  // restoring it twice would show it twice.
+  useEffect(() => {
+    const body = messages.filter((m) => m !== STARTER) as DraftMessage[];
+    if (body.length) saveDraft(body);
+  }, [messages]);
+
   // Answers given so far, not counting the canned opener.
   const answers = messages.filter((m) => m.role === "assistant").length - 1;
   // One gentle offer after the second answer — they have seen it work by then,
@@ -118,8 +150,16 @@ export default function PlannerChat({
         }),
       });
       const data = await res.json();
+      // Counted on a successful reply rather than on submit, so a dropped
+      // request is not recorded as someone engaging with the planner.
+      track("planner_message");
       setDemoNotice(Boolean(data.demo));
-      if (data.limited) setCta(data.cta === "upgrade" ? "upgrade" : "signup");
+      if (data.limited) {
+        // The conversion moment: they asked one more question and were stopped.
+        // Fires at most once a session -- the CTA replaces the input.
+        track("planner_limit");
+        setCta(data.cta === "upgrade" ? "upgrade" : "signup");
+      }
       if (typeof data.tier === "string") setTier(data.tier);
       setMessages((m) => [
         ...m,
