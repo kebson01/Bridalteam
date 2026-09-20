@@ -128,14 +128,38 @@ export default function PrivacyPage() {
         <Section n={6} title="Cookies and similar technologies">
           <P>
             We use cookies and local storage that are necessary to run the Service &mdash; for
-            example, to keep you signed in and to remember your session. <Lead>We do not run
-            third-party advertising or analytics trackers,</Lead> so there is no consent banner to
-            dismiss. You can control cookies through your browser; disabling essential cookies may
-            break core features such as signing in.
+            example, to keep you signed in and to remember your session. You can control cookies
+            through your browser; disabling essential cookies may break core features such as
+            signing in.
           </P>
           <P>
-            We do count how the site is used &mdash; how many people opened a particular guide,
-            how many tried the AI planner, how many went on to create an account. Those counts are
+            <Lead>We use Google Analytics, and only if you say yes.</Lead> The first time you
+            visit we ask, in a banner at the bottom of the page. Until you accept, nothing from
+            Google is loaded at all &mdash; no script is fetched, no cookie is set, and no request
+            reaches them. If you accept, Google Analytics sets its own cookies and receives
+            information about your visit, such as the pages you view, your approximate location
+            and your device, subject to{" "}
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-text hover:underline"
+            >
+              Google&rsquo;s privacy policy
+            </a>
+            . Declining changes nothing about how the Service works for you.
+          </P>
+          <P>
+            <Lead>Changed your mind?</Lead> Clearing this site&rsquo;s data in your browser
+            removes the stored choice and we will ask again on your next visit. Declining after
+            having accepted stops any further data being sent from your next page load; to remove
+            what Google already holds, use the controls in Google&rsquo;s own privacy policy
+            linked above.
+          </P>
+          <P>
+            Separately from Google, and whatever you choose above, we count how the site is used
+            &mdash; how many people opened a particular guide, how many tried the AI planner, how
+            many went on to create an account. Those counts are
             recorded on our own servers and contain <Lead>no identifier of any kind:</Lead> no IP
             address, no account id, no session id, no cookie and no fingerprint. Two of those
             records cannot be connected to each other, so they cannot describe you or reconstruct

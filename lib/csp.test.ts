@@ -83,20 +83,35 @@ describe("buildCsp", () => {
     expect(d.get("font-src")).toBe("'self' data:");
   });
 
+  it("allows Google Analytics in BOTH directives it needs", () => {
+    // Two hosts, two jobs: the tag is fetched from googletagmanager.com and
+    // then beacons to google-analytics.com. Naming only one is the quiet
+    // failure — the script loads fine and every measurement it sends is
+    // blocked, which reads as a site nobody visits rather than as a bug.
+    expect(d.get("script-src")).toContain("https://www.googletagmanager.com");
+    expect(d.get("connect-src")).toContain("https://www.google-analytics.com");
+    // GA4 resolves to a regional endpoint at runtime (region1.…), which cannot
+    // be enumerated ahead of time.
+    expect(d.get("connect-src")).toContain("https://*.google-analytics.com");
+  });
+
   it("names no external host beyond the ones we deliberately allow", () => {
-    // A walk of the app under the enforcing policy (2026-09-20) found exactly
-    // one external origin requested by the browser: Turnstile. This asserts the
-    // reverse direction — that nothing gets added to the policy without a
-    // deliberate edit here — so a new third party can't be waved through as a
-    // one-line policy change.
-    const hosts = new Set(
-      csp.match(/https?:\/\/[^\s;]+/g)?.map((u) => new URL(u).origin) ?? [],
-    );
+    // Asserts the reverse direction from every other test here — that nothing
+    // gets ADDED to the policy without a deliberate edit in this file — so a
+    // new third party cannot be waved through as a one-line policy change.
+    //
+    // Compared as raw strings rather than parsed origins, because the GA
+    // wildcards are not valid URLs and `new URL()` on them is not meaningful.
+    const hosts = new Set(csp.match(/https?:\/\/[^\s;]+/g) ?? []);
     expect([...hosts].sort()).toEqual([
+      "https://*.analytics.google.com",
+      "https://*.google-analytics.com",
       "https://billing.stripe.com",
       "https://challenges.cloudflare.com",
       "https://checkout.stripe.com",
       "https://player.vimeo.com",
+      "https://www.google-analytics.com",
+      "https://www.googletagmanager.com",
       "https://www.youtube.com",
       SUPABASE_URL,
     ].sort());

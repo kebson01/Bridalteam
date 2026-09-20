@@ -33,8 +33,8 @@ import { SUPABASE_URL } from "@/lib/supabase";
  * "force-dynamic"`), or you will reproduce the outage described above.
  *
  * connect-src allows the Supabase REST API and its realtime websocket (used by
- * community + notifications). Anthropic is called server-side only, so it isn't
- * listed. img-src allows any https host because vendor/venue/inspiration images
+ * community + notifications), plus the Google Analytics endpoints. Anthropic
+ * is called server-side only, so it isn't listed. img-src allows any https host because vendor/venue/inspiration images
  * can point anywhere (low risk for images) plus blob:/data: for avatar cropping.
  * style-src keeps 'unsafe-inline' — Next/Tailwind emit inline styles, and style
  * injection is far lower risk than script injection.
@@ -72,9 +72,23 @@ export function buildCsp(nonce: string, strict: boolean): string {
   // and its own XHR back home. Named in script-src, frame-src and connect-src
   // below. Remove all three together if the captcha is ever dropped.
   const turnstile = "https://challenges.cloudflare.com";
+  // Google Analytics, loaded only after consent (components/analytics.tsx).
+  // Two hosts, two directives: the tag is fetched from googletagmanager.com
+  // and then beacons to google-analytics.com. Naming only one silently halves
+  // it — the script loads and every measurement it sends is blocked, which
+  // looks exactly like a site nobody visits. The wildcards cover the regional
+  // endpoints GA4 picks at runtime (region1.google-analytics.com and
+  // friends), which are not knowable ahead of time.
+  const gaScript = "https://www.googletagmanager.com";
+  const gaConnect = [
+    gaScript,
+    "https://www.google-analytics.com",
+    "https://*.google-analytics.com",
+    "https://*.analytics.google.com",
+  ].join(" ");
   const scriptSrc = strict
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${turnstile}`
-    : `script-src 'self' 'unsafe-inline' ${turnstile}`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${turnstile} ${gaScript}`
+    : `script-src 'self' 'unsafe-inline' ${turnstile} ${gaScript}`;
   return [
     `default-src 'self'`,
     scriptSrc,
@@ -82,7 +96,7 @@ export function buildCsp(nonce: string, strict: boolean): string {
     `img-src 'self' blob: data: https:`,
     `font-src 'self' data:`,
     `media-src 'self' https:`,
-    `connect-src 'self' ${supabaseHttp} ${supabaseWss} ${turnstile}`,
+    `connect-src 'self' ${supabaseHttp} ${supabaseWss} ${turnstile} ${gaConnect}`,
     `worker-src 'self' blob:`,
     `manifest-src 'self'`,
     `frame-src 'self' https://www.youtube.com https://player.vimeo.com ${turnstile}`,
