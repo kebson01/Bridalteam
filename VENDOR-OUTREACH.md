@@ -121,7 +121,7 @@ specific and verifiable. The out is explicit, which is also your opt-out.
 Keep it under 100 words. Lead with something only a human who looked at their
 work could say.
 
-## 3. Claim-your-listing variant — use this once the claim flow ships
+## 3. Claim-your-listing variant — the best one
 
 Far better conversion than asking someone to fill in a form for a site they've
 never heard of, because the work is already done:
@@ -149,6 +149,45 @@ never heard of, because the work is already done:
 The "reply delete and it's gone" line is doing real work: it removes the fear
 that someone has published something about their business without asking. Mean
 it, and act on it the same day.
+
+### Creating the listing and its link
+
+Run this in the Supabase SQL editor (service role — the function is revoked
+from every other role, because it mints a credential):
+
+```sql
+select * from create_claimable_listing(
+  p_business_name := 'Marisol Reyes Photography',
+  p_category      := 'Photography',
+  p_city          := 'Fort Lauderdale',
+  p_region        := 'FL',
+  p_website       := 'https://example.com',
+  p_email         := 'hello@example.com',
+  p_description   := 'Documentary wedding photography across South Florida.',
+  p_contact_email := 'hello@example.com',
+  p_note          := 'Founding vendor outreach, Sept 2026',
+  p_comp_plan     := 'pro',
+  p_comp_months   := 12
+);
+```
+
+It returns `org_id` and `token`. The claim link is
+`https://bridalteam.com/claim/<token>`.
+
+**Copy the token immediately — it is shown once and never again.** Only its
+SHA-256 is stored, the same way admin session cookies are handled, so a
+database read cannot reconstruct a working link. If you lose one, delete the
+claim row and create a fresh listing.
+
+The listing is created as a **draft** with the comp already attached, so the
+vendor sees Pro the moment they claim it and nothing is public until they
+choose to publish. Claim links expire after 60 days.
+
+To honour a "please delete it" reply:
+
+```sql
+delete from organizations where id = '<org uuid>';  -- cascades to profile and claim
+```
 
 ## 4. Follow-up — once, after 5–7 days
 
