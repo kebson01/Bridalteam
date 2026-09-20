@@ -23,7 +23,7 @@ The findings below are real but narrower than the Laravel set.
 | M4 | 🟡 Low | No security headers (CSP / HSTS / X-Frame-Options / nosniff) | ✅ Enforcing in production |
 | M5 | 🟡 Low | Supabase leaked-password protection (HIBP) disabled | ✅ Enabled |
 | M6 | 🟡 Low | `vendor/track` inserts arbitrary `org` stats with service role, unauthenticated | ✅ Fixed |
-| M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ✅ Narrowed (25 → 17 anon) |
+| M7 | ⚪ Info | 56 SECURITY DEFINER advisor warnings — reviewed, all authorize internally | ✅ Narrowed (25 → 17 anon; 18 since the claim flow) |
 | M8 | 🟡 Low | `consume_ai_quota` is anon-callable, so the global AI ceiling can be tripped on purpose | ✅ Closed — both phases |
 | M9 | 🔴 High | **Live abuse**: unprotected auth endpoints used for fake signups, credential stuffing and password-reset mail | ✅ Closed — Turnstile live and verified |
 
@@ -147,6 +147,26 @@ Supabase advisor: HaveIBeenPwned check was off, so known-breached passwords were
 The `*_security_definer_function_executable` advisories are expected for this design — the functions are the RLS-authorization layer and each checks `auth.uid()` / ownership internally (spot-checked ~12, including every state-changing one).
 
 **✅ Narrowed** (2026-09-14). `EXECUTE` is revoked from `anon` on the seven functions only signed-in users ever call: `add_group_members_by_email`, `is_group_owner`, `join_public_group`, `list_group_members`, `list_suggested_groups`, `remove_group_member`, `set_wedding_website`. SQL and full reasoning in [`security/2026-09-revoke-anon-execute-on-signed-in-rpcs.sql`](security/2026-09-revoke-anon-execute-on-signed-in-rpcs.sql); applied to the live DB. The anon advisory count fell **25 → 18**.
+
+**Re-checked 2026-09-20**, after the claim-your-listing flow added three
+functions. Still **0 ERROR-level** advisories. The anon count went 17 → 18, the
+new entry being `get_claim_preview` — intentional: the outreach link is opened
+before anyone signs in, so the unguessable 32-byte token is what stands in for a
+session there. `claim_vendor_listing` is *not* in the anon list, and that took
+two attempts.
+
+The first migration said `revoke execute ... from anon` and had no effect,
+because EXECUTE on a new function is granted to `PUBLIC`, which `anon` inherits
+— the precise trap the closing note of this document warns about. It was caught
+by reading `has_function_privilege('anon', …)` back after applying rather than
+by reading the SQL, which is the lesson worth keeping: with grants, assert the
+end state, never the statement. Fixed in
+`supabase/migrations/20260920050000_claim_vendor_listing_revoke_public_execute.sql`.
+
+`vendor_claims` joins `admin_sessions`, `admin_login_attempts` and `ai_usage` as
+a fourth RLS-enabled-no-policy INFO lint. Same posture and same reason: no
+policies means no one reaches it but the service role and the SECURITY DEFINER
+functions.
 
 Two things that analysis turned up, both worth remembering before anyone extends this:
 

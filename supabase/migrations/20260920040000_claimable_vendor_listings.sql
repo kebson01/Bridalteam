@@ -18,6 +18,15 @@
 -- bytes, and only its SHA-256 is stored, the same way admin_sessions handles
 -- its cookie (security/2026-08-admin-hardening-tables.sql). A database read
 -- cannot reconstruct a working claim link.
+--
+-- pgcrypto's digest() and gen_random_bytes() are schema-qualified as
+-- extensions.* on purpose. Supabase installs pgcrypto into `extensions`, not
+-- `public`, and these functions pin search_path to 'public', 'pg_temp' -- as
+-- every SECURITY DEFINER function here does, because a wide search_path on a
+-- definer function is how you get one hijacked. Unqualified, they fail with
+-- "function digest(text, unknown) does not exist" at creation. Do not "fix"
+-- this by widening the search_path. (gen_random_uuid() needs no prefix: it is
+-- core Postgres since 13, not pgcrypto.)
 
 create table if not exists public.vendor_claims (
   id uuid primary key default gen_random_uuid(),
@@ -76,7 +85,7 @@ begin
 
   -- url-safe: the token goes in a link, and base64 '+' and '/' do not survive
   -- being pasted into an email client intact.
-  v_token := replace(replace(encode(gen_random_bytes(32), 'base64'), '+', '-'), '/', '_');
+  v_token := replace(replace(encode(extensions.gen_random_bytes(32), 'base64'), '+', '-'), '/', '_');
   v_token := replace(v_token, '=', '');
 
   insert into public.organizations (name, type, comp_plan, comp_expires_at, comp_note)
@@ -108,7 +117,7 @@ begin
   );
 
   insert into public.vendor_claims (org_id, token_hash, contact_email, note)
-  values (v_org, encode(digest(v_token, 'sha256'), 'hex'),
+  values (v_org, encode(extensions.digest(v_token, 'sha256'), 'hex'),
           nullif(btrim(coalesce(p_contact_email, p_email, '')), ''), p_note);
 
   return query select v_org, v_token;
@@ -151,7 +160,7 @@ as $$
          c.expires_at <= now() as expired
     from public.vendor_claims c
     join public.vendor_profiles p on p.org_id = c.org_id
-   where c.token_hash = encode(digest(coalesce(p_token, ''), 'sha256'), 'hex')
+   where c.token_hash = encode(extensions.digest(coalesce(p_token, ''), 'sha256'), 'hex')
    limit 1;
 $$;
 
@@ -182,7 +191,7 @@ begin
   -- both pass the "not yet claimed" check and race to insert org_members.
   select * into v_claim
     from public.vendor_claims
-   where token_hash = encode(digest(coalesce(p_token, ''), 'sha256'), 'hex')
+   where token_hash = encode(extensions.digest(coalesce(p_token, ''), 'sha256'), 'hex')
    for update;
 
   if v_claim.id is null then
@@ -219,8 +228,14 @@ begin
 end;
 $$;
 
+-- Revoke from PUBLIC, not from `anon`. EXECUTE on a new function is granted to
+-- PUBLIC, which anon inherits, so naming the role removes a grant that was
+-- never there -- the exact trap the closing note of SECURITY-AUDIT-MAIN.md
+-- describes. The first version of this file got it wrong and left
+-- claim_vendor_listing anon-reachable; caught by checking
+-- has_function_privilege() after applying rather than by reading the SQL.
+revoke execute on function public.claim_vendor_listing(text) from public;
 grant execute on function public.claim_vendor_listing(text) to authenticated;
-revoke execute on function public.claim_vendor_listing(text) from anon;
 
 comment on table public.vendor_claims is
   'Outreach claim links for pre-created vendor listings. Only the SHA-256 of each token is stored; the raw token is returned once by create_claimable_listing(). See VENDOR-OUTREACH.md.';
