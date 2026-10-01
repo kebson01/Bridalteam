@@ -51,20 +51,38 @@ export default function Hero() {
           </Link>
         </div>
 
-        <dl className="animate-fade-up mt-16 grid w-full max-w-lg grid-cols-3 gap-4 text-white">
+        {/*
+          Was a stat bar: "100%" free to start, "1 place", "24/7". Visitors read
+          the slot under a hero as proof — couples planning, weddings completed
+          — so putting non-numbers in a number's shape reads as a site with no
+          numbers to show, which is the opposite of what it was there to do.
+
+          These three steps can be told truthfully on day one and stay true at
+          ten thousand couples, so nothing here has to be revisited when the
+          real numbers arrive. Swap in the counts then, with the honest caveat
+          that `page_events` records views and not visitors (see the migration
+          in supabase/migrations/20260920060000_page_events.sql).
+        */}
+        <ol className="animate-fade-up mt-16 grid w-full max-w-2xl grid-cols-1 gap-6 text-white sm:grid-cols-3 sm:gap-4">
           {[
-            ["100%", "Free to start"],
-            ["1 place", "For your whole team"],
-            ["24/7", "AI planning help"],
-          ].map(([stat, label]) => (
-            <div key={label} className="text-center">
-              <dt className="text-2xl font-semibold sm:text-3xl">{stat}</dt>
-              <dd className="mt-1 text-xs uppercase tracking-widest text-white/70">
-                {label}
-              </dd>
-            </div>
+            ["Ask", "Tell the planner your date, city and guest count."],
+            ["Organize", "Get a timeline, budget and checklist you can edit."],
+            ["Share", "Invite your partner, your party and your parents."],
+          ].map(([step, label], i) => (
+            <li key={step} className="text-center">
+              <span
+                aria-hidden
+                className="mx-auto flex h-8 w-8 items-center justify-center rounded-full border border-white/40 bg-white/10 text-sm font-semibold backdrop-blur"
+              >
+                {i + 1}
+              </span>
+              <span className="mt-3 block text-sm font-semibold uppercase tracking-widest">
+                {step}
+              </span>
+              <p className="mt-1 text-sm font-light text-white/75">{label}</p>
+            </li>
           ))}
-        </dl>
+        </ol>
       </div>
     </section>
   );

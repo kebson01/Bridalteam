@@ -5,20 +5,35 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { SHOW_PLANNER_APP } from "@/lib/flags";
+import {
+  SHOW_PLANNER_APP,
+  SHOW_COMMUNITY,
+  SHOW_VENDOR_DIRECTORY,
+} from "@/lib/flags";
 import { SIGNUP_URL, LOGIN_URL } from "@/lib/config";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import NotificationsBell from "@/components/notifications-bell";
 
-// Primary nav — identical whether or not you're signed in, so the header
-// doesn't reshuffle on login. Every destination is a public page (Community is
-// now browsable signed-out). Auth-specific actions — Dashboard, account,
-// log out — live in the right-hand cluster instead.
+/**
+ * Primary navigation. Identical whether or not you're signed in, so the header
+ * doesn't reshuffle on login; auth-specific actions — Dashboard, account, log
+ * out — live in the right-hand cluster instead.
+ *
+ * Community and Find Vendors are gated, and the gate is the point: both pages
+ * render an honest empty state today, so a tab for either one spends a
+ * visitor's first click telling them nobody else is here. The footer already
+ * hid Find Vendors behind this flag while the header advertised it, which is
+ * how the two ended up disagreeing about whether the directory was ready —
+ * both now read the same flags, so they cannot drift apart again.
+ *
+ * Neither page is removed or blocked. Someone who follows a direct link, or a
+ * vendor checking their own listing, still gets there.
+ */
 const NAV = [
-  { label: "Community", href: "/community" },
+  ...(SHOW_COMMUNITY ? [{ label: "Community", href: "/community" }] : []),
   { label: "AI Planner", href: "/planner" },
   { label: "Inspiration", href: "/inspiration" },
-  { label: "Find Vendors", href: "/vendors" },
+  ...(SHOW_VENDOR_DIRECTORY ? [{ label: "Find Vendors", href: "/vendors" }] : []),
   { label: "Guides", href: "/guides" },
   { label: "Pricing", href: "/pricing" },
 ];

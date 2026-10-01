@@ -1,9 +1,13 @@
 import Link from "next/link";
 import PlannerChat from "./planner-chat";
+import { LAUNCH_CITY } from "@/lib/site";
 
+// The one example city a visitor sees on the homepage. It reads as a signal of
+// who the site is for, so it tracks the launch market rather than being
+// hard-coded — see LAUNCH_CITY in lib/site.ts.
 const QUICK_PROMPTS = [
   "Build me a 12-month planning timeline",
-  "Estimate a budget for 120 guests in Austin",
+  `Estimate a budget for 120 guests in ${LAUNCH_CITY}`,
   "What vendors should I book first?",
   "Ideas for a rustic autumn vibe",
 ];
@@ -25,7 +29,7 @@ export default function AIPlanner() {
           <p className="mt-4 max-w-md text-white/70">
             This is the heart of the new Bridal Team. Ask anything about your
             wedding and get real, tailored guidance — timelines, budgets,
-            checklists and vendor picks — in seconds.
+            checklists and what to book first — in seconds.
           </p>
           <Link
             href="/planner"

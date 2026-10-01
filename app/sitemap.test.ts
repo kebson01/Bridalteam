@@ -48,8 +48,47 @@ describe("sitemap", () => {
     select.mockResolvedValue({ data: [{ org_id: "aaa", updated_at: null }], error: null });
     const found = await urls();
     expect(found).toContain("https://bridalteam.com/");
-    expect(found).toContain("https://bridalteam.com/vendors");
+    expect(found).toContain("https://bridalteam.com/guides");
+    // /for-vendors is the recruitment pitch, not the directory. It has real
+    // content with zero vendors signed up, so it is never gated.
     expect(found).toContain("https://bridalteam.com/for-vendors");
+  });
+
+  /**
+   * The two gated routes.
+   *
+   * Hiding a tab in the header while still handing the same empty page to
+   * Google does half the job and looks like the whole job, which is precisely
+   * the kind of thing that survives review. These assert both directions, so
+   * the gate cannot quietly stop working and cannot outlive the content it is
+   * there to hide.
+   */
+  it("omits /vendors and /community while their flags are off", async () => {
+    select.mockResolvedValue({ data: [], error: null });
+    const found = await urls();
+    expect(found).not.toContain("https://bridalteam.com/vendors");
+    expect(found).not.toContain("https://bridalteam.com/community");
+  });
+
+  it("includes them once their flags are on", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SHOW_VENDOR_DIRECTORY", "true");
+    vi.stubEnv("NEXT_PUBLIC_SHOW_COMMUNITY", "true");
+    select.mockResolvedValue({ data: [], error: null });
+    const found = await urls();
+    expect(found).toContain("https://bridalteam.com/vendors");
+    expect(found).toContain("https://bridalteam.com/community");
+    vi.unstubAllEnvs();
+  });
+
+  it("keeps published vendor listings even with the directory tab hidden", async () => {
+    // A published listing is real content and the one thing a free listing
+    // actually buys a vendor, so it goes to Google whatever the index page is
+    // doing. Gating these too would quietly renege on the outreach pitch in
+    // VENDOR-OUTREACH.md.
+    select.mockResolvedValue({ data: [{ org_id: "aaa", updated_at: null }], error: null });
+    const found = await urls();
+    expect(found).not.toContain("https://bridalteam.com/vendors");
+    expect(found).toContain("https://bridalteam.com/v/aaa");
   });
 
   it("degrades to the static routes when Supabase returns an error", async () => {

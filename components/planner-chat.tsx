@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { track } from "@/lib/events";
 import { readDraft, saveDraft, type DraftMessage } from "@/lib/planner-draft";
+import { SIGNUP_URL, LOGIN_URL } from "@/lib/config";
 
 type Role = "user" | "assistant";
 interface Msg {
@@ -252,7 +253,7 @@ export default function PlannerChat({
           <div className="mt-3 flex items-start gap-3 rounded-2xl border border-brand/30 bg-brand-wash/60 px-4 py-3">
             <p className="flex-1 text-sm leading-relaxed text-ink-soft">
               Like where this is going?{" "}
-              <Link href="/auth/signup" className="font-semibold text-brand-text underline">
+              <Link href={SIGNUP_URL} className="font-semibold text-brand-text underline">
                 Create a free account
               </Link>{" "}
               and we&rsquo;ll keep this conversation, plus your checklist, budget and
@@ -292,7 +293,7 @@ export default function PlannerChat({
                 : "Upgrade for more AI help, or come back a little later."}
             </p>
             <Link
-              href={cta === "signup" ? "/auth/signup" : "/pricing"}
+              href={cta === "signup" ? SIGNUP_URL : "/pricing"}
               className="mt-3 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
             >
               {cta === "signup" ? "Create my free account" : "See plans"}
@@ -300,7 +301,7 @@ export default function PlannerChat({
             {cta === "signup" && (
               <p className="mt-2 text-xs text-ink-soft/70">
                 Free, no card needed.{" "}
-                <Link href="/auth/login" className="underline">
+                <Link href={LOGIN_URL} className="underline">
                   Already have an account?
                 </Link>
               </p>

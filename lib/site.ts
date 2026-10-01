@@ -32,6 +32,28 @@ export const SITE_URL = resolveSiteUrl();
 
 export const SITE_NAME = "Bridal Team";
 
+/**
+ * The launch market.
+ *
+ * Every example city in the product used to be "Austin" — in the homepage
+ * planner prompts, the onboarding placeholder and the vendor search hint —
+ * which was fine while the plan was national and actively misleading once it
+ * was not. A directory with twenty vendors in one city is useful to a couple
+ * there; the same twenty scattered nationally are useful to nobody, and the
+ * examples are the first place a visitor looks to work out which they are.
+ *
+ * Both forms exist because the copy needs both: a metro for "couples in
+ * <metro>", a city for a concrete example someone can picture. They live here
+ * so moving to the next market is one edit rather than a grep, which is the
+ * mistake this is cleaning up.
+ *
+ * See VENDOR-OUTREACH.md ("work one metro area at a time") — South Florida is
+ * the first market, matching the Florida footprint in the legal pages.
+ */
+export const LAUNCH_METRO = "South Florida";
+export const LAUNCH_CITY = "Fort Lauderdale";
+export const LAUNCH_REGION = "FL";
+
 export const SITE_TAGLINE =
   "Fun, simple wedding planning. Organize details. Find ideas. Collaborate with your team.";
 
