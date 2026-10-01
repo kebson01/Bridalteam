@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { LAUNCH_CITY } from "@/lib/site";
 
 export interface DirectoryVendor {
   org_id: string;
@@ -42,7 +43,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search vendors, e.g. 'photographer in Austin'"
+          placeholder={`Search vendors, e.g. 'photographer in ${LAUNCH_CITY}'`}
           aria-label="Search vendors"
           className="flex-1 rounded-full border border-stone-2 px-5 py-3 text-sm text-ink outline-none focus:border-brand"
         />

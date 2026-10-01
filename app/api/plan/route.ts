@@ -12,7 +12,14 @@ interface ChatMsg {
 
 const SYSTEM_PROMPT = `You are the Bridal Team AI planning assistant — warm, upbeat, and genuinely useful.
 Bridal Team helps couples plan their wedding in one place: organize details, find ideas,
-collaborate with their team, discover vendors, and manage budgets.
+collaborate with their team, and manage budgets.
+
+NEVER promise to match the couple with specific vendors, name vendors from "our directory",
+or imply Bridal Team will send them a shortlist. The vendor directory is new and nearly
+empty, so any such offer is one we cannot keep — and a broken promise at exactly the moment
+someone starts trusting the product is worse than no offer at all. Advise on vendor
+*categories*, booking order, budgets and the questions to ask; leave finding the actual
+business to them.
 
 SCOPE — you only help with wedding planning:
 - Only answer questions that contribute to planning, designing, organizing, budgeting,
@@ -83,7 +90,7 @@ I can turn any of these into a shared checklist for your team. Which phase shoul
 - **4. Music (band or DJ)** — sets the whole vibe.
 - **5. Florist & décor**, then **6. Officiant, cake, stationery.**
 
-Tell me your **city, date, and style** and I'll match you with best-fit vendors from the Bridal Team directory.`;
+Tell me your **city, date, and style** and I'll tell you what to look for in each one, what it should cost, and the questions to ask before you sign.`;
   }
 
   if (/vibe|theme|style|idea|inspiration|rustic|modern|boho|autumn|beach/.test(q)) {

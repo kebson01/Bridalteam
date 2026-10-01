@@ -3,6 +3,7 @@ import { SITE_URL } from "@/lib/site";
 import { POSTS } from "@/lib/blog";
 import { GUIDES } from "@/lib/guides";
 import { supabasePublic } from "@/lib/supabase";
+import { SHOW_COMMUNITY, SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 
 /**
  * Public marketing pages, plus every published vendor listing.
@@ -12,8 +13,17 @@ import { supabasePublic } from "@/lib/supabase";
  *   /signup, /auth/*   — transactional; /signup redirects to /auth/signup
  *   /dashboard, /w/*   — behind auth
  *
- * /vendors and /community are both public and linked from the primary nav, so
- * they belong here regardless of how much content they hold today.
+ * /vendors and /community are included only when their flags are on. Both
+ * pages stay reachable either way — this is not a block, and robots.ts still
+ * allows them — but submitting an empty directory and an empty feed to Google
+ * asks it to index, and then to rank us for, two pages whose entire content is
+ * "nobody is here yet". Hiding the tabs while still handing the same pages to
+ * a crawler would be doing half the job.
+ *
+ * The flags are the right switch rather than a row count because they already
+ * mean "there is content worth sending someone to": SHOW_VENDOR_DIRECTORY
+ * gates the homepage teaser and the footer link, SHOW_COMMUNITY the nav tab.
+ * Flip either one and its page joins the sitemap on the next build.
  */
 
 /**
@@ -67,10 +77,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/", priority: 1 },
     { path: "/planner", priority: 0.9 },
     { path: "/guides", priority: 0.8 },
-    { path: "/vendors", priority: 0.8 },
+    ...(SHOW_VENDOR_DIRECTORY ? [{ path: "/vendors", priority: 0.8 }] : []),
     { path: "/inspiration", priority: 0.7 },
     { path: "/pricing", priority: 0.7 },
-    { path: "/community", priority: 0.6 },
+    ...(SHOW_COMMUNITY ? [{ path: "/community", priority: 0.6 }] : []),
     { path: "/about", priority: 0.6 },
     { path: "/blog", priority: 0.6 },
     { path: "/for-vendors", priority: 0.6 },

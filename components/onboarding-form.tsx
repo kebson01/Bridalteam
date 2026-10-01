@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { createWorkspace, type OnboardingState } from "@/app/onboarding/actions";
+import { LAUNCH_CITY, LAUNCH_REGION } from "@/lib/site";
 
 const INPUT =
   "mt-1.5 w-full rounded-lg border border-stone-2 px-4 py-3 text-sm text-ink outline-none focus:border-brand disabled:opacity-60";
@@ -137,7 +138,12 @@ export default function OnboardingForm({
               <div className="mb-4 grid gap-4 sm:grid-cols-2">
                 <label className="block">
                   <span className="text-sm font-medium text-ink-soft">City</span>
-                  <input name="city" disabled={pending} placeholder="Austin, TX" className={INPUT} />
+                  <input
+                    name="city"
+                    disabled={pending}
+                    placeholder={`${LAUNCH_CITY}, ${LAUNCH_REGION}`}
+                    className={INPUT}
+                  />
                 </label>
                 <label className="block">
                   <span className="text-sm font-medium text-ink-soft">Guests (roughly)</span>

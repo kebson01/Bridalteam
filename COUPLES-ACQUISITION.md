@@ -27,6 +27,40 @@ If `page_view` is near zero, this document's Part 1 is the work. If `page_view`
 is healthy but `planner_message` is not, the landing page is the problem. If
 people reach `planner_limit` and never `signup_success`, the wall is.
 
+## What the site stops advertising until it is true
+
+Two pages render an honest empty state: `/community` ("No posts yet — be the
+first to share something") and `/vendors` ("Vendors are joining now"). Honest is
+not the same as harmless. As tabs in the header they spent a visitor's first
+click proving that nobody else is here, which is the clearest "leave now" signal
+a new marketplace can send — and it was being sent before they had seen the one
+thing that does work, the planner.
+
+So both are now gated, and both gates are the same shape:
+
+| Flag | Hides | Flip it when |
+|---|---|---|
+| `NEXT_PUBLIC_SHOW_COMMUNITY` | Community nav tab, sitemap entry | **~30 real posts** in the public feed |
+| `NEXT_PUBLIC_SHOW_VENDOR_DIRECTORY` | Find Vendors nav tab, homepage teaser, footer link, sitemap entry | **5+ published vendors in every core category** |
+
+Neither page is removed or blocked. `robots.ts` still allows both, direct links
+still work, and a vendor can still check their own listing. What stops is the
+advertisement — the tab and the sitemap entry. Leaving the sitemap entry while
+hiding the tab would be doing half the job: it asks Google to index, and then
+rank the site for, a page whose entire content is "nobody is here yet".
+
+Both are `NEXT_PUBLIC_*`, so they are read at build time and flipping one needs
+a redeploy, not just an env change. Check the numbers before you flip:
+
+```sql
+-- Community: real posts in the public feed (0 as of 2026-10-01)
+select count(*) from posts where visibility = 'public';
+
+-- Vendors: published listings per category
+select category, count(*) from vendor_profiles
+ where status = 'published' group by category order by 2 desc;
+```
+
 ## The thing you are actually selling
 
 Not the directory — it has no vendors yet, and couples can tell. Not the

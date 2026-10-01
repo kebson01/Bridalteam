@@ -32,3 +32,23 @@ export const SHOW_VENDOR_DIRECTORY =
  */
 export const SHOW_PLANNER_APP =
   process.env.NEXT_PUBLIC_SHOW_PLANNER_APP === "true";
+
+/**
+ * SHOW_COMMUNITY — surfaces the *entry points* to /community: the primary nav
+ * link and the sitemap entry.
+ *
+ * Same reasoning as SHOW_VENDOR_DIRECTORY, and the same shape deliberately.
+ * /community is reachable and renders an honest empty state ("No posts yet —
+ * be the first to share something"), which is fine for someone who arrives on
+ * purpose and actively harmful as a tab in the header: a visitor who clicks it
+ * learns, in one page load, that nobody else is here. That is the single
+ * clearest "leave now" signal a new marketplace can send, and it was being
+ * sent to every visitor before they had seen anything else.
+ *
+ * So the page stays; the advertisement stops. Flip this to true once the feed
+ * has enough real posts to be worth a click — roughly 30 is the number in
+ * COUPLES-ACQUISITION.md — not when the feature merely works.
+ *
+ * Read at build time (NEXT_PUBLIC_*), so flipping it needs a redeploy.
+ */
+export const SHOW_COMMUNITY = process.env.NEXT_PUBLIC_SHOW_COMMUNITY === "true";

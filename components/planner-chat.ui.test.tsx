@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import PlannerChat from "./planner-chat";
+import { SIGNUP_URL } from "@/lib/config";
 
 /**
  * What this guards is a conversion path, not a crash.
@@ -38,7 +39,7 @@ describe("PlannerChat conversion path", () => {
     await ask(user, "budget for 150 guests?");
 
     const link = await screen.findByRole("link", { name: /create my free account/i });
-    expect(link).toHaveAttribute("href", "/auth/signup");
+    expect(link).toHaveAttribute("href", SIGNUP_URL);
     // And the box that can only produce the same refusal is gone.
     expect(screen.queryByPlaceholderText(/ask about your wedding/i)).toBeNull();
   });
@@ -73,7 +74,7 @@ describe("PlannerChat conversion path", () => {
     await waitFor(() =>
       expect(screen.getByRole("link", { name: /create a free account/i })).toHaveAttribute(
         "href",
-        "/auth/signup",
+        SIGNUP_URL,
       ),
     );
   });
@@ -114,5 +115,51 @@ describe("PlannerChat conversion path", () => {
 
     expect(await screen.findByText(/a real answer/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/ask about your wedding/i)).toBeInTheDocument();
+  });
+});
+
+/**
+ * The 404 this closes.
+ *
+ * /planner carries no feature flag — it is the public demo and the whole
+ * top-of-funnel pitch — but /auth/signup and /auth/login both notFound() when
+ * SHOW_PLANNER_APP is off (app/auth/signup/page.tsx). This component
+ * hard-coded both, so in waitlist mode the three highest-intent CTAs in the
+ * product (the nudge, the wall, "already have an account?") led to a 404. Not
+ * a crash, not a failing test — just a dead end at the exact moment someone
+ * decided the product was worth something.
+ *
+ * Both directions are asserted because only the pair pins the behaviour: the
+ * "on" case alone passes against a hard-coded literal, which is how this got
+ * through the first time.
+ */
+describe("PlannerChat signup target tracks whether accounts are open", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  async function wallHref(plannerAppOn: boolean): Promise<string | null> {
+    vi.stubEnv("NEXT_PUBLIC_SHOW_PLANNER_APP", plannerAppOn ? "true" : "");
+    // Re-imported so the module-scope flag read picks up the stub.
+    const { default: Chat } = await import("./planner-chat");
+    vi.stubGlobal("fetch", mockReply({ reply: "Demo over.", limited: true, cta: "signup" }));
+    const user = userEvent.setup();
+    render(<Chat />);
+    await ask(user, "budget for 150 guests?");
+    const link = await screen.findByRole("link", { name: /create my free account/i });
+    return link.getAttribute("href");
+  }
+
+  it("sends people to the waitlist while accounts are closed", async () => {
+    expect(await wallHref(false)).toBe("/signup");
+  });
+
+  it("sends people to real signup once accounts are open", async () => {
+    expect(await wallHref(true)).toBe("/auth/signup");
   });
 });

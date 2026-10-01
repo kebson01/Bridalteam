@@ -30,7 +30,7 @@ export default function PlannerPage() {
       <PageHero
         eyebrow="Your AI planning team"
         title="AI Wedding Planner"
-        subtitle="Ask anything about your big day and get real, tailored guidance in seconds — timelines, budgets, checklists and vendor picks."
+        subtitle="Ask anything about your big day and get real, tailored guidance in seconds — timelines, budgets, checklists and what to book first."
       />
 
       <section className="mx-auto max-w-4xl px-5 py-16">
