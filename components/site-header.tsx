@@ -40,6 +40,28 @@ const NAV = [
 
 type Viewer = { id: string; name: string; firstName: string; avatar: string; email: string };
 
+/**
+ * Which homes this viewer actually has.
+ *
+ * Both pages already handle the dual-role case — someone planning their own
+ * wedding while listing their business. /dashboard asks for a couple or
+ * planner_company org specifically and /vendor asks for a vendor org, each
+ * with a comment explaining that reading "whichever org_members row comes
+ * back first" sent such a user to the wrong home on row order.
+ *
+ * The navigation never got the same treatment. It offered one link,
+ * "Dashboard", and /dashboard redirects a vendor-ONLY user on to /vendor — so
+ * single-role vendors reached their listing by accident of that redirect,
+ * and a dual-role vendor had no link to it at all. Their only route was a
+ * button on /account that said "Manage billing".
+ *
+ * `null` means not determined yet (or the lookup failed). Everything below
+ * treats that as "just show Dashboard", which is exactly today's behaviour —
+ * so a failed lookup degrades to the status quo rather than hiding a link
+ * someone needs.
+ */
+type Roles = { vendor: boolean; couple: boolean } | null;
+
 function toViewer(user: {
   id?: string;
   email?: string;
@@ -61,6 +83,7 @@ function toViewer(user: {
 function useViewer() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [viewer, setViewer] = useState<Viewer | null>(null);
+  const [roles, setRoles] = useState<Roles>(null);
 
   useEffect(() => {
     if (!SHOW_PLANNER_APP) {
@@ -68,18 +91,62 @@ function useViewer() {
       return;
     }
     const supabase = supabaseBrowser();
+
+    // RLS ("Members read their org") already scopes this to orgs the caller
+    // belongs to, so no filter is needed and none should be added — a client
+    // filter here would be decoration, not access control.
+    async function loadRoles() {
+      try {
+        const { data, error } = await supabase.from("organizations").select("type");
+        if (error) throw new Error(`${error.code}: ${error.message}`);
+        const types = (data ?? []).map((o: { type: string | null }) => o.type);
+        setRoles({
+          vendor: types.includes("vendor"),
+          couple: types.some((t) => t === "couple" || t === "planner_company"),
+        });
+      } catch (err) {
+        // Leave roles null: the header falls back to the single Dashboard
+        // link, which is what it has always shown.
+        console.error("header: could not resolve viewer roles:", err);
+        setRoles(null);
+      }
+    }
+
     supabase.auth.getUser().then(({ data }) => {
       setSignedIn(!!data.user);
       setViewer(toViewer(data.user));
+      if (data.user) void loadRoles();
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setSignedIn(!!session);
       setViewer(toViewer(session?.user ?? null));
+      // Roles belong to the account, so they have to be re-resolved on a
+      // switch and cleared on sign-out — otherwise the previous user's
+      // "Vendor account" link survives into the next session.
+      if (session) void loadRoles();
+      else setRoles(null);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  return { signedIn, viewer };
+  return { signedIn, viewer, roles };
+}
+
+/**
+ * The signed-in destinations to offer, in order.
+ *
+ * A vendor-only viewer gets "Vendor account" rather than "Dashboard": the
+ * destination is the same either way thanks to the /dashboard redirect, but
+ * the label stops describing a page they never see. A dual-role viewer gets
+ * both, which is the whole point of this function.
+ */
+export function homeLinks(roles: Roles): Array<{ label: string; href: string }> {
+  const DASHBOARD = { label: "Dashboard", href: "/dashboard" };
+  const VENDOR = { label: "Vendor account", href: "/vendor" };
+  if (!roles) return [DASHBOARD];
+  if (roles.vendor && roles.couple) return [DASHBOARD, VENDOR];
+  if (roles.vendor) return [VENDOR];
+  return [DASHBOARD];
 }
 
 /** Initials fallback for the avatar chip. */
@@ -93,7 +160,8 @@ function initialsOf(v: Viewer): string {
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const { signedIn, viewer } = useViewer();
+  const { signedIn, viewer, roles } = useViewer();
+  const homes = homeLinks(roles);
 
   async function logout() {
     await supabaseBrowser().auth.signOut();
@@ -132,12 +200,15 @@ export default function SiteHeader() {
         <div className="hidden items-center gap-4 md:flex">
           {signedIn ? (
             <>
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-text"
-              >
-                Dashboard
-              </Link>
+              {homes.map((home) => (
+                <Link
+                  key={home.href}
+                  href={home.href}
+                  className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-text"
+                >
+                  {home.label}
+                </Link>
+              ))}
               {viewer && <NotificationsBell userId={viewer.id} />}
               <Link
                 href="/account"
@@ -220,15 +291,17 @@ export default function SiteHeader() {
             ))}
             {signedIn ? (
               <>
-                <li>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
-                  >
-                    Dashboard
-                  </Link>
-                </li>
+                {homes.map((home) => (
+                  <li key={home.href}>
+                    <Link
+                      href={home.href}
+                      onClick={() => setOpen(false)}
+                      className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft hover:bg-stone-4"
+                    >
+                      {home.label}
+                    </Link>
+                  </li>
+                ))}
                 <li>
                   <Link
                     href="/account"

@@ -99,8 +99,16 @@ export default async function AccountPage() {
         </div>
 
         {vendorOrg && (
+          /*
+            Headed "Billing" with a "Manage billing" button, this was the only
+            route to /vendor for a viewer who is both a couple and a vendor —
+            so the page where they edit their business details, photos and
+            publish state was signposted as a payments screen. The plan line
+            stays, since it is useful here; the heading and the button now say
+            where the link actually goes.
+          */
           <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
-            <h2 className="text-lg font-medium text-ink">Billing</h2>
+            <h2 className="text-lg font-medium text-ink">Your business listing</h2>
             <p className="mt-1 max-w-md text-sm text-ink-soft/70">
               {vendorOrg.plan === "free" ? (
                 <>
@@ -122,7 +130,7 @@ export default async function AccountPage() {
               href="/vendor"
               className="mt-4 inline-flex rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
             >
-              {vendorOrg.plan === "free" ? "See plans" : "Manage billing"}
+              Manage your listing
             </Link>
           </div>
         )}
