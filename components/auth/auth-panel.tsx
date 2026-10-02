@@ -7,6 +7,7 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import Captcha from "@/components/auth/captcha";
 import { readAttribution } from "@/lib/attribution";
 import { track } from "@/lib/events";
+import { savePendingNext } from "@/lib/pending-next";
 import { CAPTCHA_REQUIRED } from "@/lib/captcha";
 import { authErrorMessage } from "@/lib/auth-errors";
 
@@ -92,6 +93,13 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
       // metadata is writable by the account holder, so it is fine for judging
       // a campaign and wrong for anything that needs to be trustworthy.
       const attribution = readAttribution();
+
+      // Kept in the browser as well as in the URL. `next` reaches the auth
+      // routes through the confirmation email, and when that template does not
+      // carry it they default to /onboarding — which sent the first real
+      // vendor to the onboarding form instead of back to their claim link.
+      // See lib/pending-next.ts.
+      savePendingNext(next);
 
       const { data, error } = await supabase.auth.signUp({
         email,
