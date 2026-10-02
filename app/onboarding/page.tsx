@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import OnboardingForm from "@/components/onboarding-form";
+import ResumePendingNext from "@/components/resume-pending-next";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
@@ -34,6 +35,12 @@ export default async function OnboardingPage({
 
   return (
     <>
+      {/*
+        Before the form, because someone who arrived here by the auth routes
+        losing `next` is meant to leave again rather than fill this in. It
+        renders nothing unless a destination was stored.
+      */}
+      <ResumePendingNext />
       <PageHero
         eyebrow="Almost there"
         title="Tell us about your day"

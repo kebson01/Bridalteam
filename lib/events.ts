@@ -30,14 +30,51 @@ export function isEventName(value: unknown): value is EventName {
 export const MAX_FIELD = 120;
 
 /**
+ * Route prefixes whose next path segment IS a credential.
+ *
+ * Each of these is reached only by holding a secret that lives in the URL
+ * itself: a vendor claim link, a bridal-party invite, a guest's personal RSVP
+ * link. Their whole security model is that the secret is unguessable and that
+ * the database stores only a hash of it — `vendor_claims` keeps a SHA-256 and
+ * nothing else precisely so that a database read cannot reconstruct a working
+ * link.
+ *
+ * Recording the full path defeated that. A real claim token was found sitting
+ * in `page_events.path` in plaintext:
+ *
+ *     /claim/byBpTTbetDHkjbaX-84zW9pWQwaH3N5gXK05hNIv52A
+ *
+ * Nobody could read it without service-role access — the table has RLS on and
+ * neither `anon` nor `authenticated` is granted SELECT — so this was never a
+ * public leak. It was still a live credential copied into an analytics table
+ * that exists to be read by eye, and it meant the hash-only design protected
+ * one table while another quietly kept the plaintext.
+ *
+ * The analytics value is in knowing *that* a claim page was opened, never
+ * which one, so the segment is dropped rather than hashed or truncated.
+ */
+const CREDENTIAL_ROUTES = ["/claim", "/invite", "/rsvp"] as const;
+
+/**
  * Strips a path down to what is worth storing: no origin, no query string, no
- * fragment. Query strings carry UTM values and whatever else a referrer
- * appended, and the useful part of that is recorded separately as `source`.
+ * fragment, and no credential-bearing segment.
+ *
+ * Query strings carry UTM values and whatever else a referrer appended, and
+ * the useful part of that is recorded separately as `source`.
  */
 export function cleanPath(input: string | null | undefined): string | undefined {
   if (!input) return undefined;
   const path = input.split("?")[0].split("#")[0].trim();
   if (!path.startsWith("/")) return undefined;
+
+  // Redaction runs before the length cap, so a long token cannot be preserved
+  // in part by truncation.
+  for (const prefix of CREDENTIAL_ROUTES) {
+    if (path === prefix || path.startsWith(`${prefix}/`)) {
+      return `${prefix}/[token]`;
+    }
+  }
+
   return path.slice(0, MAX_FIELD);
 }
 
