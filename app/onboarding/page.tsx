@@ -3,6 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import OnboardingForm from "@/components/onboarding-form";
 import ResumePendingNext from "@/components/resume-pending-next";
+import ClaimableListingPrompt from "@/components/claimable-listing-prompt";
+import { listClaimableForMe } from "@/app/onboarding/claim-actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SHOW_PLANNER_APP } from "@/lib/flags";
 
@@ -33,6 +35,11 @@ export default async function OnboardingPage({
   const { data: existing } = await supabase.from("org_members").select("org_id").limit(1);
   if (existing && existing.length > 0) redirect("/dashboard");
 
+  // A vendor recruited by phone has a listing waiting on their email address.
+  // Offering it here, above the form, is what stops them building a second one
+  // — which is exactly what happened the first time this flow was walked.
+  const claimable = await listClaimableForMe();
+
   return (
     <>
       {/*
@@ -47,6 +54,7 @@ export default async function OnboardingPage({
         subtitle="A few details and we'll build your plan. You can change any of this later."
       />
       <section className="mx-auto max-w-2xl px-5 py-16">
+        <ClaimableListingPrompt listings={claimable} />
         <OnboardingForm initialType={initialType} />
       </section>
     </>
