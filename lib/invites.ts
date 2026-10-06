@@ -31,9 +31,13 @@ export type InviteOutcome =
       ok: true;
       email: string;
       link: string;
-      /** False when RESEND_API_KEY is unset or the send failed; share the link by hand. */
+      /**
+       * Whether an email actually went out. False when the caller asked not to
+       * send, when RESEND_API_KEY is unset, or when the send failed — the three
+       * cases are the same to the couple, who has to share the link by hand.
+       */
       emailed: boolean;
-      /** They already had a pending invite; this re-sent it rather than making a second. */
+      /** They already had a pending invite; this returned that one rather than making a second. */
       resent: boolean;
     }
   | { ok: false; email: string; error: string };
@@ -65,16 +69,34 @@ export async function coupleNameFor(weddingId: string): Promise<string> {
 }
 
 /**
- * Creates the invite (or finds the existing one) and emails the join link.
+ * Creates the invite (or finds the existing one) and returns its join link,
+ * emailing it only when asked to.
+ *
+ * ── Why sending is a decision and not a default ─────────────────────────────
+ * This domain carries the transactional mail the product depends on: signup
+ * confirmations and password resets. Its sending reputation has already been
+ * put at risk once (M9 in SECURITY-AUDIT-MAIN.md), and those confirmations are
+ * the first thing to land in spam when reputation goes.
+ *
+ * So the two callers differ deliberately. The team page sends: a couple already
+ * inside the product, inviting one person at a time, is indistinguishable from
+ * a human writing an email. The onboarding step does not: it is the first
+ * minute of a stranger's account and can fan out to five addresses on one
+ * click, which is the shape of traffic that costs a domain its reputation.
+ * There it creates the invites and hands the couple the links to send
+ * themselves.
+ *
+ * Flipping that back is one argument at the call site, so this is a posture,
+ * not a limitation.
  *
  * Never throws: every caller is reporting a row in a list, and one bad address
  * must not take down the others.
  */
-export async function createAndSendInvite(
+export async function createInvite(
   weddingId: string,
   rawEmail: string,
   role: string,
-  coupleName?: string,
+  opts: { send: boolean; coupleName?: string },
 ): Promise<InviteOutcome> {
   const email = normalizeEmail(rawEmail);
 
@@ -106,7 +128,9 @@ export async function createAndSendInvite(
 
   if (!link) return { ok: false, email, error: "Couldn't create the invite. Please try again." };
 
-  const couple = coupleName ?? (await coupleNameFor(weddingId));
+  if (!opts.send) return { ok: true, email, link, emailed: false, resent };
+
+  const couple = opts.coupleName ?? (await coupleNameFor(weddingId));
   const { sent } = await sendEmail({
     to: email,
     subject: `You're invited to help plan ${couple}'s wedding`,

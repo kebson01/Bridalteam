@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
-import { createAndSendInvite } from "@/lib/invites";
+import { createInvite } from "@/lib/invites";
 
 export type InviteState = { error: string | null; link: string | null; emailed: boolean };
 
@@ -23,10 +23,14 @@ export async function inviteByEmail(
   formData: FormData,
 ): Promise<InviteState> {
   const weddingId = String(formData.get("wedding_id") ?? "");
-  const outcome = await createAndSendInvite(
+  // Sends, unlike the onboarding step: this is a couple already inside the
+  // product inviting one person deliberately, which is the shape of mail a
+  // human sends. See lib/invites.ts for why the two callers differ.
+  const outcome = await createInvite(
     weddingId,
     String(formData.get("email") ?? ""),
     String(formData.get("role") ?? "helper"),
+    { send: true },
   );
 
   if (!outcome.ok) return { error: outcome.error, link: null, emailed: false };
