@@ -100,6 +100,15 @@ export async function createWorkspace(
 
   const result = Array.isArray(data) ? data[0] : data;
 
-  if (result?.wedding_id) redirect(`/w/${result.wedding_id}`);
+  // Couples go to the invite step rather than straight to the workspace. One
+  // wedding already contains ten to twenty people and the product is built
+  // around them, but the invite form lived on a tab inside the workspace — so
+  // the loop that turns a bridesmaid into a future bride only ran for couples
+  // who went looking for it. Skipping is one click; see
+  // app/onboarding/invite/page.tsx.
+  //
+  // Planner companies have no wedding yet, so there is nobody to invite; they
+  // keep going to their dashboard.
+  if (result?.wedding_id) redirect("/onboarding/invite");
   redirect("/dashboard");
 }
