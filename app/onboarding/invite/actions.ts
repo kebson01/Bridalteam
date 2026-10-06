@@ -1,7 +1,7 @@
 "use server";
 
 import { supabaseServer } from "@/lib/supabase/server";
-import { coupleNameFor, createAndSendInvite, type InviteOutcome } from "@/lib/invites";
+import { createInvite, type InviteOutcome } from "@/lib/invites";
 import { parseInviteRows } from "@/lib/invite-roles";
 
 export type InviteTeamState = {
@@ -20,18 +20,22 @@ export const EMPTY_INVITE_TEAM_STATE: InviteTeamState = {
 };
 
 /**
- * Sends the first batch of wedding-party invites, from the onboarding step.
+ * Creates the first batch of wedding-party invites, from the onboarding step.
+ *
+ * **Deliberately sends nothing.** It mints the invites and hands the couple
+ * their join links to share themselves. This is the first minute of a
+ * stranger's account and one click could fan out to five addresses, which is
+ * the shape of traffic that costs a domain its sending reputation — and this
+ * domain carries the signup confirmations and password resets the product
+ * depends on. The team page, where a couple invites one person at a time from
+ * inside the product, does send. See lib/invites.ts.
  *
  * Reports per person rather than failing as a unit. One mistyped address among
  * four must not discard the other three — at this point in the flow the couple
  * has just typed them from memory and would have to recall them all again.
  *
- * Capped at MAX_INVITES_PER_SUBMIT. That is partly interface (more rows than
- * this is a guest list, not a wedding party, and the guest list has its own
- * import) and partly deliverability: this domain carries transactional mail
- * whose reputation was already put at risk once by a burst of automated sends
- * (M9 in SECURITY-AUDIT-MAIN.md), so a single click cannot fan out further
- * than a person plausibly would.
+ * Capped at MAX_INVITES_PER_SUBMIT: more rows than that is a guest list, not a
+ * wedding party, and the guest list has its own import.
  */
 export async function inviteTeam(
   _prev: InviteTeamState,
@@ -53,15 +57,12 @@ export async function inviteTeam(
 
   if (rows.length === 0) return { error: null, outcomes: [], submitted: true };
 
-  // Looked up once and passed down, rather than re-queried per invite.
-  const couple = await coupleNameFor(weddingId);
-
-  // Sequential on purpose. These are a handful of emails through one provider,
-  // and firing them in parallel buys milliseconds while making a rate-limit
-  // response from Resend hit every row at once instead of one.
+  // Sequential. Nothing is emailed here, so this is only a handful of inserts —
+  // but keeping them ordered means the results list reads back in the order the
+  // couple typed, which is how they will check it.
   const outcomes: InviteOutcome[] = [];
   for (const row of rows) {
-    outcomes.push(await createAndSendInvite(weddingId, row.email, row.role, couple));
+    outcomes.push(await createInvite(weddingId, row.email, row.role, { send: false }));
   }
 
   return { error: null, outcomes, submitted: true };

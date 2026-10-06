@@ -29,6 +29,13 @@ const field =
  * Skipping is a plain, visible link rather than a greyed-out afterthought: a
  * couple who feels trapped here abandons setup altogether, and they can invite
  * anyone later from the team page.
+ *
+ * This step does not email anyone — it mints the invites and hands over the
+ * links, because one click here could otherwise fan out to five addresses in
+ * the first minute of a stranger's account, on the domain that also carries
+ * password resets (see lib/invites.ts). So every word below promises a link to
+ * share, never a message sent. Copy that says "Send invitations" while sending
+ * nothing is the kind of small lie a product never recovers from.
  */
 export default function OnboardingInvites({
   weddingId,
@@ -44,33 +51,29 @@ export default function OnboardingInvites({
   const [rows, setRows] = useState<number>(FIRST_INVITE_ROLES.length);
   const [copied, setCopied] = useState<string | null>(null);
 
-  const sent = state.outcomes.filter((o) => o.ok);
+  const created = state.outcomes.filter((o) => o.ok);
   const failed = state.outcomes.filter((o) => !o.ok);
 
-  // Something was sent: show what happened rather than bouncing them onward.
-  // The links matter — with no RESEND_API_KEY configured nothing is emailed,
-  // and silently "succeeding" would leave the couple believing invitations
-  // went out that never did.
+  // Show the links rather than bouncing them onward: the links ARE the
+  // deliverable here, so this screen is the point of the step, not a receipt.
   if (state.submitted && state.outcomes.length > 0) {
     return (
       <div className="rounded-2xl border border-stone-2 bg-white p-8 shadow-card">
         <h2 className="text-lg font-medium text-ink">
-          {sent.length > 0
-            ? `${sent.length} ${sent.length === 1 ? "invitation" : "invitations"} ready`
-            : "We couldn't send those"}
+          {created.length > 0
+            ? `${created.length} ${created.length === 1 ? "invitation" : "invitations"} ready to share`
+            : "We couldn't create those"}
         </h2>
 
-        {sent.length > 0 && (
+        {created.length > 0 && (
           <ul className="mt-4 space-y-3">
-            {sent.map((o) => (
+            {created.map((o) => (
               <li key={o.email} className="rounded-xl border border-stone-2 px-4 py-3">
                 <p className="text-sm font-medium text-ink">{o.email}</p>
                 <p className="mt-0.5 text-xs text-ink-soft/70">
-                  {o.emailed
-                    ? o.resent
-                      ? "Already invited — we sent the invitation again."
-                      : "Invitation emailed."
-                    : "Not emailed — share this link with them yourself."}
+                  {o.resent
+                    ? "Already invited — here is their link again."
+                    : "Send them this link however you like."}
                 </p>
                 <div className="mt-2 flex items-center gap-2">
                   <code className="min-w-0 flex-1 truncate rounded bg-stone-4 px-2 py-1 text-xs text-ink-soft">
@@ -183,7 +186,7 @@ export default function OnboardingInvites({
         disabled={pending}
         className="mt-6 w-full rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
       >
-        {pending ? "Sending…" : "Send invitations"}
+        {pending ? "Creating…" : "Create their invitations"}
       </button>
 
       <Link

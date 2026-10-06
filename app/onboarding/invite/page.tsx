@@ -62,9 +62,9 @@ export default async function OnboardingInvitePage() {
       <section className="mx-auto max-w-xl px-5 py-12">
         <OnboardingInvites weddingId={wedding.id} skipHref={`/w/${wedding.id}`} />
         <p className="mt-6 text-center text-xs leading-relaxed text-ink-soft/60">
-          They&rsquo;ll get an email with a link to join. You can add or remove
-          anyone later from the Team tab, and nobody sees your wedding until
-          they accept.
+          We&rsquo;ll give you a join link for each person to send however you
+          like — text, WhatsApp, email. You can add or remove anyone later from
+          the Team tab, and nobody sees your wedding until they accept.
         </p>
       </section>
     </>
