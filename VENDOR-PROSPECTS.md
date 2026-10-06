@@ -37,7 +37,9 @@ regardless of how many prospects are listed here.
 
 - **Business / Website / City / Phone** — only what a search result actually
   stated. A blank website means the business is real and named in results but no
-  first-party URL appeared; find it before contacting them.
+  first-party URL appeared; find it before contacting them. A **Phone** number
+  means this row can be contacted today without an email address — see the
+  section above; 19 of the 117 qualify.
 - **Email** — deliberately empty. Fill from the vendor's own site.
 - **Sent / Outcome** — the tracking `VENDOR-OUTREACH.md` asks for. Record a "no"
   and a "no reply" differently: a "no" is permanent.
@@ -45,6 +47,58 @@ regardless of how many prospects are listed here.
 Verify before you contact. A search snippet is a lead, not a fact — check the
 business still trades, still does weddings, and is in the metro before you spend
 a claim link on it.
+
+## Call these 19 first — the only unblocked path
+
+Every table below has a **Phone** column, and 19 rows have a number because the
+search result published one. Those 19 are the only prospects that can be
+contacted **today**, and the reason is worth stating plainly:
+
+- **No email is needed.** The rest of this list has no contact address, and the
+  vendors' own sites cannot be reached from the environment that built it, so
+  the Email column is empty by design rather than by oversight.
+- **CAN-SPAM does not apply to a phone call.** The unresolved
+  `[TODO: mailing address for legal notices]` in `TERMS.md` blocks commercial
+  *email*. It does not block picking up the phone.
+
+So this is the one column of this list that is not waiting on anything.
+
+| Business | Category | Phone |
+|---|---|---|
+| Eddie B & Company | DJ | 954-721-9911 |
+| A1A DJs | DJ | 954-531-8146 |
+| All Events DJ Services | DJ | 954-290-6032 |
+| CK Entertainment | Band | 954-436-1230 |
+| Sekond Nature | Band | 954-607-8334 |
+| Asteria Beauty Studio | Hair & makeup | 954-531-8831 |
+| Hans on Beauty | Hair & makeup | 954-667-9940 |
+| Courtney Christopherson Glamour Group | Hair & makeup | 561-289-2138 |
+| Blue Orchid Events & Design | Planner | 248-840-4204 |
+| Très Chic Event Planning & Design | Planner | 954-517-1818 |
+| A. Marie Events & Design | Planner | 321-205-8326 |
+| Event Bliss Design | Planner | 954-463-9120 |
+| AM Event Co. | Planner | 954-588-7869 |
+| Fabuluxe Events | Planner | 561-254-2041 |
+| LoveLee Bakeshop | Cake | 954-715-2050 |
+| We Take The Cake | Cake | 954-764-2253 |
+| Panchis Bakery | Cake | 754-600-3370 |
+| La Cake Cafe | Cake | 754-779-2965 |
+| Wedding Officiant Fort Lauderdale | Officiant | 954-240-6234 |
+
+**Read this against the priority order below, not instead of it.** These are
+DJs, planners, hair and makeup and bakeries — categories 4 through 8. The
+photographers and florists that `VENDOR-OUTREACH.md` says to approach first are
+not here, because the numbers landed wherever search happened to publish one,
+not where the priority is. Calling a planner today still beats waiting on a
+photographer's email address, but it is a detour, not the plan.
+
+**What a call is for: one email address.** Ask for the best address to send
+their listing link to, then a claim listing can be created and the link sent.
+A listing minted off the back of a conversation is the strongest kind — they
+have already said yes, so it is not cold outreach at all.
+
+Record the outcome in the category table, not here, so there is one row per
+business.
 
 ## Order of attack
 
@@ -235,18 +289,21 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 
 ## What to do with this
 
-1. **Resolve the `TERMS.md` mailing address.** Nothing can be sent until then.
-2. **Start with photographers and florists** — the top two categories, ~34 names.
+1. **Call the 19 above.** The only step waiting on nothing. Ask each for the
+   best address to send their listing link to, and fill in their Email cell.
+2. **Resolve the `TERMS.md` mailing address.** Nothing can be *emailed* until
+   then — including a claim link to someone who asked for one on the phone.
+3. **Then photographers and florists** — the top two categories, ~34 names.
    Open each site, take the published contact email, fill the row.
-3. **Create claim listings in small batches** as rows complete, using the
+4. **Create claim listings in small batches** as rows complete, using the
    `create_claimable_listing` call in `VENDOR-OUTREACH.md`. Copy each token
    immediately: only its SHA-256 is stored, so a lost link cannot be recovered —
    delete the row and make a new listing.
-4. **Send 20–30 a day, hand-written**, one metro at a time. Claim links expire
+5. **Send 20–30 a day, hand-written**, one metro at a time. Claim links expire
    after 60 days, so do not mint more than you will actually send inside that
    window. Minting all 117 at once creates 117 credentials and 117 expiries.
-5. **One follow-up after 5–7 days, then stop permanently.**
-6. **Ask the ones who publish to link back.** Per the flywheel in
+6. **One follow-up after 5–7 days, then stop permanently.**
+7. **Ask the ones who publish to link back.** Per the flywheel in
    `COUPLES-ACQUISITION.md`, that inbound link is worth more to the couples side
    than the listing is to the vendor.
 
