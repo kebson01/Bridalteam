@@ -1,22 +1,34 @@
 # South Florida vendor prospects
 
 A research shortlist for the founding-vendor outreach in `VENDOR-OUTREACH.md`.
-409 real businesses across 23 categories, sourced from public web search in three
-passes: 117 on 2026-10-01, 73 on 2026-10-07, and a further 219 later the same
+444 real businesses across 25 categories, sourced from public web search in three
+passes: 117 on 2026-10-01, 73 on 2026-10-07, and a further 254 later the same
 day. Later passes also filled gaps in rows from earlier ones, so a row's data
 may be newer than the row.
 
-**This is a prospect list, not data to publish.** Nothing here has been added to
-the database. When a row is complete, it becomes a *draft* claimable listing via
-`create_claimable_listing` — nothing is public until the vendor claims it and
-chooses to publish.
+**This file is a record of what is in the database, not a staging area.** That
+is a reversal from how it started, and it matters: 443 of these 444 rows are
+live listings created by `create_claimable_listing`, and **292 of them are
+published and visible to couples on `/vendors`** right now.
+
+Publishing is no longer withheld until a vendor claims their listing. A
+directory entry is the business's own public facts — name, category, city,
+phone, a link to the site they already run — which is what a directory has
+always been, and a listing nobody can act on is a listing that fails the
+couple reading it. What the paid tiers sell is their *work* and their *reach*:
+gallery, Inspiration posts, an inquiry inbox, placement. See the note at the
+top of `lib/tiers.ts`.
+
+A row is held back as a draft only when it has **neither a phone nor a
+website**, because then it gives a couple no way to make contact at all. 151
+rows are in that state. Fill in either field and it publishes.
 
 ## Read this before using it
 
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Almost no contact emails — 19 of 409.** The sessions that built this could
+**1. Almost no contact emails — 20 of 444.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -30,7 +42,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 390 rows the email still has to be gathered by hand, from each
+For the remaining 424 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -58,8 +70,8 @@ regardless of how many prospects are listed here.
   stated. A blank website means the business is real and named in results but no
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
-  section above; 143 of the 409 qualify.
-- **Email** — empty on 390 of 409 rows. Fill from the vendor's own site. Where
+  section above; 151 of the 444 qualify.
+- **Email** — empty on 424 of 444 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -70,10 +82,10 @@ Verify before you contact. A search snippet is a lead, not a fact — check the
 business still trades, still does weddings, and is in the metro before you spend
 a claim link on it.
 
-## Call these 143 first — the widest unblocked path
+## Call these 151 first — the widest unblocked path
 
-Every table below has a **Phone** column, and 143 of the 409 rows have a number
-because a search result published one. Those 143 can be contacted **today**:
+Every table below has a **Phone** column, and 151 of the 444 rows have a number
+because a search result published one. Those 151 can be contacted **today**:
 
 - **CAN-SPAM does not apply to a phone call.** The unresolved
   `[TODO: mailing address for legal notices]` in `TERMS.md` blocks commercial
@@ -115,6 +127,8 @@ there is one row per business.
 | A Creation Films | Videographer | 305-928-8685 |  |
 | Candid Studios | Videographer | 844-522-6343 |  |
 | Default Estudios | Videographer | 786-380-9305 |  |
+| Global Filmz | Videographer | 888-653-2688 | drone; **page ~3yr old - verify** |
+| Shutter & Sound | Videographer | 800-841-3990 | **site gives 800-841-3990; directories give 443-449-6812 - verify** |
 | South Florida Wedding Studio | Videographer | 954-778-2267 |  |
 | Straightawaymovies | Videographer | 305-793-6036 |  |
 | VM Productions | Videographer | 305-239-9555 |  |
@@ -197,6 +211,8 @@ there is one row per business.
 | Eggwhites Catering | Caterer | 305-892-2066 |  |
 | Miami Wedding Caterer | Caterer | 305-669-5221 |  |
 | Thierry Isambert Culinary & Event Design | Caterer | 305-635-6626 |  |
+| Atlantic Wedding Chapel | Venue | 954-461-5520 |  |
+| Beth David Congregation | Venue | 305-854-3911 | **two addresses and two numbers published - verify** |
 | Boat Miami | Venue | 305-758-2500 | yacht; **two numbers published - verify** |
 | Charter One Yachts | Venue | 954-833-4731 |  |
 | Curtiss Mansion | Venue | 305-869-5180 |  |
@@ -213,6 +229,7 @@ there is one row per business.
 | Vista Yachts | Venue | 305-407-2324 |  |
 | Vizcaya Museum & Gardens | Venue | 305-615-8735 | **number from a caterer page, not the museum - verify** |
 | Apex International Transportation | Transportation | 305-707-5837 |  |
+| Atlantic Charters | Transportation | 954-448-2032 |  |
 | Black Car Miami | Transportation | 786-685-3076 |  |
 | Fort Lauderdale Airport Shuttle Limo | Transportation | 954-688-7738 |  |
 | Lauderdale Limos | Transportation | 954-951-2348 |  |
@@ -230,14 +247,18 @@ there is one row per business.
 | Amazing Brides Couture | Bridal salon | 561-372-9377 | **959-day-old source - verify** |
 | Boca Raton Bridal | Bridal salon | 561-447-6541 | **959-day-old source - verify** |
 | Brittany Burns Bridal of Boca | Bridal salon | 561-717-8745 | **959-day-old source - verify** |
+| Gloria Couture | Bridal salon | 305-864-1090 |  |
 | Nuova Vita | Bridal salon | 561-558-5733 | **959-day-old source - verify** |
 | Wonderland Bridal | Bridal salon | 954-973-8695 | **959-day-old source - verify** |
 | Allure Party Rentals | Rentals | 954-598-9595 |  |
+| Arc Divine | Rentals | 954-319-6126 |  |
 | GelatoGo | Dessert cart | 786-450-0477 |  |
 | Glyk Gelato | Dessert cart | 561-609-4900 | **listed Boca Raton but a Parkland address - verify** |
 | Jae's Jewelers | Jeweler | 305-443-7724 |  |
 | Kirk Jewelers | Jeweler | 305-371-1321 |  |
 | Nemaro Jewelers | Jeweler | 305-358-4399 |  |
+| Balloon World Events | Decor | 954-702-6109 |  |
+
 
 
 **Flagged rows are not ready to call.** A `verify` flag means the number came
@@ -324,7 +345,7 @@ will be the slowest yes on this entire list.
 | Beautiful Memories Studio | | Fort Lauderdale | | | | |
 | Andrea Harborne Photography | | Fort Lauderdale | | | | |
 
-## 2. Videographers (16)
+## 2. Videographers (19)
 
 Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 
@@ -337,7 +358,10 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Default Estudios |  | Coral Gables | 786-380-9305 |  | |  |
 | Straightawaymovies |  | Coral Gables | 305-793-6036 |  | |  |
 | VM Productions |  | Miami | 305-239-9555 |  | |  |
-| Shutter & Sound | shutterandsound.com | Miami Beach |  |  | |  |
+| Shutter & Sound | shutterandsound.com | Miami Beach | 800-841-3990 |  | | **site gives 800-841-3990; directories give 443-449-6812 - verify** |
+| Skyview Motions | skyviewmotions.com | Fort Lauderdale |  |  | | drone |
+| Florida Drone Operators | floridadroneoperators.com | Fort Lauderdale |  |  | | drone; also serves the Keys |
+| Global Filmz | globalfilmz.com | Miami | 888-653-2688 |  | | drone; **page ~3yr old - verify** |
 |---|---|---|---|---|---|---|
 | Andreo Studio | andreostudio.com | Miami / West Palm Beach | | | | |
 | Megaset Weddings | megasetphotography.com | South Florida | | | | |
@@ -474,7 +498,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Private Property Band | privatepropertyband.com | Miami / Fort Lauderdale | | | | |
 | Haviv Entertainment | shlomohaviv.com | Miami / Fort Lauderdale | | | | |
 
-## 7. Officiants (30)
+## 7. Officiants (31)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Just Married by Rosy | justmarriedbyrosy.com | Miami | 305-610-0308 | rosyfigueroa7@gmail.com | | **personal-looking email - do not mail** |
@@ -499,6 +523,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | HeartsFlow |  | Sunrise |  |  | |  |
 | The Vow Experience |  | Davie |  |  | |  |
 | Rabbi-Cantor Gaston Bogomolni |  | Davie |  |  | |  |
+| Wedding Ceremonies by Ketty Urbay | weddingceremoniesbyketty.com | Miami |  |  | |  |
 |---|---|---|---|---|---|---|
 | All Faith Ministry | allfaithministry.com | Fort Lauderdale | | | | |
 | Wedding Officiant Fort Lauderdale | weddingofficiantfortlauderdale.com | Fort Lauderdale | 954-240-6234 | | | |
@@ -537,7 +562,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | PriscillaM Beauty | priscillambeauty.com | South Florida | | | | |
 | Glam By Carmen | glambycarmen.info | South Florida | | | | |
 
-## 9. Planners (32)
+## 9. Planners (33)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Ideal Events | idealeventsweddings.com | Miami | 305-709-1900 | idealevents.miami@gmail.com | |  |
@@ -563,6 +588,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Big Day in Key West | bigdayinkeywest.com | Key West | 305-647-9262 |  | |  |
 | Key West Casual Weddings | keywestcasualweddings.com | Key West | 305-849-1179 |  | | no longer offers full planning |
 | As You Wish Wedding Planning |  | Key West | 305-849-1268 |  | |  |
+| Florida Weddings | floridaweddings.com | Fort Lauderdale |  |  | | beach packages; **553-day-old listing - verify** |
 |---|---|---|---|---|---|---|
 | Blue Orchid Events & Design | blue-orchid-events.com | Fort Lauderdale | 248-840-4204 | | | |
 | Très Chic Event Planning & Design | treschiceventplanning.com | Miramar (18741 SW 39th Ct) | 954-517-1818 | info@treschiceventplanning.com | | |
@@ -599,7 +625,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Kosher From Z Heart | kosherfromzheart.com | South Florida | | | | |
 | Culinary Artz Catering | | South Florida | 954-803-8818 | | | **may be the same business as Florida Cater - same site, check before publishing** |
 
-## 11. Venues (35) — approach last
+## 11. Venues (45) — approach last
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Sundy House |  | Delray Beach |  |  | |  |
@@ -626,6 +652,16 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Miami Yacht Connect | miamiyachtconnect.com | Miami | 305-813-0537 |  | | yacht; **two numbers published - verify** |
 | Charter One Yachts |  | Fort Lauderdale | 954-833-4731 |  | | yacht |
 | Island Queen Cruises | islandqueencruises.com | Miami | 305-379-5119 |  | | yacht; **7yr old page - verify** |
+| Beth David Congregation |  | Miami | 305-854-3911 |  | | **two addresses and two numbers published - verify** |
+| Trinity Episcopal Cathedral |  | Miami |  |  | |  |
+| Miami Beach Community Church |  | Miami Beach |  |  | |  |
+| Coral Gables Congregational UCC |  | Coral Gables |  |  | |  |
+| Atlantic Wedding Chapel | atlanticweddingchapel.com | Pompano Beach | 954-461-5520 |  | |  |
+| The Ancient Spanish Monastery |  | North Miami Beach |  |  | |  |
+| Miami Beach Botanical Garden |  | Miami Beach |  |  | |  |
+| Historic Virginia Key Beach Park |  | Miami |  |  | |  |
+| Fort Lauderdale Historical Society |  | Fort Lauderdale |  |  | |  |
+| Wine + Garden |  | Fort Lauderdale |  |  | |  |
 |---|---|---|---|---|---|---|
 | Bonnet House Museum & Gardens | bonnethouse.org | Fort Lauderdale | | | | |
 | Boatyard | boatyard.restaurant | Fort Lauderdale | | | | |
@@ -639,9 +675,17 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Loews Coral Gables | loewshotels.com | Coral Gables | | | | **corporate** |
 | Faena Hotel | | Miami Beach | | | | **corporate** |
 
-## 12. Transportation (9)
+## 12. Transportation (17)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
+| Rumbatours Miami | rumbatoursmiami.com | Miami |  |  | | classic cars + coaches |
+| A Family Limo | afamilylimo.com | Miami |  |  | | Rolls-Royce + charter |
+| American Limo & Transportation Service | americanlimofl.com | Miami |  |  | |  |
+| American Dream Tour Miami | americandreamtourmiami.com | Miami |  |  | | classic convertibles |
+| Miami White Trolley | miamiwhitetrolley.com | Miami |  |  | | trolley, 30 passengers |
+| Molly's Trolleys of West Palm Beach |  | West Palm Beach |  |  | | 1920s-style trolleys |
+| Atlantic Charters | atlanticchartersinc.com | Fort Lauderdale | 954-448-2032 |  | | charter buses |
+| Premier Bus Charters |  | Sunny Isles Beach |  |  | |  |
 |---|---|---|---|---|---|---|
 | Sal Limo Service | sallimoservice.com | Fort Lauderdale | 786-816-3259 |  | |  |
 | Fort Lauderdale Airport Shuttle Limo | fortlauderdaleairportshuttle.com | Fort Lauderdale | 954-688-7738 |  | |  |
@@ -692,16 +736,19 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Talega Atelier |  | Fort Lauderdale |  |  | |  |
 | AJs Custom Suits & Tuxedos Rentals |  | Boca Raton |  |  | | tuxedo |
 | House of Seide |  | Boynton Beach |  |  | |  |
-| Gloria Couture |  | Miami |  |  | |  |
+| Gloria Couture |  | Miami | 305-864-1090 |  | |  |
 | MDO Miami |  | Miami |  |  | | menswear |
 | LinDi Bridal |  | Sunrise |  |  | |  |
 
-## 16. Rentals (8)
+## 16. Rentals (11)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Mi Vintage |  | Miami |  |  | | decor + rentals |
 | Eventluxe Rentals |  | Miami |  |  | | decor + rentals |
 | Elements and Access Event Rentals |  | Doral |  |  | | **5+yr old listing - verify** |
+| Arc Divine | arcdivine.com | Miami | 954-319-6126 |  | | chuppah + arch rental; resolves the unattributed 954-319-6126 seen earlier |
+| Arches By Design | archesbydesign.com | South Florida |  |  | | builds in-house, incl. the Keys |
+| Eventgi Party Rental | eventgipartyrental.com | Miami |  |  | |  |
 |---|---|---|---|---|---|---|
 | Allure Party Rentals | allurepartyrentals.com | Fort Lauderdale | 954-598-9595 |  | |  |
 | Christina's Party Rentals | christinaspartyrentals.net | Miami |  |  | |  |
@@ -788,6 +835,27 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Jae's Jewelers | jaesjewelers.com | Coral Gables | 305-443-7724 |  | |  |
 | Nemaro Jewelers | nemarojewelers.com | Miami | 305-358-4399 |  | |  |
 
+## 24. Decor (4)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Balloon World Events | myballoonworld.com | Fort Lauderdale | 954-702-6109 | events@myballoonworld.com | |  |
+| DreamARK Events | dreamarkevents.com | Fort Lauderdale |  |  | | ceiling balloon decor |
+| Fashion Balloons | fashion-balloons.com | Miami |  |  | |  |
+| Drapeworks | drapeworks.com | Miami |  |  | | pipe + drape, ceiling draping |
+
+## 25. Alterations (5)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Emma Couture & Alterations |  | Miami |  |  | |  |
+| Marina Mella Tailoring | marinamellatailoring.com | Miami |  |  | |  |
+| Clothing Solutions |  | Weston |  |  | | also serves the Keys |
+| Needlestitch |  | Fort Lauderdale |  |  | |  |
+| B&P Alterations |  | Fort Lauderdale |  |  | |  |
+
+
+
 
 
 
@@ -796,12 +864,12 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 
 ## What to do with this
 
-1. **Call the 143 above, unflagged ones first.** The only step waiting on
+1. **Call the 151 above, unflagged ones first.** The only step waiting on
    nothing. Confirm the business, ask for the best address, and attach it on
    `/admin/claims` — no email of ours is sent, so this works today.
 2. **Resolve the `TERMS.md` mailing address.** Nothing can be *emailed* until
    then. The phone-claim flow is the way around it, not a replacement for it:
-   fixing the TODO unblocks the other 266 rows.
+   fixing the TODO unblocks the other 293 rows.
 3. **Then photographers and florists** — the top two categories, 102 names.
    Open each site, take the published contact email, fill the row. This needs
    the egress block lifted (see the top of this file) or a human with a
@@ -812,13 +880,13 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
    delete the row and make a new listing.
 5. **Send 20–30 a day, hand-written**, one metro at a time. Claim links expire
    after 60 days, so do not mint more than you will actually send inside that
-   window. Minting all 409 at once creates 409 credentials and 409 expiries.
+   window. Minting all 444 at once creates 444 credentials and 444 expiries.
 
-   **This no longer applies: 408 of the 409 are imported.** Every row below
+   **This no longer applies: 443 of the 444 are imported.** Every row below
    except `Marry Me Mendez` is in the database as a listing whose claim token
    was generated and discarded, so the email-match path on `/admin/claims` is
    the *only* route for all of them — there is no link to send to anyone.
-   270 are published and visible on `/vendors`; the rest are drafts, held
+   292 are published and visible on `/vendors`; the rest are drafts, held
    because they have neither a phone nor a website and so give a couple no way
    to make contact.
 6. **One follow-up after 5–7 days, then stop permanently.**
