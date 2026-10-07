@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import {
   SHOW_PLANNER_APP,
@@ -157,11 +157,114 @@ function initialsOf(v: Viewer): string {
   return chars.toUpperCase() || "?";
 }
 
+function Avatar({ viewer, size }: { viewer: Viewer | null; size: "sm" | "md" }) {
+  const box = size === "sm" ? "h-8 w-8 text-xs" : "h-9 w-9 text-sm";
+  return viewer?.avatar ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={viewer.avatar} alt="" className={`${box} flex-none rounded-full object-cover`} />
+  ) : (
+    <span
+      className={`${box} flex flex-none items-center justify-center rounded-full bg-brand/15 font-semibold text-brand-text`}
+    >
+      {viewer ? initialsOf(viewer) : ""}
+    </span>
+  );
+}
+
+/**
+ * The signed-in cluster used to spell everything out side by side — home
+ * links, bell, a "Hi, name" pill and a Log out button — which made the header
+ * the busiest thing on every page. The greeting, account settings, secondary
+ * homes and log out now live behind the avatar.
+ */
+function AccountMenu({
+  viewer,
+  homes,
+  onLogout,
+}: {
+  viewer: Viewer | null;
+  homes: Array<{ label: string; href: string }>;
+  onLogout: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const item =
+    "block w-full rounded-lg px-3 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-stone-4 hover:text-ink";
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Account menu"
+        className="flex items-center rounded-full ring-offset-2 transition-shadow hover:ring-2 hover:ring-stone-2 focus-visible:ring-2 focus-visible:ring-brand"
+      >
+        <Avatar viewer={viewer} size="sm" />
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full mt-3 w-60 rounded-2xl border border-stone-2 bg-white p-2 shadow-card"
+        >
+          <div className="border-b border-stone-2 px-3 pb-3 pt-2">
+            <p className="truncate text-sm font-semibold text-ink">
+              {viewer ? `Hi, ${viewer.firstName}` : "Your account"}
+            </p>
+            {viewer?.email && <p className="truncate text-xs text-ink-soft/60">{viewer.email}</p>}
+          </div>
+          <div className="py-1">
+            {homes.map((home) => (
+              <Link key={home.href} href={home.href} role="menuitem" onClick={() => setOpen(false)} className={item}>
+                {home.label}
+              </Link>
+            ))}
+            <Link href="/account" role="menuitem" onClick={() => setOpen(false)} className={item}>
+              Account settings
+            </Link>
+          </div>
+          <div className="border-t border-stone-2 pt-1">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                onLogout();
+              }}
+              className={item}
+            >
+              Log out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const { signedIn, viewer, roles } = useViewer();
   const homes = homeLinks(roles);
+  const pathname = usePathname();
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   async function logout() {
     await supabaseBrowser().auth.signOut();
@@ -172,7 +275,7 @@ export default function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-stone-2/70 bg-white/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-3">
         <Link href="/" className="flex items-center" aria-label="Bridal Team home">
           <Image
             src="/brand/logo.svg"
@@ -185,65 +288,40 @@ export default function SiteHeader() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-1 md:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-text"
+              aria-current={isActive(item.href) ? "page" : undefined}
+              className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+                isActive(item.href)
+                  ? "bg-stone-4 text-ink"
+                  : "text-ink-soft/80 hover:bg-stone-4/70 hover:text-ink"
+              }`}
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-4 md:flex">
+        <div className="hidden items-center gap-3 md:flex">
           {signedIn ? (
             <>
-              {homes.map((home) => (
-                <Link
-                  key={home.href}
-                  href={home.href}
-                  className="text-sm font-medium tracking-wide text-ink-soft transition-colors hover:text-brand-text"
-                >
-                  {home.label}
-                </Link>
-              ))}
-              {viewer && <NotificationsBell userId={viewer.id} />}
               <Link
-                href="/account"
-                className="group flex items-center gap-2 rounded-full border border-stone-2 py-1 pl-1 pr-3 transition-colors hover:border-brand"
-                aria-label="Account settings"
+                href={homes[0].href}
+                className="rounded-full border border-stone-2 px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand-text"
               >
-                {viewer?.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={viewer.avatar}
-                    alt=""
-                    className="h-7 w-7 flex-none rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-brand-text">
-                    {viewer ? initialsOf(viewer) : ""}
-                  </span>
-                )}
-                <span className="text-sm font-medium text-ink-soft transition-colors group-hover:text-brand-text">
-                  {viewer ? `Hi, ${viewer.firstName}` : "Account"}
-                </span>
+                {homes[0].label}
               </Link>
-              <button
-                type="button"
-                onClick={logout}
-                className="rounded-full border border-stone-2 px-5 py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
-              >
-                Log out
-              </button>
+              {viewer && <NotificationsBell userId={viewer.id} />}
+              <AccountMenu viewer={viewer} homes={homes.slice(1)} onLogout={logout} />
             </>
           ) : (
             <>
               <Link
                 href={LOGIN_URL}
-                className="text-sm font-medium text-ink-soft transition-colors hover:text-brand-text"
+                className="rounded-full px-3.5 py-2 text-sm font-medium text-ink-soft/80 transition-colors hover:text-ink"
               >
                 Log in
               </Link>
@@ -308,18 +386,7 @@ export default function SiteHeader() {
                     onClick={() => setOpen(false)}
                     className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-stone-4"
                   >
-                    {viewer?.avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={viewer.avatar}
-                        alt=""
-                        className="h-9 w-9 flex-none rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-brand/15 text-sm font-semibold text-brand-text">
-                        {viewer ? initialsOf(viewer) : ""}
-                      </span>
-                    )}
+                    <Avatar viewer={viewer} size="md" />
                     <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold text-ink">
                         {viewer ? `Hi, ${viewer.firstName}` : "Account"}
