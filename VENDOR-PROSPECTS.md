@@ -1,8 +1,8 @@
 # South Florida vendor prospects
 
 A research shortlist for the founding-vendor outreach in `VENDOR-OUTREACH.md`.
-190 real businesses across 11 categories, sourced from public web search in two
-passes: 117 on 2026-10-01, a further 73 on 2026-10-07. The second pass also
+188 real businesses across 11 categories, sourced from public web search in two
+passes: 117 on 2026-10-01, a further 71 on 2026-10-07. The second pass also
 filled gaps in 11 rows from the first, so a row's data may be newer than the
 row.
 
@@ -16,7 +16,7 @@ chooses to publish.
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Almost no contact emails — 15 of 190.** The sessions that built this could
+**1. Almost no contact emails — 15 of 188.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -30,7 +30,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 175 rows the email still has to be gathered by hand, from each
+For the remaining 173 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -58,8 +58,8 @@ regardless of how many prospects are listed here.
   stated. A blank website means the business is real and named in results but no
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
-  section above; 60 of the 190 qualify.
-- **Email** — empty on 175 of 190 rows. Fill from the vendor's own site. Where
+  section above; 59 of the 188 qualify.
+- **Email** — empty on 173 of 188 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -70,10 +70,10 @@ Verify before you contact. A search snippet is a lead, not a fact — check the
 business still trades, still does weddings, and is in the metro before you spend
 a claim link on it.
 
-## Call these 60 first — the widest unblocked path
+## Call these 59 first — the widest unblocked path
 
-Every table below has a **Phone** column, and 60 of the 190 rows have a number
-because a search result published one. Those 60 can be contacted **today**:
+Every table below has a **Phone** column, and 59 of the 188 rows have a number
+because a search result published one. Those 59 can be contacted **today**:
 
 - **CAN-SPAM does not apply to a phone call.** The unresolved
   `[TODO: mailing address for legal notices]` in `TERMS.md` blocks commercial
@@ -127,7 +127,7 @@ there is one row per business.
 | Hey Reverend | Officiant | 604-574-7731 | **604 = British Columbia, not FL - verify** |
 | Just Married by Rosy | Officiant | 305-610-0308 | **personal-looking email - do not mail** |
 | Love Unions | Officiant | 561-504-5107 | stale directory - verify |
-| Marry Me Mendez | Officiant | 305-439-5553 |  |
+| Marry Me Mendez | Officiant | 305-439-5553 | **may be the same business as Marry Me, LLC below - check before importing** |
 | Mitchell Cohen | Officiant | 954-757-0083 |  |
 | Modern Love South Florida | Officiant | 561-401-3072 | stale directory - verify |
 | Patti Roman | Officiant | 305-283-7647 | **personal-looking email - do not mail** |
@@ -145,7 +145,66 @@ there is one row per business.
 | Event Bliss Design | Planner | 954-463-9120 |  |
 | Fabuluxe Events | Planner | 561-254-2041 |  |
 | Ideal Events | Planner | 305-709-1900 |  |
-| Tres CHIC Event Planning & Design | Planner | 954-517-1818 |  |
+| Très Chic Event Planning & Design | Planner | 954-517-1818 |  |
+| A Paella Party | Caterer | 305-252-6669 |  |
+| Bill Hansen Catering | Caterer | 305-858-6660 |  |
+| Catering By Lovables | Caterer | 305-640-1921 |  |
+| Chef's Delights Catering | Caterer | 786-287-6283 |  |
+| Culinary Artz Catering | Caterer | 954-803-8818 | **may be the same business as Florida Cater - same site, check before publishing** |
+| Eggwhites Catering | Caterer | 305-892-2066 |  |
+| Miami Wedding Caterer | Caterer | 305-669-5221 |  |
+| Thierry Isambert Culinary & Event Design | Caterer | 305-635-6626 |  |
+|---|---|---|---|
+| Couture Bridal Photography | Photographer | 954-399-0741 |  |
+| Deivis Archbold Photography | Photographer | 954-945-8116 |  |
+| Little's Photography | Photographer | 954-563-0444 |  |
+| Michael Murphy Photographic Imaging | Photographer | 877-564-8555 |  |
+| Vanessa + Johnny | Photographer | 310-819-6544 |  |
+| A Creation Films | Videographer | 305-928-8685 |  |
+| South Florida Wedding Studio | Videographer | 954-778-2267 |  |
+| Bayfront Floral & Event Design | Florist | 954-981-1024 |  |
+| Beautiful Kreations | Florist | 954-933-7530 |  |
+| Concept Flowers | Florist | 305-300-4758 |  |
+| Cortez Event Agency | Florist | 786-983-7092 |  |
+| Flowers Unveiled | Florist | 954-806-8406 |  |
+| Jose Graterol Designs | Florist | 305-788-0562 |  |
+| La Cake Cafe | Cake | 754-779-2965 |  |
+| LoveLee Bakeshop | Cake | 954-715-2050 |  |
+| Panchis Bakery | Cake | 754-600-3370 |  |
+| We Take The Cake | Cake | 954-764-2253 |  |
+| A1A DJs | DJ | 954-531-8146 |  |
+| All Events DJ Services | DJ | 954-290-6032 |  |
+| Eddie B & Company | DJ | 954-721-9911 |  |
+| Vision DJs | DJ | 954-418-2203 |  |
+| CK Entertainment | Band | 954-436-1230 |  |
+| Sekond Nature | Band | 954-607-8334 |  |
+| Cantor Ann Turnoff | Officiant | 561-445-8914 | stale directory - verify |
+| Cantor Ellen Stettner | Officiant | 561-213-1277 | stale directory - verify |
+| Ceremonies by Cindy | Officiant | 954-781-8822 | stale directory - verify |
+| Eddie Rodriguez | Officiant | 305-596-1810 |  |
+| Florida Weddings by Cecilia | Officiant | 561-231-0043 | stale directory - verify |
+| Gracefully Wed Events | Officiant | 561-532-7919 | stale directory - verify |
+| Hey Reverend | Officiant | 604-574-7731 | **604 = British Columbia, not FL - verify** |
+| Just Married by Rosy | Officiant | 305-610-0308 | **personal-looking email - do not mail** |
+| Love Unions | Officiant | 561-504-5107 | stale directory - verify |
+| Marry Me Mendez | Officiant | 305-439-5553 | **may be the same business as Marry Me, LLC below - check before importing** |
+| Mitchell Cohen | Officiant | 954-757-0083 |  |
+| Modern Love South Florida | Officiant | 561-401-3072 | stale directory - verify |
+| Patti Roman | Officiant | 305-283-7647 | **personal-looking email - do not mail** |
+| Rainbow Notary & Nuptials | Officiant | 954-579-3953 |  |
+| SosFloWeddings | Officiant | 305-807-3898 |  |
+| Terri Golden | Officiant | 561-685-9038 | **personal-looking email - do not mail** |
+| The Officiants | Officiant | 800-354-4990 |  |
+| Wedding Officiant Fort Lauderdale | Officiant | 954-240-6234 |  |
+| Asteria Beauty Studio | Hair & makeup | 954-531-8831 |  |
+| Courtney Christopherson Glamour Group | Hair & makeup | 561-289-2138 |  |
+| Hans on Beauty | Hair & makeup | 954-667-9940 |  |
+| A. Marie Events & Design | Planner | 321-205-8326 |  |
+| AM Event Co. | Planner | 954-588-7869 |  |
+| Blue Orchid Events & Design | Planner | 248-840-4204 |  |
+| Event Bliss Design | Planner | 954-463-9120 |  |
+| Fabuluxe Events | Planner | 561-254-2041 |  |
+| Ideal Events | Planner | 305-709-1900 |  |
 | Très Chic Event Planning & Design | Planner | 954-517-1818 |  |
 | A Paella Party | Caterer | 305-252-6669 |  |
 | Bill Hansen Catering | Caterer | 305-858-6660 |  |
@@ -295,12 +354,11 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Vivid Source Events | vividsourceevents.com | Palm Beach County | | | | |
 | Traxx Entertainment | traxxentertainment.com | Florida | | | | |
 
-## 6. Bands & live music (14)
+## 6. Bands & live music (13)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | FM Band Miami |  | Miami |  |  | |  |
 | Bay Kings Band |  | South Florida |  |  | |  |
-| Heatwave Music & Entertainment |  | Boca Raton |  |  | |  |
 | Shane Duncan Band |  | Fort Lauderdale |  |  | |  |
 | AAMusicians |  | Miami |  |  | |  |
 | Inner Music Management |  | Miami |  |  | |  |
@@ -320,7 +378,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Just Married by Rosy | justmarriedbyrosy.com | Miami | 305-610-0308 | rosyfigueroa7@gmail.com | | **personal-looking email - do not mail** |
 | Patti Roman |  | Miami / Cutler Bay | 305-283-7647 | rainbowpatti2020@gmail.com | | **personal-looking email - do not mail** |
 | Eddie Rodriguez |  | Miami | 305-596-1810 |  | | Eventective listing |
-| Marry Me Mendez |  | Miami | 305-439-5553 |  | | Eventective listing |
+| Marry Me Mendez |  | Miami | 305-439-5553 |  | | **may be the same business as Marry Me, LLC below - check before importing** |
 | SosFloWeddings |  | Miami Beach | 305-807-3898 |  | | Eventective listing |
 | The Officiants |  | Fort Lauderdale | 800-354-4990 |  | | team led by Dominic Church |
 | Mitchell Cohen |  | Fort Lauderdale | 954-757-0083 |  | | Eventective listing |
@@ -364,10 +422,9 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | PriscillaM Beauty | priscillambeauty.com | South Florida | | | | |
 | Glam By Carmen | glambycarmen.info | South Florida | | | | |
 
-## 9. Planners (17)
+## 9. Planners (16)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
-| Tres CHIC Event Planning & Design | treschiceventplanning.com | Miramar (18741 SW 39th Ct) | 954-517-1818 | info@treschiceventplanning.com | |  |
 | Ideal Events | idealeventsweddings.com | Miami | 305-709-1900 | idealevents.miami@gmail.com | |  |
 | Luxy Events | luxy-events.com | Lauderhill |  |  | | also in-house catering |
 | Stephanie Verrmar | stephanieverrmar.com | Miami |  |  | | planner + florist |
@@ -377,7 +434,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Events by Tahimy |  | Miami |  |  | | Zola listing |
 |---|---|---|---|---|---|---|
 | Blue Orchid Events & Design | blue-orchid-events.com | Fort Lauderdale | 248-840-4204 | | | |
-| Très Chic Event Planning & Design | treschiceventplanning.com | South Florida | 954-517-1818 | | | |
+| Très Chic Event Planning & Design | treschiceventplanning.com | Miramar (18741 SW 39th Ct) | 954-517-1818 | info@treschiceventplanning.com | | |
 | A. Marie Events & Design | amarieevents.us | Fort Lauderdale | 321-205-8326 | | | |
 | Event Bliss Design | eventblissdesign.com | Fort Lauderdale | 954-463-9120 | | | |
 | AM Event Co. | ameventco.com | South Florida | 954-588-7869 | | | |
@@ -407,7 +464,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Eden Catering | kosherweddingsmiami.com | Hollywood | | | | |
 | Shaike's Kosher Catering | shaikes.com | Southeast Florida | | | | |
 | Kosher From Z Heart | kosherfromzheart.com | South Florida | | | | |
-| Culinary Artz Catering | | South Florida | 954-803-8818 | | | |
+| Culinary Artz Catering | | South Florida | 954-803-8818 | | | **may be the same business as Florida Cater - same site, check before publishing** |
 
 ## 11. Venues (11) — approach last
 
@@ -429,12 +486,12 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 
 ## What to do with this
 
-1. **Call the 60 above, unflagged ones first.** The only step waiting on
+1. **Call the 59 above, unflagged ones first.** The only step waiting on
    nothing. Confirm the business, ask for the best address, and attach it on
    `/admin/claims` — no email of ours is sent, so this works today.
 2. **Resolve the `TERMS.md` mailing address.** Nothing can be *emailed* until
    then. The phone-claim flow is the way around it, not a replacement for it:
-   fixing the TODO unblocks the other 130 rows.
+   fixing the TODO unblocks the other 129 rows.
 3. **Then photographers and florists** — the top two categories, 47 names.
    Open each site, take the published contact email, fill the row. This needs
    the egress block lifted (see the top of this file) or a human with a
@@ -445,13 +502,12 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
    delete the row and make a new listing.
 5. **Send 20–30 a day, hand-written**, one metro at a time. Claim links expire
    after 60 days, so do not mint more than you will actually send inside that
-   window. Minting all 190 at once creates 190 credentials and 190 expiries.
+   window. Minting all 188 at once creates 188 credentials and 188 expiries.
 
-   **This no longer applies to the 117 already imported.** They are in the
-   database as unclaimed drafts whose tokens were generated and discarded, so
-   for those the email-match path on `/admin/claims` is the *only* route — there
-   is no link to send. It applies to the 73 added in the second pass, which are
-   not in the database yet.
+   **This no longer applies: all 187 are imported.** Every row below except
+   `Marry Me Mendez` is in the database as an unclaimed draft whose token was
+   generated and discarded, so the email-match path on `/admin/claims` is the
+   *only* route for all of them — there is no link to send to anyone.
 6. **One follow-up after 5–7 days, then stop permanently.**
 7. **Ask the ones who publish to link back.** Per the flywheel in
    `COUPLES-ACQUISITION.md`, that inbound link is worth more to the couples side
