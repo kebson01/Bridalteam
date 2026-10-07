@@ -12,12 +12,13 @@
  * its keep once "nearby" stops meaning "the same three counties".
  */
 
-export type AreaId = "broward" | "miami-dade" | "palm-beach";
+export type AreaId = "broward" | "miami-dade" | "palm-beach" | "keys";
 
 export const AREAS: { id: AreaId; label: string }[] = [
   { id: "broward", label: "Broward" },
   { id: "miami-dade", label: "Miami-Dade" },
   { id: "palm-beach", label: "Palm Beach" },
+  { id: "keys", label: "Florida Keys" },
 ];
 
 /**
@@ -80,6 +81,21 @@ const CITY_AREA: Record<string, AreaId> = {
   "palm beach gardens": "palm-beach",
   "lake worth": "palm-beach",
   "royal palm beach": "palm-beach",
+
+  // Monroe County. Not part of the tri-county area, but a large share of the
+  // couples this directory serves marry in the Keys, and the vendors there are
+  // a distinct market rather than an overflow of Miami-Dade.
+  "key west": "keys",
+  "key largo": "keys",
+  islamorada: "keys",
+  marathon: "keys",
+  tavernier: "keys",
+  "big pine key": "keys",
+  "duck key": "keys",
+  "florida keys": "keys",
+  "the florida keys": "keys",
+  "upper keys": "keys",
+  "lower keys": "keys",
 };
 
 /**
