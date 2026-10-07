@@ -29,7 +29,17 @@ describe("areaOf", () => {
     expect(areaOf("Florida")).toBeNull();
   });
 
-  it("is null for a place outside the tri-county area", () => {
+  it("maps the Keys to their own area, not to Miami-Dade", () => {
+    // The directory holds 18 Keys vendors. They are a distinct market, and
+    // before this area existed they appeared under no chip at all.
+    expect(areaOf("Key West")).toBe("keys");
+    expect(areaOf("Key Largo")).toBe("keys");
+    expect(areaOf("Islamorada")).toBe("keys");
+    expect(areaOf("Marathon")).toBe("keys");
+    expect(areaOf("Key West")).not.toBe("miami-dade");
+  });
+
+  it("is null for a place outside every mapped area", () => {
     // Hobe Sound is in Martin County. It should show under All and under no
     // area chip, rather than being quietly lumped into Palm Beach.
     expect(areaOf("Hobe Sound")).toBeNull();
@@ -69,13 +79,13 @@ describe("matchesArea", () => {
     // 29 published listings say "South Florida". A couple filtering to Broward
     // should still see them -- they do serve Broward. This is the assertion
     // that stops the filter hiding a fifth of the directory.
-    for (const area of ["broward", "miami-dade", "palm-beach"] as const) {
+    for (const area of ["broward", "miami-dade", "palm-beach", "keys"] as const) {
       expect(matchesArea("South Florida", area)).toBe(true);
     }
   });
 
   it("shows an out-of-area vendor in no area", () => {
-    for (const area of ["broward", "miami-dade", "palm-beach"] as const) {
+    for (const area of ["broward", "miami-dade", "palm-beach", "keys"] as const) {
       expect(matchesArea("Hobe Sound", area)).toBe(false);
     }
   });
@@ -87,6 +97,7 @@ describe("areasPresent", () => {
       "miami-dade",
       "palm-beach",
     ]);
+    expect(areasPresent(["Key West", "Fort Lauderdale"])).toEqual(["broward", "keys"]);
   });
 
   it("is empty when nothing is mapped, so no chip row renders", () => {

@@ -1,8 +1,8 @@
 # South Florida vendor prospects
 
 A research shortlist for the founding-vendor outreach in `VENDOR-OUTREACH.md`.
-358 real businesses across 19 categories, sourced from public web search in three
-passes: 117 on 2026-10-01, 73 on 2026-10-07, and a further 170 later the same
+409 real businesses across 23 categories, sourced from public web search in three
+passes: 117 on 2026-10-01, 73 on 2026-10-07, and a further 219 later the same
 day. Later passes also filled gaps in rows from earlier ones, so a row's data
 may be newer than the row.
 
@@ -16,7 +16,7 @@ chooses to publish.
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Almost no contact emails — 19 of 358.** The sessions that built this could
+**1. Almost no contact emails — 19 of 409.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -30,7 +30,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 339 rows the email still has to be gathered by hand, from each
+For the remaining 390 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -58,8 +58,8 @@ regardless of how many prospects are listed here.
   stated. A blank website means the business is real and named in results but no
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
-  section above; 116 of the 358 qualify.
-- **Email** — empty on 339 of 358 rows. Fill from the vendor's own site. Where
+  section above; 143 of the 409 qualify.
+- **Email** — empty on 390 of 409 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -70,10 +70,10 @@ Verify before you contact. A search snippet is a lead, not a fact — check the
 business still trades, still does weddings, and is in the metro before you spend
 a claim link on it.
 
-## Call these 116 first — the widest unblocked path
+## Call these 143 first — the widest unblocked path
 
-Every table below has a **Phone** column, and 116 of the 358 rows have a number
-because a search result published one. Those 116 can be contacted **today**:
+Every table below has a **Phone** column, and 143 of the 409 rows have a number
+because a search result published one. Those 143 can be contacted **today**:
 
 - **CAN-SPAM does not apply to a phone call.** The unresolved
   `[TODO: mailing address for legal notices]` in `TERMS.md` blocks commercial
@@ -97,6 +97,7 @@ there is one row per business.
 |---|---|---|---|
 | Alan Luby Photography | Photographer | 561-577-9246 |  |
 | Appeal Photography | Photographer | 561-478-7340 |  |
+| Care Studios | Photographer | 305-360-2636 |  |
 | Chris Joriann Photography | Photographer | 561-246-9271 | **name/number pairing inferred from page layout - verify** |
 | Clickety Chicks | Photographer | 561-662-0455 |  |
 | Couture Bridal Photography | Photographer | 954-399-0741 |  |
@@ -109,17 +110,27 @@ there is one row per business.
 | Michael Murphy Photographic Imaging | Photographer | 877-564-8555 |  |
 | Photography South Florida | Photographer | 561-951-8800 |  |
 | Supanik Photography | Photographer | 786-385-1100 |  |
-| Vanessa + Johnny | Photographer | 310-819-6544 |  |
+| Vanessa + Johnny | Photographer | 954-417-2193 | **was published as 310-819-6544 (Los Angeles); a later source gave this local number** |
 | db Wolin Photography | Photographer | 561-762-5349 |  |
 | A Creation Films | Videographer | 305-928-8685 |  |
+| Candid Studios | Videographer | 844-522-6343 |  |
+| Default Estudios | Videographer | 786-380-9305 |  |
 | South Florida Wedding Studio | Videographer | 954-778-2267 |  |
+| Straightawaymovies | Videographer | 305-793-6036 |  |
+| VM Productions | Videographer | 305-239-9555 |  |
 | Bayfront Floral & Event Design | Florist | 954-981-1024 |  |
 | Beautiful Kreations | Florist | 954-933-7530 |  |
 | Beldens Florist | Florist | 561-832-2871 |  |
 | Concept Flowers | Florist | 305-300-4758 |  |
 | Cortez Event Agency | Florist | 786-983-7092 |  |
+| Floral Fantasy of the Keys | Florist | 305-664-1063 |  |
 | Flowers Unveiled | Florist | 954-806-8406 |  |
+| Flowers by J&J | Florist | 305-743-5459 |  |
+| Island Blooms | Florist | 305-304-3504 |  |
 | Jose Graterol Designs | Florist | 305-788-0562 |  |
+| Key Largo Flowers & Gifts | Florist | 305-451-3702 |  |
+| Kutchey's Flowers | Florist | 305-292-8181 |  |
+| Milan Event Floral & Decor | Florist | 305-735-4749 |  |
 | Orange Blossoms Florals and Event Styling | Florist | 561-568-0528 |  |
 | Twice the Style | Florist | 561-939-9589 |  |
 | Wellington Florist | Florist | 561-333-4441 |  |
@@ -135,6 +146,7 @@ there is one row per business.
 | Palm Beach Party DJ | DJ | 561-285-2640 | **1600-day-old source - verify** |
 | Vision DJs | DJ | 954-418-2203 |  |
 | CK Entertainment | Band | 954-436-1230 |  |
+| Florida Music Group | Band | 772-924-9302 | **second number 772-781-7415 published - verify** |
 | Sekond Nature | Band | 954-607-8334 |  |
 | Cantor Ann Turnoff | Officiant | 561-445-8914 | stale directory - verify |
 | Cantor Ellen Stettner | Officiant | 561-213-1277 | stale directory - verify |
@@ -157,16 +169,26 @@ there is one row per business.
 | Asteria Beauty Studio | Hair & makeup | 954-531-8831 |  |
 | Courtney Christopherson Glamour Group | Hair & makeup | 561-289-2138 |  |
 | Hans on Beauty | Hair & makeup | 954-667-9940 |  |
+| Wondrous Look | Hair & makeup | 305-890-4778 |  |
 | A. Marie Events & Design | Planner | 321-205-8326 |  |
 | AM Event Co. | Planner | 954-588-7869 |  |
+| As You Wish Wedding Planning | Planner | 305-849-1268 |  |
 | BOLD Impact Events & Wedding Planners | Planner | 561-320-1517 |  |
+| Big Day in Key West | Planner | 305-647-9262 |  |
 | Blue Orchid Events & Design | Planner | 248-840-4204 |  |
 | Event Bliss Design | Planner | 954-463-9120 |  |
 | Fabuluxe Events | Planner | 561-254-2041 |  |
+| Family Affair Key West | Planner | 305-433-0700 |  |
 | Ideal Events | Planner | 305-709-1900 |  |
+| Key West Casual Weddings | Planner | 305-849-1179 |  |
+| Little Miss Planner | Planner | 786-334-0124 |  |
 | My Italian Favors | Planner | 866-236-1695 |  |
+| Ocean Breeze Weddingz | Planner | 305-902-7688 |  |
 | Olive & Ivory Events | Planner | 561-613-3456 |  |
+| Say Yes In Key West | Planner | 305-396-7602 | **second number 305-747-5700 published elsewhere - verify** |
 | Très Chic Event Planning & Design | Planner | 954-517-1818 |  |
+| Vidal Wedding & Event Planner | Planner | 305-942-1604 |  |
+| Weddings To Go Key West | Planner | 305-879-2795 |  |
 | A Paella Party | Caterer | 305-252-6669 |  |
 | Bill Hansen Catering | Caterer | 305-858-6660 |  |
 | Catering By Lovables | Caterer | 305-640-1921 |  |
@@ -190,15 +212,15 @@ there is one row per business.
 | Villa Toscana Miami | Venue | 305-908-8586 |  |
 | Vista Yachts | Venue | 305-407-2324 |  |
 | Vizcaya Museum & Gardens | Venue | 305-615-8735 | **number from a caterer page, not the museum - verify** |
-| Apex International Transportation | Transport | 305-707-5837 |  |
-| Black Car Miami | Transport | 786-685-3076 |  |
-| Fort Lauderdale Airport Shuttle Limo | Transport | 954-688-7738 |  |
-| Lauderdale Limos | Transport | 954-951-2348 |  |
-| Majestic Limousines | Transport | 305-774-0117 |  |
-| Miami Limo Service | Transport | 305-414-1111 |  |
-| Miami Shuttle & Limo Service | Transport | 888-657-6842 |  |
-| Sal Limo Service | Transport | 786-816-3259 |  |
-| Worldwide Limo | Transport | 305-440-1111 |  |
+| Apex International Transportation | Transportation | 305-707-5837 |  |
+| Black Car Miami | Transportation | 786-685-3076 |  |
+| Fort Lauderdale Airport Shuttle Limo | Transportation | 954-688-7738 |  |
+| Lauderdale Limos | Transportation | 954-951-2348 |  |
+| Majestic Limousines | Transportation | 305-774-0117 |  |
+| Miami Limo Service | Transportation | 305-414-1111 |  |
+| Miami Shuttle & Limo Service | Transportation | 888-657-6842 |  |
+| Sal Limo Service | Transportation | 786-816-3259 |  |
+| Worldwide Limo | Transportation | 305-440-1111 |  |
 | Glowshot | Photo booth | 305-303-5740 |  |
 | DJ Peoples | Lighting | 305-328-9492 | **three numbers published - verify** |
 | Kings Rentals | Lighting | 786-541-4892 |  |
@@ -211,243 +233,12 @@ there is one row per business.
 | Nuova Vita | Bridal salon | 561-558-5733 | **959-day-old source - verify** |
 | Wonderland Bridal | Bridal salon | 954-973-8695 | **959-day-old source - verify** |
 | Allure Party Rentals | Rentals | 954-598-9595 |  |
-|---|---|---|---|
-| Alan Luby Photography | Photographer | 561-577-9246 |  |
-| Appeal Photography | Photographer | 561-478-7340 |  |
-| Chris Joriann Photography | Photographer | 561-246-9271 | **name/number pairing inferred from page layout - verify** |
-| Clickety Chicks | Photographer | 561-662-0455 |  |
-| Couture Bridal Photography | Photographer | 954-399-0741 |  |
-| Deivis Archbold Photography | Photographer | 954-945-8116 |  |
-| Frank Donnino Photography | Photographer | 561-776-0099 | **name/number pairing inferred from page layout - verify** |
-| Joey G Photography | Photographer | 954-986-4455 |  |
-| Little's Photography | Photographer | 954-563-0444 |  |
-| Lukas G Photography | Photographer | 561-246-2403 |  |
-| Marco Palmieri Photographer | Photographer | 954-471-5870 | **directory listing inconsistent - verify** |
-| Michael Murphy Photographic Imaging | Photographer | 877-564-8555 |  |
-| Photography South Florida | Photographer | 561-951-8800 |  |
-| Supanik Photography | Photographer | 786-385-1100 |  |
-| Vanessa + Johnny | Photographer | 310-819-6544 |  |
-| db Wolin Photography | Photographer | 561-762-5349 |  |
-| A Creation Films | Videographer | 305-928-8685 |  |
-| South Florida Wedding Studio | Videographer | 954-778-2267 |  |
-| Bayfront Floral & Event Design | Florist | 954-981-1024 |  |
-| Beautiful Kreations | Florist | 954-933-7530 |  |
-| Beldens Florist | Florist | 561-832-2871 |  |
-| Concept Flowers | Florist | 305-300-4758 |  |
-| Cortez Event Agency | Florist | 786-983-7092 |  |
-| Flowers Unveiled | Florist | 954-806-8406 |  |
-| Jose Graterol Designs | Florist | 305-788-0562 |  |
-| Orange Blossoms Florals and Event Styling | Florist | 561-568-0528 |  |
-| Twice the Style | Florist | 561-939-9589 |  |
-| Wellington Florist | Florist | 561-333-4441 |  |
-| Wildflowers of Parkland | Florist | 954-752-6999 |  |
-| Xquisite Events Production | Florist | 561-988-9798 |  |
-| La Cake Cafe | Cake | 754-779-2965 |  |
-| LoveLee Bakeshop | Cake | 954-715-2050 |  |
-| Panchis Bakery | Cake | 754-600-3370 |  |
-| We Take The Cake | Cake | 954-764-2253 |  |
-| A1A DJs | DJ | 954-531-8146 |  |
-| All Events DJ Services | DJ | 954-290-6032 |  |
-| Eddie B & Company | DJ | 954-721-9911 |  |
-| Palm Beach Party DJ | DJ | 561-285-2640 | **1600-day-old source - verify** |
-| Vision DJs | DJ | 954-418-2203 |  |
-| CK Entertainment | Band | 954-436-1230 |  |
-| Sekond Nature | Band | 954-607-8334 |  |
-| Cantor Ann Turnoff | Officiant | 561-445-8914 | stale directory - verify |
-| Cantor Ellen Stettner | Officiant | 561-213-1277 | stale directory - verify |
-| Ceremonies by Cindy | Officiant | 954-781-8822 | stale directory - verify |
-| Eddie Rodriguez | Officiant | 305-596-1810 |  |
-| Florida Weddings by Cecilia | Officiant | 561-231-0043 | stale directory - verify |
-| Gracefully Wed Events | Officiant | 561-532-7919 | stale directory - verify |
-| Hey Reverend | Officiant | 604-574-7731 | **604 = British Columbia, not FL - verify** |
-| Just Married by Rosy | Officiant | 305-610-0308 | **personal-looking email - do not mail** |
-| Love Unions | Officiant | 561-504-5107 | stale directory - verify |
-| Marry Me Mendez | Officiant | 305-439-5553 | **may be the same business as Marry Me, LLC below - check before importing** |
-| Mitchell Cohen | Officiant | 954-757-0083 |  |
-| Modern Love South Florida | Officiant | 561-401-3072 | stale directory - verify |
-| Patti Roman | Officiant | 305-283-7647 | **personal-looking email - do not mail** |
-| Rainbow Notary & Nuptials | Officiant | 954-579-3953 |  |
-| SosFloWeddings | Officiant | 305-807-3898 |  |
-| Terri Golden | Officiant | 561-685-9038 | **personal-looking email - do not mail** |
-| The Officiants | Officiant | 800-354-4990 |  |
-| Wedding Officiant Fort Lauderdale | Officiant | 954-240-6234 |  |
-| Asteria Beauty Studio | Hair & makeup | 954-531-8831 |  |
-| Courtney Christopherson Glamour Group | Hair & makeup | 561-289-2138 |  |
-| Hans on Beauty | Hair & makeup | 954-667-9940 |  |
-| A. Marie Events & Design | Planner | 321-205-8326 |  |
-| AM Event Co. | Planner | 954-588-7869 |  |
-| BOLD Impact Events & Wedding Planners | Planner | 561-320-1517 |  |
-| Blue Orchid Events & Design | Planner | 248-840-4204 |  |
-| Event Bliss Design | Planner | 954-463-9120 |  |
-| Fabuluxe Events | Planner | 561-254-2041 |  |
-| Ideal Events | Planner | 305-709-1900 |  |
-| My Italian Favors | Planner | 866-236-1695 |  |
-| Olive & Ivory Events | Planner | 561-613-3456 |  |
-| Très Chic Event Planning & Design | Planner | 954-517-1818 |  |
-| A Paella Party | Caterer | 305-252-6669 |  |
-| Bill Hansen Catering | Caterer | 305-858-6660 |  |
-| Catering By Lovables | Caterer | 305-640-1921 |  |
-| Chef's Delights Catering | Caterer | 786-287-6283 |  |
-| Culinary Artz Catering | Caterer | 954-803-8818 | **may be the same business as Florida Cater - same site, check before publishing** |
-| Eggwhites Catering | Caterer | 305-892-2066 |  |
-| Miami Wedding Caterer | Caterer | 305-669-5221 |  |
-| Thierry Isambert Culinary & Event Design | Caterer | 305-635-6626 |  |
-| Boat Miami | Venue | 305-758-2500 | yacht; **two numbers published - verify** |
-| Charter One Yachts | Venue | 954-833-4731 |  |
-| Curtiss Mansion | Venue | 305-869-5180 |  |
-| Deering Estate | Venue | 305-235-1668 |  |
-| Island Queen Cruises | Venue | 305-379-5119 | yacht; **7yr old page - verify** |
-| Miami Yacht Connect | Venue | 305-813-0537 | yacht; **two numbers published - verify** |
-| Prestige Estate | Venue | 786-612-1542 |  |
-| Royal Mansion & Garden | Venue | 786-386-1116 |  |
-| SeaFair Miami | Venue | 786-353-4738 |  |
-| The Addison | Venue | 561-372-0568 |  |
-| The Venue Fort Lauderdale | Venue | 954-765-6968 |  |
-| Villa Casa Casuarina | Venue | 786-485-2200 |  |
-| Villa Toscana Miami | Venue | 305-908-8586 |  |
-| Vista Yachts | Venue | 305-407-2324 |  |
-| Vizcaya Museum & Gardens | Venue | 305-615-8735 | **number from a caterer page, not the museum - verify** |
-| Apex International Transportation | Transport | 305-707-5837 |  |
-| Black Car Miami | Transport | 786-685-3076 |  |
-| Fort Lauderdale Airport Shuttle Limo | Transport | 954-688-7738 |  |
-| Lauderdale Limos | Transport | 954-951-2348 |  |
-| Majestic Limousines | Transport | 305-774-0117 |  |
-| Miami Limo Service | Transport | 305-414-1111 |  |
-| Miami Shuttle & Limo Service | Transport | 888-657-6842 |  |
-| Sal Limo Service | Transport | 786-816-3259 |  |
-| Worldwide Limo | Transport | 305-440-1111 |  |
-| Glowshot | Photo booth | 305-303-5740 |  |
-| DJ Peoples | Lighting | 305-328-9492 | **three numbers published - verify** |
-| Kings Rentals | Lighting | 786-541-4892 |  |
-| Miami Party DJ | Lighting | 305-609-6707 |  |
-| Miami Uplighting Rentals | Lighting | 786-755-3431 |  |
-| Rent For Event | Lighting | 877-409-6999 | **two conflicting numbers published - verify** |
-| Amazing Brides Couture | Bridal salon | 561-372-9377 | **959-day-old source - verify** |
-| Boca Raton Bridal | Bridal salon | 561-447-6541 | **959-day-old source - verify** |
-| Brittany Burns Bridal of Boca | Bridal salon | 561-717-8745 | **959-day-old source - verify** |
-| Nuova Vita | Bridal salon | 561-558-5733 | **959-day-old source - verify** |
-| Wonderland Bridal | Bridal salon | 954-973-8695 | **959-day-old source - verify** |
-| Allure Party Rentals | Rentals | 954-598-9595 |  |
-|---|---|---|---|
-| Couture Bridal Photography | Photographer | 954-399-0741 |  |
-| Deivis Archbold Photography | Photographer | 954-945-8116 |  |
-| Little's Photography | Photographer | 954-563-0444 |  |
-| Michael Murphy Photographic Imaging | Photographer | 877-564-8555 |  |
-| Vanessa + Johnny | Photographer | 310-819-6544 |  |
-| A Creation Films | Videographer | 305-928-8685 |  |
-| South Florida Wedding Studio | Videographer | 954-778-2267 |  |
-| Bayfront Floral & Event Design | Florist | 954-981-1024 |  |
-| Beautiful Kreations | Florist | 954-933-7530 |  |
-| Concept Flowers | Florist | 305-300-4758 |  |
-| Cortez Event Agency | Florist | 786-983-7092 |  |
-| Flowers Unveiled | Florist | 954-806-8406 |  |
-| Jose Graterol Designs | Florist | 305-788-0562 |  |
-| La Cake Cafe | Cake | 754-779-2965 |  |
-| LoveLee Bakeshop | Cake | 954-715-2050 |  |
-| Panchis Bakery | Cake | 754-600-3370 |  |
-| We Take The Cake | Cake | 954-764-2253 |  |
-| A1A DJs | DJ | 954-531-8146 |  |
-| All Events DJ Services | DJ | 954-290-6032 |  |
-| Eddie B & Company | DJ | 954-721-9911 |  |
-| Vision DJs | DJ | 954-418-2203 |  |
-| CK Entertainment | Band | 954-436-1230 |  |
-| Sekond Nature | Band | 954-607-8334 |  |
-| Cantor Ann Turnoff | Officiant | 561-445-8914 | stale directory - verify |
-| Cantor Ellen Stettner | Officiant | 561-213-1277 | stale directory - verify |
-| Ceremonies by Cindy | Officiant | 954-781-8822 | stale directory - verify |
-| Eddie Rodriguez | Officiant | 305-596-1810 |  |
-| Florida Weddings by Cecilia | Officiant | 561-231-0043 | stale directory - verify |
-| Gracefully Wed Events | Officiant | 561-532-7919 | stale directory - verify |
-| Hey Reverend | Officiant | 604-574-7731 | **604 = British Columbia, not FL - verify** |
-| Just Married by Rosy | Officiant | 305-610-0308 | **personal-looking email - do not mail** |
-| Love Unions | Officiant | 561-504-5107 | stale directory - verify |
-| Marry Me Mendez | Officiant | 305-439-5553 | **may be the same business as Marry Me, LLC below - check before importing** |
-| Mitchell Cohen | Officiant | 954-757-0083 |  |
-| Modern Love South Florida | Officiant | 561-401-3072 | stale directory - verify |
-| Patti Roman | Officiant | 305-283-7647 | **personal-looking email - do not mail** |
-| Rainbow Notary & Nuptials | Officiant | 954-579-3953 |  |
-| SosFloWeddings | Officiant | 305-807-3898 |  |
-| Terri Golden | Officiant | 561-685-9038 | **personal-looking email - do not mail** |
-| The Officiants | Officiant | 800-354-4990 |  |
-| Wedding Officiant Fort Lauderdale | Officiant | 954-240-6234 |  |
-| Asteria Beauty Studio | Hair & makeup | 954-531-8831 |  |
-| Courtney Christopherson Glamour Group | Hair & makeup | 561-289-2138 |  |
-| Hans on Beauty | Hair & makeup | 954-667-9940 |  |
-| A. Marie Events & Design | Planner | 321-205-8326 |  |
-| AM Event Co. | Planner | 954-588-7869 |  |
-| Blue Orchid Events & Design | Planner | 248-840-4204 |  |
-| Event Bliss Design | Planner | 954-463-9120 |  |
-| Fabuluxe Events | Planner | 561-254-2041 |  |
-| Ideal Events | Planner | 305-709-1900 |  |
-| Très Chic Event Planning & Design | Planner | 954-517-1818 |  |
-| A Paella Party | Caterer | 305-252-6669 |  |
-| Bill Hansen Catering | Caterer | 305-858-6660 |  |
-| Catering By Lovables | Caterer | 305-640-1921 |  |
-| Chef's Delights Catering | Caterer | 786-287-6283 |  |
-| Culinary Artz Catering | Caterer | 954-803-8818 | **may be the same business as Florida Cater - same site, check before publishing** |
-| Eggwhites Catering | Caterer | 305-892-2066 |  |
-| Miami Wedding Caterer | Caterer | 305-669-5221 |  |
-| Thierry Isambert Culinary & Event Design | Caterer | 305-635-6626 |  |
-|---|---|---|---|
-| Couture Bridal Photography | Photographer | 954-399-0741 |  |
-| Deivis Archbold Photography | Photographer | 954-945-8116 |  |
-| Little's Photography | Photographer | 954-563-0444 |  |
-| Michael Murphy Photographic Imaging | Photographer | 877-564-8555 |  |
-| Vanessa + Johnny | Photographer | 310-819-6544 |  |
-| A Creation Films | Videographer | 305-928-8685 |  |
-| South Florida Wedding Studio | Videographer | 954-778-2267 |  |
-| Bayfront Floral & Event Design | Florist | 954-981-1024 |  |
-| Beautiful Kreations | Florist | 954-933-7530 |  |
-| Concept Flowers | Florist | 305-300-4758 |  |
-| Cortez Event Agency | Florist | 786-983-7092 |  |
-| Flowers Unveiled | Florist | 954-806-8406 |  |
-| Jose Graterol Designs | Florist | 305-788-0562 |  |
-| La Cake Cafe | Cake | 754-779-2965 |  |
-| LoveLee Bakeshop | Cake | 954-715-2050 |  |
-| Panchis Bakery | Cake | 754-600-3370 |  |
-| We Take The Cake | Cake | 954-764-2253 |  |
-| A1A DJs | DJ | 954-531-8146 |  |
-| All Events DJ Services | DJ | 954-290-6032 |  |
-| Eddie B & Company | DJ | 954-721-9911 |  |
-| Vision DJs | DJ | 954-418-2203 |  |
-| CK Entertainment | Band | 954-436-1230 |  |
-| Sekond Nature | Band | 954-607-8334 |  |
-| Cantor Ann Turnoff | Officiant | 561-445-8914 | stale directory - verify |
-| Cantor Ellen Stettner | Officiant | 561-213-1277 | stale directory - verify |
-| Ceremonies by Cindy | Officiant | 954-781-8822 | stale directory - verify |
-| Eddie Rodriguez | Officiant | 305-596-1810 |  |
-| Florida Weddings by Cecilia | Officiant | 561-231-0043 | stale directory - verify |
-| Gracefully Wed Events | Officiant | 561-532-7919 | stale directory - verify |
-| Hey Reverend | Officiant | 604-574-7731 | **604 = British Columbia, not FL - verify** |
-| Just Married by Rosy | Officiant | 305-610-0308 | **personal-looking email - do not mail** |
-| Love Unions | Officiant | 561-504-5107 | stale directory - verify |
-| Marry Me Mendez | Officiant | 305-439-5553 | **may be the same business as Marry Me, LLC below - check before importing** |
-| Mitchell Cohen | Officiant | 954-757-0083 |  |
-| Modern Love South Florida | Officiant | 561-401-3072 | stale directory - verify |
-| Patti Roman | Officiant | 305-283-7647 | **personal-looking email - do not mail** |
-| Rainbow Notary & Nuptials | Officiant | 954-579-3953 |  |
-| SosFloWeddings | Officiant | 305-807-3898 |  |
-| Terri Golden | Officiant | 561-685-9038 | **personal-looking email - do not mail** |
-| The Officiants | Officiant | 800-354-4990 |  |
-| Wedding Officiant Fort Lauderdale | Officiant | 954-240-6234 |  |
-| Asteria Beauty Studio | Hair & makeup | 954-531-8831 |  |
-| Courtney Christopherson Glamour Group | Hair & makeup | 561-289-2138 |  |
-| Hans on Beauty | Hair & makeup | 954-667-9940 |  |
-| A. Marie Events & Design | Planner | 321-205-8326 |  |
-| AM Event Co. | Planner | 954-588-7869 |  |
-| Blue Orchid Events & Design | Planner | 248-840-4204 |  |
-| Event Bliss Design | Planner | 954-463-9120 |  |
-| Fabuluxe Events | Planner | 561-254-2041 |  |
-| Ideal Events | Planner | 305-709-1900 |  |
-| Très Chic Event Planning & Design | Planner | 954-517-1818 |  |
-| A Paella Party | Caterer | 305-252-6669 |  |
-| Bill Hansen Catering | Caterer | 305-858-6660 |  |
-| Catering By Lovables | Caterer | 305-640-1921 |  |
-| Chef's Delights Catering | Caterer | 786-287-6283 |  |
-| Culinary Artz Catering | Caterer | 954-803-8818 |  |
-| Eggwhites Catering | Caterer | 305-892-2066 |  |
-| Miami Wedding Caterer | Caterer | 305-669-5221 |  |
-| Thierry Isambert Culinary & Event Design | Caterer | 305-635-6626 |  |
+| GelatoGo | Dessert cart | 786-450-0477 |  |
+| Glyk Gelato | Dessert cart | 561-609-4900 | **listed Boca Raton but a Parkland address - verify** |
+| Jae's Jewelers | Jeweler | 305-443-7724 |  |
+| Kirk Jewelers | Jeweler | 305-371-1321 |  |
+| Nemaro Jewelers | Jeweler | 305-358-4399 |  |
+
 
 **Flagged rows are not ready to call.** A `verify` flag means the number came
 from a directory page that search dated as stale, or the area code does not
@@ -471,7 +262,7 @@ will be the slowest yes on this entire list.
 
 ---
 
-## 1. Photographers (54)
+## 1. Photographers (57)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Deivis Archbold Photography | deivisarchbold.com | Fort Lauderdale (6555 Power Line Rd) | 954-945-8116 |  | |  |
@@ -510,6 +301,9 @@ will be the slowest yes on this entire list.
 | Alan Luby Photography |  | West Palm Beach | 561-577-9246 |  | |  |
 | Chris Joriann Photography |  | Palm Beach Gardens | 561-246-9271 |  | | **name/number pairing inferred from page layout - verify** |
 | Frank Donnino Photography |  | Palm Beach Gardens | 561-776-0099 |  | | **name/number pairing inferred from page layout - verify** |
+| Care Studios | careweddings.com | Key Largo | 305-360-2636 |  | |  |
+| Jannette De Llanos Photography | jannettedellanosphotography.com | Key Largo |  |  | |  |
+| Barbara Knowles Wedding Photography |  | Islamorada |  |  | | also planning |
 |---|---|---|---|---|---|---|
 | Lenisse Komatsu Photography | lenisse.com | Fort Lauderdale | | | | |
 | Couture Bridal Photography | couturebridalphotography.com | Boca Raton (137 E Palmetto Park Rd) | 954-399-0741 | mail@couturebridalphotography.com | | |
@@ -524,13 +318,13 @@ will be the slowest yes on this entire list.
 | Poirier Wedding Photography | poirierweddingphotography.com | Palm Beach / Jupiter | | | | |
 | Boogietek Photo+Cinema | boogietek.com | Pembroke Pines | | | | |
 | Mark Salner Photography | marksalnerphotography.com | West Palm Beach | | | | |
-| Vanessa + Johnny | vanessaandjohnny.com | South Florida | 310-819-6544 | hello@vanessaandjohnny.com | | |
+| Vanessa + Johnny | vanessaandjohnny.com | South Florida | 954-417-2193 | hello@vanessaandjohnny.com | | **was published as 310-819-6544 (Los Angeles); a later source gave this local number** |
 | Bruna Bastos Photography | | Boca Raton (3601 N Dixie Hwy) | | | | |
 | Kenneth Appelbaum Photography | | Boca Raton (121 NW 43rd St) | | | | |
 | Beautiful Memories Studio | | Fort Lauderdale | | | | |
 | Andrea Harborne Photography | | Fort Lauderdale | | | | |
 
-## 2. Videographers (11)
+## 2. Videographers (16)
 
 Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 
@@ -539,6 +333,11 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | PRIMEUS Photography & Video |  | Miami |  |  | |  |
 | Videography by Cristina |  | Sunrise |  |  | |  |
 | Bells & Whistles Photography + Videography |  | Miami |  |  | |  |
+| Candid Studios | candidstudios.net | Miami | 844-522-6343 |  | |  |
+| Default Estudios |  | Coral Gables | 786-380-9305 |  | |  |
+| Straightawaymovies |  | Coral Gables | 305-793-6036 |  | |  |
+| VM Productions |  | Miami | 305-239-9555 |  | |  |
+| Shutter & Sound | shutterandsound.com | Miami Beach |  |  | |  |
 |---|---|---|---|---|---|---|
 | Andreo Studio | andreostudio.com | Miami / West Palm Beach | | | | |
 | Megaset Weddings | megasetphotography.com | South Florida | | | | |
@@ -548,7 +347,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Until Forever Photography | untilforeverphotography.com | Fort Lauderdale | | | | |
 | Rimas Films | rimasfilms.com | Miami | | | | |
 
-## 3. Florists (39)
+## 3. Florists (45)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Flowers Unveiled | flowersunveiled.com | Fort Lauderdale (14310 SW 17th St) | 954-806-8406 | hello@flowersunveiled.com | |  |
@@ -574,6 +373,12 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Beldens Florist | beldensflorist.com | West Palm Beach | 561-832-2871 |  | |  |
 | Twice the Style | twicethestyle.net | West Palm Beach | 561-939-9589 |  | |  |
 | Xquisite Events Production | xefla.com | West Palm Beach | 561-988-9798 |  | |  |
+| Floral Fantasy of the Keys | floralfantasyweddings.com | Islamorada | 305-664-1063 |  | |  |
+| Key Largo Flowers & Gifts | keylargoflorist.com | Key Largo | 305-451-3702 |  | |  |
+| Island Blooms | islandblooms.com | Key Largo | 305-304-3504 |  | | upper Keys |
+| Flowers by J&J |  | Marathon | 305-743-5459 |  | |  |
+| Kutchey's Flowers |  | Key West | 305-292-8181 |  | |  |
+| Milan Event Floral & Decor |  | Key West | 305-735-4749 |  | |  |
 |---|---|---|---|---|---|---|
 | Bayfront Floral & Event Design | bayfrontfloral.com | Fort Lauderdale (3414 Griffin Rd) | 954-981-1024 | | | |
 | Saucha Floral Design | sauchafloraldesign.com | Fort Lauderdale (2209 NE 54th St) | | | | |
@@ -647,7 +452,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Vivid Source Events | vividsourceevents.com | Palm Beach County | | | | |
 | Traxx Entertainment | traxxentertainment.com | Florida | | | | |
 
-## 6. Bands & live music (13)
+## 6. Bands & live music (17)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | FM Band Miami |  | Miami |  |  | |  |
@@ -657,6 +462,10 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Inner Music Management |  | Miami |  |  | |  |
 | Sunbeat Entertainment |  | Miami |  |  | |  |
 | La Nota Band |  | Miami |  |  | |  |
+| Florida Music Group | floridamusicgroup.com | Miami | 772-924-9302 |  | | **second number 772-781-7415 published - verify** |
+| The Sparkle Band | thesparkleband.com | Miami |  |  | | **646 = New York area code - verify local presence** |
+| Louis Pettinelli Entertainment |  | Miami |  |  | |  |
+| Mercier's Music |  | Miami |  |  | |  |
 |---|---|---|---|---|---|---|
 | CK Entertainment | ckentertainmentinc.com | South Florida | 954-436-1230 | | | |
 | Sekond Nature | sekondnature.com | Fort Lauderdale | 954-607-8334 | | | |
@@ -700,7 +509,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Just UnI Weddings | | South Florida | | | | |
 | Marry Me, LLC | | South Florida | | | | |
 
-## 8. Hair & makeup (17)
+## 8. Hair & makeup (23)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Tashy Marie Beauty | tashymariebeauty.com | South Florida |  |  | | page ~2yr old - verify |
@@ -712,6 +521,12 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | FeNom Salon |  | Aventura |  |  | |  |
 | Beauty Arquitek |  | Aventura |  |  | |  |
 | The Changing Room |  | North Miami Beach |  |  | |  |
+| Wondrous Look | wondrouslook.com | Miami | 305-890-4778 |  | |  |
+| Beauty Studio | beautystudioinc.com | Miami |  |  | | mobile |
+| Mari D. MUA | maridmua.com | Miami |  |  | | Brickell studio |
+| Miami Beach Glam | miamibeachglam.com | Miami Beach |  |  | |  |
+| Art of Hair by Claudia |  | Miami |  |  | |  |
+| Nova MakeUp and Hair |  | Miami |  |  | |  |
 |---|---|---|---|---|---|---|
 | Asteria Beauty Studio | asteriamakeup.net | Fort Lauderdale | 954-531-8831 | bookings@asteriabeautystudio.com | | |
 | Robbin Junnola Beauty | robbinjunnolabeauty.com | Fort Lauderdale (6278 N Federal Hwy #144) | | | | |
@@ -722,7 +537,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | PriscillaM Beauty | priscillambeauty.com | South Florida | | | | |
 | Glam By Carmen | glambycarmen.info | South Florida | | | | |
 
-## 9. Planners (23)
+## 9. Planners (32)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Ideal Events | idealeventsweddings.com | Miami | 305-709-1900 | idealevents.miami@gmail.com | |  |
@@ -739,6 +554,15 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Suhaag Garden |  | South Florida |  |  | | Indian weddings |
 | Eventsource |  | Miami |  |  | | **5+yr old listing - verify** |
 | JRN Events |  | Boca Raton |  |  | | **5+yr old listing - verify** |
+| Weddings To Go Key West |  | Key West | 305-879-2795 |  | |  |
+| Vidal Wedding & Event Planner |  | Key West | 305-942-1604 |  | | also event photography |
+| Say Yes In Key West |  | Key West | 305-396-7602 |  | | **second number 305-747-5700 published elsewhere - verify** |
+| Little Miss Planner | littlemissplannerkw.com | Key West | 786-334-0124 |  | |  |
+| Family Affair Key West | familyaffairkeywest.com | Key West | 305-433-0700 |  | |  |
+| Ocean Breeze Weddingz |  | Key West | 305-902-7688 |  | |  |
+| Big Day in Key West | bigdayinkeywest.com | Key West | 305-647-9262 |  | |  |
+| Key West Casual Weddings | keywestcasualweddings.com | Key West | 305-849-1179 |  | | no longer offers full planning |
+| As You Wish Wedding Planning |  | Key West | 305-849-1268 |  | |  |
 |---|---|---|---|---|---|---|
 | Blue Orchid Events & Design | blue-orchid-events.com | Fort Lauderdale | 248-840-4204 | | | |
 | Très Chic Event Planning & Design | treschiceventplanning.com | Miramar (18741 SW 39th Ct) | 954-517-1818 | info@treschiceventplanning.com | | |
@@ -926,19 +750,59 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Pretty Little Letters |  | Fort Lauderdale |  |  | | engraving |
 | Kiki's Customized Creations |  | Miami |  |  | |  |
 
+## 20. Dance lessons (5)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Royal Wedding Dance |  | Miami |  |  | | 22 years choreography |
+| Fajardo Elite Dance Academy |  | Miami |  |  | | serves tri-county |
+| vON Dance | vondance.com | South Florida |  |  | |  |
+| The Wedding Dance Studio | theweddingdancestudio.com | South Florida |  |  | |  |
+| Fred Astaire Dance Studios South Florida | fredastaire.com | South Florida |  |  | | **national franchise** |
+
+## 21. Live painter (1)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Carla Schall Live Event Painting | carlaschall.com | Florida |  |  | |  |
+
+## 22. Dessert cart (9)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Glyk Gelato | glyk.com | Boca Raton | 561-609-4900 |  | | **listed Boca Raton but a Parkland address - verify** |
+| GelatoGo | gelatogo.net | Miami | 786-450-0477 |  | |  |
+| The Gelato Bar | urbanicaevents.com | Fort Lauderdale |  |  | |  |
+| I Scream Gelato | iscream-gelato.com | Miami |  |  | |  |
+| HipPOPs | hippops.com | Miami |  |  | | dessert truck |
+| Banana Daddy | eatbananadaddy.com | Miami |  |  | | electric dessert truck |
+| AJ's Coffee Break |  | South Florida |  |  | | mobile coffee cart |
+| El Salvaje Food Trailer |  | Fort Lauderdale |  |  | |  |
+| JJ's Gelato & Coffee |  | Fort Lauderdale |  |  | |  |
+
+## 23. Jeweler (3)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Kirk Jewelers | kirkjewelers.com | Miami | 305-371-1321 |  | |  |
+| Jae's Jewelers | jaesjewelers.com | Coral Gables | 305-443-7724 |  | |  |
+| Nemaro Jewelers | nemarojewelers.com | Miami | 305-358-4399 |  | |  |
+
+
+
 
 
 ---
 
 ## What to do with this
 
-1. **Call the 116 above, unflagged ones first.** The only step waiting on
+1. **Call the 143 above, unflagged ones first.** The only step waiting on
    nothing. Confirm the business, ask for the best address, and attach it on
    `/admin/claims` — no email of ours is sent, so this works today.
 2. **Resolve the `TERMS.md` mailing address.** Nothing can be *emailed* until
    then. The phone-claim flow is the way around it, not a replacement for it:
-   fixing the TODO unblocks the other 242 rows.
-3. **Then photographers and florists** — the top two categories, 93 names.
+   fixing the TODO unblocks the other 266 rows.
+3. **Then photographers and florists** — the top two categories, 102 names.
    Open each site, take the published contact email, fill the row. This needs
    the egress block lifted (see the top of this file) or a human with a
    browser.
@@ -948,13 +812,13 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
    delete the row and make a new listing.
 5. **Send 20–30 a day, hand-written**, one metro at a time. Claim links expire
    after 60 days, so do not mint more than you will actually send inside that
-   window. Minting all 358 at once creates 358 credentials and 358 expiries.
+   window. Minting all 409 at once creates 409 credentials and 409 expiries.
 
-   **This no longer applies: 357 of the 358 are imported.** Every row below
+   **This no longer applies: 408 of the 409 are imported.** Every row below
    except `Marry Me Mendez` is in the database as a listing whose claim token
    was generated and discarded, so the email-match path on `/admin/claims` is
    the *only* route for all of them — there is no link to send to anyone.
-   229 are published and visible on `/vendors`; the rest are drafts, held
+   270 are published and visible on `/vendors`; the rest are drafts, held
    because they have neither a phone nor a website and so give a couple no way
    to make contact.
 6. **One follow-up after 5–7 days, then stop permanently.**
