@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LAUNCH_CITY } from "@/lib/site";
 import { AREAS, type AreaId, areasPresent, isRegionWide, matchesArea } from "@/lib/areas";
 
@@ -21,6 +21,26 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
   const [area, setArea] = useState<AreaId | null>(null);
+
+  // The type row scrolls sideways rather than wrapping, so it stays one line
+  // however many categories exist. Arrows appear only on the side with more.
+  const typeRow = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+  const updateEdges = () => {
+    const el = typeRow.current;
+    if (!el) return;
+    setEdges({
+      left: el.scrollLeft > 4,
+      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 4,
+    });
+  };
+  useEffect(() => {
+    updateEdges();
+    window.addEventListener("resize", updateEdges);
+    return () => window.removeEventListener("resize", updateEdges);
+  }, []);
+  const scrollTypes = (dir: 1 | -1) =>
+    typeRow.current?.scrollBy({ left: dir * typeRow.current.clientWidth * 0.7, behavior: "smooth" });
 
   const categories = useMemo(() => {
     const seen = new Set<string>();
@@ -47,60 +67,126 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
 
   return (
     <>
-      <div className="flex flex-col gap-3 rounded-2xl border border-stone-2 bg-white p-4 shadow-card sm:flex-row sm:items-center">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={`Search vendors, e.g. 'photographer in ${LAUNCH_CITY}'`}
-          aria-label="Search vendors"
-          className="flex-1 rounded-full border border-stone-2 px-5 py-3 text-sm text-ink outline-none focus:border-brand"
-        />
-        <Link
-          href="/planner"
-          className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-center text-sm font-semibold text-white"
-        >
-          Match me with AI
-        </Link>
+      <div className="rounded-2xl border border-stone-2 bg-white p-2 shadow-card lg:flex lg:items-center lg:gap-2">
+        <label className="flex flex-1 items-center gap-3 px-4">
+          <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-stone-3">
+            <circle cx="9" cy="9" r="6" />
+            <path d="m17 17-3.5-3.5" strokeLinecap="round" />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={`Search vendors, e.g. 'photographer in ${LAUNCH_CITY}'`}
+            aria-label="Search vendors"
+            className="w-full bg-transparent py-3 text-sm text-ink outline-none placeholder:text-stone-3"
+          />
+        </label>
+
+        {areaChips.length > 0 && (
+          <div
+            role="group"
+            aria-label="Area"
+            className="flex gap-1 overflow-x-auto rounded-xl bg-stone-4 p-1 [scrollbar-width:none] lg:shrink-0"
+          >
+            {[{ id: null, label: "Anywhere" }, ...areaChips].map((a) => (
+              <button
+                key={a.id ?? "any"}
+                type="button"
+                onClick={() => setArea(a.id === area ? null : a.id)}
+                aria-pressed={a.id === area}
+                className={`whitespace-nowrap rounded-lg px-3.5 py-2 text-sm transition-colors ${
+                  a.id === area
+                    ? "bg-white font-medium text-ink shadow-sm"
+                    : "text-ink-soft/70 hover:text-ink"
+                }`}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {areaChips.length > 0 && (
-        <div className="mt-6 flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-sm font-medium text-ink-soft/60">Area</span>
-          <button type="button" onClick={() => setArea(null)} aria-pressed={area === null}
-            className={`rounded-full border px-4 py-2 text-sm transition-colors ${area === null ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
-            Anywhere
-          </button>
-          {areaChips.map((a) => (
-            <button key={a.id} type="button" onClick={() => setArea(a.id === area ? null : a.id)} aria-pressed={a.id === area}
-              className={`rounded-full border px-4 py-2 text-sm transition-colors ${a.id === area ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
-              {a.label}
-            </button>
-          ))}
-        </div>
-      )}
-
       {categories.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-sm font-medium text-ink-soft/60">Type</span>
-          <button type="button" onClick={() => setCategory(null)} aria-pressed={category === null}
-            className={`rounded-full border px-4 py-2 text-sm transition-colors ${category === null ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
-            All
-          </button>
-          {categories.map((c) => (
-            <button key={c} type="button" onClick={() => setCategory(c === category ? null : c)} aria-pressed={c === category}
-              className={`rounded-full border px-4 py-2 text-sm transition-colors ${c === category ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
-              {c}
-            </button>
-          ))}
+        <div className="relative mt-5">
+          <div
+            ref={typeRow}
+            onScroll={updateEdges}
+            role="group"
+            aria-label="Vendor type"
+            className="flex gap-2 overflow-x-auto scroll-px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {[null, ...categories].map((c) => (
+              <button
+                key={c ?? "all"}
+                type="button"
+                onClick={() => setCategory(c === category ? null : c)}
+                aria-pressed={c === category}
+                className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[13px] transition-colors ${
+                  c === category
+                    ? "border-ink bg-ink text-white"
+                    : "border-stone-2 bg-white text-ink-soft/80 hover:border-stone-5 hover:text-ink"
+                }`}
+              >
+                {c ?? "All types"}
+              </button>
+            ))}
+          </div>
+          {edges.left && (
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex w-20 items-center justify-start bg-gradient-to-r from-white via-white/90 to-transparent">
+              <button
+                type="button"
+                onClick={() => scrollTypes(-1)}
+                aria-label="Scroll vendor types left"
+                className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-stone-2 bg-white text-ink-soft shadow-sm hover:text-ink sm:flex"
+              >
+                <span aria-hidden>‹</span>
+              </button>
+            </div>
+          )}
+          {edges.right && (
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex w-20 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent">
+              <button
+                type="button"
+                onClick={() => scrollTypes(1)}
+                aria-label="Scroll vendor types right"
+                className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-stone-2 bg-white text-ink-soft shadow-sm hover:text-ink sm:flex"
+              >
+                <span aria-hidden>›</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      <p className="mt-6 text-sm text-ink-soft/60">
-        {filtered.length === vendors.length ? `${vendors.length} vendors` : `${filtered.length} of ${vendors.length} vendors`}
-        {area && filtered.some((v) => isRegionWide(v.city)) && (
-          <span> &middot; includes vendors who cover all of South Florida</span>
-        )}
-      </p>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-stone-2 pt-5">
+        <p className="text-sm text-ink-soft/60">
+          {filtered.length === vendors.length ? `${vendors.length} vendors` : `${filtered.length} of ${vendors.length} vendors`}
+          {area && filtered.some((v) => isRegionWide(v.city)) && (
+            <span> &middot; includes vendors who cover all of South Florida</span>
+          )}
+          {(query || category || area) && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setCategory(null);
+                setArea(null);
+              }}
+              className="ml-3 font-medium text-brand-text hover:text-brand-deep"
+            >
+              Clear filters
+            </button>
+          )}
+        </p>
+        <Link
+          href="/planner"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-text hover:text-brand-deep"
+        >
+          <span aria-hidden>✦</span> Not sure who you need? Match me with AI
+        </Link>
+      </div>
 
       {filtered.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-10 text-center text-sm text-ink-soft/70">
