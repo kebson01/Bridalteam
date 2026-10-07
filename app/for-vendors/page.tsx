@@ -79,6 +79,10 @@ export default function ForVendorsPage() {
               <Link href={LOGIN_URL} className="font-semibold text-brand-text">
                 Log in
               </Link>
+              {" · "}
+              <Link href="/pricing" className="font-semibold text-brand-text">
+                See vendor plans
+              </Link>
             </p>
           </div>
         </div>

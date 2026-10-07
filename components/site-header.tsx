@@ -35,7 +35,10 @@ const NAV = [
   { label: "Inspiration", href: "/inspiration" },
   ...(SHOW_VENDOR_DIRECTORY ? [{ label: "Find Vendors", href: "/vendors" }] : []),
   { label: "Guides", href: "/guides" },
-  { label: "Pricing", href: "/pricing" },
+  // Couples use everything free, so a Pricing tab only ever answered a
+  // question they didn't have. Vendors are the ones who pay; they get a way in
+  // here, and /for-vendors links on to the plans. Pricing stays in the footer.
+  { label: "List your business", href: "/for-vendors" },
 ];
 
 type Viewer = { id: string; name: string; firstName: string; avatar: string; email: string };
@@ -288,13 +291,13 @@ export default function SiteHeader() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+              className={`whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
                 isActive(item.href)
                   ? "bg-stone-4 text-ink"
                   : "text-ink-soft/80 hover:bg-stone-4/70 hover:text-ink"
@@ -305,7 +308,7 @@ export default function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           {signedIn ? (
             <>
               <Link
@@ -336,7 +339,7 @@ export default function SiteHeader() {
         </div>
 
         {signedIn && viewer && (
-          <div className="ml-auto mr-1 md:hidden">
+          <div className="ml-auto mr-1 lg:hidden">
             <NotificationsBell userId={viewer.id} />
           </div>
         )}
@@ -345,7 +348,7 @@ export default function SiteHeader() {
           aria-label="Toggle menu"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-ink md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-ink lg:hidden"
         >
           <svg width="22" height="16" viewBox="0 0 23 15.3" fill="currentColor">
             <path d="M0,0h23v2.6H0V0 M0,6.4h23v2.6H0V6.4 M0,12.8h23v2.6H0V12.8z" />
@@ -354,7 +357,7 @@ export default function SiteHeader() {
       </div>
 
       {open && (
-        <nav className="border-t border-stone-2 bg-white px-5 py-4 md:hidden">
+        <nav className="border-t border-stone-2 bg-white px-5 py-4 lg:hidden">
           <ul className="flex flex-col gap-1">
             {NAV.map((item) => (
               <li key={item.href}>
