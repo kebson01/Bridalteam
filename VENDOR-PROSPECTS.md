@@ -1,14 +1,14 @@
 # South Florida vendor prospects
 
 A research shortlist for the founding-vendor outreach in `VENDOR-OUTREACH.md`.
-444 real businesses across 25 categories, sourced from public web search in three
-passes: 117 on 2026-10-01, 73 on 2026-10-07, and a further 254 later the same
+480 real businesses across 29 categories, sourced from public web search in three
+passes: 117 on 2026-10-01, 73 on 2026-10-07, and a further 290 later the same
 day. Later passes also filled gaps in rows from earlier ones, so a row's data
 may be newer than the row.
 
 **This file is a record of what is in the database, not a staging area.** That
-is a reversal from how it started, and it matters: 443 of these 444 rows are
-live listings created by `create_claimable_listing`, and **292 of them are
+is a reversal from how it started, and it matters: 479 of these 480 rows are
+live listings created by `create_claimable_listing`, and **310 of them are
 published and visible to couples on `/vendors`** right now.
 
 Publishing is no longer withheld until a vendor claims their listing. A
@@ -20,7 +20,7 @@ gallery, Inspiration posts, an inquiry inbox, placement. See the note at the
 top of `lib/tiers.ts`.
 
 A row is held back as a draft only when it has **neither a phone nor a
-website**, because then it gives a couple no way to make contact at all. 151
+website**, because then it gives a couple no way to make contact at all. 169
 rows are in that state. Fill in either field and it publishes.
 
 ## Read this before using it
@@ -28,7 +28,7 @@ rows are in that state. Fill in either field and it publishes.
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Almost no contact emails — 20 of 444.** The sessions that built this could
+**1. Almost no contact emails — 20 of 480.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -42,7 +42,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 424 rows the email still has to be gathered by hand, from each
+For the remaining 460 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -70,8 +70,8 @@ regardless of how many prospects are listed here.
   stated. A blank website means the business is real and named in results but no
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
-  section above; 151 of the 444 qualify.
-- **Email** — empty on 424 of 444 rows. Fill from the vendor's own site. Where
+  section above; 158 of the 480 qualify.
+- **Email** — empty on 460 of 480 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -82,10 +82,10 @@ Verify before you contact. A search snippet is a lead, not a fact — check the
 business still trades, still does weddings, and is in the metro before you spend
 a claim link on it.
 
-## Call these 151 first — the widest unblocked path
+## Call these 158 first — the widest unblocked path
 
-Every table below has a **Phone** column, and 151 of the 444 rows have a number
-because a search result published one. Those 151 can be contacted **today**:
+Every table below has a **Phone** column, and 158 of the 480 rows have a number
+because a search result published one. Those 158 can be contacted **today**:
 
 - **CAN-SPAM does not apply to a phone call.** The unresolved
   `[TODO: mailing address for legal notices]` in `TERMS.md` blocks commercial
@@ -258,6 +258,14 @@ there is one row per business.
 | Kirk Jewelers | Jeweler | 305-371-1321 |  |
 | Nemaro Jewelers | Jeweler | 305-358-4399 |  |
 | Balloon World Events | Decor | 954-702-6109 |  |
+| J&G Entertainment | Hora loca | 305-677-2429 |  |
+| Led Robot Miami | Hora loca | 954-530-6136 | **number from a Facebook listing; 954 area code vs Miami address - verify** |
+| Miami Cigar Entertainment | Cigar roller | 845-549-8751 | **845 = New York Hudson Valley area code - verify** |
+| Carolyn Drummond | Travel agent | 305-432-5108 |  |
+| Grisel Velasco | Travel agent | 305-282-0809 |  |
+| Karrah Kazravan | Travel agent | 844-950-2143 |  |
+| Mario Lopez | Travel agent | 954-330-1210 |  |
+
 
 
 
@@ -476,7 +484,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Vivid Source Events | vividsourceevents.com | Palm Beach County | | | | |
 | Traxx Entertainment | traxxentertainment.com | Florida | | | | |
 
-## 6. Bands & live music (17)
+## 6. Bands & live music (25)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | FM Band Miami |  | Miami |  |  | |  |
@@ -490,6 +498,14 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | The Sparkle Band | thesparkleband.com | Miami |  |  | | **646 = New York area code - verify local presence** |
 | Louis Pettinelli Entertainment |  | Miami |  |  | |  |
 | Mercier's Music |  | Miami |  |  | |  |
+| Mariachi los Mensajeros |  | Miami |  |  | |  |
+| Mariachi Fiesta Grande |  | Miami |  |  | |  |
+| Mariachi Mexico 88 |  | Miami |  |  | |  |
+| Mariachi Aventureros |  | Miami |  |  | |  |
+| Hermanos Mora Arriaga | hermanosmoraarriaga.com | Fort Lauderdale |  |  | | mariachi |
+| Fondo Blanco Band |  | Miami |  |  | | **15-month-old listing - verify** |
+| Caesar Vera y El Sexteto Nuevoson |  | Miami |  |  | | salsa |
+| Kenny Quintero Y Su Orquesta Brava |  | Miami |  |  | |  |
 |---|---|---|---|---|---|---|
 | CK Entertainment | ckentertainmentinc.com | South Florida | 954-436-1230 | | | |
 | Sekond Nature | sekondnature.com | Fort Lauderdale | 954-607-8334 | | | |
@@ -854,6 +870,56 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Needlestitch |  | Fort Lauderdale |  |  | |  |
 | B&P Alterations |  | Fort Lauderdale |  |  | |  |
 
+## 26. Hora loca (7)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| J&G Entertainment | jandgentertainment.com | North Miami Beach | 305-677-2429 |  | | stilt walkers, Brazilian dancers, LED robots |
+| Led Robot Miami | ledrobotsmiami.com | Miami Lakes | 954-530-6136 |  | | **number from a Facebook listing; 954 area code vs Miami address - verify** |
+| Blast Party Entertainment | blastpartyentertainmentllc.com | Miami |  |  | |  |
+| The Hora Loca Guys | thehoralocaguys.com | South Florida |  |  | | also DJ + photo booth |
+| ArteVivo Dance Studio |  | Miami |  |  | | dancers, drummers, percussionists |
+| Miami Superhero | miamisuperhero.com | Miami |  |  | |  |
+| The Party Characters | thepartycharacters.com | Miami |  |  | |  |
+
+## 27. Cigar roller (2)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Miami Cigar Entertainment | miamicigarentertainment.com | Miami | 845-549-8751 |  | | **845 = New York Hudson Valley area code - verify** |
+| Cigar Bella | cigarbella.com | Miami |  |  | |  |
+
+## 28. Restrooms (6)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| A Royal Flush | aroyalflush.com | Miami |  |  | | **2yr-old listing - verify** |
+| Coastal Mobile Restrooms | coastalmobilerestrooms.com | West Palm Beach |  |  | |  |
+| Royal Restrooms Florida | royalrestroomsfl.com | Fort Lauderdale |  |  | | ADA units |
+| Jones Luxury Restrooms |  | Florida |  |  | |  |
+| South Florida Restroom Trailers | southfloridarestroomtrailers.com | South Florida |  |  | |  |
+| Island Restrooms | islandrestrooms.com | Florida Keys |  |  | | also generators |
+
+## 29. Travel agent (13)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Grisel Velasco |  | Miami | 305-282-0809 |  | | destination weddings + honeymoons |
+| Karrah Kazravan |  | Miami | 844-950-2143 |  | | honeymoons |
+| Mario Lopez |  | Hollywood | 954-330-1210 |  | | destination weddings |
+| Carolyn Drummond |  | Miramar | 305-432-5108 |  | | destination weddings |
+| Tie the Knot Abroad |  | Miami |  |  | |  |
+| Anchored South Travel Services |  | Miami |  |  | |  |
+| Luxevo Vacations |  | Miami |  |  | |  |
+| Fairytale Getaways |  | Miami |  |  | |  |
+| Travel Adventures by Patrice |  | Miami |  |  | |  |
+| Bailey's Luxury Travel |  | Miramar |  |  | |  |
+| Cruise Planners - Christine Erwin |  | Fort Lauderdale |  |  | |  |
+| Travelmation |  | Fort Lauderdale |  |  | |  |
+| The Vacation Group |  | South Florida |  |  | |  |
+
+
+
 
 
 
@@ -864,12 +930,12 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 
 ## What to do with this
 
-1. **Call the 151 above, unflagged ones first.** The only step waiting on
+1. **Call the 158 above, unflagged ones first.** The only step waiting on
    nothing. Confirm the business, ask for the best address, and attach it on
    `/admin/claims` — no email of ours is sent, so this works today.
 2. **Resolve the `TERMS.md` mailing address.** Nothing can be *emailed* until
    then. The phone-claim flow is the way around it, not a replacement for it:
-   fixing the TODO unblocks the other 293 rows.
+   fixing the TODO unblocks the other 322 rows.
 3. **Then photographers and florists** — the top two categories, 102 names.
    Open each site, take the published contact email, fill the row. This needs
    the egress block lifted (see the top of this file) or a human with a
@@ -880,9 +946,9 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
    delete the row and make a new listing.
 5. **Send 20–30 a day, hand-written**, one metro at a time. Claim links expire
    after 60 days, so do not mint more than you will actually send inside that
-   window. Minting all 444 at once creates 444 credentials and 444 expiries.
+   window. Minting all 480 at once creates 480 credentials and 480 expiries.
 
-   **This no longer applies: 443 of the 444 are imported.** Every row below
+   **This no longer applies: 479 of the 480 are imported.** Every row below
    except `Marry Me Mendez` is in the database as a listing whose claim token
    was generated and discarded, so the email-match path on `/admin/claims` is
    the *only* route for all of them — there is no link to send to anyone.
