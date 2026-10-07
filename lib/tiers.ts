@@ -5,6 +5,19 @@
  * place.
  *
  * Plans map 1:1 to `organizations.plan` ("free" | "pro" | "featured").
+ *
+ * What Free includes, and why it includes the outbound link: the directory's
+ * job is to let a couple find a vendor and then reach them. A listing carrying
+ * only a name, a category and a city is a dead end, and most of the directory
+ * is imported businesses that have not claimed anything yet and so are on Free
+ * by definition — gating their link would make the directory useless exactly
+ * where it has the most rows. The link also points at a URL the business
+ * already publishes, so withholding it protects nothing.
+ *
+ * What the paid tiers sell is their *work* and their *reach*: an unlimited
+ * gallery, a place in the Inspiration feed, an inquiry inbox, stats, top
+ * placement, a badge. Those are things Bridal Team provides. A link to
+ * somebody's own website is not.
  */
 
 export type Plan = "free" | "pro" | "featured";
@@ -45,11 +58,13 @@ export const TIERS: Record<Plan, TierMeta> = {
     plan: "free",
     name: "Free",
     priceMonthly: 0,
-    tagline: "Claim your listing and show a few photos.",
+    tagline: "Your listing, your link, and a few photos.",
     entitlements: {
       galleryLimit: 5,
       canPostInspiration: false,
-      canLinkSite: false,
+      // Free, deliberately -- see the note at the top of this file. Couples
+      // must be able to reach a vendor from an unclaimed listing.
+      canLinkSite: true,
       canReceiveInquiries: false,
       hasStats: false,
       featuredPlacement: false,

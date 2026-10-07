@@ -66,13 +66,33 @@ describe("effectivePlan", () => {
     expect(effectivePlan({}, NOW)).toBe("free");
   });
 
+  it("lets a Free listing link out to the vendor's own site", () => {
+    // The directory is mostly imported businesses that have claimed nothing, so
+    // they are on Free by definition. Gating the outbound link would leave a
+    // couple on a page with a name, a category and a city and no way to reach
+    // anyone -- which is the directory failing at its only job. Flipping
+    // free.canLinkSite back to false is what this test exists to catch.
+    const ent = entitlements(effectivePlan({ plan: "free" }, NOW));
+    expect(ent.canLinkSite).toBe(true);
+  });
+
+  it("still sells the paid tiers on work and reach, not on the link", () => {
+    // What Free must NOT include, or there is nothing left to charge for.
+    const ent = entitlements(effectivePlan({ plan: "free" }, NOW));
+    expect(ent.canReceiveInquiries).toBe(false);
+    expect(ent.canPostInspiration).toBe(false);
+    expect(ent.hasStats).toBe(false);
+    expect(ent.galleryLimit).toBe(5);
+    expect(ent.badge).toBe(false);
+    expect(ent.featuredPlacement).toBe(false);
+  });
+
   it("unlocks exactly what Pro unlocks, for a comped vendor", () => {
-    // The point of the whole mechanism: a founding vendor's listing shows the
-    // link to their own site and can take inquiries.
+    // Now that the outbound link is free, the inquiry inbox and the unlimited
+    // gallery are what a comp actually buys -- so those are what this asserts.
     const ent = entitlements(
       effectivePlan({ plan: "free", comp_plan: "pro", comp_expires_at: future }, NOW),
     );
-    expect(ent.canLinkSite).toBe(true);
     expect(ent.canReceiveInquiries).toBe(true);
     expect(ent.galleryLimit).toBeNull();
     // Still not Featured: no badge, no top placement.
