@@ -1,14 +1,14 @@
 # South Florida vendor prospects
 
 A research shortlist for the founding-vendor outreach in `VENDOR-OUTREACH.md`.
-480 real businesses across 29 categories, sourced from public web search in three
-passes: 117 on 2026-10-01, 73 on 2026-10-07, and a further 290 later the same
+513 real businesses across 34 categories, sourced from public web search in three
+passes: 117 on 2026-10-01, 73 on 2026-10-07, and a further 323 later the same
 day. Later passes also filled gaps in rows from earlier ones, so a row's data
 may be newer than the row.
 
 **This file is a record of what is in the database, not a staging area.** That
-is a reversal from how it started, and it matters: 479 of these 480 rows are
-live listings created by `create_claimable_listing`, and **310 of them are
+is a reversal from how it started, and it matters: 512 of these 513 rows are
+live listings created by `create_claimable_listing`, and **333 of them are
 published and visible to couples on `/vendors`** right now.
 
 Publishing is no longer withheld until a vendor claims their listing. A
@@ -20,7 +20,7 @@ gallery, Inspiration posts, an inquiry inbox, placement. See the note at the
 top of `lib/tiers.ts`.
 
 A row is held back as a draft only when it has **neither a phone nor a
-website**, because then it gives a couple no way to make contact at all. 169
+website**, because then it gives a couple no way to make contact at all. 179
 rows are in that state. Fill in either field and it publishes.
 
 ## Read this before using it
@@ -28,7 +28,7 @@ rows are in that state. Fill in either field and it publishes.
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Almost no contact emails — 20 of 480.** The sessions that built this could
+**1. Almost no contact emails — 20 of 513.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -42,7 +42,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 460 rows the email still has to be gathered by hand, from each
+For the remaining 493 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -70,8 +70,8 @@ regardless of how many prospects are listed here.
   stated. A blank website means the business is real and named in results but no
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
-  section above; 158 of the 480 qualify.
-- **Email** — empty on 460 of 480 rows. Fill from the vendor's own site. Where
+  section above; 167 of the 513 qualify.
+- **Email** — empty on 493 of 513 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -82,10 +82,10 @@ Verify before you contact. A search snippet is a lead, not a fact — check the
 business still trades, still does weddings, and is in the metro before you spend
 a claim link on it.
 
-## Call these 158 first — the widest unblocked path
+## Call these 167 first — the widest unblocked path
 
-Every table below has a **Phone** column, and 158 of the 480 rows have a number
-because a search result published one. Those 158 can be contacted **today**:
+Every table below has a **Phone** column, and 167 of the 513 rows have a number
+because a search result published one. Those 167 can be contacted **today**:
 
 - **CAN-SPAM does not apply to a phone call.** The unresolved
   `[TODO: mailing address for legal notices]` in `TERMS.md` blocks commercial
@@ -156,9 +156,11 @@ there is one row per business.
 | We Take The Cake | Cake | 954-764-2253 |  |
 | A1A DJs | DJ | 954-531-8146 |  |
 | All Events DJ Services | DJ | 954-290-6032 |  |
+| DJ Javier Cabal & Event Services | DJ | 786-708-0848 |  |
 | Eddie B & Company | DJ | 954-721-9911 |  |
 | Palm Beach Party DJ | DJ | 561-285-2640 | **1600-day-old source - verify** |
 | Vision DJs | DJ | 954-418-2203 |  |
+| Zeta Event Productions | DJ | 954-732-1350 | **second number 786-452-8742 published - verify** |
 | CK Entertainment | Band | 954-436-1230 |  |
 | Florida Music Group | Band | 772-924-9302 | **second number 772-781-7415 published - verify** |
 | Sekond Nature | Band | 954-607-8334 |  |
@@ -205,11 +207,15 @@ there is one row per business.
 | Weddings To Go Key West | Planner | 305-879-2795 |  |
 | A Paella Party | Caterer | 305-252-6669 |  |
 | Bill Hansen Catering | Caterer | 305-858-6660 |  |
+| Broward Catering | Caterer | 954-983-6937 | Jamaican + Haitian; **listing marked current only through 2024 - verify** |
 | Catering By Lovables | Caterer | 305-640-1921 |  |
 | Chef's Delights Catering | Caterer | 786-287-6283 |  |
 | Culinary Artz Catering | Caterer | 954-803-8818 | **may be the same business as Florida Cater - same site, check before publishing** |
+| Dade County Food Group | Caterer | 305-965-7764 |  |
 | Eggwhites Catering | Caterer | 305-892-2066 |  |
+| Hugh's Catering | Caterer | 954-563-4844 |  |
 | Miami Wedding Caterer | Caterer | 305-669-5221 |  |
+| Sensory Delights | Caterer | 954-394-8465 |  |
 | Thierry Isambert Culinary & Event Design | Caterer | 305-635-6626 |  |
 | Atlantic Wedding Chapel | Venue | 954-461-5520 |  |
 | Beth David Congregation | Venue | 305-854-3911 | **two addresses and two numbers published - verify** |
@@ -265,6 +271,10 @@ there is one row per business.
 | Grisel Velasco | Travel agent | 305-282-0809 |  |
 | Karrah Kazravan | Travel agent | 844-950-2143 |  |
 | Mario Lopez | Travel agent | 954-330-1210 |  |
+| Firepower Displays | Fireworks | 305-258-8820 |  |
+| Fireworks Over Miami | Fireworks | 305-305-0191 |  |
+| My 3 Sons Fireworks | Fireworks | 561-210-5176 |  |
+
 
 
 
@@ -457,7 +467,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Elegant Temptations | eleganttemptations.com | Miami | | | | |
 | Johnson's Custom Cakes | | South Florida | | | | |
 
-## 5. DJs (22)
+## 5. DJs (26)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | The Mix DJs | themixdjs.com | Miami / Fort Lauderdale / WPB |  |  | |  |
@@ -469,6 +479,10 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | A&A Musik |  | Miramar |  |  | |  |
 | LIVE305 Entertainment |  | Hollywood |  |  | |  |
 | Palm Beach Party DJ | palmbeachpartydj.com | Wellington | 561-285-2640 |  | | **1600-day-old source - verify** |
+| DJ Javier Cabal & Event Services |  | Miami | 786-708-0848 |  | |  |
+| Zeta Event Productions |  | Miami | 954-732-1350 |  | | **second number 786-452-8742 published - verify** |
+| Fiesta Time Entertainment |  | South Florida |  |  | | serves the Keys too; number was masked in the listing |
+| Rhythm City Productions |  | Hollywood |  |  | | 30+ years; number was masked in the listing |
 |---|---|---|---|---|---|---|
 | Eddie B & Company | eddieb.com | Fort Lauderdale | 954-721-9911 | eddie@eddieb.com | | |
 | A1A DJs | a1adjs.com | South Florida | 954-531-8146 | | | |
@@ -616,7 +630,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Urbanica Luxury Events | urbanicaevents.com | Fort Lauderdale | | | | |
 | Rodriguez Event Design | | South Florida | | | | |
 
-## 10. Caterers (20)
+## 10. Caterers (23)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Bill Hansen Catering | billhansencatering.com | Coconut Grove | 305-858-6660 |  | | serves Miami + Ft Lauderdale |
@@ -627,11 +641,14 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | A Paella Party |  | Miami | 305-252-6669 |  | |  |
 | VNV Events | vnvevents.com | Sunrise |  |  | |  |
 | Premier Event Catering | eatwithpremier.com | Aventura |  |  | | kosher |
+| Sensory Delights | sensorydelights.net | Pembroke Pines | 954-394-8465 |  | | Caribbean + Haitian cuisine |
+| Broward Catering | browardcatering.com | Fort Lauderdale | 954-983-6937 |  | | Jamaican + Haitian; **listing marked current only through 2024 - verify** |
+| Dade County Food Group |  | Miami | 305-965-7764 |  | | Caribbean + Latin American |
 |---|---|---|---|---|---|---|
 | Another Perfect Party | anotherperfectparty.com | Palm Beach / Broward / Dade | | | | |
 | 954 Catering | catering954.com | Fort Lauderdale | | | | |
 | Boca Joe's Catering | bocajoescatering.com | South Florida | | | | |
-| Hugh's Catering | hughscatering.com | South Florida | | | | |
+| Hugh's Catering | hughscatering.com | South Florida | 954-563-4844 | | | |
 | Catering by Kerrisha | cateringbykerrisha.com | South Florida | | | | |
 | Florida Cater | floridacater.com | Fort Lauderdale | | | | |
 | Eggwhites Catering | eggwhitescatering.com | Miami | 305-892-2066 | | | |
@@ -641,7 +658,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Kosher From Z Heart | kosherfromzheart.com | South Florida | | | | |
 | Culinary Artz Catering | | South Florida | 954-803-8818 | | | **may be the same business as Florida Cater - same site, check before publishing** |
 
-## 11. Venues (45) — approach last
+## 11. Venues (51) — approach last
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 | Sundy House |  | Delray Beach |  |  | |  |
@@ -678,6 +695,12 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Historic Virginia Key Beach Park |  | Miami |  |  | |  |
 | Fort Lauderdale Historical Society |  | Fort Lauderdale |  |  | |  |
 | Wine + Garden |  | Fort Lauderdale |  |  | |  |
+| Stonebridge Country Club |  | Boca Raton |  |  | | country club |
+| Boca Lago Golf & Country Club |  | Boca Raton |  |  | | 35-350 guests |
+| Boca Dunes Golf & Country Club |  | Boca Raton |  |  | |  |
+| The Club at Boca Pointe |  | Boca Raton |  |  | |  |
+| Jacaranda Country Club | jacarandacountryclub.com | Plantation |  |  | |  |
+| Plantation Preserve Golf Course & Club |  | Plantation |  |  | |  |
 |---|---|---|---|---|---|---|
 | Bonnet House Museum & Gardens | bonnethouse.org | Fort Lauderdale | | | | |
 | Boatyard | boatyard.restaurant | Fort Lauderdale | | | | |
@@ -735,9 +758,10 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Kings Rentals | kings-rental.com | Miami | 786-541-4892 | kingsrental@hotmail.com | |  |
 | Miami Uplighting Rentals | miamiuplightingrentals.com | Miami | 786-755-3431 |  | |  |
 
-## 15. Bridal salon (16)
+## 15. Bridal salon (17)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
+| ANV Bridal Valet | anvbridalvalet.com | Fort Lauderdale |  |  | | **attire care on the day, NOT vehicle parking** |
 |---|---|---|---|---|---|---|
 | Boca Raton Bridal | bocaratonbridal.net | Boca Raton | 561-447-6541 |  | | **959-day-old source - verify** |
 | Amazing Brides Couture |  | Boca Raton | 561-372-9377 |  | | **959-day-old source - verify** |
@@ -918,6 +942,52 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Travelmation |  | Fort Lauderdale |  |  | |  |
 | The Vacation Group |  | South Florida |  |  | |  |
 
+## 30. Event staffing (2)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Ziva Staffing |  | Miami |  |  | | bar staff, servers, banquet managers |
+| SoleMar Events & Waitstaff Services |  | Fort Lauderdale |  |  | | setup, service, cleanup |
+
+## 31. Valet parking (4)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Farber Parking | farberparking.com | South Florida |  |  | | NPA-certified |
+| AV Valet Parking Miami | avvaletparkingmiami.com | Miami |  |  | |  |
+| Soflo Valet | soflovalet.com | Fort Lauderdale |  |  | |  |
+| 717 Parking | 717parking.com | South Florida |  |  | |  |
+
+## 32. Security (2)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| FSO Guard | fsoguard.us | Miami |  |  | | licensed event security |
+| IGS Security | igssecurityusa.com | Miami |  |  | | FDACS-certified |
+
+## 33. AV production (4)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Mia Sound Production | miasoundproduction.com | Miami |  |  | |  |
+| Master Sound Productions | mastersoundpro.com | Miami |  |  | | serves the Keys too |
+| Monster Sound Productions |  | Miami |  |  | |  |
+| SoFlo Studio | soflostudio.com | Miami |  |  | |  |
+
+## 34. Fireworks (7)
+
+| Business | Website | City | Phone | Email | Sent | Outcome |
+|---|---|---|---|---|---|---|
+| Fireworks Over Miami | fireworksovermiami.com | Miami | 305-305-0191 |  | | barges for waterfront venues |
+| Firepower Displays | firepowerdisplays.com | Miami | 305-258-8820 |  | | handles permits |
+| My 3 Sons Fireworks | 3sonspyro.com | Jupiter | 561-210-5176 |  | | PGI certified |
+| Pyro Pros Fireworks | pyroprosfl.com | Miami |  |  | |  |
+| Add Fire | addfire.com | Miami |  |  | | shot from own barges |
+| FX Pro | fireworkspros.com | Florida |  |  | |  |
+| Ghost Coast Entertainment | ghostcoastentertainment.com | Florida |  |  | |  |
+
+
+
 
 
 
@@ -930,12 +1000,12 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 
 ## What to do with this
 
-1. **Call the 158 above, unflagged ones first.** The only step waiting on
+1. **Call the 167 above, unflagged ones first.** The only step waiting on
    nothing. Confirm the business, ask for the best address, and attach it on
    `/admin/claims` — no email of ours is sent, so this works today.
 2. **Resolve the `TERMS.md` mailing address.** Nothing can be *emailed* until
    then. The phone-claim flow is the way around it, not a replacement for it:
-   fixing the TODO unblocks the other 322 rows.
+   fixing the TODO unblocks the other 346 rows.
 3. **Then photographers and florists** — the top two categories, 102 names.
    Open each site, take the published contact email, fill the row. This needs
    the egress block lifted (see the top of this file) or a human with a
@@ -946,9 +1016,9 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
    delete the row and make a new listing.
 5. **Send 20–30 a day, hand-written**, one metro at a time. Claim links expire
    after 60 days, so do not mint more than you will actually send inside that
-   window. Minting all 480 at once creates 480 credentials and 480 expiries.
+   window. Minting all 513 at once creates 513 credentials and 513 expiries.
 
-   **This no longer applies: 479 of the 480 are imported.** Every row below
+   **This no longer applies: 512 of the 513 are imported.** Every row below
    except `Marry Me Mendez` is in the database as a listing whose claim token
    was generated and discarded, so the email-match path on `/admin/claims` is
    the *only* route for all of them — there is no link to send to anyone.
