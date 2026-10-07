@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { LAUNCH_CITY } from "@/lib/site";
+import { AREAS, type AreaId, areasPresent, isRegionWide, matchesArea } from "@/lib/areas";
 
 export interface DirectoryVendor {
   org_id: string;
@@ -19,6 +20,7 @@ export interface DirectoryVendor {
 export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVendor[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const [area, setArea] = useState<AreaId | null>(null);
 
   const categories = useMemo(() => {
     const seen = new Set<string>();
@@ -26,16 +28,22 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
     return [...seen].sort();
   }, [vendors]);
 
+  // Only offer an area that something is actually in, so a filter can never
+  // lead to an empty page.
+  const areaIds = useMemo(() => areasPresent(vendors.map((v) => v.city)), [vendors]);
+  const areaChips = useMemo(() => AREAS.filter((a) => areaIds.includes(a.id)), [areaIds]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return vendors.filter((v) => {
       if (category && v.category !== category) return false;
+      if (area && !matchesArea(v.city, area)) return false;
       if (!q) return true;
       return [v.business_name, v.category, v.city, v.region, v.description]
         .filter(Boolean)
         .some((f) => String(f).toLowerCase().includes(q));
     });
-  }, [vendors, query, category]);
+  }, [vendors, query, category, area]);
 
   return (
     <>
@@ -55,8 +63,25 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
         </Link>
       </div>
 
+      {areaChips.length > 0 && (
+        <div className="mt-6 flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-sm font-medium text-ink-soft/60">Area</span>
+          <button type="button" onClick={() => setArea(null)} aria-pressed={area === null}
+            className={`rounded-full border px-4 py-2 text-sm transition-colors ${area === null ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
+            Anywhere
+          </button>
+          {areaChips.map((a) => (
+            <button key={a.id} type="button" onClick={() => setArea(a.id === area ? null : a.id)} aria-pressed={a.id === area}
+              className={`rounded-full border px-4 py-2 text-sm transition-colors ${a.id === area ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
+              {a.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {categories.length > 0 && (
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-sm font-medium text-ink-soft/60">Type</span>
           <button type="button" onClick={() => setCategory(null)} aria-pressed={category === null}
             className={`rounded-full border px-4 py-2 text-sm transition-colors ${category === null ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
             All
@@ -72,6 +97,9 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
 
       <p className="mt-6 text-sm text-ink-soft/60">
         {filtered.length === vendors.length ? `${vendors.length} vendors` : `${filtered.length} of ${vendors.length} vendors`}
+        {area && filtered.some((v) => isRegionWide(v.city)) && (
+          <span> &middot; includes vendors who cover all of South Florida</span>
+        )}
       </p>
 
       {filtered.length === 0 ? (
@@ -105,7 +133,14 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                 <h3 className="text-lg font-medium text-ink">{v.business_name}</h3>
                 {(v.category || v.city) && (
                   <p className="mt-1 text-sm text-ink-soft/70">
-                    {[v.category, [v.city, v.region].filter(Boolean).join(", ")].filter(Boolean).join(" · ")}
+                    {[
+                      v.category,
+                      isRegionWide(v.city)
+                        ? "Serves all of South Florida"
+                        : [v.city, v.region].filter(Boolean).join(", "),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
                 )}
                 {v.description && (
