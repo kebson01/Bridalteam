@@ -76,16 +76,16 @@ export default function PricingPage() {
 
       {/* Couples */}
       <section className="mx-auto max-w-3xl px-5 pt-14">
-        <div className="rounded-3xl border border-brand bg-ink p-8 text-white shadow-card">
-          <span className="mb-3 inline-flex w-fit rounded-full bg-brand px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
+        <div className="rounded-3xl bg-brand-primary p-8 text-ink shadow-card">
+          <span className="mb-3 inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-text">
             Free forever
           </span>
-          <h2 className="text-lg font-medium text-brand-amber">Couples</h2>
+          <h2 className="text-lg font-medium text-ink">Couples</h2>
           <div className="mt-3 flex items-end gap-1">
             <span className="text-4xl font-semibold">Free</span>
-            <span className="mb-1 text-sm text-white/60">forever</span>
+            <span className="mb-1 text-sm text-ink">forever</span>
           </div>
-          <p className="mt-2 text-sm text-white/70">
+          <p className="mt-2 text-sm text-ink">
             The whole AI planning team — every feature, no paywall.
           </p>
           <Link

@@ -44,6 +44,19 @@
   --shadow-glow: 0 22px 60px -20px rgba(243, 103, 5, 0.45);
 }
 
+/*
+  The primary orange band: the same gradient as the "Start free" button, used
+  behind page banners and feature sections so they match the buttons exactly.
+
+  Text on it is dark, not white. White on --color-brand is only 2.3:1, under
+  the 4.5:1 WCAG AA minimum; --color-ink on it is 6.8:1 (5.1:1 at the
+  --color-brand-dark end), so every size of text stays readable.
+*/
+@utility bg-brand-primary {
+  background-color: var(--color-brand);
+  background-image: linear-gradient(to right, var(--color-brand), var(--color-brand-dark));
+}
+
 :root {
   --background: #ffffff;
   --foreground: #222222;

@@ -8,12 +8,12 @@ export default function PageHero({
   subtitle?: string;
 }) {
   return (
-    <section className="relative overflow-hidden bg-ink">
-      <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand-dark/30 blur-3xl" />
-      <div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-brand/20 blur-3xl" />
-      <div className="relative mx-auto max-w-4xl px-5 py-20 text-center text-white">
+    <section className="relative overflow-hidden bg-brand-primary">
+      <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand-amber/40 blur-3xl" />
+      <div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-white/15 blur-3xl" />
+      <div className="relative mx-auto max-w-4xl px-5 py-20 text-center text-ink">
         {eyebrow && (
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-amber">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ink">
             {eyebrow}
           </p>
         )}
@@ -21,7 +21,7 @@ export default function PageHero({
           {title}
         </h1>
         {subtitle && (
-          <p className="mx-auto mt-5 max-w-2xl text-lg font-light text-white/75">
+          <p className="mx-auto mt-5 max-w-2xl text-lg font-normal text-ink">
             {subtitle}
           </p>
         )}
