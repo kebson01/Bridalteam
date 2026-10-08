@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LAUNCH_CITY } from "@/lib/site";
+import { sortCategories } from "@/lib/categories";
 import { AREAS, type AreaId, areasPresent, isRegionWide, matchesArea } from "@/lib/areas";
 
 export interface DirectoryVendor {
@@ -42,11 +43,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
   const scrollTypes = (dir: 1 | -1) =>
     typeRow.current?.scrollBy({ left: dir * typeRow.current.clientWidth * 0.7, behavior: "smooth" });
 
-  const categories = useMemo(() => {
-    const seen = new Set<string>();
-    for (const v of vendors) if (v.category) seen.add(v.category);
-    return [...seen].sort();
-  }, [vendors]);
+  const categories = useMemo(() => sortCategories(vendors.map((v) => v.category)), [vendors]);
 
   // Only offer an area that something is actually in, so a filter can never
   // lead to an empty page.
