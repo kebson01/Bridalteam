@@ -45,16 +45,17 @@
 }
 
 /*
-  The primary orange band: the same gradient as the "Start free" button, used
-  behind page banners and feature sections so they match the buttons exactly.
+  The soft brand band: a light warm cream behind page banners and feature
+  sections, so they stand apart from white content without the weight of
+  near-black or a full orange block. Orange stays an accent on top of it.
 
-  Text on it is dark, not white. White on --color-brand is only 2.3:1, under
-  the 4.5:1 WCAG AA minimum; --color-ink on it is 6.8:1 (5.1:1 at the
-  --color-brand-dark end), so every size of text stays readable.
+  Text on it is --color-ink (14:1). Orange labels use #b34a04 rather than
+  --color-brand-text: on this cream brand-text drops to 4.2:1, just under the
+  4.5:1 WCAG AA minimum, while #b34a04 holds 4.8:1.
 */
-@utility bg-brand-primary {
-  background-color: var(--color-brand);
-  background-image: linear-gradient(to right, var(--color-brand), var(--color-brand-dark));
+@utility bg-brand-soft {
+  background-color: #fff6ee;
+  background-image: linear-gradient(to right, #fff6ee, #ffefe0);
 }
 
 :root {

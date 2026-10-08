@@ -14,32 +14,32 @@ const QUICK_PROMPTS = [
 
 export default function AIPlanner() {
   return (
-    <section id="planner" className="relative overflow-hidden bg-brand-primary py-24">
-      <div className="pointer-events-none absolute -right-32 top-0 h-96 w-96 rounded-full bg-brand-amber/35 blur-3xl" />
-      <div className="pointer-events-none absolute -left-32 bottom-0 h-96 w-96 rounded-full bg-white/15 blur-3xl" />
+    <section id="planner" className="relative overflow-hidden bg-brand-soft py-24">
+      <div className="pointer-events-none absolute -right-32 top-0 h-96 w-96 rounded-full bg-brand/15 blur-3xl" />
+      <div className="pointer-events-none absolute -left-32 bottom-0 h-96 w-96 rounded-full bg-brand-amber/10 blur-3xl" />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="text-ink">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ink">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#b34a04]">
             Live AI demo
           </p>
           <h2 className="mt-3 text-3xl font-light uppercase tracking-wide sm:text-4xl">
             Meet your AI planning assistant
           </h2>
-          <p className="mt-4 max-w-md text-ink">
+          <p className="mt-4 max-w-md text-ink-soft">
             This is the heart of the new Bridal Team. Ask anything about your
             wedding and get real, tailored guidance — timelines, budgets,
             checklists and what to book first — in seconds.
           </p>
           <Link
             href="/planner"
-            className="mt-8 inline-flex rounded-full bg-white px-7 py-3 text-sm font-semibold text-brand-text shadow-glow transition-transform hover:-translate-y-0.5"
+            className="mt-8 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-7 py-3 text-sm font-semibold text-white shadow-glow transition-transform hover:-translate-y-0.5"
           >
             Open the full planner
           </Link>
         </div>
 
-        <div className="rounded-3xl bg-white/20 p-2">
+        <div className="rounded-3xl bg-brand/10 p-2">
           <PlannerChat quickPrompts={QUICK_PROMPTS} />
         </div>
       </div>

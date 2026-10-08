@@ -66,11 +66,11 @@ export default async function RsvpPage({
 
   return (
     <div className="min-h-screen bg-stone-4/40">
-      <section className="relative overflow-hidden bg-brand-primary">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand-amber/40 blur-3xl" />
-        <div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-white/15 blur-3xl" />
+      <section className="relative overflow-hidden bg-brand-soft">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand/15 blur-3xl" />
+        <div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-brand-amber/10 blur-3xl" />
         <div className="relative mx-auto max-w-2xl px-5 py-20 text-center text-ink">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ink">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#b34a04]">
             You&rsquo;re invited
           </p>
           <h1 className="mt-3 text-4xl font-light uppercase tracking-wide sm:text-5xl">{couple}</h1>

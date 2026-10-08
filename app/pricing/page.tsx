@@ -76,11 +76,11 @@ export default function PricingPage() {
 
       {/* Couples */}
       <section className="mx-auto max-w-3xl px-5 pt-14">
-        <div className="rounded-3xl bg-brand-primary p-8 text-ink shadow-card">
-          <span className="mb-3 inline-flex w-fit rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-text">
+        <div className="rounded-3xl border border-brand/40 bg-brand-soft p-8 text-ink shadow-card">
+          <span className="mb-3 inline-flex w-fit rounded-full bg-brand px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
             Free forever
           </span>
-          <h2 className="text-lg font-medium text-ink">Couples</h2>
+          <h2 className="text-lg font-medium text-[#b34a04]">Couples</h2>
           <div className="mt-3 flex items-end gap-1">
             <span className="text-4xl font-semibold">Free</span>
             <span className="mb-1 text-sm text-ink">forever</span>
@@ -90,7 +90,7 @@ export default function PricingPage() {
           </p>
           <Link
             href={SIGNUP_URL}
-            className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-brand-text"
+            className="mt-6 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-3 text-sm font-semibold text-white"
           >
             Start free
           </Link>
