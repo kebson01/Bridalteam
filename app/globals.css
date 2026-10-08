@@ -44,6 +44,20 @@
   --shadow-glow: 0 22px 60px -20px rgba(243, 103, 5, 0.45);
 }
 
+/*
+  The soft brand band: a light warm cream behind page banners and feature
+  sections, so they stand apart from white content without the weight of
+  near-black or a full orange block. Orange stays an accent on top of it.
+
+  Text on it is --color-ink (14:1). Orange labels use #b34a04 rather than
+  --color-brand-text: on this cream brand-text drops to 4.2:1, just under the
+  4.5:1 WCAG AA minimum, while #b34a04 holds 4.8:1.
+*/
+@utility bg-brand-soft {
+  background-color: #fff6ee;
+  background-image: linear-gradient(to right, #fff6ee, #ffefe0);
+}
+
 :root {
   --background: #ffffff;
   --foreground: #222222;

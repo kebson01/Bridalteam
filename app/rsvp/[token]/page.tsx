@@ -66,16 +66,16 @@ export default async function RsvpPage({
 
   return (
     <div className="min-h-screen bg-stone-4/40">
-      <section className="relative overflow-hidden bg-ink">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand-dark/30 blur-3xl" />
-        <div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-brand/20 blur-3xl" />
-        <div className="relative mx-auto max-w-2xl px-5 py-20 text-center text-white">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-amber">
+      <section className="relative overflow-hidden bg-brand-soft">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand/15 blur-3xl" />
+        <div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-brand-amber/10 blur-3xl" />
+        <div className="relative mx-auto max-w-2xl px-5 py-20 text-center text-ink">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#b34a04]">
             You&rsquo;re invited
           </p>
           <h1 className="mt-3 text-4xl font-light uppercase tracking-wide sm:text-5xl">{couple}</h1>
-          {when && <p className="mt-5 text-lg font-light text-white/80">{when}</p>}
-          {where && <p className="mt-1 text-white/70">{where}</p>}
+          {when && <p className="mt-5 text-lg font-normal text-ink">{when}</p>}
+          {where && <p className="mt-1 text-ink">{where}</p>}
         </div>
       </section>
 
