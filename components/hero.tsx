@@ -16,6 +16,9 @@ export default function Hero() {
         />
         {/* the original site's signature orange wash */}
         <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-brand-deep/15 to-ink/60" />
+        {/* A soft shade behind the text only, so the copy stays readable over
+            the bright sand without darkening the flowers at the edges. */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_60%_at_50%_55%,rgba(34,34,34,0.6),transparent_75%)]" />
       </div>
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center px-5 py-28 text-center sm:py-36">
@@ -30,7 +33,7 @@ export default function Hero() {
           Wedding Planning.
         </h1>
 
-        <p className="animate-fade-up mt-7 max-w-2xl text-lg font-light text-white/90 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] sm:text-xl">
+        <p className="animate-fade-up mt-7 max-w-2xl text-lg font-normal text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.7)] sm:text-xl">
           Organize details. Find ideas. Collaborate with your team. All in one
           place — now guided by AI every step of the way. Open your free account
           today.
@@ -45,7 +48,7 @@ export default function Hero() {
           </Link>
           <Link
             href={SHOW_VENDOR_DIRECTORY ? "/vendors" : "/#how"}
-            className="rounded-full border border-white/50 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+            className="rounded-full border border-white/70 bg-ink/25 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-ink/35"
           >
             {SHOW_VENDOR_DIRECTORY ? "Browse vendors" : "See how it works"}
           </Link>
@@ -76,10 +79,10 @@ export default function Hero() {
               >
                 {i + 1}
               </span>
-              <span className="mt-3 block text-sm font-semibold uppercase tracking-widest">
+              <span className="mt-3 block text-sm font-semibold uppercase tracking-widest drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)]">
                 {step}
               </span>
-              <p className="mt-1 text-sm font-light text-white/75">{label}</p>
+              <p className="mt-1 text-sm font-normal text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.7)]">{label}</p>
             </li>
           ))}
         </ol>
