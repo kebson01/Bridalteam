@@ -15,7 +15,7 @@ export default function Hero() {
           className="animate-slow-zoom object-cover object-center"
         />
         {/* the original site's signature orange wash */}
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-deep/70 via-brand-dark/65 to-ink/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink/30 via-brand-deep/15 to-ink/60" />
       </div>
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center px-5 py-28 text-center sm:py-36">

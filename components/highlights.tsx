@@ -1,21 +1,27 @@
 import Image from "next/image";
 import Link from "next/link";
 
+// The highlight images are wide banners (about 1280x373): a photo on one side
+// fading into a flat fill on the other. `pos` points the 4:3 crop at the photo
+// side, and the saturate filter tones down the orange baked into them.
 const BLOCKS = [
   {
     img: "/brand/highlight1.jpg",
+    pos: "object-right",
     tag: "Organize",
     title: "Every detail, in one place",
     body: "Timelines, checklists, budgets and documents live together — no more scattered spreadsheets and screenshots. Your AI assistant keeps it all current as plans change.",
   },
   {
     img: "/brand/highlight2.jpg",
+    pos: "object-left",
     tag: "Collaborate",
     title: "Plan with your whole team",
     body: "Invite your partner, family and vendors. Everyone sees the same plan, gets the right to-dos, and stays in sync from engagement to 'I do'.",
   },
   {
     img: "/brand/highlight3.jpg",
+    pos: "object-right",
     tag: "Inspire",
     title: "Find ideas you'll love",
     body: "Filter real wedding photography by theme and colour, save what you love to a shared mood board, and ask the AI planner how to pull the look together on your budget.",
@@ -39,9 +45,9 @@ export default function Highlights() {
                 alt={b.title}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
+                className={`object-cover ${b.pos} saturate-[.45] brightness-[1.18]`}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/25 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/10 to-transparent" />
             </figure>
             <div className={i % 2 === 1 ? "lg:pr-8" : "lg:pl-8"}>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-text">
