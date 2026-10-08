@@ -207,7 +207,7 @@ function AccountMenu({
   }, [open]);
 
   const item =
-    "block w-full rounded-lg px-3 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-stone-4 hover:text-ink";
+    "block w-full rounded-lg px-3 py-2 text-left text-sm text-ink-soft transition-colors hover:bg-stone-4 hover:text-brand-text";
 
   return (
     <div ref={ref} className="relative">
@@ -299,8 +299,8 @@ export default function SiteHeader() {
               aria-current={isActive(item.href) ? "page" : undefined}
               className={`whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
                 isActive(item.href)
-                  ? "bg-stone-4 text-ink"
-                  : "text-ink-soft/80 hover:bg-stone-4/70 hover:text-ink"
+                  ? "bg-brand/10 text-brand-text"
+                  : "text-ink-soft/80 hover:text-brand-text"
               }`}
             >
               {item.label}
@@ -324,7 +324,7 @@ export default function SiteHeader() {
             <>
               <Link
                 href={LOGIN_URL}
-                className="rounded-full px-3.5 py-2 text-sm font-medium text-ink-soft/80 transition-colors hover:text-ink"
+                className="rounded-full px-3.5 py-2 text-sm font-medium text-ink-soft/80 transition-colors hover:text-brand-text"
               >
                 Log in
               </Link>
