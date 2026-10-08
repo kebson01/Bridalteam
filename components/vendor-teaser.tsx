@@ -18,7 +18,7 @@ export default function VendorTeaser() {
       className="relative overflow-hidden bg-cover bg-center py-24"
       style={{ backgroundImage: "url('/brand/cat.jpg')" }}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/80 to-brand-deep/80" />
+      <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/80 to-brand-deep/40 backdrop-saturate-[.4]" />
 
       <div className="relative mx-auto max-w-6xl px-5 text-white">
         <div className="max-w-2xl">
