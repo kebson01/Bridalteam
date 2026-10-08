@@ -45,9 +45,9 @@ export default function Highlights() {
                 alt={b.title}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className={`object-cover ${b.pos} saturate-[.4] brightness-105`}
+                className={`object-cover ${b.pos} saturate-[.45] brightness-[1.18]`}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/25 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/10 to-transparent" />
             </figure>
             <div className={i % 2 === 1 ? "lg:pr-8" : "lg:pl-8"}>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-text">
