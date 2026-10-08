@@ -94,8 +94,8 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                 aria-pressed={a.id === area}
                 className={`whitespace-nowrap rounded-lg px-3.5 py-2 text-sm transition-colors ${
                   a.id === area
-                    ? "bg-white font-medium text-ink shadow-sm"
-                    : "text-ink-soft/70 hover:text-ink"
+                    ? "bg-white font-medium text-brand-text shadow-sm ring-1 ring-brand"
+                    : "text-ink-soft/70 hover:text-brand-text"
                 }`}
               >
                 {a.label}
@@ -122,8 +122,8 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                 aria-pressed={c === category}
                 className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[13px] transition-colors ${
                   c === category
-                    ? "border-ink bg-ink text-white"
-                    : "border-stone-2 bg-white text-ink-soft/80 hover:border-stone-5 hover:text-ink"
+                    ? "border-brand bg-brand text-white"
+                    : "border-stone-2 bg-white text-ink-soft/80 hover:border-brand hover:text-brand-text"
                 }`}
               >
                 {c ?? "All types"}
@@ -136,7 +136,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                 type="button"
                 onClick={() => scrollTypes(-1)}
                 aria-label="Scroll vendor types left"
-                className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-stone-2 bg-white text-ink-soft shadow-sm hover:text-ink sm:flex"
+                className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-stone-2 bg-white text-ink-soft shadow-sm hover:border-brand hover:text-brand-text sm:flex"
               >
                 <span aria-hidden>‹</span>
               </button>
@@ -148,7 +148,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                 type="button"
                 onClick={() => scrollTypes(1)}
                 aria-label="Scroll vendor types right"
-                className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-stone-2 bg-white text-ink-soft shadow-sm hover:text-ink sm:flex"
+                className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-stone-2 bg-white text-ink-soft shadow-sm hover:border-brand hover:text-brand-text sm:flex"
               >
                 <span aria-hidden>›</span>
               </button>
