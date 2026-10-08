@@ -28,7 +28,7 @@ const SOCIAL = [
 export default function SiteFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="border-t border-white/20 bg-[#a94503] text-white">
+    <footer className="bg-ink text-white">
       <div className="mx-auto max-w-6xl px-5 py-7">
         <div className="flex items-center justify-between gap-4">
           <Image
@@ -47,7 +47,7 @@ export default function SiteFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.label}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/40 text-white transition-colors hover:border-white hover:bg-white hover:text-brand-text"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-brand hover:bg-brand hover:text-white"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path d={s.d} />
@@ -62,15 +62,15 @@ export default function SiteFooter() {
             <Link
               key={l.label}
               href={l.href}
-              className="text-[13px] text-white transition-colors hover:text-white hover:underline"
+              className="text-[13px] text-white/60 transition-colors hover:text-white"
             >
               {l.label}
             </Link>
           ))}
-          <InstallAppLink className="text-[13px] text-white transition-colors hover:text-white hover:underline" />
+          <InstallAppLink className="text-[13px] text-white/60 transition-colors hover:text-white" />
         </nav>
 
-        <p className="mt-5 border-t border-white/25 pt-4 text-xs text-white">
+        <p className="mt-5 border-t border-white/10 pt-4 text-xs text-white/40">
           © {year} Bridal Team. All rights reserved.
         </p>
       </div>
