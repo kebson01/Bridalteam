@@ -44,6 +44,22 @@
   --shadow-glow: 0 22px 60px -20px rgba(243, 103, 5, 0.45);
 }
 
+/*
+  The orange band behind hero sections, the footer and feature cards — the
+  surfaces that used to be --color-ink.
+
+  White text needs 4.5:1 here, and most of the palette can't give it: white on
+  --color-brand is 2.3:1 and on --color-brand-deep 3.6:1. So the band runs from
+  #d35400 (4.2:1) to --color-brand-text (4.7:1), the deepest oranges that still
+  read as Bridal Team orange. Brighter brand oranges belong only in the blurred
+  corner glows, never under text. Orange type does not work on this band
+  either; text on it is white.
+*/
+@utility bg-brand-band {
+  background-color: var(--color-brand-text);
+  background-image: linear-gradient(135deg, #d35400, var(--color-brand-text));
+}
+
 :root {
   --background: #ffffff;
   --foreground: #222222;
