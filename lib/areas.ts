@@ -1,24 +1,36 @@
 /**
- * Grouping vendor listings by metro area, for the location filter on /vendors.
+ * Grouping vendor listings by metro and area, for the location filter on
+ * /vendors.
+ *
+ * Two levels, because one stopped working. A flat row of Broward, Miami-Dade,
+ * Palm Beach and Florida Keys was coherent while the directory was one metro.
+ * Adding Orlando and Tampa to that same row mixes counties with metros, and
+ * the row becomes unusable by the fourth city. So: metros are the top level,
+ * areas sit inside the metro that has them.
  *
  * Why areas and not a distance radius. The listings carry a free-text `city`
- * and no coordinates, and a fifth of them name a region rather than a city --
- * "South Florida", "Southeast Florida", "Florida". There is no point to
- * measure from for those, so a mile radius would either hide them or pin them
- * to an invented centroid. Areas are also what a couple here actually asks
- * for: Broward, Miami-Dade or Palm Beach, not "within 18 miles".
- *
- * If the directory ever covers a second metro, revisit this -- distance earns
- * its keep once "nearby" stops meaning "the same three counties".
+ * and no coordinates, and a seventh of them name a region rather than a city.
+ * There is no point to measure from for those, so a mile radius would either
+ * hide them or pin them to an invented centroid. Distance becomes worth
+ * revisiting once a metro has enough listings that "nearby" means something
+ * finer than its counties.
  */
+
+export type MetroId = "south-florida" | "orlando" | "tampa";
+
+export const METROS: { id: MetroId; label: string }[] = [
+  { id: "south-florida", label: "South Florida" },
+  { id: "orlando", label: "Orlando" },
+  { id: "tampa", label: "Tampa Bay" },
+];
 
 export type AreaId = "broward" | "miami-dade" | "palm-beach" | "keys";
 
-export const AREAS: { id: AreaId; label: string }[] = [
-  { id: "broward", label: "Broward" },
-  { id: "miami-dade", label: "Miami-Dade" },
-  { id: "palm-beach", label: "Palm Beach" },
-  { id: "keys", label: "Florida Keys" },
+export const AREAS: { id: AreaId; label: string; metro: MetroId }[] = [
+  { id: "broward", label: "Broward", metro: "south-florida" },
+  { id: "miami-dade", label: "Miami-Dade", metro: "south-florida" },
+  { id: "palm-beach", label: "Palm Beach", metro: "south-florida" },
+  { id: "keys", label: "Florida Keys", metro: "south-florida" },
 ];
 
 /**
@@ -99,51 +111,208 @@ const CITY_AREA: Record<string, AreaId> = {
 };
 
 /**
- * Values that name the whole region instead of a city. A vendor listed this
- * way serves every area, so they show under all of them -- hiding them would
- * drop real, reachable vendors from a filtered view, which is the opposite of
- * what the filter is for.
+ * City -> metro, for cities outside South Florida. South Florida cities are
+ * resolved through their area instead (see metroOf), so they are not repeated
+ * here.
+ *
+ * As with CITY_AREA, this deliberately covers more cities than the data holds,
+ * so a later import lands in a metro without a code change.
  */
-const REGION_WIDE = new Set([
-  "south florida",
-  "southeast florida",
-  "south east florida",
-  "florida",
-  "statewide",
-  "tri-county",
-  "miami / fort lauderdale",
-]);
+const CITY_METRO: Record<string, MetroId> = {
+  // Orlando / Central Florida
+  orlando: "orlando",
+  "winter park": "orlando",
+  "winter garden": "orlando",
+  kissimmee: "orlando",
+  celebration: "orlando",
+  "lake mary": "orlando",
+  sanford: "orlando",
+  apopka: "orlando",
+  "altamonte springs": "orlando",
+  ocoee: "orlando",
+  clermont: "orlando",
+  "mount dora": "orlando",
+  "lake nona": "orlando",
+  "dr phillips": "orlando",
+  "winter springs": "orlando",
+  oviedo: "orlando",
+  maitland: "orlando",
+  "st cloud": "orlando",
+  "saint cloud": "orlando",
+  "central florida": "orlando",
+  "greater orlando": "orlando",
+  "winter haven": "orlando",
+  lakeland: "orlando",
+  davenport: "orlando",
+  "haines city": "orlando",
+
+  // Tampa Bay
+  tampa: "tampa",
+  "st petersburg": "tampa",
+  "saint petersburg": "tampa",
+  "st pete": "tampa",
+  clearwater: "tampa",
+  brandon: "tampa",
+  "safety harbor": "tampa",
+  dunedin: "tampa",
+  "palm harbor": "tampa",
+  riverview: "tampa",
+  "land o lakes": "tampa",
+  "wesley chapel": "tampa",
+  sarasota: "tampa",
+  bradenton: "tampa",
+  "temple terrace": "tampa",
+  "ybor city": "tampa",
+  "tampa bay": "tampa",
+  "tarpon springs": "tampa",
+  largo: "tampa",
+  "tierra verde": "tampa",
+  seminole: "tampa",
+  "pinellas park": "tampa",
+  "treasure island": "tampa",
+  "st pete beach": "tampa",
+  ellenton: "tampa",
+  venice: "tampa",
+  "anna maria": "tampa",
+  palmetto: "tampa",
+  ruskin: "tampa",
+  "apollo beach": "tampa",
+  "plant city": "tampa",
+  odessa: "tampa",
+  "new port richey": "tampa",
+  holiday: "tampa",
+  gulfport: "tampa",
+};
+
+/**
+ * Values that name a region instead of a city, and the scope each one means.
+ *
+ * This split is the whole reason the module changed. The old version had one
+ * REGION_WIDE set and `matchesArea` returned true for every area in it, which
+ * was correct while every area was in South Florida and became wrong the
+ * moment it wasn't: 63 listings say "South Florida" or similar, and under a
+ * flat rule all 63 would surface under an Orlando filter. A couple in Orlando
+ * would be shown Fort Lauderdale vendors, and nothing on the page would look
+ * broken.
+ *
+ * So a region-wide value now carries the metro it covers. "Florida" and
+ * "statewide" genuinely mean everywhere and map to null, which is the only
+ * case that still matches every metro.
+ */
+const REGION_SCOPE: Record<string, MetroId | null> = {
+  // Scoped to South Florida -- NOT statewide.
+  "south florida": "south-florida",
+  "southeast florida": "south-florida",
+  "south east florida": "south-florida",
+  "tri-county": "south-florida",
+  "miami / fort lauderdale": "south-florida",
+
+  // Scoped to their own metro.
+  "central florida": "orlando",
+  "greater orlando": "orlando",
+  "winter haven": "orlando",
+  lakeland: "orlando",
+  davenport: "orlando",
+  "haines city": "orlando",
+  "tampa bay": "tampa",
+
+  // Genuinely everywhere.
+  florida: null,
+  statewide: null,
+};
 
 function key(city: string | null | undefined): string {
   return (city ?? "").trim().toLowerCase();
 }
 
-/** True when the listing names a region rather than a city. */
+/** True when the listing names a region rather than a single city. */
 export function isRegionWide(city: string | null | undefined): boolean {
-  return REGION_WIDE.has(key(city));
+  return key(city) in REGION_SCOPE;
 }
 
 /**
- * The area a city belongs to, or null when it is region-wide, empty, or a
- * place outside the tri-county area. Null means "no area chip matches", so
- * such a listing appears only under All -- which is right for somewhere like
- * Hobe Sound, and is also the safe default for a city nobody has mapped yet.
+ * For a region-wide listing, the metro it covers, or null for statewide.
+ * Throws nothing for a city: callers should check isRegionWide first.
+ */
+export function regionScope(city: string | null | undefined): MetroId | null {
+  return REGION_SCOPE[key(city)] ?? null;
+}
+
+/**
+ * The area a city belongs to, or null when it is region-wide, empty, outside
+ * every mapped area, or in a metro that has no areas yet. Null means "no area
+ * chip matches", which is right for Hobe Sound (Martin County) and is the safe
+ * default for a city nobody has mapped.
  */
 export function areaOf(city: string | null | undefined): AreaId | null {
   return CITY_AREA[key(city)] ?? null;
 }
 
-/** Does this listing belong in the given area's results? */
-export function matchesArea(city: string | null | undefined, area: AreaId): boolean {
-  return isRegionWide(city) || areaOf(city) === area;
+/**
+ * The metro a listing belongs to. A South Florida city resolves through its
+ * area so the two maps cannot disagree; everything else comes from CITY_METRO
+ * or, for a region-wide value, from its scope.
+ */
+export function metroOf(city: string | null | undefined): MetroId | null {
+  const area = areaOf(city);
+  if (area) return AREAS.find((a) => a.id === area)!.metro;
+  const direct = CITY_METRO[key(city)];
+  if (direct) return direct;
+  return isRegionWide(city) ? regionScope(city) : null;
 }
 
-/** Areas that actually have listings, so empty chips are never rendered. */
-export function areasPresent(cities: (string | null | undefined)[]): AreaId[] {
+/**
+ * Does this listing belong in the given metro's results?
+ *
+ * A statewide listing matches every metro. A metro-scoped one matches only its
+ * own. Everything else matches the metro its city is in.
+ */
+export function matchesMetro(city: string | null | undefined, metro: MetroId): boolean {
+  if (isRegionWide(city)) {
+    const scope = regionScope(city);
+    return scope === null || scope === metro;
+  }
+  return metroOf(city) === metro;
+}
+
+/**
+ * Does this listing belong in the given area's results?
+ *
+ * A region-wide listing counts only if its scope reaches this area's metro --
+ * which is what stops a "South Florida" vendor appearing under Orlando.
+ */
+export function matchesArea(city: string | null | undefined, area: AreaId): boolean {
+  if (isRegionWide(city)) {
+    const scope = regionScope(city);
+    const areaMetro = AREAS.find((a) => a.id === area)!.metro;
+    return scope === null || scope === areaMetro;
+  }
+  return areaOf(city) === area;
+}
+
+/** Metros that actually have listings, so empty chips are never rendered. */
+export function metrosPresent(cities: (string | null | undefined)[]): MetroId[] {
+  const seen = new Set<MetroId>();
+  for (const c of cities) {
+    const m = metroOf(c);
+    if (m) seen.add(m);
+  }
+  return METROS.filter((m) => seen.has(m.id)).map((m) => m.id);
+}
+
+/**
+ * Areas with listings inside one metro. Returns an empty list when the metro
+ * has no areas defined (Orlando and Tampa today), which is how the second chip
+ * row stays hidden rather than rendering a row of one.
+ */
+export function areasPresent(
+  cities: (string | null | undefined)[],
+  metro?: MetroId,
+): AreaId[] {
   const seen = new Set<AreaId>();
   for (const c of cities) {
     const a = areaOf(c);
     if (a) seen.add(a);
   }
-  return AREAS.filter((a) => seen.has(a.id)).map((a) => a.id);
+  return AREAS.filter((a) => seen.has(a.id) && (!metro || a.metro === metro)).map((a) => a.id);
 }

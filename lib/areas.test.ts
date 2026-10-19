@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { areaOf, areasPresent, isRegionWide, matchesArea } from "./areas";
+import {
+  areaOf,
+  areasPresent,
+  isRegionWide,
+  matchesArea,
+  matchesMetro,
+  metroOf,
+  metrosPresent,
+  regionScope,
+} from "./areas";
 
 describe("areaOf", () => {
   it("maps the cities the directory actually holds", () => {
@@ -104,5 +113,112 @@ describe("areasPresent", () => {
     // Region-wide rows alone must not conjure an area chip that filters to
     // exactly the same list.
     expect(areasPresent(["South Florida", "Florida", null])).toEqual([]);
+  });
+});
+
+
+describe("metro scoping", () => {
+  it("does not leak South Florida vendors into another metro", () => {
+    // THE regression this split exists for. 63 published listings say
+    // "South Florida" or similar. Under the old flat REGION_WIDE rule they
+    // matched every area id, so adding Orlando would have shown all 63 to a
+    // couple in Orlando -- with nothing on the page looking wrong.
+    expect(matchesMetro("South Florida", "south-florida")).toBe(true);
+    expect(matchesMetro("South Florida", "orlando")).toBe(false);
+    expect(matchesMetro("South Florida", "tampa")).toBe(false);
+    expect(matchesMetro("Southeast Florida", "orlando")).toBe(false);
+    expect(matchesMetro("tri-county", "tampa")).toBe(false);
+  });
+
+  it("keeps a genuinely statewide vendor in every metro", () => {
+    // "Florida" and "statewide" are the only values that really mean
+    // everywhere; narrowing them would hide real, reachable vendors.
+    for (const m of ["south-florida", "orlando", "tampa"] as const) {
+      expect(matchesMetro("Florida", m)).toBe(true);
+      expect(matchesMetro("statewide", m)).toBe(true);
+    }
+  });
+
+  it("scopes each region name to its own metro", () => {
+    expect(regionScope("South Florida")).toBe("south-florida");
+    expect(regionScope("Central Florida")).toBe("orlando");
+    expect(regionScope("Tampa Bay")).toBe("tampa");
+    expect(regionScope("Florida")).toBeNull();
+  });
+
+  it("maps cities in the new metros", () => {
+    expect(metroOf("Orlando")).toBe("orlando");
+    expect(metroOf("Winter Park")).toBe("orlando");
+    expect(metroOf("Kissimmee")).toBe("orlando");
+    expect(metroOf("Tampa")).toBe("tampa");
+    expect(metroOf("St Petersburg")).toBe("tampa");
+    expect(metroOf("Clearwater")).toBe("tampa");
+  });
+
+  it("resolves a South Florida city to its metro through its area", () => {
+    // Both maps must agree, so the city->area map is the single source and
+    // CITY_METRO never repeats a South Florida city.
+    expect(metroOf("Fort Lauderdale")).toBe("south-florida");
+    expect(metroOf("Miami")).toBe("south-florida");
+    expect(metroOf("Key West")).toBe("south-florida");
+  });
+
+  it("is null for a city in no metro", () => {
+    expect(metroOf("Hobe Sound")).toBeNull();
+    expect(metroOf(null)).toBeNull();
+  });
+
+  it("stops an area filter reaching across metros", () => {
+    // Broward is a South Florida area; an Orlando vendor must never match it.
+    expect(matchesArea("Orlando", "broward")).toBe(false);
+    expect(matchesArea("Tampa", "miami-dade")).toBe(false);
+    // ...and a South-Florida-wide vendor still does match its own areas.
+    expect(matchesArea("South Florida", "broward")).toBe(true);
+  });
+
+  it("lists only metros that have listings", () => {
+    expect(metrosPresent(["Miami", "Orlando"])).toEqual(["south-florida", "orlando"]);
+    expect(metrosPresent(["Tampa"])).toEqual(["tampa"]);
+    expect(metrosPresent(["Hobe Sound"])).toEqual([]);
+  });
+
+  it("returns no areas for a metro that has none, so the row stays hidden", () => {
+    // Orlando and Tampa have no sub-areas yet. A one-chip row would filter
+    // nothing while implying it does.
+    expect(areasPresent(["Orlando", "Winter Park"], "orlando")).toEqual([]);
+    expect(areasPresent(["Tampa", "Clearwater"], "tampa")).toEqual([]);
+    expect(areasPresent(["Miami", "Fort Lauderdale"], "south-florida")).toEqual([
+      "broward",
+      "miami-dade",
+    ]);
+  });
+});
+
+describe("map hygiene", () => {
+  it("has no key that could never match a stored city", () => {
+    // Two junk keys shipped in the first draft -- "palmharbor" with no space
+    // and "wesley_chapel" with an underscore. Neither can ever equal a trimmed,
+    // lowercased city, so both silently did nothing. A key with an underscore,
+    // or with no separator where the real name has one, is always a typo.
+    const cities = [
+      "Orlando", "Winter Park", "Kissimmee", "Tampa", "St Petersburg",
+      "Clearwater", "Largo", "Tierra Verde", "Saint Cloud", "Winter Springs",
+      // Added with the metro listings: each arrived as the stated city of a
+      // real listing, and an unmapped one is invisible under every filter.
+      "Maitland", "Odessa", "Gulfport", "New Port Richey", "Holiday",
+      "Lake Mary", "Sanford", "Ellenton", "Sarasota", "Davenport",
+    ];
+    for (const c of cities) {
+      expect(metroOf(c), `${c} maps to no metro, so it would be invisible under every metro filter`).not.toBeNull();
+    }
+  });
+
+  it("never puts the same city in two metros", () => {
+    // A South Florida city must resolve through its area only; repeating it in
+    // CITY_METRO would let the two maps disagree.
+    expect(metroOf("Fort Lauderdale")).toBe("south-florida");
+    expect(metroOf("Miami")).toBe("south-florida");
+    expect(metroOf("Orlando")).toBe("orlando");
+    expect(metroOf("Tampa")).toBe("tampa");
   });
 });

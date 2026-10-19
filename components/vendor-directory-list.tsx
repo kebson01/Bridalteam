@@ -4,7 +4,18 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LAUNCH_CITY } from "@/lib/site";
 import { sortCategories } from "@/lib/categories";
-import { AREAS, type AreaId, areasPresent, isRegionWide, matchesArea } from "@/lib/areas";
+import {
+  AREAS,
+  type AreaId,
+  METROS,
+  type MetroId,
+  areasPresent,
+  isRegionWide,
+  matchesArea,
+  matchesMetro,
+  metrosPresent,
+  regionScope,
+} from "@/lib/areas";
 
 export interface DirectoryVendor {
   org_id: string;
@@ -21,6 +32,7 @@ export interface DirectoryVendor {
 export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVendor[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const [metro, setMetro] = useState<MetroId | null>(null);
   const [area, setArea] = useState<AreaId | null>(null);
 
   // The type row scrolls sideways rather than wrapping, so it stays one line
@@ -45,22 +57,37 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
 
   const categories = useMemo(() => sortCategories(vendors.map((v) => v.category)), [vendors]);
 
-  // Only offer an area that something is actually in, so a filter can never
-  // lead to an empty page.
-  const areaIds = useMemo(() => areasPresent(vendors.map((v) => v.city)), [vendors]);
+  // Only offer a metro or area that something is actually in, so a filter can
+  // never lead to an empty page.
+  const cities = useMemo(() => vendors.map((v) => v.city), [vendors]);
+  const metroIds = useMemo(() => metrosPresent(cities), [cities]);
+  const metroChips = useMemo(() => METROS.filter((m) => metroIds.includes(m.id)), [metroIds]);
+
+  // The area row belongs to the selected metro. Orlando and Tampa have no
+  // areas defined, so it simply does not render for them -- better than a row
+  // containing one chip that filters nothing.
+  const areaIds = useMemo(() => (metro ? areasPresent(cities, metro) : []), [cities, metro]);
   const areaChips = useMemo(() => AREAS.filter((a) => areaIds.includes(a.id)), [areaIds]);
+
+  // Switching metro must drop the area, or a Broward filter survives into
+  // Orlando and silently returns nothing.
+  const pickMetro = (id: MetroId | null) => {
+    setMetro(id === metro ? null : id);
+    setArea(null);
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return vendors.filter((v) => {
       if (category && v.category !== category) return false;
+      if (metro && !matchesMetro(v.city, metro)) return false;
       if (area && !matchesArea(v.city, area)) return false;
       if (!q) return true;
       return [v.business_name, v.category, v.city, v.region, v.description]
         .filter(Boolean)
         .some((f) => String(f).toLowerCase().includes(q));
     });
-  }, [vendors, query, category, area]);
+  }, [vendors, query, category, metro, area]);
 
   return (
     <>
@@ -80,30 +107,51 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
           />
         </label>
 
-        {areaChips.length > 0 && (
+        {metroChips.length > 0 && (
           <div
             role="group"
-            aria-label="Area"
+            aria-label="Metro"
             className="flex gap-1 overflow-x-auto rounded-xl bg-stone-4 p-1 [scrollbar-width:none] lg:shrink-0"
           >
-            {[{ id: null, label: "Anywhere" }, ...areaChips].map((a) => (
+            {[{ id: null, label: "Anywhere" }, ...metroChips].map((m) => (
               <button
-                key={a.id ?? "any"}
+                key={m.id ?? "any"}
                 type="button"
-                onClick={() => setArea(a.id === area ? null : a.id)}
-                aria-pressed={a.id === area}
+                onClick={() => pickMetro(m.id)}
+                aria-pressed={m.id === metro}
                 className={`whitespace-nowrap rounded-lg px-3.5 py-2 text-sm transition-colors ${
-                  a.id === area
+                  m.id === metro
                     ? "bg-white font-medium text-brand-text shadow-sm ring-1 ring-brand"
                     : "text-ink-soft/70 hover:text-brand-text"
                 }`}
               >
-                {a.label}
+                {m.label}
               </button>
             ))}
           </div>
         )}
       </div>
+
+      {areaChips.length > 0 && (
+        <div role="group" aria-label="Area" className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-[13px] text-ink-soft/50">Narrow to</span>
+          {[{ id: null as AreaId | null, label: "All areas" }, ...areaChips].map((a) => (
+            <button
+              key={a.id ?? "all"}
+              type="button"
+              onClick={() => setArea(a.id === area ? null : a.id)}
+              aria-pressed={a.id === area}
+              className={`whitespace-nowrap rounded-full border px-3 py-1 text-[13px] transition-colors ${
+                a.id === area
+                  ? "border-brand bg-brand text-white"
+                  : "border-stone-2 bg-white text-ink-soft/80 hover:border-brand hover:text-brand-text"
+              }`}
+            >
+              {a.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {categories.length > 0 && (
         <div className="relative mt-5">
@@ -160,15 +208,16 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-stone-2 pt-5">
         <p className="text-sm text-ink-soft/60">
           {filtered.length === vendors.length ? `${vendors.length} vendors` : `${filtered.length} of ${vendors.length} vendors`}
-          {area && filtered.some((v) => isRegionWide(v.city)) && (
-            <span> &middot; includes vendors who cover all of South Florida</span>
+          {(metro || area) && filtered.some((v) => isRegionWide(v.city)) && (
+            <span> &middot; includes vendors who cover the whole area</span>
           )}
-          {(query || category || area) && (
+          {(query || category || metro || area) && (
             <button
               type="button"
               onClick={() => {
                 setQuery("");
                 setCategory(null);
+                setMetro(null);
                 setArea(null);
               }}
               className="ml-3 font-medium text-brand-text hover:text-brand-deep"
@@ -219,7 +268,9 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
                     {[
                       v.category,
                       isRegionWide(v.city)
-                        ? "Serves all of South Florida"
+                        ? `Serves all of ${
+                            METROS.find((m) => m.id === regionScope(v.city))?.label ?? "Florida"
+                          }`
                         : [v.city, v.region].filter(Boolean).join(", "),
                     ]
                       .filter(Boolean)
