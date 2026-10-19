@@ -63,9 +63,9 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
   const metroIds = useMemo(() => metrosPresent(cities), [cities]);
   const metroChips = useMemo(() => METROS.filter((m) => metroIds.includes(m.id)), [metroIds]);
 
-  // The area row belongs to the selected metro. Orlando and Tampa have no
-  // areas defined, so it simply does not render for them -- better than a row
-  // containing one chip that filters nothing.
+  // The area row belongs to the selected metro. Only South Florida has areas
+  // defined, so the row simply does not render for the others -- better than a
+  // row containing one chip that filters nothing.
   const areaIds = useMemo(() => (metro ? areasPresent(cities, metro) : []), [cities, metro]);
   const areaChips = useMemo(() => AREAS.filter((a) => areaIds.includes(a.id)), [areaIds]);
 
