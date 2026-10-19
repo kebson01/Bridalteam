@@ -16,7 +16,6 @@ import {
   metrosPresent,
   regionScope,
 } from "@/lib/areas";
-import { monogram } from "@/lib/monogram";
 
 export interface DirectoryVendor {
   org_id: string;
@@ -28,54 +27,6 @@ export interface DirectoryVendor {
   logo_url: string | null;
   cover_url: string | null;
   featured?: boolean;
-}
-
-/**
- * The image area of a card, in preference order: the vendor's own cover, then
- * their logo, then a monogram built from their name.
- *
- * Most rows reach the third case -- they are imported businesses that have
- * never signed in -- and before the monogram every one of those rendered the
- * same category label, so a screen of cards read as one repeated placeholder.
- * A logo is contained rather than cropped, on white, because a logo has its own
- * margins and `object-cover` would slice them off.
- */
-function CardArt({ vendor }: { vendor: DirectoryVendor }) {
-  if (vendor.cover_url) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={vendor.cover_url} alt={vendor.business_name} className="h-full w-full object-cover" />
-    );
-  }
-
-  if (vendor.logo_url) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-white p-6">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={vendor.logo_url} alt={vendor.business_name} className="max-h-full max-w-full object-contain" />
-      </div>
-    );
-  }
-
-  const { text, background, color } = monogram(vendor.business_name);
-  return (
-    <div
-      className="flex h-full w-full flex-col items-center justify-center gap-1.5"
-      style={{ backgroundColor: background }}
-    >
-      {/* The name is already the card's heading, so the initials are decorative. */}
-      <span
-        aria-hidden
-        className="font-display text-3xl font-semibold leading-none tracking-wide"
-        style={{ color }}
-      >
-        {text}
-      </span>
-      <span className="text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color }}>
-        {vendor.category ?? "Vendor"}
-      </span>
-    </div>
-  );
 }
 
 export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVendor[] }) {
@@ -295,8 +246,15 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
               href={`/v/${v.org_id}`}
               className="overflow-hidden rounded-2xl border border-stone-2 bg-white shadow-card transition-transform hover:-translate-y-1"
             >
-              <div className="relative flex h-36 items-center justify-center overflow-hidden">
-                <CardArt vendor={v} />
+              <div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-brand/15 via-stone-4 to-brand-dark/10">
+                {v.cover_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={v.cover_url} alt={v.business_name} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-text">
+                    {v.category ?? "Vendor"}
+                  </span>
+                )}
                 {v.featured && (
                   <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
                     Featured
