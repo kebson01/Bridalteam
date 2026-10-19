@@ -235,6 +235,7 @@ const CITY_METRO: Record<string, MetroId> = {
   "cape canaveral": "space-coast",
   "daytona beach": "space-coast",
   "daytona beach shores": "space-coast",
+  "south daytona": "space-coast",
   "ormond beach": "space-coast",
   "port orange": "space-coast",
   "new smyrna beach": "space-coast",

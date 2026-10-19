@@ -215,6 +215,7 @@ describe("map hygiene", () => {
       "Naples", "Fort Myers", "Cape Coral", "Bonita Springs", "Marco Island",
       "Melbourne", "Cocoa Beach", "Titusville", "Daytona Beach",
       "New Smyrna Beach", "Ormond Beach", "Palm Coast", "DeLand",
+      "South Daytona",
       "Destin", "Santa Rosa Beach", "Pensacola", "Panama City Beach",
       "Fort Walton Beach", "Tallahassee", "30A",
     ];
