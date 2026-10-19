@@ -136,10 +136,15 @@ const CITY_METRO: Record<string, MetroId> = {
   "dr phillips": "orlando",
   "winter springs": "orlando",
   oviedo: "orlando",
+  maitland: "orlando",
   "st cloud": "orlando",
   "saint cloud": "orlando",
   "central florida": "orlando",
   "greater orlando": "orlando",
+  "winter haven": "orlando",
+  lakeland: "orlando",
+  davenport: "orlando",
+  "haines city": "orlando",
 
   // Tampa Bay
   tampa: "tampa",
@@ -166,6 +171,17 @@ const CITY_METRO: Record<string, MetroId> = {
   "pinellas park": "tampa",
   "treasure island": "tampa",
   "st pete beach": "tampa",
+  ellenton: "tampa",
+  venice: "tampa",
+  "anna maria": "tampa",
+  palmetto: "tampa",
+  ruskin: "tampa",
+  "apollo beach": "tampa",
+  "plant city": "tampa",
+  odessa: "tampa",
+  "new port richey": "tampa",
+  holiday: "tampa",
+  gulfport: "tampa",
 };
 
 /**
@@ -194,6 +210,10 @@ const REGION_SCOPE: Record<string, MetroId | null> = {
   // Scoped to their own metro.
   "central florida": "orlando",
   "greater orlando": "orlando",
+  "winter haven": "orlando",
+  lakeland: "orlando",
+  davenport: "orlando",
+  "haines city": "orlando",
   "tampa bay": "tampa",
 
   // Genuinely everywhere.

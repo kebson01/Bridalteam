@@ -203,6 +203,10 @@ describe("map hygiene", () => {
     const cities = [
       "Orlando", "Winter Park", "Kissimmee", "Tampa", "St Petersburg",
       "Clearwater", "Largo", "Tierra Verde", "Saint Cloud", "Winter Springs",
+      // Added with the metro listings: each arrived as the stated city of a
+      // real listing, and an unmapped one is invisible under every filter.
+      "Maitland", "Odessa", "Gulfport", "New Port Richey", "Holiday",
+      "Lake Mary", "Sanford", "Ellenton", "Sarasota", "Davenport",
     ];
     for (const c of cities) {
       expect(metroOf(c), `${c} maps to no metro, so it would be invisible under every metro filter`).not.toBeNull();
