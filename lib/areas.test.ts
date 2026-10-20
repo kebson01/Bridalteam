@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  METROS,
+  type MetroId,
   areaOf,
   areasPresent,
   isRegionWide,
@@ -207,6 +209,15 @@ describe("map hygiene", () => {
       // real listing, and an unmapped one is invisible under every filter.
       "Maitland", "Odessa", "Gulfport", "New Port Richey", "Holiday",
       "Lake Mary", "Sanford", "Ellenton", "Sarasota", "Davenport",
+      // The four metros added after Orlando and Tampa.
+      "Jacksonville", "Ponte Vedra Beach", "St Augustine", "Amelia Island",
+      "Orange Park", "Fernandina Beach", "Nocatee",
+      "Naples", "Fort Myers", "Cape Coral", "Bonita Springs", "Marco Island",
+      "Melbourne", "Cocoa Beach", "Titusville", "Daytona Beach",
+      "New Smyrna Beach", "Ormond Beach", "Palm Coast", "DeLand",
+      "South Daytona",
+      "Destin", "Santa Rosa Beach", "Pensacola", "Panama City Beach",
+      "Fort Walton Beach", "Tallahassee", "30A",
     ];
     for (const c of cities) {
       expect(metroOf(c), `${c} maps to no metro, so it would be invisible under every metro filter`).not.toBeNull();
@@ -220,5 +231,85 @@ describe("map hygiene", () => {
     expect(metroOf("Miami")).toBe("south-florida");
     expect(metroOf("Orlando")).toBe("orlando");
     expect(metroOf("Tampa")).toBe("tampa");
+  });
+});
+
+describe("the metros added after Orlando and Tampa", () => {
+  it("puts each city in the metro a couple would look under", () => {
+    expect(metroOf("Jacksonville")).toBe("jacksonville");
+    expect(metroOf("St Augustine")).toBe("jacksonville");
+    expect(metroOf("Amelia Island")).toBe("jacksonville");
+    expect(metroOf("Naples")).toBe("southwest");
+    expect(metroOf("Fort Myers")).toBe("southwest");
+    expect(metroOf("Melbourne")).toBe("space-coast");
+    expect(metroOf("Daytona Beach")).toBe("space-coast");
+    expect(metroOf("Destin")).toBe("panhandle");
+    expect(metroOf("Pensacola")).toBe("panhandle");
+  });
+
+  it("keeps Sarasota County with Tampa Bay, not Southwest Florida", () => {
+    // Venice and North Port sit between the two markets; a Sarasota couple
+    // looks up the bay. Moving them later is a data decision, not a bug.
+    for (const c of ["Sarasota", "Bradenton", "Venice", "North Port"]) {
+      expect(metroOf(c), c).toBe("tampa");
+    }
+  });
+
+  it("does not leak a listing from one new metro into another", () => {
+    // The failure the two-level filter exists to prevent, now across seven
+    // metros rather than three: every pair must be mutually exclusive.
+    const sample: Record<MetroId, string> = {
+      "south-florida": "Fort Lauderdale",
+      southwest: "Naples",
+      tampa: "Tampa",
+      orlando: "Orlando",
+      "space-coast": "Melbourne",
+      jacksonville: "Jacksonville",
+      panhandle: "Destin",
+    };
+    for (const [metro, city] of Object.entries(sample)) {
+      for (const other of METROS) {
+        expect(matchesMetro(city, other.id), `${city} under ${other.id}`).toBe(
+          other.id === metro,
+        );
+      }
+    }
+  });
+
+  it("scopes each region phrase to its own metro", () => {
+    expect(regionScope("Northeast Florida")).toBe("jacksonville");
+    expect(regionScope("First Coast")).toBe("jacksonville");
+    expect(regionScope("Southwest Florida")).toBe("southwest");
+    expect(regionScope("Emerald Coast")).toBe("panhandle");
+    expect(regionScope("Space Coast")).toBe("space-coast");
+    // And the original leak case still holds with seven metros in play.
+    expect(matchesMetro("South Florida", "jacksonville")).toBe(false);
+    expect(matchesMetro("Northeast Florida", "south-florida")).toBe(false);
+  });
+
+  it("still shows a statewide listing under every metro", () => {
+    for (const m of METROS) {
+      expect(matchesMetro("Florida", m.id), m.id).toBe(true);
+    }
+  });
+});
+
+describe("a city is not a region", () => {
+  /**
+   * These four were in REGION_SCOPE as well as CITY_METRO, which made
+   * isRegionWide() true for them. A published officiant in Davenport rendered
+   * "Serves all of Orlando" instead of "Davenport, FL" -- a claim about reach
+   * that the vendor never made.
+   */
+  it("does not treat a mapped city as region-wide", () => {
+    for (const c of ["Winter Haven", "Lakeland", "Davenport", "Haines City"]) {
+      expect(isRegionWide(c), `${c} reads as region-wide`).toBe(false);
+    }
+  });
+
+  it("still resolves those cities to Orlando", () => {
+    for (const c of ["Winter Haven", "Lakeland", "Davenport", "Haines City"]) {
+      expect(metroOf(c), c).toBe("orlando");
+    }
   });
 });

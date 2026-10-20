@@ -16,12 +16,28 @@
  * finer than its counties.
  */
 
-export type MetroId = "south-florida" | "orlando" | "tampa";
+export type MetroId =
+  | "south-florida"
+  | "southwest"
+  | "tampa"
+  | "orlando"
+  | "space-coast"
+  | "jacksonville"
+  | "panhandle";
 
+/**
+ * Chip order, roughly south to north and then west along the coast, so the
+ * row reads as a map rather than as a leaderboard that reshuffles whenever
+ * one metro overtakes another.
+ */
 export const METROS: { id: MetroId; label: string }[] = [
   { id: "south-florida", label: "South Florida" },
-  { id: "orlando", label: "Orlando" },
+  { id: "southwest", label: "Southwest Florida" },
   { id: "tampa", label: "Tampa Bay" },
+  { id: "orlando", label: "Orlando" },
+  { id: "space-coast", label: "Space Coast & Daytona" },
+  { id: "jacksonville", label: "Jacksonville" },
+  { id: "panhandle", label: "Panhandle" },
 ];
 
 export type AreaId = "broward" | "miami-dade" | "palm-beach" | "keys";
@@ -182,6 +198,109 @@ const CITY_METRO: Record<string, MetroId> = {
   "new port richey": "tampa",
   holiday: "tampa",
   gulfport: "tampa",
+  // Sarasota County stays with Tampa Bay rather than moving to Southwest
+  // Florida: Venice and North Port sit between the two, and a couple in
+  // Sarasota looks up the bay, not down to Naples.
+  "north port": "tampa",
+
+  // Southwest Florida
+  naples: "southwest",
+  "fort myers": "southwest",
+  "ft myers": "southwest",
+  "fort myers beach": "southwest",
+  "cape coral": "southwest",
+  "bonita springs": "southwest",
+  estero: "southwest",
+  "marco island": "southwest",
+  sanibel: "southwest",
+  captiva: "southwest",
+  "punta gorda": "southwest",
+  "port charlotte": "southwest",
+  "lehigh acres": "southwest",
+  "everglades city": "southwest",
+
+  // Space Coast, plus Volusia and Flagler
+  melbourne: "space-coast",
+  "melbourne beach": "space-coast",
+  "palm bay": "space-coast",
+  cocoa: "space-coast",
+  "cocoa beach": "space-coast",
+  rockledge: "space-coast",
+  "merritt island": "space-coast",
+  "satellite beach": "space-coast",
+  indialantic: "space-coast",
+  titusville: "space-coast",
+  viera: "space-coast",
+  suntree: "space-coast",
+  "cape canaveral": "space-coast",
+  "daytona beach": "space-coast",
+  "daytona beach shores": "space-coast",
+  "south daytona": "space-coast",
+  "ormond beach": "space-coast",
+  "port orange": "space-coast",
+  "new smyrna beach": "space-coast",
+  "new smyrna": "space-coast",
+  edgewater: "space-coast",
+  "ponce inlet": "space-coast",
+  "holly hill": "space-coast",
+  deland: "space-coast",
+  deltona: "space-coast",
+  debary: "space-coast",
+  "orange city": "space-coast",
+  "palm coast": "space-coast",
+  "flagler beach": "space-coast",
+
+  // Jacksonville and the First Coast
+  jacksonville: "jacksonville",
+  "jacksonville beach": "jacksonville",
+  "atlantic beach": "jacksonville",
+  "neptune beach": "jacksonville",
+  "ponte vedra": "jacksonville",
+  "ponte vedra beach": "jacksonville",
+  "st augustine": "jacksonville",
+  "saint augustine": "jacksonville",
+  "st augustine beach": "jacksonville",
+  "saint augustine beach": "jacksonville",
+  "st johns": "jacksonville",
+  "saint johns": "jacksonville",
+  nocatee: "jacksonville",
+  "orange park": "jacksonville",
+  "fleming island": "jacksonville",
+  middleburg: "jacksonville",
+  "green cove springs": "jacksonville",
+  "fernandina beach": "jacksonville",
+  "amelia island": "jacksonville",
+  yulee: "jacksonville",
+  callahan: "jacksonville",
+  hilliard: "jacksonville",
+  macclenny: "jacksonville",
+
+  // Panhandle, plus Tallahassee -- Big Bend rather than Panhandle proper, but
+  // this is the nearest grouping, and leaving it unmapped would hide it under
+  // every metro chip instead of one.
+  destin: "panhandle",
+  "miramar beach": "panhandle",
+  sandestin: "panhandle",
+  "santa rosa beach": "panhandle",
+  "30a": "panhandle",
+  seaside: "panhandle",
+  "rosemary beach": "panhandle",
+  "inlet beach": "panhandle",
+  "grayton beach": "panhandle",
+  watersound: "panhandle",
+  watercolor: "panhandle",
+  freeport: "panhandle",
+  "fort walton beach": "panhandle",
+  niceville: "panhandle",
+  crestview: "panhandle",
+  navarre: "panhandle",
+  pensacola: "panhandle",
+  "pensacola beach": "panhandle",
+  "gulf breeze": "panhandle",
+  "perdido key": "panhandle",
+  "panama city": "panhandle",
+  "panama city beach": "panhandle",
+  tallahassee: "panhandle",
 };
 
 /**
@@ -208,13 +327,28 @@ const REGION_SCOPE: Record<string, MetroId | null> = {
   "miami / fort lauderdale": "south-florida",
 
   // Scoped to their own metro.
+  //
+  // Only a phrase naming a *region* belongs here. Winter Haven, Lakeland,
+  // Davenport and Haines City were listed here as well as in CITY_METRO, which
+  // made isRegionWide() true for them -- so a listing in Davenport rendered
+  // "Serves all of Orlando" instead of its own city, claiming a reach the
+  // vendor never stated. They are cities; CITY_METRO is where they belong.
   "central florida": "orlando",
   "greater orlando": "orlando",
-  "winter haven": "orlando",
-  lakeland: "orlando",
-  davenport: "orlando",
-  "haines city": "orlando",
   "tampa bay": "tampa",
+  "southwest florida": "southwest",
+  "south west florida": "southwest",
+  "naples / fort myers": "southwest",
+  "space coast": "space-coast",
+  "east central florida": "space-coast",
+  "northeast florida": "jacksonville",
+  "north east florida": "jacksonville",
+  "first coast": "jacksonville",
+  // Colloquially the Jacksonville side, not Tallahassee's.
+  "north florida": "jacksonville",
+  panhandle: "panhandle",
+  "florida panhandle": "panhandle",
+  "emerald coast": "panhandle",
 
   // Genuinely everywhere.
   florida: null,
@@ -302,8 +436,8 @@ export function metrosPresent(cities: (string | null | undefined)[]): MetroId[] 
 
 /**
  * Areas with listings inside one metro. Returns an empty list when the metro
- * has no areas defined (Orlando and Tampa today), which is how the second chip
- * row stays hidden rather than rendering a row of one.
+ * has no areas defined -- every metro except South Florida today -- which is
+ * how the second chip row stays hidden rather than rendering a row of one.
  */
 export function areasPresent(
   cities: (string | null | undefined)[],
