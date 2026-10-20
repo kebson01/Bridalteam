@@ -70,24 +70,55 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
   const areaChips = useMemo(() => AREAS.filter((a) => areaIds.includes(a.id)), [areaIds]);
 
   // Switching metro must drop the area, or a Broward filter survives into
-  // Orlando and silently returns nothing.
-  const pickMetro = (id: MetroId | null) => {
-    setMetro(id === metro ? null : id);
+  // Orlando and silently returns nothing. Unlike the chips this replaced, a
+  // select cannot toggle: re-choosing the current metro fires no change event,
+  // and clearing is what the "Anywhere" option is for.
+  const selectMetro = (id: MetroId | null) => {
+    setMetro(id);
     setArea(null);
   };
 
-  const filtered = useMemo(() => {
+  /**
+   * Everything except the location filters. The metro dropdown counts with it
+   * too, so a count can never disagree with the list it is counting -- which is
+   * the whole risk of putting a number next to a filter.
+   */
+  const matchesSearch = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return vendors.filter((v) => {
+    return (v: DirectoryVendor) => {
       if (category && v.category !== category) return false;
-      if (metro && !matchesMetro(v.city, metro)) return false;
-      if (area && !matchesArea(v.city, area)) return false;
       if (!q) return true;
       return [v.business_name, v.category, v.city, v.region, v.description]
         .filter(Boolean)
         .some((f) => String(f).toLowerCase().includes(q));
-    });
-  }, [vendors, query, category, metro, area]);
+    };
+  }, [query, category]);
+
+  const filtered = useMemo(
+    () =>
+      vendors.filter((v) => {
+        if (!matchesSearch(v)) return false;
+        if (metro && !matchesMetro(v.city, metro)) return false;
+        if (area && !matchesArea(v.city, area)) return false;
+        return true;
+      }),
+    [vendors, matchesSearch, metro, area],
+  );
+
+  /**
+   * How many listings each metro would show if picked, given the type and text
+   * already chosen. Coverage is very uneven -- hundreds in South Florida
+   * against a few dozen on the Space Coast -- so saying so up front beats
+   * letting a couple pick a metro and find it nearly empty.
+   */
+  const metroCounts = useMemo(() => {
+    const base = vendors.filter(matchesSearch);
+    const counts = new Map<MetroId | "any", number>([["any", base.length]]);
+    for (const m of METROS) {
+      counts.set(m.id, base.filter((v) => matchesMetro(v.city, m.id)).length);
+    }
+    return counts;
+  }, [vendors, matchesSearch]);
 
   return (
     <>
@@ -107,27 +138,39 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
           />
         </label>
 
+        {/*
+          A select rather than a row of chips. With three metros the chips fit;
+          with seven they overflowed a container that has no scrollbar and no
+          arrows, so the extra metros would have been invisible rather than
+          merely out of reach -- and every chip added narrowed the search field
+          beside them. Native, so keyboard and screen-reader behaviour and the
+          mobile picker come for free.
+        */}
         {metroChips.length > 0 && (
-          <div
-            role="group"
-            aria-label="Metro"
-            className="flex gap-1 overflow-x-auto rounded-xl bg-stone-4 p-1 [scrollbar-width:none] lg:shrink-0"
-          >
-            {[{ id: null, label: "Anywhere" }, ...metroChips].map((m) => (
-              <button
-                key={m.id ?? "any"}
-                type="button"
-                onClick={() => pickMetro(m.id)}
-                aria-pressed={m.id === metro}
-                className={`whitespace-nowrap rounded-lg px-3.5 py-2 text-sm transition-colors ${
-                  m.id === metro
-                    ? "bg-white font-medium text-brand-text shadow-sm ring-1 ring-brand"
-                    : "text-ink-soft/70 hover:text-brand-text"
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
+          <div className="relative mt-2 lg:mt-0 lg:shrink-0">
+            <select
+              aria-label="Metro"
+              value={metro ?? ""}
+              onChange={(e) => selectMetro((e.target.value || null) as MetroId | null)}
+              className="w-full cursor-pointer appearance-none rounded-xl bg-stone-4 py-3 pl-4 pr-10 text-sm font-medium text-ink outline-none focus-visible:ring-2 focus-visible:ring-brand lg:w-auto"
+            >
+              <option value="">Anywhere ({metroCounts.get("any") ?? 0})</option>
+              {metroChips.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.label} ({metroCounts.get(m.id) ?? 0})
+                </option>
+              ))}
+            </select>
+            <svg
+              aria-hidden
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-3"
+            >
+              <path d="m6 8 4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
         )}
       </div>
