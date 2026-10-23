@@ -53,7 +53,7 @@ there as no information rather than as reassurance.
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Almost no contact emails — 31 of 931.** The sessions that built this could
+**1. Almost no contact emails — 42 of 931.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -69,7 +69,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 900 rows the email still has to be gathered by hand, from each
+For the remaining 889 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -98,7 +98,7 @@ regardless of how many prospects are listed here.
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
   section above; 430 of the 931 qualify.
-- **Email** — empty on 900 of 931 rows. Fill from the vendor's own site. Where
+- **Email** — empty on 889 of 931 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -595,8 +595,8 @@ will be the slowest yes on this entire list.
 ## 1. Photographers (114)
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
-| Deivis Archbold Photography | deivisarchbold.com | Fort Lauderdale (6555 Power Line Rd) | 954-945-8116 |  | |  |
-| Little's Photography | littlesphotography.com | Fort Lauderdale (2552 N Federal Hwy) | 954-563-0444 |  | | weddings one of several services |
+| Deivis Archbold Photography | deivisarchbold.com | Fort Lauderdale (6555 Power Line Rd) | 954-945-8116 |  | | no published email found 2026-10-23 |
+| Little's Photography | littlesphotography.com | Fort Lauderdale (2552 N Federal Hwy) | 954-563-0444 | info@littlesphotography.com | | weddings one of several services; email: own site via search |
 | Michael Murphy Photographic Imaging |  | Fort Lauderdale (261 NE 32nd Ct) | 877-564-8555 |  | | event photographer; toll-free line |
 | Joey G Photography | joeygphoto.com | Hollywood | 954-986-4455 | joeygphoto@yahoo.com | |  |
 | Marco Palmieri Photographer |  | Hollywood | 954-471-5870 |  | | **directory listing inconsistent - verify** |
@@ -610,15 +610,15 @@ will be the slowest yes on this entire list.
 | Michelle VanTine Photography |  | Doral |  |  | |  |
 | Rey Zamora Photography |  | Doral |  |  | |  |
 | Courtney Jones Photography |  | Doral |  |  | |  |
-| Celeste Wedding Photography | celesteweddingphotography.com | Miami |  |  | |  |
+| Celeste Wedding Photography | celesteweddingphotography.com | Miami |  |  | | no published email found 2026-10-23; site gives a Sammamish, WA address and 425 number: verify it is a real Miami business |
 | Adriana Samanez Weddings |  | Doral |  |  | |  |
 | Marcelin Photography |  | Hialeah |  |  | |  |
 | Allison Studios |  | Hialeah |  |  | |  |
-| Supanik Photography | supanikphotography.com | Doral | 786-385-1100 |  | |  |
-| Lopez Falcon | lopezfalcon.com | Coral Gables |  |  | |  |
-| Robi Studio | robistudio.com | Miami |  |  | |  |
+| Supanik Photography | supanikphotography.com | Doral | 786-385-1100 | Bruce@supanikphotography.com | | email: own site via search; mostly quinceañeras, verify weddings |
+| Lopez Falcon | lopezfalcon.com | Coral Gables |  |  | | no published email found 2026-10-23; quinceañera-focused, verify weddings |
+| Robi Studio | robistudio.com | Miami |  | info@robistudio.com | | email: own site via search; quinceañera-focused, verify weddings |
 | Ramoneda Photo |  | Miami |  |  | |  |
-| Alfaaz Photography | alfaazphotography.com | South Florida |  |  | | Indian weddings |
+| Alfaaz Photography | alfaazphotography.com | South Florida |  | info@alfaazphotography.com | | Indian weddings; email: own site via search; **based in Mississauga, Ontario, not Florida: verify before contacting** |
 | Channa Photography |  | Fort Lauderdale |  |  | | **5+yr old listing - verify** |
 | Infinite Loop Photography |  | Fort Lauderdale |  |  | | **5+yr old listing - verify** |
 | Maloman Boutique Photography |  | Fort Lauderdale |  |  | | **5+yr old listing - verify** |
@@ -636,14 +636,14 @@ will be the slowest yes on this entire list.
 | Barbara Knowles Wedding Photography |  | Islamorada |  |  | | also planning |
 | Maddness Photography | maddnessphotography.com | Tampa | 727-418-9434 |  | |  |
 |---|---|---|---|---|---|---|
-| Lenisse Komatsu Photography | lenisse.com | Fort Lauderdale | | | | |
+| Lenisse Komatsu Photography | lenisse.com | Fort Lauderdale | | hello@lenisse.com | | email: own site and Instagram via search |
 | Couture Bridal Photography | couturebridalphotography.com | Boca Raton (137 E Palmetto Park Rd) | 954-399-0741 | mail@couturebridalphotography.com | | |
-| Wanderlust Studios | wanderluststudiosfl.com | Fort Lauderdale | | | | |
-| Melanie Anne Photography | melanieannephotography.com | Fort Lauderdale | | | | |
-| La Vie Studios | laviestudios.com | Miami | | | | |
-| Michelle Elyse Photography | michelleelysephotography.com | Miami | | | | |
-| EP Photos | epphotos.studio | Miami | | | | |
-| Kolour Haus | kolourhaus.com | Miami | | | | |
+| Wanderlust Studios | wanderluststudiosfl.com | Fort Lauderdale | | wanderluststudiosfl@gmail.com | | email: own Facebook Page via search; site says texting is preferred |
+| Melanie Anne Photography | melanieannephotography.com | Fort Lauderdale | | hello@melanieannephotography.com | | email: own Facebook Page via search |
+| La Vie Studios | laviestudios.com | Miami | | smile@laviestudios.com | | email: own site via search |
+| Michelle Elyse Photography | michelleelysephotography.com | Miami | | info@michelleelysephotography.com | | email: own site via search; **appears to be based in Raleigh, NC: verify Miami presence** |
+| EP Photos | epphotos.studio | Miami | | erica@epphotos.studio | | email: own site via search |
+| Kolour Haus | kolourhaus.com | Miami | | info@kolourhaus.com | | email: own contact page via search |
 | Jessica Vilchez Photo | jessicavilchez.com | Miami / Palm Beach | | | | |
 | LeFever Photo | lefeverphoto.net | Palm Beach | | | | |
 | Poirier Wedding Photography | poirierweddingphotography.com | Palm Beach / Jupiter | | | | |
