@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { captureAttribution } from "@/lib/attribution";
+import { captureAttribution, captureReferrer } from "@/lib/attribution";
 
 /**
  * Records which ad or link brought this visitor here, once per session.
@@ -18,6 +18,7 @@ import { captureAttribution } from "@/lib/attribution";
 export default function AttributionCapture() {
   useEffect(() => {
     captureAttribution();
+    captureReferrer();
   }, []);
 
   return null;

@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { parseAttribution, captureAttribution, readAttribution } from "./attribution";
+import {
+  parseAttribution,
+  captureAttribution,
+  readAttribution,
+  externalReferrerHost,
+  captureReferrer,
+  readReferrer,
+} from "./attribution";
 
 const AD = "https://bridalteam.com/planner?utm_source=facebook&utm_medium=paid_social&utm_campaign=launch_miami_2026_09&utm_content=couples_a1";
 
@@ -98,5 +105,70 @@ describe("captureAttribution / readAttribution", () => {
     expect(readAttribution()).toBeNull();
     window.sessionStorage.setItem("bt_attribution", "[1,2,3]");
     expect(readAttribution()).toBeNull();
+  });
+});
+
+describe("externalReferrerHost", () => {
+  it("keeps only the host of another site", () => {
+    expect(externalReferrerHost("https://www.google.com/search?q=wedding+budget", "bridalteam.com")).toBe("google.com");
+    expect(externalReferrerHost("https://old.reddit.com/r/weddingplanning/comments/abc", "bridalteam.com")).toBe(
+      "old.reddit.com",
+    );
+  });
+
+  it("ignores our own site, with or without www", () => {
+    expect(externalReferrerHost("https://bridalteam.com/guides", "bridalteam.com")).toBeUndefined();
+    expect(externalReferrerHost("https://www.bridalteam.com/", "bridalteam.com")).toBeUndefined();
+    expect(externalReferrerHost("https://bridalteam.com/", "www.bridalteam.com")).toBeUndefined();
+  });
+
+  it("returns undefined for a missing or malformed referrer", () => {
+    expect(externalReferrerHost("", "bridalteam.com")).toBeUndefined();
+    expect(externalReferrerHost("not a url", "bridalteam.com")).toBeUndefined();
+  });
+});
+
+describe("captureReferrer / readReferrer", () => {
+  function visit(url: string, referrer = "") {
+    Object.defineProperty(window, "location", { value: new URL(url), writable: true });
+    Object.defineProperty(document, "referrer", { value: referrer, configurable: true });
+    captureReferrer();
+  }
+
+  beforeEach(() => {
+    window.sessionStorage.clear();
+    vi.restoreAllMocks();
+  });
+
+  it("records the site an untagged visitor came from", () => {
+    visit("https://bridalteam.com/guides/who-pays-for-the-wedding", "https://www.google.com/");
+    expect(readReferrer()).toBe("google.com");
+  });
+
+  it("keeps the first external site when later pages are internal", () => {
+    visit("https://bridalteam.com/", "https://www.pinterest.com/");
+    visit("https://bridalteam.com/planner", "https://bridalteam.com/");
+    expect(readReferrer()).toBe("pinterest.com");
+  });
+
+  it("records nothing for a direct visit or an internal reload", () => {
+    visit("https://bridalteam.com/planner");
+    visit("https://bridalteam.com/planner", "https://bridalteam.com/planner");
+    expect(readReferrer()).toBeUndefined();
+  });
+
+  it("does not touch the signup attribution record", () => {
+    // An organic referrer must never become a first touch that blocks a
+    // campaign link clicked later in the same session.
+    visit("https://bridalteam.com/", "https://www.google.com/");
+    expect(readAttribution()).toBeNull();
+  });
+
+  it("does not throw when storage is unavailable", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("SecurityError");
+    });
+    expect(() => visit("https://bridalteam.com/", "https://www.google.com/")).not.toThrow();
+    expect(readReferrer()).toBeUndefined();
   });
 });

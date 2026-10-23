@@ -140,6 +140,66 @@ export function captureAttribution(): void {
   }
 }
 
+// ── Referring site, for counting only ─────────────────────────────────────
+//
+// parseAttribution() deliberately records nothing for an untagged visit, and
+// it should keep doing that: the record above ends up on the user's account
+// and has a first-touch rule that an organic "google.com" must not win over a
+// campaign link clicked later. But it left page_events with no `source` at all
+// for organic arrivals, which is the opposite of what that table promises
+// (`utm_source, or the referring host when there is no UTM`) — and it made the
+// one number that shows strangers finding us on their own invisible.
+//
+// So the referring site is held separately, for page counts only. Same shape
+// of data as `referrer_host` above (the host, never the URL) and the same
+// storage rules: session-scoped, first external arrival wins, never thrown.
+
+const REFERRER_KEY = "bt_referrer";
+
+/** "www.Example.com" and "example.com" are the same site for this purpose. */
+function bareHost(host: string): string {
+  return host.trim().toLowerCase().replace(/^www\./, "");
+}
+
+/**
+ * The referring site's host when the visit came from another site, else
+ * undefined. Our own host (a reload, an internal link) is not a source.
+ * Exported for testing.
+ */
+export function externalReferrerHost(referrer: string, ownHost: string): string | undefined {
+  if (!referrer) return undefined;
+  let host: string;
+  try {
+    host = new URL(referrer).host;
+  } catch {
+    return undefined;
+  }
+  if (!host || bareHost(host) === bareHost(ownHost)) return undefined;
+  return bareHost(host).slice(0, MAX_LEN) || undefined;
+}
+
+/** Records the referring site for this session, once. Never throws. */
+export function captureReferrer(): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (window.sessionStorage.getItem(REFERRER_KEY)) return;
+    const host = externalReferrerHost(document.referrer, window.location.host);
+    if (host) window.sessionStorage.setItem(REFERRER_KEY, host);
+  } catch {
+    // Storage unavailable. The view is still counted, just without a source.
+  }
+}
+
+/** The referring site captured this session, or undefined. Never throws. */
+export function readReferrer(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    return window.sessionStorage.getItem(REFERRER_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Returns what was captured this session, or null. Never throws. */
 export function readAttribution(): Attribution | null {
   if (typeof window === "undefined") return null;
