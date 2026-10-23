@@ -53,7 +53,7 @@ there as no information rather than as reassurance.
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Contact emails — 751 of 931.** The sessions that built this could
+**1. Contact emails — 750 of 931.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -69,7 +69,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 180 rows the email still has to be gathered by hand, from each
+For the remaining 181 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -98,7 +98,7 @@ regardless of how many prospects are listed here.
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
   section above; 430 of the 931 qualify.
-- **Email** — empty on 180 of 931 rows. Fill from the vendor's own site. Where
+- **Email** — empty on 181 of 931 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -1553,7 +1553,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 |---|---|---|---|---|---|---|
 | Glyk Gelato | glyk.com | Boca Raton | 561-609-4900 | info@glyk.com | | **listed Boca Raton but a Parkland address - verify**; email: own site via search; Own site lists Boca Raton (129 NW 13th St); older listings show Parkland |
 | GelatoGo | gelatogo.net | Miami | 786-450-0477 | alessandro@gelatogo.net | | email: own site via search; Named-person address published as the business contact. Also operates in LA |
-| The Gelato Bar | urbanicaevents.com | Fort Lauderdale |  | hello@urbanicaevents.com | | email: own site via search; Operated by Urbanica Luxury Events. Not Gelato&Co (Las Olas) |
+| The Gelato Bar | urbanicaevents.com | Fort Lauderdale |  |  | | Operated by Urbanica Luxury Events. Not Gelato&Co (Las Olas); hello@urbanicaevents.com removed 2026-10-23 (shared with Urbanica's listing): email Urbanica instead |
 | I Scream Gelato | iscream-gelato.com | Miami |  | inquiry@iscream-gelato.com | | email: own site via search; Shops on Lincoln Rd and Wynwood; may be a chain. iscreamgelatoinfo@gmail.com seen on a directory, unverified |
 | HipPOPs | hippops.com | Miami |  | Info@HipPOPs.com | | dessert truck; email: own site via search |
 | Banana Daddy | eatbananadaddy.com | Miami |  | info@eatbananadaddy.com | | electric dessert truck; email: own site via search; Also a storefront at 3415 NE 1st Ave Miami |
