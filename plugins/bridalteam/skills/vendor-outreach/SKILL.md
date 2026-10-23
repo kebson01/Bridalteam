@@ -103,12 +103,17 @@ early on the couples side, so I can't promise you bookings."
 5. Give the user a table: business, category, city, phone, one specific thing
    about their work to open with, and anything to watch for. Then the call
    script from `references/call-script.md`.
+6. **Open the claim window for the batch.** Fill in the SQL from
+   `references/claim-window.md` for exactly these vendors and tell the user to
+   run it before the first call. The 60 days start now, not when the listing
+   was created.
 
 ### 2. After calls: record outcomes
 
 Update the business's row in its **category table** in `VENDOR-PROSPECTS.md`
-(never the generated "Call these first" table): **Sent** gets the date and
-channel (`2026-10-23 call`), **Outcome** gets one of:
+(never the generated "Call these first" table): **Sent** gets the date, the
+channel and the claim window's end (`2026-10-23 call; window to 2026-12-22`),
+**Outcome** gets one of:
 
 - `yes: email attached` (user attached it on `/admin/claims`)
 - `yes: sent claim link`
@@ -122,6 +127,12 @@ For each "yes", remind the user of the `/admin/claims` steps: search the
 number, confirm the business, type the email the vendor read out, save. The
 vendor then signs up with that same address and is offered the listing.
 
+For a `call back <date>` that falls after the window ends, reopen the window
+for that vendor when the call-back happens, not now. For a "yes" that still
+hasn't claimed a week before the window closes, flag it to the user. Reopening
+is fine, but a yes that never claims usually means the claim flow is the
+problem (see Progress report).
+
 ### 3. Messages to vendors
 
 Start from the templates in `VENDOR-OUTREACH.md` and update the facts as
@@ -133,7 +144,10 @@ about their work that a person who looked at it would say.
   yes on a call and asked for their link is a reply, not cold outreach.
 - **Instagram DM:** under 100 words, no link in the first message unless they
   asked.
-- **Follow-up:** the one-time template in `VENDOR-OUTREACH.md`.
+- **Before the first message of a batch**, open the claim window for those
+  vendors exactly as in workflow 1, step 6 (`references/claim-window.md`).
+- **Follow-up:** the one-time template in `VENDOR-OUTREACH.md`. It falls
+  inside the window already opened, so don't reopen for it.
 - **Objections:** use the honest answers in `VENDOR-OUTREACH.md`. Re-check any
   number or price they contain against `lib/tiers.ts` first.
 
