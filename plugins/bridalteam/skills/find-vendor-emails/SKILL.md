@@ -60,6 +60,13 @@ is the best source. If they don't:
   `"<Business name>" facebook`.
 - Run several vendors' searches in parallel in one turn. Batches of 10–15
   keep it manageable.
+- For a whole metro, split the vendors across parallel subagents (about 35
+  each) that write JSON results to the scratchpad, and merge them into
+  `VENDOR-PROSPECTS.md` yourself afterwards. Web searches are capped at about
+  200 per turn, **shared by every agent running at once**, so a round covers
+  roughly 200 vendors. Have agents use one search per vendor and mark any
+  vendor they couldn't reach `NOT SEARCHED` so the next round retries it
+  instead of recording it as having no email.
 - Read the result's attribution. Accept only addresses it attributes to an
   allowed source above. If it gives several, prefer the one on the business's
   own website.

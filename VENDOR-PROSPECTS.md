@@ -53,7 +53,7 @@ there as no information rather than as reassurance.
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Contact emails — 732 of 931.** The sessions that built this could
+**1. Contact emails — 751 of 931.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -69,7 +69,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 199 rows the email still has to be gathered by hand, from each
+For the remaining 180 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -98,7 +98,7 @@ regardless of how many prospects are listed here.
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
   section above; 430 of the 931 qualify.
-- **Email** — empty on 199 of 931 rows. Fill from the vendor's own site. Where
+- **Email** — empty on 180 of 931 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -830,19 +830,19 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Flower Girlz Inc |  | Destin | 850-865-1245 |  | | no published email found 2026-10-23; No email found; site flowergirlzinc.com. Studio is in Fort Walton Beach |
 | Flowerama Gulf Breeze |  | Gulf Breeze | 850-916-7673 |  | | no published email found 2026-10-23; CLOSED: own Facebook says 'no longer Flowerama, we have closed'; MapQuest shows permanently closed. Successor FlowerMama LLC (flowermamallc@gmail.com) is a different business, not recorded |
 | Fort Myers Florist | fmflorist.com | Fort Myers | 239-931-0506 | support@fmflorist.com | | email: own site via search; Wedding/events specialist address yourevent@fmflorist.com on consultation page - may be better for weddings |
-| GG Bloom |  | Santa Rosa Beach | 850-460-2078 |  | | **directory-only source** |
+| GG Bloom |  | Santa Rosa Beach | 850-460-2078 |  | | **directory-only source**; no published email found 2026-10-23; no email found. BBB lists it at Miramar Beach, YP at Destin, same phone 850-460-2078. Directory-only |
 | Jade Violet Wedding Floral | jadevioletweddingfloral.com | St Augustine | 904-415-2480 | info@jadevioletweddingfloral.com | | email: own Facebook Page via search, verify; possibly CLOSED (Visit St Augustine, MapQuest); own thank-you page lists jadevioletweddingfloral333@gmail.com |
 | Jardin Floral Design | jardinfdflowers.com | Fort Myers | 239-451-9498 | info@jardinfloraldesign.com | | **second number 239-404-1050 published - verify**; email: own site via search; Email domain differs from website domain. Owner elaine@jardinfloraldesign.com also published. Shop is in Naples (4949 Tamiami Trl N); FM is mailing address |
-| Magnolia Flowers |  | Panama City Beach | 850-249-6009 |  | |  |
+| Magnolia Flowers |  | Panama City Beach | 850-249-6009 | orders@magnoliasflowers.net | | email: own site via search, verify; business is Magnolia's Flowers. The email is in embedded data on the contact page, not a visible field. Phone and address match (7906 Front Beach Rd) |
 | Midtown Flowers |  | Naples | 239-261-4414 | wecare@floristofnaples.com | | delivery focus; confirm weddings; email: own site via search, verify; From site structured data; Facebook lists naplesmidtownflowers@gmail.com. stewart685@gmail.com on Yellow Pages: personal-looking email, do not mail. Delivery florist; weddings unconfirmed |
 | Naples Floral Design | naplesfloral.com | Naples | 239-514-1414 | michael@naplesfloral.com | | email: own site via search, verify; Facebook page shows 'Opening Soon'; some results older - confirm active |
 | Naples Picasso Flowers | naplespicassoflowers.com | Naples | 239-297-0352 | naplespicassoflowers@gmail.com | |  |
-| Navarre Beach Flowers |  | Navarre | 850-939-2288 |  | |  |
+| Navarre Beach Flowers |  | Navarre | 850-939-2288 | navarrebeachflowers1@gmail.com | | email: own site via search; also on the FB page. Phone matches |
 | Once And Florall Designs | onceandfloralldesigns.com | St Johns |  | onceandfloralldesigns@gmail.com | | email: own site via search; located St Augustine (Shearwater, 32092) |
 | Ruby Reds Floral and Garden | rubyredsfloral.com | Jacksonville | 904-476-9282 | rubyredsfloral@yahoo.com | |  |
 | Silver Leaf Flowers | naplessilverleaf.com | Naples | 239-777-8803 | silverleafflowers@gmail.com | | appointment only, text to book; email: own site via search; Also on own Facebook. Accessibility page lists naplessilverleaf@gmail.com |
 | Surfside Florist |  | Cocoa Beach | 407-970-7314 | SurfsideFlorist@gmail.com | | inside Surfside Wedding Chapel; **407 number in a 321 city - verify**; email: own site via search, verify; site phone 321-258-4147 (not input 407 number); owners say they no longer own the chapel as of Jul 2023; related addresses mycocoabeachwedding@gmail.com / DestinationWeddingsInFlorida@gmail.com on sister sites |
-| Tula Rose Floral & Event Design |  | St Augustine | 904-599-5470 |  | | full service from $5,000 |
+| Tula Rose Floral & Event Design |  | St Augustine | 904-599-5470 | info@tularoseevents.com | | full service from $5,000; email: own site via search; thebranch@tularoseevents.com is for their lower-cost line |
 | Weddings by Beasley's Floral | cocoabeachweddings.net | Cocoa Beach | 321-613-0601 | beasleys@cocoabeachweddings.net | | **listing ~1,608 days old - verify**; email: own site via search, verify; listing flagged old; site shows 80 S Orlando Ave, phone matches |
 
 ## 4. Cake & dessert (44)
@@ -882,16 +882,16 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | 4R Bakery and Specialty Cakes |  | Winter Park | 407-543-8589 | specialtycakes@4rsmokehouse.com | | email: own Facebook Page via search, verify; Part of 4 Rivers Smokehouse (chain). Facebook only; phones conflict (407-474-8377 vs input 407-543-8589) |
 | The Glass Knife | theglassknife.com | Winter Park |  | cake@theglassknife.com | | tastings by appointment; email: own site via search; From page structured data; visible text obfuscated. Wedding FAQ directs inquiries to this address |
 | Scotchie's Custom Cakes | scotchiescakes.com | Winter Park |  | dan@scotchiescakes.com | | email: own Facebook Page via search, verify; Named-person address on Facebook (and a Nextdoor job post); not confirmed on own site |
-| Classic Cakes |  | Jacksonville Beach | 904-246-6408 |  | |  |
-| Cupcake Connection Bakery | yourcupcakelady.com | Jacksonville | 904-874-5101 |  | |  |
-| D & D Cake Designs |  | Jacksonville | 904-316-7013 |  | |  |
+| Classic Cakes |  | Jacksonville Beach | 904-246-6408 | classiccakes100@gmail.com | | email: own Facebook Page via search, verify; Nextdoor shows jkrupinski@classiccakes.com with a different website (conflict). classiccakes.com / cake@classiccakes.com is a different business in Carmel, Indiana |
+| Cupcake Connection Bakery | yourcupcakelady.com | Jacksonville | 904-874-5101 | info@yourcupcakelady.com | | email: own site via search |
+| D & D Cake Designs |  | Jacksonville | 904-316-7013 | ddcakedesigns504@att.net | | email: own Facebook Page via search, verify; Only source is Facebook page info; not confirmed on own site ddcakedesigns.com |
 | Ella's Cakes |  | Naples | 239-643-0778 | info@ellascakes.com | | email: own site via search |
-| Kakes by Katie |  | St Johns | 904-716-9915 |  | | appointment only, consultations Sundays |
-| Love + Cake Bakery Jax |  | Jacksonville | 904-710-8046 |  | |  |
+| Kakes by Katie |  | St Johns | 904-716-9915 | gotcake@kakesbykatie.com | | appointment only, consultations Sundays; email: own Facebook Page via search; Addresses differ across listings (St Johns vs Jacksonville 32258); same phone |
+| Love + Cake Bakery Jax |  | Jacksonville | 904-710-8046 | loveandcakebakeryjax@gmail.com | | email: own site via search; Facebook shows variant love.and.cake.bakery.jax@gmail.com (Gmail ignores dots, same inbox) |
 | LuLu's Cupcakes and More |  | Daytona Beach | 386-785-7038 |  | | **from a venue's preferred-vendor list - verify**; no published email found 2026-10-23; home-based cottage bakery in Edgewater; FB page and WeddingWire show phone only; reviews mention unanswered messages |
 | My Cupcake Insanity |  | Southwest Florida | 239-738-4994 |  | | **no source stated a city; filed region-wide on the 239 area code**; no published email found 2026-10-23; Cape Coral (310 SE 6th St); site mycupcakeinsanity.com, no email in results |
 | SassyCakes |  | Naples | 239-687-5100 | SassyCakesofNaples@gmail.com | | email: own site via search; Older directory addresses @sassycakesinc.com seen; not used |
-| Sweet By Holly |  | Jacksonville | 904-564-2711 |  | |  |
+| Sweet By Holly |  | Jacksonville | 904-564-2711 |  | | no published email found 2026-10-23; CLOSED: Jacksonville location exited permanently (First Coast News; Yelp CLOSED). info@sweetbyholly.com seen on Instagram/2022 post; Orlando flagship is separate ownership. Do not mail as Jax vendor |
 | Sweets By Staci |  | Jacksonville | 904-254-6394 | sweetsbystaci@yahoo.com | | email: own Facebook Page via search; North Jacksonville; FB intro also lists sweetsbystaci.com |
 
 ## 5. DJs (60)
@@ -945,11 +945,11 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Soundwave Entertainment | djsoundwave.net | Orlando |  | info@djsoundwave.net | | since 2001; email: own site via search; mailing address Winter Garden |
 | DJ Danny Garcia | djdannygarcia.com | Orlando |  | danny@djdannygarcia.com | | email: own site via search; sole operator; published as the contact |
 | A Sound Choice Entertainment |  | Naples | 239-352-9988 |  | | no published email found 2026-10-23; Only email seen is naplesdjs@comast.net on Paradise Coast listing (likely typo; not corrected - never construct). Site naplesdj.com. Retry search refused by budget limit |
-| Aardvark DJ & Bands |  | Pensacola | 850-390-0650 |  | |  |
-| Boogie Inc |  | Pensacola | 850-438-1660 |  | |  |
+| Aardvark DJ & Bands |  | Pensacola | 850-390-0650 |  | | no published email found 2026-10-23; no email found. Website apensacoladj.com (via MapQuest/WeDJ). Phone matches across directories |
+| Boogie Inc |  | Pensacola | 850-438-1660 | mrsboogie@boogieinc.com | | email: own site via search; also in the Gulf Breeze Chamber profile. Phone matches |
 | DJ Darion | djdarion.com | South Daytona |  | info@djdarion.com | | email: own site via search; 831 (California) phone numbers; formerly Monterey/Marina CA business (DDB Enterprises), now says South Daytona |
 | DJ PAV Events | djpavevents.com | Jacksonville |  | DJpavinfo@gmail.com | | email: own site via search; site metadata also shows djpavevents@gmail.com; phone is 813-407-9472 (Tampa area code) though listed in Jacksonville |
-| Emerald Coast Mobile DJ | destinweddingdj.com | Fort Walton Beach | 850-424-4650 |  | | office in Fort Walton Beach |
+| Emerald Coast Mobile DJ | destinweddingdj.com | Fort Walton Beach | 850-424-4650 | destinweddingdj@gmail.com | | office in Fort Walton Beach; email: own site via search, verify; site phone is 850-803-8270, not the input's 850-424-4650. Older address djjbrock@cox.net seen on the Christmas page. ecdjservices@gmail.com belongs to a different business |
 | Frank Roberts |  | Daytona Beach | 386-767-0946 |  | | **from a venue's preferred-vendor list - verify**; no published email found 2026-10-23; froberts6@cfl.rr.com appears only on a car-show event listing - personal-looking email: do not mail; no own site found |
 | Ikeman Entertainment |  | Atlantic Beach | 904-803-4297 | ikemanentertainment@yahoo.com | | from $695 / 5 hours; email: own site via search; based in Jacksonville (PO Box 32245), serves Atlantic Beach |
 | MK Entertainment | mkentertainmentdj.com | Naples |  |  | | no published email found 2026-10-23; Listings place it in Estero, FL (239-405-0475). contact@mkentertainment.org belongs to an unrelated Manchester UK agency: do not use |
@@ -1375,13 +1375,13 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | BFF Booth | bffbooth.com | Jacksonville | 904-477-9995 | info@bffbooth.com | | also trades as Big Fun Photo Booth on the same line; email: own site via search; site also lists dave@bffbooth.com (main contact section) and bffbooth@gmail.com; trades as Big Fun Photo Booth |
 | Forever in the Moment Co | foreverinthemomentco.com | Fort Myers | 239-296-9316 | info@foreverinthemomentco.com | |  |
 | Instant Photocube | instantphotocube.co | Jacksonville | 904-576-5855 | info@instantphotocube.co | | email: own site via search; directories show steve@instantphotocube.com; 2021 privacy policy shows instantphotocube@gmail.com |
-| Jax Booth | jaxbooth.com | Jacksonville | 904-504-1759 |  | |  |
-| JAXonville 360 |  | Jacksonville | 904-504-1696 |  | |  |
+| Jax Booth | jaxbooth.com | Jacksonville | 904-504-1759 | info@jaxbooth.com | | email: own Facebook Page via search; FB page lists jaxbooth.com and matching phone 904-504-1759. Not to be confused with The Photo Booth Jax or Jax Mirror Photo Booth |
+| JAXonville 360 |  | Jacksonville | 904-504-1696 | thejaxonville360@gmail.com | | email: own site via search; phone matches. Older ueniweb page has the same phone. Kapture JAX 360 is a different business |
 | Lucky Photo Booth | yourluckybooth.com | Fort Myers | 239-961-7150 | hello@yourluckybooth.com | |  |
-| Mojo of Jacksonville | mojoofjacksonville.com | Jacksonville |  |  | |  |
-| PhotoBooth Creations | photobooth-creations.com | Jacksonville | 904-947-8644 |  | |  |
-| Photobooth Pixel | photoboothpixel.com | Jacksonville | 904-419-3029 |  | |  |
-| Picture & Pose | pictureandpose.com | Jacksonville | 904-326-3428 |  | |  |
+| Mojo of Jacksonville | mojoofjacksonville.com | Jacksonville |  | mojoofjacksonville@hotmail.com | | email: own site via search, verify; FB page has the same email, but the site lists phone 910-265-2849 (a North Carolina area code). Confirm it is based in Jacksonville FL and not Jacksonville NC |
+| PhotoBooth Creations | photobooth-creations.com | Jacksonville | 904-947-8644 |  | | no published email found 2026-10-23; site has only a 'Send us an email' link and the address is hidden. Passport 2 Adventure LLC DBA, 3545 St Johns Bluff Rd Ste 113. Use the phone or the site form |
+| Photobooth Pixel | photoboothpixel.com | Jacksonville | 904-419-3029 | info@photoboothpixel.com | | email: own site via search; phone matches. Its address (3545 St Johns Bluff Rd) is in the same building as PhotoBooth Creations |
+| Picture & Pose | pictureandpose.com | Jacksonville | 904-326-3428 |  | | no published email found 2026-10-23; the About page shows a garbled 'Hello@Picture & Pose.com'. hello@pictureandpose.com is likely but unconfirmed, so it is not recorded. Check the site by hand |
 
 ## 14. Lighting (6)
 
@@ -1417,9 +1417,9 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | LinDi Bridal |  | Sunrise |  | lindiandco@gmail.com | | email: own site via search; Phone numbers vary across directories |
 | The Collection Bridal | thecollectionbridal.com | Winter Park | 407-740-6003 | info@thecollectionbridal.com | | in-house alterations; email: own site via search |
 | Calvet Couture Bridal | calvetcouture.com | Winter Park | 407-951-5670 | CalvetCouture@Gmail.com | | by appointment only; email: own site via search; Also on own Facebook; Yelp/BBB show older phones |
-| The Bridal Finery |  | Winter Park | 407-960-5225 |  | |  |
-| Angel Rivera Bridal Atelier |  | Winter Park | 407-960-7544 |  | |  |
-| Leonardo Fifth Avenue |  | Winter Park |  |  | | tuxedo, custom-made |
+| The Bridal Finery |  | Winter Park | 407-960-5225 | tali@thebridalfinery.com | | email: own Facebook Page via search, verify; Named owner address (Tali Gallo); also on Hue I Do listing and own careers page. Own site schema shows tali@thebridalfinery.net (conflict). Site lists phone 407-554-9034 vs input 407-960-5225 |
+| Angel Rivera Bridal Atelier |  | Winter Park | 407-960-7544 | winterpark@angelriveraatelier.com | | email: own site via search; Multi-location brand also in Ridgewood NJ (info@angelriveraatelier.com); Winter Park address is location-specific |
+| Leonardo Fifth Avenue |  | Winter Park |  | marketing@l5a.com | | tuxedo, custom-made; email: own Facebook Page via search, verify; Chain based outside Florida (Puerto Rico/NY phones); marketing@ is corporate, not the Winter Park store. winterpark@l5a.com seen only on weddingvenuemap.com aggregator (not accepted). Store phone per own site 305-399-8585. Tuxedo/menswear |
 | Magnolia Laine Bridal | magnolialainebridal.com | Tampa | 656-203-8615 | tampa@magnolialainebridal.com | | 656 is a valid Tampa overlay; email: own site via search; Multi-location brand (also McKinney TX); Tampa address 308 E Oak Ave, older listings show W Kennedy Blvd |
 | Truly Forever Bridal | trulyforeverbridal.com | Tampa | 813-931-8991 | info@trulyforeverbridal.com | | email: own site via search; Also has Sarasota location |
 | Jade Bridal | jadebridaltampa.com | Tampa | 813-614-1490 | info.jadebridal@gmail.com | | appointment only; email: own site via search |
@@ -1428,8 +1428,8 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Maria's Bridal Connection | mariasbridal.net | Tampa |  | mariasbridalconnection@gmail.com | | **727 area code vs Tampa, phone withheld**; email: own Facebook Page via search, verify; Located in New Port Richey (Pasco), not Tampa - explains 727 number (727-863-2400); also in site structured data only |
 | Ivory & Lace Bridal | ivoryandlacebridal.com | Tampa |  | ivoryandlace@ccsboutique.com | | email: own Facebook Page via search, verify; Only on FB; domain ccsboutique.com unexplained; other same-name shops in MO/TX - don't mix up |
 | Elliot James Bridal | elliotjamesbridal.com | Tampa |  | mckenzie@elliotjamesbridal.com | | appointment only, N Hyde Park; email: own site via search, verify; Owner McKenzie's address on own booking pages; Yelp marks closed (possibly stale); phones conflict 656-256-4065 vs 561-373-7830 |
-| Theory Bridal House | theorybridalhouse.com | Orlando | 407-219-4529 |  | | Avalon Park |
-| Bridal Gown Studio Orlando | bridalgownstudioorlando.com | Orlando | 407-826-1843 |  | | appointment only |
+| Theory Bridal House | theorybridalhouse.com | Orlando | 407-219-4529 | hello@theorybridalhouse.com | | Avalon Park; email: own Facebook Page via search; Also brie@theorybridalhouse.com (founder) on Calla Blanche stockist listing |
+| Bridal Gown Studio Orlando | bridalgownstudioorlando.com | Orlando | 407-826-1843 | bridalgownstudioorlando@gmail.com | | appointment only; email: own site via search; Also on own Setmore booking page |
 | Lily's Bridal | lilysbridal.com | Orlando | 407-228-4050 | info@lilysbridal.com | | email: own site via search; Facebook shows same. Separate outlet store uses info@lilysbridaloutlet.com |
 | Minerva's Bridal | minervasbridal.com | Orlando |  | mail@minervasbridal.com | | email: own site via search; same address on outlet site minniesoutlet.com |
 | Bridal Gallery of Orlando | bridalgalleryoforlando.com | Orlando |  | info@bridalgalleryoforlando.com | | email: own site via search |
