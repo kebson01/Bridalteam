@@ -1,4 +1,4 @@
--- Vendor contact emails: high confidence (411 addresses)
+-- Vendor contact emails: high confidence (410 addresses)
 --
 -- Generated 2026-10-23 from VENDOR-PROSPECTS.md by the find-vendor-emails
 -- skill. Run it by hand in the Supabase SQL editor (service role). Covers every metro. It is not a
@@ -398,7 +398,6 @@ insert into found_emails (business_name, phone10, email) values
   ('The Write Stuff', '8138370400', 'thewritestufftampa@yahoo.com'),
   ('Carla Schall Live Event Painting', '', 'carla@carlaschall.com'),
   ('GelatoGo', '7864500477', 'alessandro@gelatogo.net'),
-  ('The Gelato Bar', '', 'hello@urbanicaevents.com'),
   ('I Scream Gelato', '', 'inquiry@iscream-gelato.com'),
   ('HipPOPs', '', 'info@hippops.com'),
   ('Banana Daddy', '', 'info@eatbananadaddy.com'),
