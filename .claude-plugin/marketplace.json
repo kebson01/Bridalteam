@@ -1,0 +1,16 @@
+{
+  "name": "bridalteam-tools",
+  "owner": {
+    "name": "Kebson St. Charles"
+  },
+  "metadata": {
+    "description": "Claude Code plugins for running and growing Bridal Team."
+  },
+  "plugins": [
+    {
+      "name": "bridalteam",
+      "source": "./plugins/bridalteam",
+      "description": "Skills for growing Bridal Team: SEO, listings and promotion."
+    }
+  ]
+}
