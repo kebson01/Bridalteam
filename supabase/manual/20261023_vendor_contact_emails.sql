@@ -1,4 +1,4 @@
--- Vendor contact emails: high confidence (410 addresses)
+-- Vendor contact emails: high confidence (409 addresses)
 --
 -- Generated 2026-10-23 from VENDOR-PROSPECTS.md by the find-vendor-emails
 -- skill. Run it by hand in the Supabase SQL editor (service role). Covers every metro. It is not a
@@ -311,7 +311,6 @@ insert into found_emails (business_name, phone10, email) values
   ('A Family Limo', '', 'reservations@afamilylimo.com'),
   ('American Limo & Transportation Service', '', 'info@americanlimofl.com'),
   ('American Dream Tour Miami', '', 'info@americandreamtourmiami.com'),
-  ('Miami White Trolley', '', 'reservations@rumbatoursmiami.com'),
   ('Molly''s Trolleys of West Palm Beach', '', 'info@mollystrolleys.com'),
   ('Atlantic Charters', '9544482032', 'sales@atlanticchartersinc.com'),
   ('Phoenix Bus', '', 'contact@phoenixbusorlando.com'),
