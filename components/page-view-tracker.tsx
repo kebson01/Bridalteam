@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { track } from "@/lib/events";
-import { readAttribution } from "@/lib/attribution";
+import { readAttribution, readReferrer } from "@/lib/attribution";
 
 /**
  * Counts page views, first-party and without an identifier of any kind.
@@ -30,7 +30,9 @@ export default function PageViewTracker() {
     lastPath.current = pathname;
 
     const attribution = readAttribution();
-    const source = attribution?.utm_source ?? attribution?.referrer_host ?? undefined;
+    // Tagged links first, then the referring site for untagged arrivals (an
+    // organic search result, a link someone shared) so those aren't "(none)".
+    const source = attribution?.utm_source ?? attribution?.referrer_host ?? readReferrer();
     track("page_view", pathname, source);
   }, [pathname]);
 
