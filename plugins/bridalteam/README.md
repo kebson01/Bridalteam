@@ -8,6 +8,7 @@ Skills for running and growing Bridal Team. Each skill lives in
 | Skill | Use it for |
 |---|---|
 | `seo-promotion` | SEO audits, getting listed on major websites and directories, press and roundup pitches, AI-search visibility, and keeping `PROMOTION-TRACKER.md` up to date. |
+| `vendor-outreach` | Call lists and scripts for getting vendors to claim their listings, claim-your-listing messages, recording outcomes in `VENDOR-PROSPECTS.md`, researching new vendors, and backlink asks. |
 
 ## Install
 
