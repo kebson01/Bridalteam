@@ -53,7 +53,7 @@ there as no information rather than as reassurance.
 Two things are missing, and the first one is why there is a file here instead of
 rows in the database.
 
-**1. Contact emails — 750 of 931.** The sessions that built this could
+**1. Contact emails — 734 of 931.** The sessions that built this could
 run web *search* but could not open the vendors' own websites; the network egress
 proxy blocked every one, on both passes. So every name, URL, address and phone
 below came from a search result rather than from first-party verification.
@@ -69,7 +69,7 @@ and `VENDOR-OUTREACH.md` is explicit — *the business's own published contact
 address, never a scraped personal one.* Those four are listed so nobody
 re-researches them, not so they can be mailed.
 
-For the remaining 181 rows the email still has to be gathered by hand, from each
+For the remaining 197 rows the email still has to be gathered by hand, from each
 business's own published contact page.
 
 **Allowing the vendor domains would end this.** The block is the environment's
@@ -98,7 +98,7 @@ regardless of how many prospects are listed here.
   first-party URL appeared; find it before contacting them. A **Phone** number
   means this row can be contacted today without an email address — see the
   section above; 430 of the 931 qualify.
-- **Email** — empty on 181 of 931 rows. Fill from the vendor's own site. Where
+- **Email** — empty on 197 of 931 rows. Fill from the vendor's own site. Where
   one is present it came from a search snippet, so confirm it before use.
 - **Outcome** — also carries research flags (`verify`, `do not mail`,
   `corporate`) until there is a real outcome to record.
@@ -618,7 +618,7 @@ will be the slowest yes on this entire list.
 | Lopez Falcon | lopezfalcon.com | Coral Gables |  |  | | no published email found 2026-10-23; quinceañera-focused, verify weddings |
 | Robi Studio | robistudio.com | Miami |  | info@robistudio.com | | email: own site via search; quinceañera-focused, verify weddings |
 | Ramoneda Photo |  | Miami |  | info@ramonedaphoto.com | | email: own site via search; Mainly quinceanera studio (misquincefoto); also photos4wed.com. Same email on FB. Contact page also mentions Tampa location |
-| Alfaaz Photography | alfaazphotography.com | South Florida |  | info@alfaazphotography.com | | Indian weddings; email: own site via search; **based in Mississauga, Ontario, not Florida: verify before contacting** |
+| Alfaaz Photography | alfaazphotography.com | South Florida |  |  | | Indian weddings; email: own site via search; **based in Mississauga, Ontario, not Florida: verify before contacting**; info@alfaazphotography.com removed 2026-10-23 (based in Ontario, not Florida) |
 | Channa Photography |  | Fort Lauderdale |  |  | | **5+yr old listing - verify**; no published email found 2026-10-23; Different business: Channa Photography (info@channaphotography.com) is Toronto/Brooklyn based. Fort Lauderdale listing may be 'Narvinder Channa Photography' on Sulekha - no email. Do not use |
 | Infinite Loop Photography |  | Fort Lauderdale |  | info@infiniteloopphoto.com | | **5+yr old listing - verify**; email: own site via search; Based West Palm Beach/Miami, serves Ft Lauderdale. Phones 561-692-3212, 305-814-8640 |
 | Maloman Boutique Photography |  | Fort Lauderdale |  | info@malomanstudios.com | | **5+yr old listing - verify**; email: own site via search; Business now named Maloman Studios. Same email on FB. WeddingWire says they prefer site contact form. Phone 954-353-7887 |
@@ -626,7 +626,7 @@ will be the slowest yes on this entire list.
 | db Wolin Photography |  | West Palm Beach | 561-762-5349 |  | | no published email found 2026-10-23; No published email; site yourweddingstories.com uses contact form. wolbd@aol.com seen only on ContactOut - rejected, personal-looking email: do not mail |
 | Lukas G Photography |  | West Palm Beach | 561-246-2403 | photography@lukasg.com | | email: own site via search; Based in Miami Beach (7315 Carlyle Ave), not West Palm Beach. Same on FB |
 | Photography South Florida |  | Palm Beach | 561-951-8800 | info@photographysouthflorida.com | | email: own site via search, verify; Site footer copyright 2007-2008 (stale). Site phone 561-662-0455 = input phone for Clickety Chicks (line 629); input phone 561-951-8800 not found. Possibly same operator as Clickety Chicks |
-| Clickety Chicks |  | West Palm Beach | 561-662-0455 | kim@kimfontaine.com | | email: own site via search, verify; A Facebook page for Clickety Chicks Photography Inc. says permanently closed. Owner Kim Fontaine now runs Kim Fontaine Photography (same domain). Site phone 561-478-7340 = input phone for Appeal Photography (line 630) |
+| Clickety Chicks |  | West Palm Beach | 561-662-0455 |  | | email: own site via search, verify; A Facebook page for Clickety Chicks Photography Inc. says permanently closed. Owner Kim Fontaine now runs Kim Fontaine Photography (same domain). Site phone 561-478-7340 = input phone for Appeal Photography (line 630); kim@kimfontaine.com removed 2026-10-23 (possibly closed) |
 | Appeal Photography |  | West Palm Beach | 561-478-7340 |  | | no published email found 2026-10-23; No West Palm Beach business found. Appeal Photography with info@appealphotography.com is a DC boudoir studio - different business. Input phone 561-478-7340 matches Clickety Chicks' site number - listing likely mismatched |
 | Alan Luby Photography |  | West Palm Beach | 561-577-9246 | aluby1441@aol.com | | email: own listing via search, verify; Address is Riviera Beach (1441 W 33rd St). Email from WeDJ listing; personal-provider aol. Phones seen 561-340-9310 and (561) 845-3865, not input 561-577-9246 |
 | Chris Joriann Photography |  | Palm Beach Gardens | 561-246-9271 | info@chrisjoriann.com | | **name/number pairing inferred from page layout - verify**; email: own site via search; Phone on own site is 561-776-0099 (input lists that number under Frank Donnino); input 561-246-9271 likely mispaired |
@@ -641,7 +641,7 @@ will be the slowest yes on this entire list.
 | Wanderlust Studios | wanderluststudiosfl.com | Fort Lauderdale | | wanderluststudiosfl@gmail.com | | email: own Facebook Page via search; site says texting is preferred |
 | Melanie Anne Photography | melanieannephotography.com | Fort Lauderdale | | hello@melanieannephotography.com | | email: own Facebook Page via search |
 | La Vie Studios | laviestudios.com | Miami | | smile@laviestudios.com | | email: own site via search |
-| Michelle Elyse Photography | michelleelysephotography.com | Miami | | info@michelleelysephotography.com | | email: own site via search; **appears to be based in Raleigh, NC: verify Miami presence** |
+| Michelle Elyse Photography | michelleelysephotography.com | Miami | |  | | email: own site via search; **appears to be based in Raleigh, NC: verify Miami presence**; info@michelleelysephotography.com removed 2026-10-23 (based in Raleigh, NC) |
 | EP Photos | epphotos.studio | Miami | | erica@epphotos.studio | | email: own site via search |
 | Kolour Haus | kolourhaus.com | Miami | | info@kolourhaus.com | | email: own contact page via search |
 | Jessica Vilchez Photo | jessicavilchez.com | Miami / Palm Beach | | hello@jessicavilchez.com | | email: own site via search |
@@ -831,7 +831,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Flowerama Gulf Breeze |  | Gulf Breeze | 850-916-7673 |  | | no published email found 2026-10-23; CLOSED: own Facebook says 'no longer Flowerama, we have closed'; MapQuest shows permanently closed. Successor FlowerMama LLC (flowermamallc@gmail.com) is a different business, not recorded |
 | Fort Myers Florist | fmflorist.com | Fort Myers | 239-931-0506 | support@fmflorist.com | | email: own site via search; Wedding/events specialist address yourevent@fmflorist.com on consultation page - may be better for weddings |
 | GG Bloom |  | Santa Rosa Beach | 850-460-2078 |  | | **directory-only source**; no published email found 2026-10-23; no email found. BBB lists it at Miramar Beach, YP at Destin, same phone 850-460-2078. Directory-only |
-| Jade Violet Wedding Floral | jadevioletweddingfloral.com | St Augustine | 904-415-2480 | info@jadevioletweddingfloral.com | | email: own Facebook Page via search, verify; possibly CLOSED (Visit St Augustine, MapQuest); own thank-you page lists jadevioletweddingfloral333@gmail.com |
+| Jade Violet Wedding Floral | jadevioletweddingfloral.com | St Augustine | 904-415-2480 |  | | email: own Facebook Page via search, verify; possibly CLOSED (Visit St Augustine, MapQuest); own thank-you page lists jadevioletweddingfloral333@gmail.com; info@jadevioletweddingfloral.com removed 2026-10-23 (possibly closed) |
 | Jardin Floral Design | jardinfdflowers.com | Fort Myers | 239-451-9498 | info@jardinfloraldesign.com | | **second number 239-404-1050 published - verify**; email: own site via search; Email domain differs from website domain. Owner elaine@jardinfloraldesign.com also published. Shop is in Naples (4949 Tamiami Trl N); FM is mailing address |
 | Magnolia Flowers |  | Panama City Beach | 850-249-6009 | orders@magnoliasflowers.net | | email: own site via search, verify; business is Magnolia's Flowers. The email is in embedded data on the contact page, not a visible field. Phone and address match (7906 Front Beach Rd) |
 | Midtown Flowers |  | Naples | 239-261-4414 | wecare@floristofnaples.com | | delivery focus; confirm weddings; email: own site via search, verify; From site structured data; Facebook lists naplesmidtownflowers@gmail.com. stewart685@gmail.com on Yellow Pages: personal-looking email, do not mail. Delivery florist; weddings unconfirmed |
@@ -865,7 +865,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Monicakes Sweets & Dreams |  | Tampa |  | monicakes123@gmail.com | | email: own site via search, verify; Only in page structured data on own site, not visible text; IG @monicakes7951 |
 |---|---|---|---|---|---|---|
 | LoveLee Bakeshop | instagram.com/loveleebakeshop | Fort Lauderdale (603 NE 13th St) | 954-715-2050 | hello@loveleebakeshop.com | | email: own site via search; Also on its Facebook; site says email preferred for custom orders |
-| We Take The Cake | | Fort Lauderdale (1211 NE 9th Ave) | 954-764-2253 | sales@wetakethecake.com | | email: own site via search, verify; Yelp shows TEMP. CLOSED; site says no dedicated customer service team; corporate orders via Goldbelly |
+| We Take The Cake | | Fort Lauderdale (1211 NE 9th Ave) | 954-764-2253 |  | | email: own site via search, verify; Yelp shows TEMP. CLOSED; site says no dedicated customer service team; corporate orders via Goldbelly; sales@wetakethecake.com removed 2026-10-23 (possibly closed) |
 | Panchis Bakery | | Fort Lauderdale (2726 Davie Blvd) | 754-600-3370 | panchisbakeries@gmail.com | | email: own Facebook Page via search; Also on second Facebook page and Nextdoor |
 | La Cake Cafe | | Fort Lauderdale (2809 E Commercial Blvd) | 754-779-2965 | lacakecafe@gmail.com | | email: own site via search; Own site address is 2633 E Commercial Blvd, not 2809 as in input. Same email on Facebook |
 | New River Cafe and Bakery | newrivercafeandbakery.com | Fort Lauderdale | | | | no published email found 2026-10-23; Only email on site is an individual staff address at riversidehotel.com (parent Riverside Hotel) - not a general inbox; not recorded. Phone 954-377-5500 |
@@ -928,7 +928,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Deco DJs | decodjs.com | South Florida | | ernie@lightfxpros.com | | email: own site via search, verify; Published on Deco DJs contact page but on a different domain (lightfxpros.com, likely sister lighting company); named person. Miami, 7261 NW 43rd St |
 | DJ AJ Falcon | djajfalcon.com | Miami | | djajfalcon@gmail.com | | email: own site via search; Also on Yelp. Sole DJ/emcee |
 | Power Parties | powerparties.com | Miami / Fort Lauderdale | | bigwill@powerparties.com | | email: own site via search, verify; Only seen in site's embedded page data; named owner address. Moved to Medley FL, by appointment |
-| NYX Events | nyxevents.com | Boca Raton | | info@nyxevents.com | | email: own site via search, verify; Based in Rockville, MD (DC area); Boca Raton is only a service-area page. Location mismatch |
+| NYX Events | nyxevents.com | Boca Raton | |  | | email: own site via search, verify; Based in Rockville, MD (DC area); Boca Raton is only a service-area page. Location mismatch; info@nyxevents.com removed 2026-10-23 (based in Maryland) |
 | Masso Entertainment | massoentertainment.com | West Palm Beach | | Matt@massoentertainment.com | | email: own site via search; Owner's address published as the business contact; also on Timeless I Do's listing |
 | Vivid Source Events | vividsourceevents.com | Palm Beach County | | vividsourceevents@gmail.com | | email: own site via search; Also on its Facebook. Palm Beach Gardens; rentals/photo booth/speakers company rather than pure DJ |
 | Traxx Entertainment | traxxentertainment.com | Florida | | events@traxxentertainment.com | | email: own site via search, verify; based Port St. Lucie/Royal Palm Beach area (Treasure Coast/Palm Beach); site also lists Email.TraxxEnt@gmail.com; one MapQuest location marked closed |
@@ -940,7 +940,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Sound Ryte Mobile DJs | soundrytemobiledjs.com | Tampa | 813-370-0113 | info@soundrytemobiledjs.com | | **jumbled directory listing**; email: own site via search |
 | Celebrations24 | celebrations24.com | Tampa |  | info@celebrations24.com | | email: own site via search; Office in Sun City Center; older directory lists Dave@Celebrations24.com |
 | Inner Circle DJs | innercircledjsfl.com | New Port Richey |  |  | | serves Tampa; no published email found 2026-10-23; No email in results; site phone 631-652-5870 (NY area code); no New Port Richey tie found. Not the UK Inner Circle DJs (innercircledjs.com) |
-| Party Time Productions | ptpdj.com | Tampa |  | bookings@ptpdj.com | | email: own site via search, verify; Based in Dalton, GA (HQ 1203 Broadrick Dr); serves Tampa from GA, 844 number. Same email on own Facebook. Unrelated same-name businesses in Atlanta/Pittsburgh |
+| Party Time Productions | ptpdj.com | Tampa |  |  | | email: own site via search, verify; Based in Dalton, GA (HQ 1203 Broadrick Dr); serves Tampa from GA, 844 number. Same email on own Facebook. Unrelated same-name businesses in Atlanta/Pittsburgh; bookings@ptpdj.com removed 2026-10-23 (based in Georgia) |
 | Orlando DJ and Lighting | orlandodjandlighting.com | Orlando | 321-695-4072 | orlandodjandlighting@gmail.com | | email: own site via search, verify; one MapQuest listing (Natchez Trace) marked closed; Yelp shows Winter Park address and different phone |
 | Soundwave Entertainment | djsoundwave.net | Orlando |  | info@djsoundwave.net | | since 2001; email: own site via search; mailing address Winter Garden |
 | DJ Danny Garcia | djdannygarcia.com | Orlando |  | danny@djdannygarcia.com | | email: own site via search; sole operator; published as the contact |
@@ -1155,7 +1155,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Blue Orchid Events & Design | blue-orchid-events.com | Fort Lauderdale | 248-840-4204 | abby@blue-orchid-events.com | | email: own site via search; site structured data also lists blueorchided@gmail.com |
 | Très Chic Event Planning & Design | treschiceventplanning.com | Miramar (18741 SW 39th Ct) | 954-517-1818 | info@treschiceventplanning.com | | |
 | A. Marie Events & Design | amarieevents.us | Fort Lauderdale | 321-205-8326 | info@amarieevents.us | | email: own site via search; related Simply Chic Weddings page lists simplychicweddingss@gmail.com |
-| Event Bliss Design | eventblissdesign.com | Fort Lauderdale | 954-463-9120 | info@eventblissdesign.com | | email: own site via search, verify; Nextdoor marks business closed (may be stale); directories show second phone 954-319-1830 |
+| Event Bliss Design | eventblissdesign.com | Fort Lauderdale | 954-463-9120 |  | | email: own site via search, verify; Nextdoor marks business closed (may be stale); directories show second phone 954-319-1830; info@eventblissdesign.com removed 2026-10-23 (possibly closed) |
 | AM Event Co. | ameventco.com | South Florida | 954-588-7869 | info@ameventco.com | | email: own site via search; florist/event co; address Deerfield Beach vs Pompano Beach across listings |
 | Fabuluxe Events | fabuluxeevents.com | South Florida | 561-254-2041 | jennifer@fabuluxeevents.com | | email: own site via search; owner address published as the contact; older PRLog profile lists info@fabuluxeevents.com; unrelated Australian Fabuluxe Events uses .com.au |
 | Ramos Events | ramosevents.com | Fort Lauderdale | | hello@ramosevents.com | | email: own site via search; WeddingWire places in Pembroke Pines; phone 954-637-6901 |
@@ -1208,7 +1208,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Eden Catering | kosherweddingsmiami.com | Hollywood | | events@cateringeden.com | | email: own site via search, verify; from cateringbyeden.com (Eden Regal Ballroom & Catering, Hollywood); kosherweddingsmiami.com contact email hidden; info@cateringeden.com seen on a venue vendor page |
 | Shaike's Kosher Catering | shaikes.com | Southeast Florida | | info@shaikes.com | | email: own site via search |
 | Kosher From Z Heart | kosherfromzheart.com | South Florida | | KosherZohara@gmail.com | | email: own site via search |
-| Culinary Artz Catering | | South Florida | 954-803-8818 | info@floridacater.com | | **may be the same business as Florida Cater - same site, check before publishing**; email: own Facebook Page via search, verify; same business as Florida Cater (line 1205) - dedupe before outreach |
+| Culinary Artz Catering | | South Florida | 954-803-8818 |  | | **may be the same business as Florida Cater - same site, check before publishing**; email: own Facebook Page via search, verify; same business as Florida Cater (line 1205) - dedupe before outreach; info@floridacater.com removed 2026-10-23 (shares Florida Cater's inbox; email Florida Cater instead) |
 | Simply Gourmet Caterers | simplygourmetcaterers.com | Sarasota | 941-218-3671 | simplygourmet@metzcorp.com | | also planning + coordination; email: own site via search, verify; Contact page ~3 years old; Nextdoor shows info@simplygourmetcaterers.com and 941-929-0066. Sarasota (Metz Culinary), outside Tampa Bay core |
 | Premier Event & Catering Services | premiereventservices.net | Orlando | 407-285-0284 | Sales@PremierEventServices.net | | email: own site via search, verify; Page indexed ~2.5 years ago |
 | Magic Occasions Catering |  | Orlando | 407-927-4515 | events@magicoccasions.com | | email: own site via search; Based in Longwood. Facebook also shows angie@magicoccasions.com |
@@ -1322,7 +1322,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | A Family Limo | afamilylimo.com | Miami |  | reservations@afamilylimo.com | | Rolls-Royce + charter; email: own site via search; Based Hallandale Beach, not Miami; sister site afamilycoaches.com uses reservations@afamilycoaches.com |
 | American Limo & Transportation Service | americanlimofl.com | Miami |  | info@americanlimofl.com | | email: own site via search; Trades as American Transportation & Limo Service; also reservations@americanlimofl.com |
 | American Dream Tour Miami | americandreamtourmiami.com | Miami |  | info@americandreamtourmiami.com | | classic convertibles; email: own site via search; Email from terms page; located Miami Beach |
-| Miami White Trolley | miamiwhitetrolley.com | Miami |  | reservations@rumbatoursmiami.com | | trolley, 30 passengers; email: own site via search; Duplicate operator: dba of Rumba Tours Miami LLC (line 1321); same inbox, don't double-mail |
+| Miami White Trolley | miamiwhitetrolley.com | Miami |  |  | | trolley, 30 passengers; email: own site via search; Duplicate operator: dba of Rumba Tours Miami LLC (line 1321); same inbox, don't double-mail; reservations@rumbatoursmiami.com removed 2026-10-23 (shares Rumbatours Miami's inbox; email Rumbatours instead) |
 | Molly's Trolleys of West Palm Beach |  | West Palm Beach |  | info@mollystrolleys.com | | 1920s-style trolleys; email: own site via search; BizBash listing shows wpb-info@mollystrolleys.com (unconfirmed); not the Pittsburgh company |
 | Atlantic Charters | atlanticchartersinc.com | Fort Lauderdale | 954-448-2032 | sales@atlanticchartersinc.com | | charter buses; email: own site via search; Not Atlantic Air Charter (jet operator) |
 | Premier Bus Charters |  | Sunny Isles Beach |  |  | | no published email found 2026-10-23; Site premierbuscharter.com has contact form only; registry email masked |
@@ -1427,7 +1427,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | White Closet Bridal | thewhiteclosetco.com | Tampa | 813-249-4696 | hello@thewhiteclosetco.com | | email: own Facebook Page via search, verify; Own site structured data shows thewhiteclosetbridal@gmail.com instead; address conflict 5900 N Florida Ave vs 3627 S Dale Mabry |
 | Maria's Bridal Connection | mariasbridal.net | Tampa |  | mariasbridalconnection@gmail.com | | **727 area code vs Tampa, phone withheld**; email: own Facebook Page via search, verify; Located in New Port Richey (Pasco), not Tampa - explains 727 number (727-863-2400); also in site structured data only |
 | Ivory & Lace Bridal | ivoryandlacebridal.com | Tampa |  | ivoryandlace@ccsboutique.com | | email: own Facebook Page via search, verify; Only on FB; domain ccsboutique.com unexplained; other same-name shops in MO/TX - don't mix up |
-| Elliot James Bridal | elliotjamesbridal.com | Tampa |  | mckenzie@elliotjamesbridal.com | | appointment only, N Hyde Park; email: own site via search, verify; Owner McKenzie's address on own booking pages; Yelp marks closed (possibly stale); phones conflict 656-256-4065 vs 561-373-7830 |
+| Elliot James Bridal | elliotjamesbridal.com | Tampa |  |  | | appointment only, N Hyde Park; email: own site via search, verify; Owner McKenzie's address on own booking pages; Yelp marks closed (possibly stale); phones conflict 656-256-4065 vs 561-373-7830; mckenzie@elliotjamesbridal.com removed 2026-10-23 (possibly closed) |
 | Theory Bridal House | theorybridalhouse.com | Orlando | 407-219-4529 | hello@theorybridalhouse.com | | Avalon Park; email: own Facebook Page via search; Also brie@theorybridalhouse.com (founder) on Calla Blanche stockist listing |
 | Bridal Gown Studio Orlando | bridalgownstudioorlando.com | Orlando | 407-826-1843 | bridalgownstudioorlando@gmail.com | | appointment only; email: own site via search; Also on own Setmore booking page |
 | Lily's Bridal | lilysbridal.com | Orlando | 407-228-4050 | info@lilysbridal.com | | email: own site via search; Facebook shows same. Separate outlet store uses info@lilysbridaloutlet.com |
@@ -1487,7 +1487,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Craft Bar Co. |  | Deerfield Beach |  | info@craft-barco.com | | email: own site via search, verify; Own site says South Florida but Deerfield Beach not confirmed; site also lists Craftbarco@outlook.com; phone 561-982-6326 |
 | Cocktail Couture Mobile |  | Fort Lauderdale |  | shannon@cocktailcouturemobile.com | | email: own site via search; Owner Shannon's address, also on own FB; phone is 631 area code; other unrelated 'Cocktail Couture' businesses exist in MI/NC/KS |
 | Mr Barrtenderr | mrbarrtenderr.com | South Florida |  | info@mrbarrtenderr.com | | email: own site via search, verify; Based in Jacksonville, FL (not South FL); pages cover Central/North FL |
-| Boozy Bear Mobile Bartending | myboozybear.com | Tampa |  | boozybear820@gmail.com | | email: own Facebook Page via search, verify; Likely relocated to Martinsburg WV (Yelp) after Hurricane Helene; Tampa base doubtful |
+| Boozy Bear Mobile Bartending | myboozybear.com | Tampa |  |  | | email: own Facebook Page via search, verify; Likely relocated to Martinsburg WV (Yelp) after Hurricane Helene; Tampa base doubtful; boozybear820@gmail.com removed 2026-10-23 (appears to have moved to West Virginia) |
 | Encore Bartending Service | encorebartendingservice.com | Tampa |  | info@encorebartendingservice.com | | licensed + insured; email: own site via search; National multi-city service, not Tampa-local; 877 number |
 | Deluxe Bartending Service | deluxebartendingservice.com | Tampa |  | info@deluxebartendingservice.com | | email: own site via search; National multi-city service, not Tampa-local; 800 number |
 | Tampa Bay Bartenders | tampabaybartenders.com | Tampa |  |  | | no published email found 2026-10-23; No source for tampabaybartenders.com; similar-name Tampa Bay Bartending (contact@tampabaybartending.com) may be a different business |
@@ -1528,7 +1528,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Kiki's Customized Creations |  | Miami |  | kiki.ccreations@gmail.com | | email: own listing via search, verify; Only source is a Wedding Style Society vendor listing. Instagram 'Kiki's Custom Creations' (help.kikiscustomcreations@gmail.com) may be a different business. LLC address Homestead |
 | Tampa Calligraphy | tampacalligraphy.com | Tampa | 813-854-6100 | diane@tampacalligraphy.com | | envelope addressing; email: own site via search; Owner's address published as the business contact |
 | The Write Stuff |  | Tampa | 813-837-0400 | thewritestufftampa@yahoo.com | | **directory-only source**; email: own site via search |
-| Lili V. The Company |  | Tampa | 813-389-3691 | Lilivthecompany@gmail.net | | **directory-only source**; email: own site via search, verify; Site shows @gmail.net which is likely a typo; do not substitute gmail.com without confirming |
+| Lili V. The Company |  | Tampa | 813-389-3691 |  | | **directory-only source**; email: own site via search, verify; Site shows @gmail.net which is likely a typo; do not substitute gmail.com without confirming; Lilivthecompany@gmail.net removed 2026-10-23 (@gmail.net looks like a typo) |
 | Calligraphy by Cami | calligraphybycami.com | Jacksonville |  |  | | no published email found 2026-10-23; cami@calligraphybycami.com seen only on Premier Bride vendor page (~1 yr old, not an allowed source); own site uses General Inquiry form, phone 904-703-1608. Listings put her in Orange Park/Middleburg |
 
 ## 20. Dance lessons (5)
@@ -1567,7 +1567,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 |---|---|---|---|---|---|---|
 | Kirk Jewelers | kirkjewelers.com | Miami | 305-371-1321 | inquiry@kirkjewelers.com | | email: own site via search; kirk@kirkjewelers.com seen on Patek/Facebook/Nextdoor |
 | Jae's Jewelers | jaesjewelers.com | Coral Gables | 305-443-7724 | info@jaesjewelers.com | | email: own site via search; jill@jaesjewelers.com (manager) seen on Chamber listing |
-| Nemaro Jewelers | nemarojewelers.com | Miami | 305-358-4399 | sales@nemarojewelers.com | | email: own site via search, verify; MapQuest marks CLOSED; other sources look active. Older addresses seen: sales@nemaro.com, a.perez@nemaro.com |
+| Nemaro Jewelers | nemarojewelers.com | Miami | 305-358-4399 |  | | email: own site via search, verify; MapQuest marks CLOSED; other sources look active. Older addresses seen: sales@nemaro.com, a.perez@nemaro.com; sales@nemarojewelers.com removed 2026-10-23 (possibly closed) |
 | LC Rings | lcrings.com | Tampa | 813-447-5577 | Paul@LCRings.com | | by appointment; email: own site via search, verify; Owner's address on layaway page, not main contact page |
 | Tampa Diamond Center | tampadiamondcenter.com | Tampa | 813-402-2696 | tampadiamondcenter1@gmail.com | | cuts gems on site; email: own site via search; Not International Diamond Center (info@shopidc.com, different business) |
 | Awesome Jewelry | awesomejewelrytampa.com | Tampa | 813-831-2419 |  | | family-owned since 1994; no published email found 2026-10-23; jewelryawesome@gmail.com seen only on threebestrated.com directory, not own site; phone numbers conflict across listings |
@@ -1620,7 +1620,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 | Business | Website | City | Phone | Email | Sent | Outcome |
 |---|---|---|---|---|---|---|
 | Miami Cigar Entertainment | miamicigarentertainment.com | Miami | 845-549-8751 | Miamicigarentertainment@gmail.com | | **845 = New York Hudson Valley area code - verify**; email: own site via search; site uses 845 (NY) phone |
-| Cigar Bella | cigarbella.com | Miami |  | Katrina@cigarbella.com | | email: own site via search, verify; national company (702 Las Vegas phone), Miami is one market; FB lists cigarbella@gmail.com |
+| Cigar Bella | cigarbella.com | Miami |  |  | | email: own site via search, verify; national company (702 Las Vegas phone), Miami is one market; FB lists cigarbella@gmail.com; Katrina@cigarbella.com removed 2026-10-23 (based in Las Vegas) |
 
 ## 28. Restrooms (6)
 
@@ -1687,7 +1687,7 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 
 | Business | Website | City | Phone | Email | Sent | Outcome |
 |---|---|---|---|---|---|---|
-| Fireworks Over Miami | fireworksovermiami.com | Miami | 305-305-0191 | lutgardomp@gmail.com | | barges for waterfront venues; email: own site via search, verify; Yelp marks Miami location CLOSED (Feb 2026) though site active; personal-style gmail but published on own site |
+| Fireworks Over Miami | fireworksovermiami.com | Miami | 305-305-0191 |  | | barges for waterfront venues; email: own site via search, verify; Yelp marks Miami location CLOSED (Feb 2026) though site active; personal-style gmail but published on own site; lutgardomp@gmail.com removed 2026-10-23 (possibly closed) |
 | Firepower Displays | firepowerdisplays.com | Miami | 305-258-8820 | info@firepowerdisplays.com | | handles permits; email: own site via search; Yellow Pages also shows sales@firepowerdisplays.com |
 | My 3 Sons Fireworks | 3sonspyro.com | Jupiter | 561-210-5176 | josh@3sonspyro.com | | PGI certified; email: own site via search; older contact page shows josh@mythreesonsfireworks.com |
 | Pyro Pros Fireworks | pyroprosfl.com | Miami |  | pyroprosfl@gmail.com | | email: own site via search, verify; phone 321-947-7371 is Space Coast/Orlando area code; Miami may be a service-area page |
