@@ -22,6 +22,7 @@ One row per community. Check the rule before every post.
 | 2026-10-23 | Pinterest: Wedding Budget Tips | Budget breakdown by category | | utm_source=pinterest, utm_content=budget-breakdown | drafted | |
 | 2026-10-23 | Pinterest: Wedding Budget Tips | Who pays for the wedding | | utm_source=pinterest, utm_content=who-pays | drafted | |
 | 2026-10-23 | Pinterest: Free Wedding Planning Tools | Free AI wedding planner | | utm_source=pinterest, utm_content=ai-planner | drafted | |
+| 2026-10-24 | Facebook Page story | "4 things to know before you plan", 6 frames, link sticker to /planner | | utm_source=facebook, utm_medium=story, utm_content=story-1 | drafted | |
 
 ## Weekly numbers
 
@@ -37,3 +38,4 @@ One row per community. Check the rule before every post.
 - 2026-10-23: Drafted Pinterest batch 1 (5 pins) in `marketing/pinterest/2026-10-23-batch-1.md`. Waiting on the owner to review and post.
 - 2026-10-24: Rendered the 5 pin images (1000 × 1500 PNG, Jost and Raleway, brand colors) into `marketing/pinterest/2026-10-23-batch-1/`.
 - 2026-10-24: Found while making pin 5: the planner's demo-mode reply (used when `ANTHROPIC_API_KEY` is unset) misread "We have $20k and 100 guests. Where should the money go?" as about 20 guests and a $5,000 budget. If production ever falls back to demo mode, visitors would see this. Worth a fix in the demo reply logic.
+- 2026-10-24: Drafted Facebook Page story 1 (6 frames, 1080 × 1920) in `marketing/facebook/2026-10-24-story-1/`, built from the Pinterest batch 1 content. Waiting on the owner to post.
