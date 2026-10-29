@@ -143,6 +143,12 @@ Lowercase, short, no personal data. Record the exact tags in the tracker so
 results match back. Where a platform strips query strings, note that its
 visits will show the referring host as `source` instead.
 
+## Making the graphics
+
+To design, render, schedule or log Pinterest pins and Facebook stories, use
+the `social-graphics` skill. It holds the renderer, the photo rules and the
+PinBridge scheduling steps.
+
 ## What to report back
 
 End each session with what you drafted, what's waiting on the user (posts to
