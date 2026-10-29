@@ -11,6 +11,7 @@ const LINKS = [
   { label: "Wedding Website", href: "/wedding-website" },
   { label: "Budget Calculator", href: "/wedding-budget-calculator" },
   { label: "Guest List & RSVP", href: "/wedding-rsvp" },
+  { label: "Seating Chart", href: "/wedding-seating-chart" },
   ...(SHOW_VENDOR_DIRECTORY ? [{ label: "Find Vendors", href: "/vendors" }] : []),
   { label: "Inspiration", href: "/inspiration" },
   { label: "Pricing", href: "/pricing" },
