@@ -10,6 +10,7 @@
  * system, so we grow this deliberately.
  */
 import type { Block } from "@/lib/blog";
+import type { ToolKey } from "@/lib/tools";
 
 export interface FAQ {
   q: string;
@@ -27,6 +28,8 @@ export interface Guide {
   body: Block[];
   faqs: FAQ[];
   keywords: string[];
+  /** Free tool pages this guide points readers to, most relevant first. */
+  tools?: ToolKey[];
 }
 
 export const GUIDES: Guide[] = [
@@ -92,6 +95,7 @@ export const GUIDES: Guide[] = [
         a: "Mail invitations about 8 weeks before the wedding, or 12 weeks for a destination wedding, and send save-the-dates 6–8 months out.",
       },
     ],
+    tools: ["checklist", "budget"],
     keywords: [
       "wedding planning checklist",
       "wedding to do list",
@@ -152,6 +156,7 @@ export const GUIDES: Guide[] = [
         a: "Set aside about 5% for the unexpected — last-minute upgrades, tips, postage, alterations, and vendor meals that are easy to forget when you first plan.",
       },
     ],
+    tools: ["budget", "rsvp"],
     keywords: [
       "how much does a wedding cost",
       "wedding budget breakdown",
@@ -204,6 +209,7 @@ export const GUIDES: Guide[] = [
         a: "Book your venue as early as possible — ideally 12+ months out — because the date isn't truly fixed, and other vendors can't be booked, until the venue is signed.",
       },
     ],
+    tools: ["budget", "seating"],
     keywords: [
       "how to choose a wedding venue",
       "questions to ask wedding venue",
@@ -263,6 +269,7 @@ export const GUIDES: Guide[] = [
         a: "Review a full real wedding rather than a highlight reel, confirm experience at your venue, read the contract for what's included, and make sure communication feels easy — you'll work together for months.",
       },
     ],
+    tools: ["checklist"],
     keywords: [
       "when to book wedding vendors",
       "wedding vendors checklist",
@@ -311,6 +318,7 @@ export const GUIDES: Guide[] = [
         a: "Choose a single policy — all kids, no kids, or immediate family only — and apply it to everyone. Communicate it clearly on the invitation to avoid confusion.",
       },
     ],
+    tools: ["rsvp", "seating", "budget"],
     keywords: [
       "wedding guest list",
       "how to make a wedding guest list",
@@ -366,6 +374,7 @@ export const GUIDES: Guide[] = [
         a: "A first look lets you take couple and wedding-party photos before the ceremony, which frees up cocktail hour and keeps the schedule from running late — but it's a personal choice, not a rule.",
       },
     ],
+    tools: ["checklist", "seating"],
     keywords: [
       "wedding day timeline",
       "wedding timeline template",
@@ -566,6 +575,7 @@ export const GUIDES: Guide[] = [
         a: "Ask whether the per-person price is all-inclusive, how they handle dietary needs, the staff-to-guest ratio and gratuities, bar options, venue experience and cleanup, and the final-headcount and cancellation terms.",
       },
     ],
+    tools: ["rsvp", "budget"],
     keywords: [
       "how to choose a wedding caterer",
       "wedding catering cost",
@@ -822,6 +832,7 @@ export const GUIDES: Guide[] = [
         a: "With a short timeline, aim to mail invitations 6–8 weeks before the wedding so RSVPs return in time to finalize your headcount and seating.",
       },
     ],
+    tools: ["checklist", "budget"],
     keywords: [
       "how to plan a wedding in 6 months",
       "short engagement wedding planning",
@@ -873,6 +884,7 @@ export const GUIDES: Guide[] = [
         a: "Order one per household (not per guest), then add 15–20 extras for addressing mistakes, keepsakes, and last-minute additions — reprinting a few later costs much more per piece.",
       },
     ],
+    tools: ["rsvp", "website"],
     keywords: [
       "wedding invitations guide",
       "wedding invitation wording",
@@ -914,6 +926,7 @@ export const GUIDES: Guide[] = [
         a: "They're optional, but valuable for destination weddings, holiday weekends, or when many guests travel. For a local wedding on a short timeline, you can skip them and send invitations only.",
       },
     ],
+    tools: ["website", "rsvp"],
     keywords: [
       "save the dates vs invitations",
       "when to send save the dates",
@@ -955,6 +968,7 @@ export const GUIDES: Guide[] = [
         a: "Yes — cash, honeymoon, and charity funds are widely accepted now, especially for couples who already have a furnished home. Offer a mix so guests who prefer a physical gift still have choices.",
       },
     ],
+    tools: ["website"],
     keywords: [
       "wedding registry guide",
       "how to create a wedding registry",
@@ -1041,6 +1055,7 @@ export const GUIDES: Guide[] = [
         a: "Have the conversation before booking anything. Ask each contributor for a specific amount they're comfortable with (not a blank check), clarify any expectations that come with it, and track everything in one shared budget.",
       },
     ],
+    tools: ["budget"],
     keywords: [
       "who pays for the wedding",
       "wedding cost split",

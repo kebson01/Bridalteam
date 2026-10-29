@@ -11,6 +11,7 @@ import {
 import { GUIDES, getGuide } from "@/lib/guides";
 import type { Block } from "@/lib/blog";
 import { SITE_URL } from "@/lib/site";
+import { TOOLS } from "@/lib/tools";
 
 export function generateStaticParams() {
   return GUIDES.map((g) => ({ slug: g.slug }));
@@ -94,6 +95,29 @@ export default async function GuidePage({
             <BlockView key={i} block={block} />
           ))}
         </div>
+
+        {guide.tools && guide.tools.length > 0 && (
+          <aside className="mt-10 rounded-2xl border border-stone-2 bg-brand-soft p-6">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-[#b34a04]">
+              Free tools for this
+            </h2>
+            <ul className="mt-4 space-y-3">
+              {guide.tools.map((key) => {
+                const t = TOOLS[key];
+                return (
+                  <li key={key}>
+                    <Link href={t.href} className="group block">
+                      <span className="font-medium text-ink group-hover:text-[#b34a04] group-hover:underline">
+                        {t.name} →
+                      </span>
+                      <span className="block text-sm text-ink-soft/80">{t.blurb}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </aside>
+        )}
 
         {guide.faqs.length > 0 && (
           <div className="mt-12 border-t border-stone-2 pt-10">
