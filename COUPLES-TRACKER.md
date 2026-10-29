@@ -28,6 +28,7 @@ One row per community. Check the rule before every post.
 | 2026-11-01 | Pinterest: Free Wedding Planning Tools | Guest list & RSVP (tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-rsvp | scheduled | |
 | 2026-11-02 | Pinterest: Free Wedding Planning Tools | How many tables do you need? (seating tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-seating | scheduled | |
 | 2026-11-03 | Pinterest: Free Wedding Planning Tools | Free wedding website (tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-website | scheduled | |
+| 2026-10-29 | Facebook Page story | "5 free tools that do the math for you", 6 frames, a link sticker per tool | | utm_source=facebook, utm_medium=story, utm_content=story-2-* | drafted | |
 
 ## Weekly numbers
 
@@ -47,3 +48,4 @@ One row per community. Check the rule before every post.
 - 2026-10-24: Published Pinterest batch 1 through PinBridge on the `kebsaint` account. Created 4 public boards (Wedding Planning Checklists & Timelines, Wedding Budget Tips, Wedding Etiquette & Invitations, Free Wedding Planning Tools) and posted all 5 pins. Images are served from raw.githubusercontent.com at commit b37619c. Check visits from `source = 'pinterest'` on 2026-10-31.
 - 2026-10-29: Drafted Pinterest batch 2 (5 pins, one per free tool page) in `marketing/pinterest/2026-10-29-batch-2.md`, with images in `2026-10-29-batch-2/`. Every number on the pins comes from the tool's own code. Waiting on the owner to review and post.
 - 2026-10-29: Scheduled Pinterest batch 2 through PinBridge on the `kebsaint` account: one pin a day at 8:13 pm Eastern, Oct 30 to Nov 3. Images are served from raw.githubusercontent.com at commit 3c24f8c. Once each pin publishes, swap in its URL and mark it `posted`. Check `source = 'pinterest'` visits on the tool pages from Nov 10.
+- 2026-10-29: Drafted Facebook Page story 2 (6 frames, one per free tool) in `marketing/facebook/2026-10-29-story-2/`, with a separate tagged link for each tool. Waiting on the owner to post.
