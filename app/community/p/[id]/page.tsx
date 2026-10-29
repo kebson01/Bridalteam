@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getPost, getPublicPost } from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Post — Community",
@@ -27,7 +26,6 @@ function timeAgo(iso: string): string {
  * getPost, so a private group post only resolves for its members.
  */
 export default async function CommunityPostPage({ params }: { params: Promise<{ id: string }> }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
 
   const supabase = await supabaseServer();

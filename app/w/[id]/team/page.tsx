@@ -5,7 +5,6 @@ import WeddingNav from "@/components/wedding-nav";
 import ConnectCodePanel from "@/components/connect-code-panel";
 import InvitePanel from "@/components/invite-panel";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Team",
@@ -40,7 +39,6 @@ export default async function TeamPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
 
   const supabase = await supabaseServer();

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import ForgotPasswordPanel from "@/components/auth/forgot-password-panel";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Reset Password",
@@ -11,8 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default function ForgotPasswordPage() {
-  if (!SHOW_PLANNER_APP) notFound();
-
   return (
     <>
       <PageHero eyebrow="Account help" title="Forgot your password?" />

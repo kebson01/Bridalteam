@@ -7,7 +7,6 @@ interface Stats {
   vendors: number;
   vendorsPublished: number;
   weddings: number;
-  waitlist: number;
   comments: number;
   inspiration: number;
   featured: number;
@@ -21,14 +20,6 @@ interface VendorRow {
   region: string | null;
   status: string;
   organizations: { plan: string; subscription_status: string | null } | null;
-}
-interface WaitlistRow {
-  id: string;
-  email: string;
-  name: string | null;
-  role: string;
-  source: string | null;
-  created_at: string;
 }
 interface CommentRow {
   id: string;
@@ -48,7 +39,6 @@ interface ReportRow {
 interface Dashboard {
   stats: Stats;
   vendors: VendorRow[];
-  waitlist: WaitlistRow[];
   comments: CommentRow[];
   reports: ReportRow[];
 }
@@ -197,13 +187,12 @@ export default function AdminDashboardPage() {
     );
   }
 
-  const { stats, vendors, waitlist, comments, reports } = data;
+  const { stats, vendors, comments, reports } = data;
   const tiles: Array<[string, number, string?]> = [
     ["Reports", stats.reports, stats.reports > 0 ? "needs review" : undefined],
     ["Vendors", stats.vendors, `${stats.vendorsPublished} live`],
     ["Featured (paid)", stats.featured],
     ["Weddings", stats.weddings],
-    ["Waitlist", stats.waitlist],
     ["Comments", stats.comments],
   ];
 
@@ -322,47 +311,6 @@ export default function AdminDashboardPage() {
                   </tr>
                 );
               })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Waitlist */}
-      <h2 className="mt-12 text-sm font-semibold uppercase tracking-wide text-ink-soft/50">
-        Waitlist ({waitlist.length})
-      </h2>
-      <div className="mt-3 overflow-x-auto rounded-2xl border border-stone-2 bg-white shadow-card">
-        <table className="w-full text-sm">
-          <thead className="border-b border-stone-2 text-left text-xs uppercase tracking-wide text-ink-soft/50">
-            <tr>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">Joined</th>
-              <th className="px-4 py-3 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {waitlist.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-6 text-ink-soft/50">No signups yet.</td></tr>
-            ) : (
-              waitlist.map((w) => (
-                <tr key={w.id} className="border-b border-stone-2/60">
-                  <td className="px-4 py-3 font-medium text-ink">{w.email}</td>
-                  <td className="px-4 py-3 text-ink-soft/80">{w.name ?? "—"}</td>
-                  <td className="px-4 py-3 text-ink-soft/80 capitalize">{w.role}</td>
-                  <td className="px-4 py-3 text-ink-soft/60">{fmt(w.created_at)}</td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => act("delete_waitlist", w.id)}
-                      disabled={busy}
-                      className="text-xs font-semibold text-ink-soft/40 hover:text-red-600 disabled:opacity-50"
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))
             )}
           </tbody>
         </table>

@@ -42,3 +42,18 @@ describe("www -> apex redirect", () => {
     }
   });
 });
+
+describe("legacy waitlist paths", () => {
+  it("send /signup and /login to the real auth screens, permanently", async () => {
+    const redirects = await nextConfig.redirects!();
+    for (const [source, destination] of [
+      ["/signup", "/auth/signup"],
+      ["/login", "/auth/login"],
+    ]) {
+      const r = redirects.find((x) => x.source === source);
+      expect(r, `no redirect for ${source}`).toBeDefined();
+      expect(r!.destination).toBe(destination);
+      expect(r!.permanent).toBe(true);
+    }
+  });
+});

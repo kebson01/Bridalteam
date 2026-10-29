@@ -5,11 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import {
-  SHOW_PLANNER_APP,
-  SHOW_COMMUNITY,
-  SHOW_VENDOR_DIRECTORY,
-} from "@/lib/flags";
+import { SHOW_COMMUNITY, SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 import { SIGNUP_URL, LOGIN_URL } from "@/lib/config";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import NotificationsBell from "@/components/notifications-bell";
@@ -89,10 +85,6 @@ function useViewer() {
   const [roles, setRoles] = useState<Roles>(null);
 
   useEffect(() => {
-    if (!SHOW_PLANNER_APP) {
-      setSignedIn(false);
-      return;
-    }
     const supabase = supabaseBrowser();
 
     // RLS ("Members read their org") already scopes this to orgs the caller

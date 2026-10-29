@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,10 +14,6 @@ export const dynamic = "force-dynamic";
  * rows to weddings the user is a member of, so a plain select("*") is safe.
  */
 export async function GET() {
-  if (!SHOW_PLANNER_APP) {
-    return NextResponse.json({ error: "not available" }, { status: 404 });
-  }
-
   const supabase = await supabaseServer();
   const {
     data: { user },

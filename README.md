@@ -126,15 +126,14 @@ rebuilt; it remains recoverable in the git history if ever needed.
 
 ## Launch state
 
-The app is feature-complete and builds clean. The signed-in product — accounts,
-onboarding, the dashboard and the wedding workspace — sits behind one build-time
-flag, `NEXT_PUBLIC_SHOW_PLANNER_APP`. `lib/config.ts` reads it as `SIGNUPS_OPEN`,
-which is the single source of truth for where every "Start free" CTA, `/signup`
-and `/login` point: the waitlist while it's off, the real auth screens once it's
-on. Because it's a `NEXT_PUBLIC_*` flag it is read at build time, so opening
-accounts means setting it **and redeploying**.
+Accounts are open. The signed-in product — accounts, onboarding, the dashboard
+and the wedding workspace — is always on; the pre-launch waitlist and its
+`NEXT_PUBLIC_SHOW_PLANNER_APP` flag are gone. Every "Start free" and "Log in"
+CTA reads its link from `lib/config.ts`, and the old `/signup` and `/login`
+paths redirect permanently to `/auth/signup` and `/auth/login`
+(`next.config.ts`).
 
-Before flipping it, make sure the server-only keys are set in production —
+Make sure the server-only keys are set in production —
 `STRIPE_SECRET_KEY` and the price/webhook ids, `RESEND_API_KEY`,
 `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`. Each one
 degrades quietly rather than erroring (see `.env.example`), so a missing key

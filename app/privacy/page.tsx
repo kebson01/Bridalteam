@@ -65,7 +65,7 @@ export default function PrivacyPage() {
               Payment information for vendor subscriptions (processed by Stripe &mdash; we do not
               store full card numbers).
             </Item>
-            <Item>Communications you send us (support, waitlist signups).</Item>
+            <Item>Communications you send us (for example, support requests).</Item>
           </List>
           <P>
             <Lead>Information collected automatically:</Lead> device and usage data (IP address,

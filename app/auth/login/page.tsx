@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import AuthPanel from "@/components/auth/auth-panel";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Log In",
@@ -23,7 +21,6 @@ export default async function AuthLoginPage({
 }: {
   searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { next, error } = await searchParams;
   const notice = error ? ERROR_COPY[error] : undefined;
 

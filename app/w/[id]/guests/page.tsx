@@ -7,7 +7,6 @@ import MenuManager from "@/components/wedding/menu-manager";
 import { listGuests, listMenu, listDishCounts } from "./actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Guests",
@@ -21,7 +20,6 @@ export default async function GuestsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
 
   const supabase = await supabaseServer();

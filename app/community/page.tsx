@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import Community from "@/components/community/community";
 import PublicFeed from "@/components/community/public-feed";
 import {
@@ -9,7 +8,6 @@ import {
   listPublicFeed,
 } from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { pageMetadata } from "@/lib/site";
 
 export const metadata = pageMetadata({
@@ -27,8 +25,6 @@ export const dynamic = "force-dynamic";
  * Inspiration, which is a curated gallery of ideas.
  */
 export default async function CommunityPage() {
-  if (!SHOW_PLANNER_APP) notFound();
-
   const supabase = await supabaseServer();
   const {
     data: { user },

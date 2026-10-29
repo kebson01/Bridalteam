@@ -14,8 +14,7 @@ import { faqSchema, breadcrumbSchema } from "@/lib/structured-data";
  * claim below is something the editor and the guest page actually do; keep it
  * that way when either changes.
  *
- * The CTA uses SIGNUP_URL like every other signup button, which is
- * /auth/signup in production (NEXT_PUBLIC_SHOW_PLANNER_APP=true).
+ * The CTA uses SIGNUP_URL like every other signup button.
  */
 
 export const metadata = pageMetadata({

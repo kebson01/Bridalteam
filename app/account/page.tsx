@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import ProfilePanel from "@/components/account/profile-panel";
 import ChangeEmailPanel from "@/components/account/change-email-panel";
 import SignOutButton from "@/components/account/sign-out-button";
 import DeleteAccount from "@/components/account/delete-account";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { TIERS, PLANS, type Plan } from "@/lib/tiers";
 
 export const metadata: Metadata = {
@@ -57,8 +56,6 @@ async function getVendorOrg(supabase: Awaited<ReturnType<typeof supabaseServer>>
  * and vendors alike. Profile (photo + name), email, and password.
  */
 export default async function AccountPage() {
-  if (!SHOW_PLANNER_APP) notFound();
-
   const supabase = await supabaseServer();
   const {
     data: { user },
