@@ -23,6 +23,11 @@ One row per community. Check the rule before every post.
 | 2026-10-24 | Pinterest: Wedding Budget Tips | Who pays for the wedding | https://www.pinterest.com/pin/610800768261639224/ | utm_source=pinterest, utm_content=who-pays | posted | |
 | 2026-10-24 | Pinterest: Free Wedding Planning Tools | Free AI wedding planner | https://www.pinterest.com/pin/610800768261639225/ | utm_source=pinterest, utm_content=ai-planner | posted | |
 | 2026-10-24 | Facebook Page story | "4 things to know before you plan", 6 frames, link sticker to /planner | | utm_source=facebook, utm_medium=story, utm_content=story-1 | drafted | |
+| 2026-10-30 | Pinterest: Wedding Planning Checklists & Timelines | Wedding checklist with dates (tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-checklist | scheduled | |
+| 2026-10-31 | Pinterest: Wedding Budget Tips | $30,000 budget by category (calculator) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-budget | scheduled | |
+| 2026-11-01 | Pinterest: Free Wedding Planning Tools | Guest list & RSVP (tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-rsvp | scheduled | |
+| 2026-11-02 | Pinterest: Free Wedding Planning Tools | How many tables do you need? (seating tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-seating | scheduled | |
+| 2026-11-03 | Pinterest: Free Wedding Planning Tools | Free wedding website (tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-website | scheduled | |
 
 ## Weekly numbers
 
@@ -41,3 +46,4 @@ One row per community. Check the rule before every post.
 - 2026-10-24: Drafted Facebook Page story 1 (6 frames, 1080 × 1920) in `marketing/facebook/2026-10-24-story-1/`, built from the Pinterest batch 1 content. Waiting on the owner to post.
 - 2026-10-24: Published Pinterest batch 1 through PinBridge on the `kebsaint` account. Created 4 public boards (Wedding Planning Checklists & Timelines, Wedding Budget Tips, Wedding Etiquette & Invitations, Free Wedding Planning Tools) and posted all 5 pins. Images are served from raw.githubusercontent.com at commit b37619c. Check visits from `source = 'pinterest'` on 2026-10-31.
 - 2026-10-29: Drafted Pinterest batch 2 (5 pins, one per free tool page) in `marketing/pinterest/2026-10-29-batch-2.md`, with images in `2026-10-29-batch-2/`. Every number on the pins comes from the tool's own code. Waiting on the owner to review and post.
+- 2026-10-29: Scheduled Pinterest batch 2 through PinBridge on the `kebsaint` account: one pin a day at 8:13 pm Eastern, Oct 30 to Nov 3. Images are served from raw.githubusercontent.com at commit 3c24f8c. Once each pin publishes, swap in its URL and mark it `posted`. Check `source = 'pinterest'` visits on the tool pages from Nov 10.
