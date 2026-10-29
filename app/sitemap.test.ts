@@ -52,6 +52,7 @@ describe("sitemap", () => {
     expect(found).toContain("https://bridalteam.com/wedding-website");
     expect(found).toContain("https://bridalteam.com/wedding-budget-calculator");
     expect(found).toContain("https://bridalteam.com/wedding-rsvp");
+    expect(found).toContain("https://bridalteam.com/wedding-seating-chart");
     // /for-vendors is the recruitment pitch, not the directory. It has real
     // content with zero vendors signed up, so it is never gated.
     expect(found).toContain("https://bridalteam.com/for-vendors");
