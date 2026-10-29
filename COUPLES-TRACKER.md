@@ -28,6 +28,11 @@ One row per community. Check the rule before every post.
 | 2026-11-01 | Pinterest: Free Wedding Planning Tools | Guest list & RSVP (tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-rsvp | scheduled | |
 | 2026-11-02 | Pinterest: Free Wedding Planning Tools | How many tables do you need? (seating tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-seating | scheduled | |
 | 2026-11-03 | Pinterest: Free Wedding Planning Tools | Free wedding website (tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-website | scheduled | |
+| 2026-11-04 | Pinterest: Wedding Etiquette & Invitations | Guest list tiers | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=guest-list | scheduled | |
+| 2026-11-05 | Pinterest: Wedding Planning Checklists & Timelines | Wedding day timeline | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=day-timeline | scheduled | |
+| 2026-11-06 | Pinterest: Wedding Planning Checklists & Timelines | When to book vendors | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=book-vendors | scheduled | |
+| 2026-11-07 | Pinterest: Wedding Planning Checklists & Timelines | Plan a wedding in 6 months | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=six-months | scheduled | |
+| 2026-11-08 | Pinterest: Wedding Etiquette & Invitations | 4 registry rules | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=registry | scheduled | |
 | 2026-10-29 | Facebook Page story | "5 free tools that do the math for you", 6 frames, a link sticker per tool | | utm_source=facebook, utm_medium=story, utm_content=story-2-* | drafted | |
 
 ## Weekly numbers
@@ -50,3 +55,4 @@ One row per community. Check the rule before every post.
 - 2026-10-29: Scheduled Pinterest batch 2 through PinBridge on the `kebsaint` account: one pin a day at 8:13 pm Eastern, Oct 30 to Nov 3. Images are served from raw.githubusercontent.com at commit 3c24f8c. Once each pin publishes, swap in its URL and mark it `posted`. Check `source = 'pinterest'` visits on the tool pages from Nov 10.
 - 2026-10-29: Drafted Facebook Page story 2 (6 frames, one per free tool) in `marketing/facebook/2026-10-29-story-2/`, with a separate tagged link for each tool. Waiting on the owner to post.
 - 2026-10-29: Drafted Pinterest batch 3 (5 guide pins: guest list, day timeline, when to book vendors, 6-month plan, registry) in `marketing/pinterest/2026-10-29-batch-3.md`. Every line comes from the guide it links to. Waiting on the owner; to go one a day after batch 2 ends on Nov 3.
+- 2026-10-29: Scheduled Pinterest batch 3 through PinBridge, one a day at 8:13 pm Eastern from Nov 4 to Nov 8. The images are served from raw.githubusercontent.com at commit 7f574e9. Note: these are in PinBridge workspace `36cd9917` (the one batch 1 was posted from). Batch 2 was scheduled an hour earlier in a different workspace, `5cf336ec`, while the connector pointed there. Both workspaces post to the same `kebsaint` Pinterest account, but neither can see the other's schedules. Check that batch 2 is still queued in the PinBridge dashboard.
