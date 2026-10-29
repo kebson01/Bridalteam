@@ -30,6 +30,16 @@
   */
   --color-brand-text: #c35004;
 
+  /*
+    The flat cream behind small callouts (the planner's sign-up nudge and
+    demo wall, the claim-your-listing prompt): the start color of
+    bg-brand-soft below, as a token so it takes an opacity modifier. It was
+    used before it was defined, so those boxes had no background at all.
+    Keep text on it ink or ink-soft: --color-brand-text is 4.4:1 on the full
+    color, just under AA; at /60 over white it's 4.5:1.
+  */
+  --color-brand-wash: #fff6ee;
+
   --color-stone-1: #7b7b7b;
   --color-stone-2: #eaeaea;
   --color-stone-3: #9c9c9d;
