@@ -8,6 +8,7 @@ import InstallAppLink from "@/components/install-app-link";
 const LINKS = [
   { label: "How it works", href: "/#how" },
   { label: "AI Planner", href: "/planner" },
+  { label: "Wedding Website", href: "/wedding-website" },
   ...(SHOW_VENDOR_DIRECTORY ? [{ label: "Find Vendors", href: "/vendors" }] : []),
   { label: "Inspiration", href: "/inspiration" },
   { label: "Pricing", href: "/pricing" },

@@ -76,6 +76,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes: Array<{ path: string; priority: number }> = [
     { path: "/", priority: 1 },
     { path: "/planner", priority: 0.9 },
+    { path: "/wedding-website", priority: 0.9 },
     { path: "/guides", priority: 0.8 },
     ...(SHOW_VENDOR_DIRECTORY ? [{ path: "/vendors", priority: 0.8 }] : []),
     { path: "/inspiration", priority: 0.7 },
