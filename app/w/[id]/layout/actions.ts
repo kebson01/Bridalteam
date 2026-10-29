@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { failWith } from "@/lib/flash";
 import { SUPABASE_URL } from "@/lib/supabase";
-import { cleanDimension, sanitizeItems, tableKey } from "@/lib/venue-layout";
+import { FLOOR_SOURCES, cleanDimension, sanitizeItems, tableKey, type FloorSource } from "@/lib/venue-layout";
 
 // RLS enforces edit access: venue_layouts writes are can_edit_wedding(wedding_id).
 
@@ -13,13 +13,14 @@ export interface VenueLayout {
   id: string;
   name: string;
   base_image_url: string | null;
+  floor_source: FloorSource | null;
   width_ft: number;
   length_ft: number;
   items: unknown;
   updated_at: string;
 }
 
-const COLUMNS = "id, name, base_image_url, width_ft, length_ft, items, updated_at";
+const COLUMNS = "id, name, base_image_url, floor_source, width_ft, length_ft, items, updated_at";
 
 export async function listLayouts(weddingId: string): Promise<VenueLayout[] | null> {
   const supabase = await supabaseServer();
@@ -114,6 +115,7 @@ export interface LayoutPatch {
   name?: string;
   /** A public URL in our own wedding-media bucket, or null to remove the picture. */
   base_image_url?: string | null;
+  floor_source?: FloorSource | null;
   width_ft?: number;
   length_ft?: number;
   items?: unknown;
@@ -142,6 +144,10 @@ export async function saveLayout(
       return { ok: false, error: "That picture can’t be used." };
     }
     update.base_image_url = patch.base_image_url;
+  }
+
+  if (patch.floor_source !== undefined) {
+    update.floor_source = FLOOR_SOURCES.includes(patch.floor_source as FloorSource) ? patch.floor_source : null;
   }
 
   const supabase = await supabaseServer();

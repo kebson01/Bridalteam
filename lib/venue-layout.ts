@@ -12,6 +12,36 @@
 export type PieceShape = "round" | "rect";
 
 /**
+ * "Room" is the venue itself — pillars, doors, places nothing can go, the
+ * aisle — as opposed to things the couple rents and brings in.
+ */
+export type PieceGroup = "Tables" | "Floor" | "Service" | "Room";
+
+/** Palette order. */
+export const PIECE_GROUPS: readonly PieceGroup[] = ["Tables", "Floor", "Service", "Room"];
+
+/**
+ * Drawing order, bottom to top: the room's own features sit under the dance
+ * floor, which sits under the bar and the tables, so a table pushed onto a
+ * no-go area is still visible (and outlined) rather than hidden beneath it.
+ */
+export const DRAW_ORDER: Record<PieceGroup, number> = { Room: 0, Floor: 1, Service: 2, Tables: 3 };
+
+/**
+ * How the floor was set up. Only a floor plan (or a blank room typed in by
+ * size) is measured; a photo straightened from floor level is only as good as
+ * the four corners tapped on it and the size typed in, so it's labelled as
+ * approximate wherever the layout is shown or printed.
+ */
+export type FloorSource = "plan" | "photo" | "blank";
+
+export const FLOOR_SOURCES: readonly FloorSource[] = ["plan", "photo", "blank"];
+
+export function isApproximate(source: FloorSource | null | undefined): boolean {
+  return source === "photo";
+}
+
+/**
  * Where a rectangular table seats people. "both" is a banquet table with
  * chairs down each long side; "front" is a head or sweetheart table, everyone
  * on one side facing the room.
@@ -31,7 +61,7 @@ export interface PieceDef {
   resizable: boolean;
   /** Numbered automatically when added and counted towards seating. */
   isTable: boolean;
-  group: "Tables" | "Floor" | "Service";
+  group: PieceGroup;
 }
 
 /**
@@ -55,6 +85,13 @@ export const PIECES = {
   dj: { label: "DJ", shape: "rect", w: 6, h: 2.5, seats: 0, sides: "none", resizable: true, isTable: false, group: "Service" },
   cake: { label: "Cake", shape: "round", w: 3, h: 3, seats: 0, sides: "none", resizable: false, isTable: false, group: "Service" },
   gifts: { label: "Gifts", shape: "rect", w: 6, h: 2.5, seats: 0, sides: "none", resizable: true, isTable: false, group: "Service" },
+  pillar: { label: "Pillar", shape: "rect", w: 2, h: 2, seats: 0, sides: "none", resizable: true, isTable: false, group: "Room" },
+  // A door's footprint is the area its leaf swings through, so a table parked
+  // in front of it shows as a clash.
+  door: { label: "Door", shape: "rect", w: 3, h: 3, seats: 0, sides: "none", resizable: false, isTable: false, group: "Room" },
+  doubledoor: { label: "Double door", shape: "rect", w: 6, h: 3, seats: 0, sides: "none", resizable: false, isTable: false, group: "Room" },
+  nogo: { label: "No-go area", shape: "rect", w: 8, h: 6, seats: 0, sides: "none", resizable: true, isTable: false, group: "Room" },
+  aisle: { label: "Aisle", shape: "rect", w: 4, h: 30, seats: 0, sides: "none", resizable: true, isTable: false, group: "Room" },
 } as const satisfies Record<string, PieceDef>;
 
 export type PieceKind = keyof typeof PIECES;
@@ -316,6 +353,10 @@ export function findClashes(items: LayoutItem[], widthFt: number, lengthFt: numb
       // Things stand on a stage (the DJ, the band's gear), so it doesn't clash
       // with what is put on it.
       if (items[i].kind === "stage" || items[j].kind === "stage") continue;
+      // The room's own features can sit on each other (a pillar inside a
+      // no-go area, an aisle running out of a door); they only clash with
+      // what's brought in.
+      if (PIECES[items[i].kind].group === "Room" && PIECES[items[j].kind].group === "Room") continue;
       if (overlaps(items[i], items[j])) {
         bad.add(items[i].id);
         bad.add(items[j].id);

@@ -32,6 +32,7 @@ function setup(items: LayoutItem[] = [table()], extra: Partial<Parameters<typeof
       layoutId="l1"
       initialName="Reception"
       initialImageUrl={null}
+      initialSource={null}
       initialWidth={60}
       initialLength={40}
       initialItems={items}
@@ -110,5 +111,44 @@ describe("LayoutEditor", () => {
     await user.click(screen.getByRole("button", { name: /Bar/ }));
     expect(await screen.findByText(/permission/, {}, { timeout: 2000 })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+  });
+
+  it("marks a layout built on a photo as approximate", () => {
+    setup([table()], { initialSource: "photo" });
+    expect(screen.getByText("Approximate")).toBeInTheDocument();
+    expect(screen.getByText(/approximate scale, from a room photo/)).toBeInTheDocument();
+  });
+
+  it("doesn't mark a floor plan as approximate", () => {
+    setup([table()], { initialSource: "plan" });
+    expect(screen.queryByText("Approximate")).not.toBeInTheDocument();
+  });
+
+  it("hides chairs and names with the layer switches, and prints the same view", async () => {
+    const user = userEvent.setup();
+    const { container } = setup();
+    const chairs = () => container.querySelectorAll('svg [role="button"] circle').length;
+    // One table: its top plus eight chairs.
+    expect(chairs()).toBe(9);
+    await user.click(screen.getByRole("checkbox", { name: "Chairs" }));
+    expect(chairs()).toBe(1);
+
+    await user.click(screen.getByRole("checkbox", { name: "Names & counts" }));
+    expect(screen.queryByText("6/8")).not.toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: "Print / PDF" })).toHaveAttribute(
+      "href",
+      "/w/w1/layout/l1/print?hide=chairs,labels",
+    );
+    // Hiding is a way of looking at the plan, not an edit.
+    await new Promise((r) => setTimeout(r, 1100));
+    expect(saveLayout).not.toHaveBeenCalled();
+  });
+
+  it("lists room features in the palette", () => {
+    setup();
+    for (const name of ["Pillar", "Door", "Double door", "No-go area", "Aisle"]) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    }
   });
 });

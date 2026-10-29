@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { downscaleImage, loadBitmap } from "@/lib/image";
 import { orderCorners, warpToRect, type Point } from "@/lib/homography";
+import type { FloorSource } from "@/lib/venue-layout";
 
 const INPUT =
   "mt-1 w-full rounded-lg border border-stone-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-brand";
@@ -13,6 +14,7 @@ const BTN_GHOST =
 
 export interface FloorResult {
   imageUrl: string | null;
+  source: FloorSource;
   width: number;
   length: number;
 }
@@ -115,7 +117,7 @@ export default function FloorSetup({
     return supabase.storage.from("wedding-media").getPublicUrl(path).data.publicUrl;
   }
 
-  async function finish(r: { picture: Picture | null; width: number; length: number }) {
+  async function finish(r: { picture: Picture | null; source: FloorSource; width: number; length: number }) {
     setBusy(true);
     setError(null);
     try {
@@ -124,7 +126,12 @@ export default function FloorSetup({
         imageUrl = await upload(r.picture);
         if (!imageUrl) return setError("Upload failed. Please try again.");
       }
-      await onDone({ imageUrl, width: Math.round(r.width * 100) / 100, length: Math.round(r.length * 100) / 100 });
+      await onDone({
+        imageUrl,
+        source: r.source,
+        width: Math.round(r.width * 100) / 100,
+        length: Math.round(r.length * 100) / 100,
+      });
     } finally {
       setBusy(false);
     }
@@ -140,7 +147,7 @@ export default function FloorSetup({
     const length = pic.h * ftPerPx;
     if (!okDim(width) || !okDim(length))
       return setError(`That makes the plan ${Math.round(width)} × ${Math.round(length)} ft. Check the length you entered.`);
-    void finish({ picture: pic, width, length });
+    void finish({ picture: pic, source: "plan", width, length });
   }
 
   async function straighten() {
@@ -196,7 +203,7 @@ export default function FloorSetup({
     const w = num(widthFt);
     const l = num(lengthFt);
     if (!okDim(w) || !okDim(l)) return setError("Enter the room’s width and depth in feet (between 5 and 1000).");
-    void finish({ picture: null, width: w, length: l });
+    void finish({ picture: null, source: "blank", width: w, length: l });
   }
 
   const needed = mode === "plan" ? 2 : 4;
@@ -227,7 +234,7 @@ export default function FloorSetup({
             />
             <Choice
               title="Photo of the room"
-              body="Take one from a corner, showing as much floor as you can. We’ll turn it into a view from above."
+              body="Take one from a corner, showing as much floor as you can. We’ll turn it into a view from above — sizes will be approximate."
               onClick={() => pickFile("photo")}
               disabled={busy}
             />
@@ -294,7 +301,9 @@ export default function FloorSetup({
           <h2 className="font-display text-lg font-semibold text-ink">Your room from above</h2>
           <p className="mt-1 max-w-2xl text-sm text-ink-soft/75">
             The floor is straightened; anything standing up (chairs, walls, people) will look stretched, which is
-            expected. If the floor looks skewed, go back and nudge the corners.
+            expected. If the floor looks skewed, go back and nudge the corners. A photo can&rsquo;t be measured exactly,
+            so this layout will be marked <strong>approximate</strong> &mdash; for exact sizes, use your venue&rsquo;s
+            floor plan instead.
           </p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={preview.url} alt="Straightened view of the room" className="mt-4 max-h-[60vh] w-auto rounded-lg border border-stone-2" />
@@ -303,7 +312,7 @@ export default function FloorSetup({
               type="button"
               className={BTN}
               disabled={busy}
-              onClick={() => void finish({ picture: preview, width: num(widthFt), length: num(lengthFt) })}
+              onClick={() => void finish({ picture: preview, source: "photo", width: num(widthFt), length: num(lengthFt) })}
             >
               {busy ? "Saving…" : "Use this view"}
             </button>

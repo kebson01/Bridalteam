@@ -3,13 +3,21 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { deleteLayout, saveLayout } from "@/app/w/[id]/layout/actions";
 import FloorSetup, { type FloorResult } from "@/components/layout/floor-setup";
+import LayoutDrawing, {
+  ALL_LAYERS,
+  LAYER_LABELS,
+  MARGIN,
+  type Layers,
+  type PieceHandlers,
+} from "@/components/layout/layout-drawing";
 import {
   PIECES,
+  PIECE_GROUPS,
   PIECE_KINDS,
   MAX_PIECE_FT,
   MAX_SEATS,
-  chairPositions,
   findClashes,
+  isApproximate,
   newItem,
   normalizeRotation,
   overlaps,
@@ -17,6 +25,7 @@ import {
   seatTotal,
   tableCount,
   tableKey,
+  type FloorSource,
   type LayoutItem,
   type PieceDef,
   type PieceKind,
@@ -27,15 +36,8 @@ const INPUT =
 const TOOL =
   "rounded-full border border-stone-2 bg-white px-3.5 py-1.5 text-sm font-medium text-ink-soft hover:border-brand hover:text-brand-text disabled:opacity-40";
 
-/** Feet of margin drawn around the room, so chairs against a wall aren't cut off. */
-const MARGIN = 3;
 const ZOOMS = [1, 1.5, 2, 3, 4];
 const HISTORY = 60;
-const ORANGE = "#ff8c1c";
-const ORANGE_DEEP = "#ec5400";
-const INK = "#222222";
-const CLASH = "#dc2626";
-const FONT = "Jost, Futura, 'Segoe UI', sans-serif";
 
 type SaveStatus = "saved" | "pending" | "saving" | "error";
 
@@ -48,13 +50,6 @@ type Drag = { id: string; before: LayoutItem[]; moved: boolean } & (
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const clamp = (n: number, lo: number, hi: number) => Math.min(Math.max(n, lo), hi);
-
-function fill(def: PieceDef, kind: PieceKind): string {
-  if (kind === "dance") return "#fff6ee";
-  if (def.group === "Tables") return "#ffffff";
-  if (def.group === "Floor") return "#f4f4f4";
-  return "#eaeaea";
-}
 
 /**
  * The overhead layout editor: the room (a floor plan, a straightened photo or
@@ -74,6 +69,7 @@ export default function LayoutEditor({
   layoutId,
   initialName,
   initialImageUrl,
+  initialSource,
   initialWidth,
   initialLength,
   initialItems,
@@ -84,6 +80,7 @@ export default function LayoutEditor({
   layoutId: string;
   initialName: string;
   initialImageUrl: string | null;
+  initialSource: FloorSource | null;
   initialWidth: number;
   initialLength: number;
   initialItems: LayoutItem[];
@@ -95,6 +92,8 @@ export default function LayoutEditor({
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [name, setName] = useState(initialName);
   const [imageUrl, setImageUrl] = useState(initialImageUrl);
+  const [source, setSource] = useState<FloorSource | null>(initialSource);
+  const [layers, setLayers] = useState<Layers>(ALL_LAYERS);
   const [width, setWidth] = useState(initialWidth);
   const [length, setLength] = useState(initialLength);
   const [items, setItems] = useState<LayoutItem[]>(initialItems);
@@ -149,8 +148,8 @@ export default function LayoutEditor({
   // Compared as JSON so a re-render (or React's development double effect)
   // never sends a save that changes nothing.
   const payload = useMemo(
-    () => ({ name, base_image_url: imageUrl, width_ft: width, length_ft: length, items }),
-    [name, imageUrl, width, length, items],
+    () => ({ name, base_image_url: imageUrl, floor_source: source, width_ft: width, length_ft: length, items }),
+    [name, imageUrl, source, width, length, items],
   );
   const lastSaved = useRef(JSON.stringify(payload));
   const saveSeq = useRef(0);
@@ -339,6 +338,7 @@ export default function LayoutEditor({
       commit(rescaleItems(items, r.width / width, r.length / length));
     }
     setImageUrl(r.imageUrl);
+    setSource(r.source);
     setWidth(r.width);
     setLength(r.length);
     setSettingUp(false);
@@ -389,7 +389,7 @@ export default function LayoutEditor({
           img.src = src;
         });
 
-      if (imageUrl) {
+      if (imageUrl && layers.photo) {
         try {
           const photo = await load(imageUrl, true);
           ctx.globalAlpha = photoStrength;
@@ -421,12 +421,28 @@ export default function LayoutEditor({
   const statusText =
     status === "saved" ? "All changes saved" : status === "error" ? saveError : status === "saving" ? "Saving…" : "Unsaved changes";
 
-  const groups = (["Tables", "Floor", "Service"] as const).map((g) => ({
+  const groups = PIECE_GROUPS.map((g) => ({
     group: g,
     kinds: PIECE_KINDS.filter((k) => PIECES[k].group === g),
   }));
 
   const seatedAt = (it: LayoutItem) => seatedByTable[tableKey(it.label)] ?? 0;
+  const approximate = isApproximate(source);
+  const handlers: PieceHandlers = {
+    onPointerDown: startMove,
+    onRotateStart: startRotate,
+    onFocus: (it) => setSelectedId(it.id),
+  };
+
+  const off = (Object.keys(layers) as (keyof Layers)[]).filter((k) => !layers[k]);
+  const hiddenLayers = off.length ? `?hide=${off.join(",")}` : "";
+
+  function toggleLayer(key: keyof Layers, on: boolean) {
+    setLayers((l) => ({ ...l, [key]: on }));
+    // A hidden piece can't be seen, so it shouldn't stay selected for the
+    // arrow keys and Delete to act on.
+    if (key === "room" && !on && selected && PIECES[selected.kind].group === "Room") setSelectedId(null);
+  }
 
   return (
     <div>
@@ -467,6 +483,14 @@ export default function LayoutEditor({
         <>
           <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-soft">
             <Stat label="Room" value={`${width} × ${length} ft`} />
+            {approximate && (
+              <span
+                className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800"
+                title="This floor was straightened from a photo, so sizes are estimates."
+              >
+                Approximate
+              </span>
+            )}
             <Stat label="Tables" value={String(tables)} />
             <Stat label="Seats" value={String(seats)} />
             {invitedSeats > 0 && (
@@ -481,6 +505,13 @@ export default function LayoutEditor({
               />
             )}
           </dl>
+          {approximate && (
+            <p className="mt-2 max-w-3xl text-sm text-amber-800">
+              This floor comes from a photo, so its measurements are estimates. Before booking rentals, ask your venue
+              for their floor plan and use <strong>Change floor</strong> to switch to it &mdash; your tables stay where
+              they are.
+            </p>
+          )}
           {clashes.size > 0 && (
             <p className="mt-2 text-sm text-red-700">
               {clashes.size === 1 ? "1 piece overlaps" : `${clashes.size} pieces overlap`} another or runs off the
@@ -515,7 +546,7 @@ export default function LayoutEditor({
               <input type="checkbox" checked={snap} onChange={(e) => setSnap(e.target.checked)} className="accent-brand" />
               Snap
             </label>
-            {imageUrl && (
+            {imageUrl && layers.photo && (
               <label className="ml-1 flex items-center gap-1.5 text-sm text-ink-soft">
                 Photo
                 <input
@@ -531,6 +562,14 @@ export default function LayoutEditor({
               </label>
             )}
             <span className="flex-1" />
+            {/* The print page reads what's saved, so it waits for the save. */}
+            <a
+              href={`/w/${weddingId}/layout/${layoutId}/print${hiddenLayers}`}
+              className={`${TOOL} ${status === "saved" ? "" : "pointer-events-none opacity-40"}`}
+              aria-disabled={status !== "saved"}
+            >
+              Print / PDF
+            </a>
             <button type="button" className={TOOL} onClick={() => setSettingUp(true)}>
               Change floor
             </button>
@@ -538,6 +577,25 @@ export default function LayoutEditor({
               {exporting ? "Preparing…" : "Download image"}
             </button>
           </div>
+
+          <fieldset className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-ink-soft">
+            <legend className="sr-only">Layers to show</legend>
+            <span aria-hidden className="text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft/50">
+              Show
+            </span>
+            {LAYER_LABELS.filter(([key]) => key !== "photo" || imageUrl).map(([key, label]) => (
+              <label key={key} className="flex items-center gap-1.5">
+                <input
+                  type="checkbox"
+                  checked={layers[key]}
+                  onChange={(e) => toggleLayer(key, e.target.checked)}
+                  className="accent-brand"
+                />
+                {label}
+              </label>
+            ))}
+            <span className="text-xs text-ink-soft/50">Hidden layers stay saved and are left out of the image and print.</span>
+          </fieldset>
 
           <div className="mt-4 grid gap-5 lg:grid-cols-[180px_minmax(0,1fr)_240px]">
             {/* Palette */}
@@ -569,9 +627,20 @@ export default function LayoutEditor({
               className="order-1 max-h-[75vh] self-start overflow-auto rounded-2xl border border-stone-2 bg-white shadow-card lg:order-2"
               onKeyDown={onKeyDown}
             >
-              <svg
-                ref={svgRef}
-                viewBox={`${-MARGIN} ${-MARGIN} ${width + MARGIN * 2} ${length + MARGIN * 2}`}
+              <LayoutDrawing
+                svgRef={svgRef}
+                idPrefix={uid}
+                width={width}
+                length={length}
+                imageUrl={imageUrl}
+                photoStrength={photoStrength}
+                items={items}
+                layers={layers}
+                approximate={approximate}
+                seatedByTable={seatedByTable}
+                clashes={clashes}
+                selectedId={selectedId}
+                handlers={handlers}
                 style={{ width: `${zoom * 100}%`, minWidth: zoom > 1 ? `${zoom * 100}%` : undefined }}
                 className="block touch-none select-none"
                 role="application"
@@ -580,56 +649,7 @@ export default function LayoutEditor({
                 onPointerMove={onPointerMove}
                 onPointerUp={endDrag}
                 onPointerCancel={endDrag}
-              >
-                <defs>
-                  <pattern id={`${uid}g1`} width={1} height={1} patternUnits="userSpaceOnUse">
-                    <path d="M 1 0 L 0 0 0 1" fill="none" stroke={INK} strokeOpacity={0.06} strokeWidth={0.04} />
-                  </pattern>
-                  <pattern id={`${uid}g5`} width={5} height={5} patternUnits="userSpaceOnUse">
-                    <rect width={5} height={5} fill={`url(#${uid}g1)`} />
-                    <path d="M 5 0 L 0 0 0 5" fill="none" stroke={INK} strokeOpacity={0.14} strokeWidth={0.06} />
-                  </pattern>
-                </defs>
-
-                <rect x={0} y={0} width={width} height={length} fill="#ffffff" />
-                {imageUrl && (
-                  <image
-                    data-export-skip
-                    href={imageUrl}
-                    x={0}
-                    y={0}
-                    width={width}
-                    height={length}
-                    preserveAspectRatio="none"
-                    opacity={photoStrength}
-                  />
-                )}
-                <rect x={0} y={0} width={width} height={length} fill={`url(#${uid}g5)`} />
-                <rect x={0} y={0} width={width} height={length} fill="none" stroke={INK} strokeWidth={0.15} />
-
-                {/* 10 ft scale bar under the room */}
-                <g transform={`translate(0 ${length + 1.4})`}>
-                  <line x1={0} x2={Math.min(10, width)} y1={0} y2={0} stroke={INK} strokeWidth={0.12} />
-                  <line x1={0} x2={0} y1={-0.4} y2={0.4} stroke={INK} strokeWidth={0.12} />
-                  <line x1={Math.min(10, width)} x2={Math.min(10, width)} y1={-0.4} y2={0.4} stroke={INK} strokeWidth={0.12} />
-                  <text x={Math.min(10, width) + 0.6} y={0.35} fontSize={0.9} fill={INK} fontFamily={FONT}>
-                    {Math.min(10, width)} ft
-                  </text>
-                </g>
-
-                {items.map((it) => (
-                  <Piece
-                    key={it.id}
-                    item={it}
-                    selected={it.id === selectedId}
-                    clash={clashes.has(it.id)}
-                    seated={PIECES[it.kind].isTable ? seatedAt(it) : null}
-                    onPointerDown={(e) => startMove(e, it)}
-                    onRotateStart={(e) => startRotate(e, it)}
-                    onFocus={() => setSelectedId(it.id)}
-                  />
-                ))}
-              </svg>
+              />
             </div>
 
             {/* Selected piece */}
@@ -679,93 +699,6 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: str
       <dt className="text-ink-soft/60">{label}</dt>
       <dd className={`font-semibold ${tone ?? "text-ink"}`}>{value}</dd>
     </div>
-  );
-}
-
-/** One piece on the floor, its chairs, label and (when selected) rotate handle. */
-function Piece({
-  item,
-  selected,
-  clash,
-  seated,
-  onPointerDown,
-  onRotateStart,
-  onFocus,
-}: {
-  item: LayoutItem;
-  selected: boolean;
-  clash: boolean;
-  seated: number | null;
-  onPointerDown: (e: React.PointerEvent) => void;
-  onRotateStart: (e: React.PointerEvent) => void;
-  onFocus: () => void;
-}) {
-  const def: PieceDef = PIECES[item.kind];
-  const chairs = chairPositions(item);
-  const stroke = clash ? CLASH : selected ? ORANGE_DEEP : INK;
-  const strokeWidth = clash || selected ? 0.18 : 0.1;
-  // Fit the label inside the piece: ~0.6em per character, 90% of the width.
-  const fontSize = clamp((1.5 * Math.min(item.w, item.h * 3)) / Math.max(item.label.length, 2), 0.35, 1.1);
-  const handleY = -(item.h / 2 + (chairs.length ? 2.4 : 1.2));
-  const over = seated !== null && seated > item.seats;
-
-  return (
-    <g>
-      <g
-        transform={`translate(${item.x} ${item.y}) rotate(${item.rotation})`}
-        onPointerDown={onPointerDown}
-        onFocus={onFocus}
-        tabIndex={0}
-        role="button"
-        aria-label={`${def.label}${item.label !== def.label ? ` ${item.label}` : ""}${item.seats ? `, ${item.seats} seats` : ""}`}
-        aria-pressed={selected}
-        className="cursor-move outline-none"
-      >
-        {chairs.map((c, i) => (
-          <circle key={i} cx={c.x} cy={c.y} r={0.7} fill="#ffffff" stroke={INK} strokeOpacity={0.55} strokeWidth={0.08} />
-        ))}
-        {def.shape === "round" ? (
-          <circle r={item.w / 2} fill={fill(def, item.kind)} stroke={stroke} strokeWidth={strokeWidth} />
-        ) : (
-          <rect
-            x={-item.w / 2}
-            y={-item.h / 2}
-            width={item.w}
-            height={item.h}
-            rx={0.2}
-            fill={fill(def, item.kind)}
-            stroke={stroke}
-            strokeWidth={strokeWidth}
-            strokeDasharray={item.kind === "dance" ? "0.6 0.3" : undefined}
-          />
-        )}
-        {selected && (
-          <g data-export-skip>
-            <line x1={0} x2={0} y1={-item.h / 2} y2={handleY} stroke={ORANGE_DEEP} strokeWidth={0.08} />
-            <circle
-              cy={handleY}
-              r={0.6}
-              fill={ORANGE}
-              stroke="#ffffff"
-              strokeWidth={0.12}
-              className="cursor-grab"
-              onPointerDown={onRotateStart}
-            />
-          </g>
-        )}
-      </g>
-      {/* Text stays upright whichever way the piece is turned. */}
-      <g pointerEvents="none" fontFamily={FONT} textAnchor="middle">
-        <text x={item.x} y={item.y + (seated !== null ? -0.05 : fontSize * 0.35)} fontSize={fontSize} fontWeight={600} fill={INK}>
-          {item.label}
-        </text>
-        {seated !== null && item.seats > 0 && (
-          <text x={item.x} y={item.y + fontSize * 0.9} fontSize={fontSize * 0.7} fill={over ? CLASH : INK} fillOpacity={over ? 1 : 0.6}>
-            {seated}/{item.seats}
-          </text>
-        )}
-      </g>
-    </g>
   );
 }
 
