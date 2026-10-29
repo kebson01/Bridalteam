@@ -2,7 +2,7 @@ import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import JsonLd from "@/components/json-ld";
 import { pageMetadata } from "@/lib/site";
-import { SIGNUP_URL, SIGNUPS_OPEN } from "@/lib/config";
+import { SIGNUP_URL } from "@/lib/config";
 import { faqSchema, breadcrumbSchema } from "@/lib/structured-data";
 
 /**
@@ -13,6 +13,9 @@ import { faqSchema, breadcrumbSchema } from "@/lib/structured-data";
  * was nothing public for "free wedding website" searches to land on. Every
  * claim below is something the editor and the guest page actually do; keep it
  * that way when either changes.
+ *
+ * The CTA uses SIGNUP_URL like every other signup button, which is
+ * /auth/signup in production (NEXT_PUBLIC_SHOW_PLANNER_APP=true).
  */
 
 export const metadata = pageMetadata({
@@ -23,7 +26,7 @@ export const metadata = pageMetadata({
     "Make a free wedding website in minutes: your date, venue, photo, welcome note and registry, plus a private RSVP link for every household.",
 });
 
-const CTA_LABEL = SIGNUPS_OPEN ? "Create your free wedding website" : "Join the waitlist";
+const CTA_LABEL = "Create your free wedding website";
 
 const FEATURES: Array<[string, string]> = [
   ["Your day at a glance", "Your names, date, venue and city up top, so guests have the essentials in one place."],
@@ -101,11 +104,6 @@ export default function WeddingWebsitePage() {
             >
               {CTA_LABEL}
             </Link>
-            {!SIGNUPS_OPEN && (
-              <p className="mt-3 text-sm text-ink-soft/70">
-                Accounts are opening soon. Join the waitlist and we&rsquo;ll let you know.
-              </p>
-            )}
           </div>
 
           {/* A sample, drawn with the same look as the real guest page
