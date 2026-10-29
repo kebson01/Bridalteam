@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import OnboardingForm from "@/components/onboarding-form";
 import ResumePendingNext from "@/components/resume-pending-next";
 import ClaimableListingPrompt from "@/components/claimable-listing-prompt";
 import { listClaimableForMe } from "@/app/onboarding/claim-actions";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Set Up Your Plan",
@@ -20,7 +19,6 @@ export default async function OnboardingPage({
 }: {
   searchParams: Promise<{ type?: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { type } = await searchParams;
   const initialType =
     type === "vendor" ? "vendor" : type === "planner" ? "planner_company" : "couple";

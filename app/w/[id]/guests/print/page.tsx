@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { listGuests } from "../actions";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Print",
@@ -29,7 +28,6 @@ export default async function PrintPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
   const sp = await searchParams;
   const view = (Array.isArray(sp.view) ? sp.view[0] : sp.view) === "seating" ? "seating" : "cards";

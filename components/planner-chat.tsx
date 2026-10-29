@@ -275,10 +275,8 @@ export default function PlannerChat({
           leaving a live box there invites another question that can only
           produce the same refusal.
 
-          Links go to /auth/signup, not the shorter /signup: that path is a
-          legacy waitlist page that only redirects to the real screen while
-          SIGNUPS_OPEN is true, and a conversion button is the last place
-          that should quietly become a waitlist form.
+          Links come from SIGNUP_URL / LOGIN_URL in lib/config.ts, like every
+          other signup button, so they can't drift from the rest of the site.
         */}
         {cta ? (
           <div className="mt-3 rounded-2xl border border-brand/40 bg-brand-wash px-5 py-4 text-center">

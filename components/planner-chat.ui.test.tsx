@@ -119,47 +119,24 @@ describe("PlannerChat conversion path", () => {
 });
 
 /**
- * The 404 this closes.
- *
- * /planner carries no feature flag — it is the public demo and the whole
- * top-of-funnel pitch — but /auth/signup and /auth/login both notFound() when
- * SHOW_PLANNER_APP is off (app/auth/signup/page.tsx). This component
- * hard-coded both, so in waitlist mode the three highest-intent CTAs in the
- * product (the nudge, the wall, "already have an account?") led to a 404. Not
- * a crash, not a failing test — just a dead end at the exact moment someone
- * decided the product was worth something.
- *
- * Both directions are asserted because only the pair pins the behaviour: the
- * "on" case alone passes against a hard-coded literal, which is how this got
- * through the first time.
+ * The wall's signup link must be the real account screen. It once pointed at
+ * the pre-launch waitlist, which made the highest-intent CTA in the product a
+ * dead end; this pins it to the same SIGNUP_URL every other button uses.
  */
-describe("PlannerChat signup target tracks whether accounts are open", () => {
+describe("PlannerChat signup target", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.resetModules();
   });
   afterEach(() => {
     vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
   });
 
-  async function wallHref(plannerAppOn: boolean): Promise<string | null> {
-    vi.stubEnv("NEXT_PUBLIC_SHOW_PLANNER_APP", plannerAppOn ? "true" : "");
-    // Re-imported so the module-scope flag read picks up the stub.
-    const { default: Chat } = await import("./planner-chat");
+  it("sends people to real signup", async () => {
     vi.stubGlobal("fetch", mockReply({ reply: "Demo over.", limited: true, cta: "signup" }));
     const user = userEvent.setup();
-    render(<Chat />);
+    render(<PlannerChat />);
     await ask(user, "budget for 150 guests?");
     const link = await screen.findByRole("link", { name: /create my free account/i });
-    return link.getAttribute("href");
-  }
-
-  it("sends people to the waitlist while accounts are closed", async () => {
-    expect(await wallHref(false)).toBe("/signup");
-  });
-
-  it("sends people to real signup once accounts are open", async () => {
-    expect(await wallHref(true)).toBe("/auth/signup");
+    expect(link.getAttribute("href")).toBe("/auth/signup");
   });
 });

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Wedding Invitation",
@@ -21,7 +20,6 @@ export default async function InvitePage({
 }: {
   params: Promise<{ token: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { token } = await params;
 
   const supabase = await supabaseServer();

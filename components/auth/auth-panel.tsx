@@ -13,11 +13,7 @@ import { authErrorMessage } from "@/lib/auth-errors";
 
 type Mode = "login" | "signup";
 
-/**
- * Real authentication against Supabase Auth — distinct from the pre-launch
- * waitlist in components/auth-form.tsx, which collects an email and nothing
- * more. This one creates accounts.
- */
+/** Real authentication against Supabase Auth: logs in and creates accounts. */
 export default function AuthPanel({ mode, next }: { mode: Mode; next?: string }) {
   const isSignup = mode === "signup";
   const router = useRouter();

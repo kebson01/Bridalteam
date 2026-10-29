@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import ConnectForm from "@/components/connect-form";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Connect to a Wedding",
@@ -13,8 +12,6 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function ConnectPage() {
-  if (!SHOW_PLANNER_APP) notFound();
-
   const supabase = await supabaseServer();
   const {
     data: { user },

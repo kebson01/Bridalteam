@@ -4,7 +4,6 @@ import { notFound, redirect } from "next/navigation";
 import DetailsForm, { type WeddingDetails } from "@/components/wedding/details-form";
 import WeddingNav from "@/components/wedding-nav";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Wedding Details",
@@ -18,7 +17,6 @@ export default async function DetailsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
 
   const supabase = await supabaseServer();

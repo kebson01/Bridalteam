@@ -8,7 +8,6 @@ import RegistryManager from "@/components/wedding/registry-manager";
 import CoverPhoto from "@/components/wedding/cover-photo";
 import { listRegistryLinks } from "@/app/wedding/actions";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -23,7 +22,6 @@ export default async function WeddingWebsitePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
 
   const supabase = await supabaseServer();

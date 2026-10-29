@@ -6,7 +6,6 @@ import WeddingNav from "@/components/wedding-nav";
 import { supabaseServer } from "@/lib/supabase/server";
 import { flashFrom } from "@/lib/flash";
 import FlashBanner from "@/components/flash-banner";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 import { BUDGET_CATEGORY_ORDER } from "@/lib/budget-template";
 import { seedBudget } from "./actions";
 
@@ -38,7 +37,6 @@ export default async function BudgetPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { id } = await params;
   // Failure message from a server action that bounced back here.
   const flash = flashFrom(await searchParams);

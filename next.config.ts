@@ -41,6 +41,11 @@ const nextConfig: NextConfig = {
         destination: `${APEX_ORIGIN}/:path*`,
         permanent: true,
       },
+      // The pre-launch waitlist lived at /signup and /login. Accounts are open,
+      // so old links and bookmarks go straight to the real auth screens. The
+      // query string carries over, so ?next= still works.
+      { source: "/signup", destination: "/auth/signup", permanent: true },
+      { source: "/login", destination: "/auth/login", permanent: true },
     ];
   },
   images: {

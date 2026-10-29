@@ -6,18 +6,17 @@ export const dynamic = "force-dynamic";
 
 const COUNT = { count: "exact" as const, head: true };
 
-/** Dashboard data: overview stats + recent lists for vendors, waitlist, comments. */
+/** Dashboard data: overview stats + recent lists for vendors, comments and reports. */
 export async function GET(req: Request) {
   const admin = await adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
   // Exact counts (service role → not limited by RLS).
-  const [cVendors, cPublished, cWeddings, cWaitlist, cComments, cInspiration, cFeatured, cReports] =
+  const [cVendors, cPublished, cWeddings, cComments, cInspiration, cFeatured, cReports] =
     await Promise.all([
       admin.from("vendor_profiles").select("*", COUNT),
       admin.from("vendor_profiles").select("*", COUNT).eq("status", "published"),
       admin.from("weddings").select("*", COUNT),
-      admin.from("waitlist").select("*", COUNT),
       admin.from("inspiration_comments").select("*", COUNT),
       admin.from("inspiration_images").select("*", COUNT),
       admin.from("organizations").select("*", COUNT).eq("plan", "featured"),
@@ -28,23 +27,17 @@ export async function GET(req: Request) {
     vendors: cVendors.count ?? 0,
     vendorsPublished: cPublished.count ?? 0,
     weddings: cWeddings.count ?? 0,
-    waitlist: cWaitlist.count ?? 0,
     comments: cComments.count ?? 0,
     inspiration: cInspiration.count ?? 0,
     featured: cFeatured.count ?? 0,
     reports: cReports.count ?? 0,
   };
 
-  const [{ data: vendorRows }, { data: waitlistRows }, { data: commentRows }, { data: reportRows }] =
+  const [{ data: vendorRows }, { data: commentRows }, { data: reportRows }] =
     await Promise.all([
     admin
       .from("vendor_profiles")
       .select("org_id, business_name, category, city, region, status, organizations(plan, subscription_status)")
-      .order("created_at", { ascending: false })
-      .limit(200),
-    admin
-      .from("waitlist")
-      .select("id, email, name, role, source, created_at")
       .order("created_at", { ascending: false })
       .limit(200),
     admin
@@ -63,7 +56,6 @@ export async function GET(req: Request) {
   return NextResponse.json({
     stats,
     vendors: vendorRows ?? [],
-    waitlist: waitlistRows ?? [],
     comments: commentRows ?? [],
     reports: reportRows ?? [],
   });
@@ -89,10 +81,6 @@ export async function POST(req: Request) {
     }
     case "delete_comment": {
       const { error } = await admin.from("inspiration_comments").delete().eq("id", id);
-      return error ? fail(error.message) : NextResponse.json({ ok: true });
-    }
-    case "delete_waitlist": {
-      const { error } = await admin.from("waitlist").delete().eq("id", id);
       return error ? fail(error.message) : NextResponse.json({ ok: true });
     }
     case "dismiss_report": {

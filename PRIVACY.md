@@ -31,7 +31,7 @@ information when you use the Bridal Team website and applications (the
 - Community content (posts, comments, reviews, group memberships).
 - Payment information for vendor subscriptions (processed by Stripe — we do not
   store full card numbers).
-- Communications you send us (support, waitlist signups).
+- Communications you send us (for example, support requests).
 
 **Information collected automatically:**
 - Device and usage data (IP address, browser type, pages viewed, actions taken),

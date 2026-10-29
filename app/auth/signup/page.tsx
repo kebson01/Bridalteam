@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import PageHero from "@/components/page-hero";
 import AuthPanel from "@/components/auth/auth-panel";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Create Your Account",
@@ -15,7 +13,6 @@ export default async function AuthSignupPage({
 }: {
   searchParams: Promise<{ next?: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { next } = await searchParams;
 
   return (

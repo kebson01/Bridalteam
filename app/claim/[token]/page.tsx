@@ -3,7 +3,6 @@ import Link from "next/link";
 import PageHero from "@/components/page-hero";
 import ClaimButton from "@/components/claim-button";
 import { supabaseServer } from "@/lib/supabase/server";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 /**
  * The page an outreach "claim your listing" link opens.
@@ -147,14 +146,7 @@ export default async function ClaimPage({ params }: { params: Promise<{ token: s
           </p>
         </div>
 
-        {/* Claiming needs an account, and accounts only exist once the planner
-            app is switched on. Saying so beats a sign-up link that 404s. */}
-        {!SHOW_PLANNER_APP ? (
-          <Note>
-            Accounts aren&rsquo;t open quite yet. Reply to the email we sent and
-            we&rsquo;ll let you know the moment this listing is yours to take.
-          </Note>
-        ) : user ? (
+        {user ? (
           <ClaimButton token={token} />
         ) : (
           <div className="rounded-2xl border border-stone-2 bg-white p-8 text-center shadow-card">

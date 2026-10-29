@@ -12,7 +12,6 @@ import { getVendorStats } from "@/app/vendor/stats-actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { proConfigured, featuredConfigured } from "@/lib/stripe";
 import { entitlements, effectivePlan, PLAN_COLUMNS } from "@/lib/tiers";
-import { SHOW_PLANNER_APP } from "@/lib/flags";
 
 export const metadata: Metadata = {
   title: "Your Vendor Account",
@@ -26,7 +25,6 @@ export default async function VendorDashboard({
 }: {
   searchParams: Promise<{ billing?: string; account?: string }>;
 }) {
-  if (!SHOW_PLANNER_APP) notFound();
   const { billing, account } = await searchParams;
 
   const supabase = await supabaseServer();
