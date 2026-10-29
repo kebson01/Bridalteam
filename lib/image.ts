@@ -4,7 +4,7 @@
  * browser only (uses <canvas>), so call it from client components.
  */
 
-async function loadBitmap(file: File): Promise<ImageBitmap | HTMLImageElement> {
+export async function loadBitmap(file: Blob): Promise<ImageBitmap | HTMLImageElement> {
   // createImageBitmap is fast and can honour EXIF orientation. Fall back to an
   // <img> for browsers/files it can't decode.
   if (typeof createImageBitmap === "function") {
