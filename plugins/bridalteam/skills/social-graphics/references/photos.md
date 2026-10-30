@@ -51,9 +51,11 @@ page instead (it shows the `images.unsplash.com/photo-<id>` URL, the
 photographer, and whether it's Unsplash+), then download from
 images.unsplash.com.
 
-Avoid photos where an identifiable person is the focus of a topic that could
-embarrass them, such as costs or etiquette mistakes. Details, venues, flowers
-and tables are safest.
+**No identifiable faces (the owner's rule, 2026-10-30).** Don't use any photo
+where a person's face can be recognized, even small or in the background.
+Hands, a bouquet held at the waist, or people seen from behind or blurred
+past recognition are fine. Use details, venues, flowers, tables and gear.
+Check each photo at full size before you use it, not just the thumbnail.
 
 ## Getting a photo onto the machine
 
