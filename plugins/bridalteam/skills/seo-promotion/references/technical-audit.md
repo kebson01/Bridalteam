@@ -14,7 +14,8 @@ differ from older versions.
 - [ ] `app/robots.ts` allows `/` and disallows only private paths (`/admin`,
       `/api/`, `/claim`). Nothing public got blocked.
 - [ ] `app/sitemap.ts` includes every public marketing page, every guide, every
-      blog post and published vendor listings. It excludes auth, dashboard and
+      blog post and published vendor listings that have content of their own
+      (`lib/vendor-content.ts`; empty ones are noindex). It excludes auth, dashboard and
       `/w/*`, and respects `SHOW_COMMUNITY` and `SHOW_VENDOR_DIRECTORY`.
 - [ ] Any new public route under `app/` is in the sitemap, or there's a reason
       it isn't.

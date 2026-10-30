@@ -15,9 +15,11 @@ and `/for-vendors` already takes the same line ("The directory is brand new").
 So the pitch cannot be leads. It is three things a vendor can verify in five
 minutes:
 
-1. **A page they control that Google can find.** Published listings are now in
-   the sitemap (`app/sitemap.ts`), `/v/[id]` sets real per-vendor metadata, and
-   `robots.ts` allows it. For a small vendor with a thin web presence, one more
+1. **A page they control that Google can find.** Once a listing has a
+   description or a photo it's in the sitemap (`app/sitemap.ts`), `/v/[id]`
+   sets real per-vendor metadata, and `robots.ts` allows it. An untouched
+   imported listing is kept out of Google until then (`lib/vendor-content.ts`),
+   which makes "claim it and fill it in" the step that gets them indexed. For a small vendor with a thin web presence, one more
    indexed page with their name, photos and a link is worth something on its
    own, whatever the directory's traffic is.
 2. **Free, and free without a catch.** No card, no trial clock. Free shows

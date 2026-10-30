@@ -151,7 +151,9 @@ Do not redo any of this:
 - **Structured data** throughout: Article, BlogPosting, FAQPage, Breadcrumb,
   Organization, WebSite, LocalBusiness (`lib/structured-data.ts`).
 - **Sitemap** covering marketing pages, guides, posts, and — as of this
-  branch — every published vendor listing.
+  branch — every published vendor listing that has a description or a
+  picture of its own (empty imported shells stay out; see
+  `lib/vendor-content.ts`).
 - **Internal linking** from guides to `/planner` and to related guides.
 - **Per-page canonicals and metadata** via `pageMetadata()`.
 
