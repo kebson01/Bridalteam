@@ -1,4 +1,4 @@
-# Facebook Page feed posts from every pin, batches 1–8 (2026-10-30)
+# Facebook Page feed posts from every pin, batches 1–9 (2026-10-30)
 
 These are the Pinterest pins, reworked as Facebook feed posts. Each post is
 one image, a caption, and a link tagged for Facebook. **Nothing here is
@@ -19,7 +19,7 @@ Every caption is the pin's own description, taken from its batch notes in
 - **How to post:** in Meta Business Suite, choose **Create post**, add the
   image, paste the caption (the link is already at the end), and choose
   **Schedule**.
-- **Timing:** one a day. The suggested dates below run Oct 31 to Dec 9. Use
+- **Timing:** one a day. The suggested dates below run Oct 31 to Dec 14. Use
   any time that suits the Page; 12:13 pm ET keeps them off the top of the
   hour.
 
@@ -738,6 +738,100 @@ Taste before you commit, and bring your color palette and a photo or two of styl
 • When do you need the final design and guest count?
 
 Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-cake?utm_source=facebook&utm_medium=social&utm_content=fb-cake-tasting
+```
+
+## 41. Do You Even Need Save-the-Dates?
+
+- **Suggested date:** Thu Dec 10
+- **Image:** `09-1-do-you-need-save-the-dates.jpg` (batch 9, pin 1)
+- **Caption:**
+
+```
+Do You Even Need Save-the-Dates?
+
+Save-the-dates are optional. They're most valuable for:
+• destination weddings;
+• holiday weekends;
+• weddings where many guests travel.
+
+For a local wedding with a short timeline, you can skip straight to invitations. One rule: everyone who gets a save-the-date must get an invitation, so finalize the core list first.
+
+Read the full guide: https://bridalteam.com/guides/save-the-dates-vs-invitations?utm_source=facebook&utm_medium=social&utm_content=fb-need-save-the-dates
+```
+
+## 42. How to Have the Wedding Money Talk With Your Families
+
+- **Suggested date:** Fri Dec 11
+- **Image:** `09-2-the-wedding-money-talk.jpg` (batch 9, pin 2)
+- **Caption:**
+
+```
+How to Have the Wedding Money Talk With Your Families
+
+1. Talk before you book, so you know the real total up front.
+2. Ask for a fixed amount: what each contributor is comfortable giving, not a blank check.
+3. Ask what comes with it. Money often comes with a say, like guest-list input, so decide together how much influence a contribution carries.
+4. Keep one shared budget: total funds in, costs out, and who's covering what.
+
+Read the full guide: https://bridalteam.com/guides/who-pays-for-the-wedding?utm_source=facebook&utm_medium=social&utm_content=fb-money-talk
+```
+
+## 43. 5 Questions to Ask Your Wedding Officiant
+
+- **Suggested date:** Sat Dec 12
+- **Image:** `09-3-questions-for-your-officiant.jpg` (batch 9, pin 3)
+- **Caption:**
+
+```
+5 Questions to Ask Your Wedding Officiant
+
+• Are you legally able to officiate in our location, and do you handle the license paperwork?
+• Do you personalize the ceremony, and can we review a draft?
+• Can we write our own vows, and will you help structure them?
+• Will you run the rehearsal?
+• How long does a typical ceremony run?
+
+The rules vary by location, so verify the specifics with your local marriage authority.
+
+Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-officiant?utm_source=facebook&utm_medium=social&utm_content=fb-officiant-questions
+```
+
+## 44. What Wedding Video Keeps That Photos Can't
+
+- **Suggested date:** Sun Dec 13
+- **Image:** `09-4-what-video-keeps.jpg` (batch 9, pin 4)
+- **Caption:**
+
+```
+What Wedding Video Keeps That Photos Can't
+
+Not every couple wants video, and that's fine. But the things a photo can't capture are exactly what couples say they treasure most later:
+• your partner's voice during the vows;
+• a parent's toast;
+• the roar of the dance floor.
+
+If those moments matter, it's money well spent.
+
+Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-videographer?utm_source=facebook&utm_medium=social&utm_content=fb-video-moments
+```
+
+## 45. Your Final-Month Wedding Checklist
+
+- **Suggested date:** Mon Dec 14
+- **Image:** `09-5-final-month-checklist.jpg` (batch 9, pin 5)
+- **Caption:**
+
+```
+Your Final-Month Wedding Checklist
+
+The last month is about tying it together:
+• chase the last RSVPs;
+• give the caterer a final headcount;
+• build the seating chart;
+• confirm arrival times with every vendor;
+• delegate day-of logistics, so you're not fielding questions on the day.
+
+Read the full guide: https://bridalteam.com/guides/wedding-planning-checklist?utm_source=facebook&utm_medium=social&utm_content=fb-final-month
 ```
 
 ---
