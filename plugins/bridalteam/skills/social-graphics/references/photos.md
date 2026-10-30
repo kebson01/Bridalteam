@@ -45,6 +45,11 @@ page once the host is allowed.
 URL for the credit. Searching on unsplash.com and downloading from
 images.unsplash.com both need those hosts allowed in the environment's network
 settings. api.unsplash.com also needs an access key.
+unsplash.com sits behind a bot check that blocks `curl`, so don't script
+searches against it. Find photos with web search and a page fetch of the photo
+page instead (it shows the `images.unsplash.com/photo-<id>` URL, the
+photographer, and whether it's Unsplash+), then download from
+images.unsplash.com.
 
 Avoid photos where an identifiable person is the focus of a topic that could
 embarrass them, such as costs or etiquette mistakes. Details, venues, flowers
