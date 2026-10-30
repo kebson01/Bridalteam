@@ -503,9 +503,9 @@ export default async function WeddingOverviewPage({
                 </h2>
                 <ul className="mt-4 space-y-2 text-sm">
                   {[
-                    "What should we book first?",
-                    "How much should a photographer cost?",
-                    "Help me word our invitations",
+                    "Build us a checklist for the next 3 months",
+                    "Make a budget for our wedding",
+                    "Which vendors do we still need?",
                   ].map((q) => (
                     <li key={q} className="rounded-xl border border-stone-2 bg-white px-3 py-2 text-ink-soft">
                       “{q}”
@@ -513,7 +513,7 @@ export default async function WeddingOverviewPage({
                   ))}
                 </ul>
                 <Link
-                  href="/planner"
+                  href={`/planner?w=${id}`}
                   className="mt-5 block rounded-full bg-gradient-to-r from-brand to-brand-dark py-2.5 text-center text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
                 >
                   Ask Bridal AI

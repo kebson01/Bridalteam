@@ -142,9 +142,10 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     key: "ai",
     name: "Bridal AI Assistant",
     nav: "AI Planner",
-    blurb: "Ask anything — vendor questions, etiquette, timelines — and get answers for your wedding.",
+    blurb: "Ask anything — and have it add the checklist, budget, vendors or guests it suggests in one tap.",
     category: "planning",
-    path: () => "/planner",
+    // ?w= connects the chat to this wedding, so it can add what it suggests.
+    path: (id) => `/planner?w=${id}`,
     icon: "✨",
     start: "Ask a question",
   },
