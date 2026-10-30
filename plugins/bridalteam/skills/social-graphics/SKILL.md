@@ -175,6 +175,25 @@ Use the same rules and renderer with `format: "story"` (1080 × 1920):
 - **Posting:** the owner posts stories from the Bridal Team Page in the app.
   There is no tool for it, so log them as `drafted`.
 
+## Facebook Page feed posts
+
+Every Pinterest batch also becomes Facebook feed posts, as part of the same
+run:
+- **Images:** run
+  `python3 plugins/bridalteam/skills/social-graphics/scripts/facebook-feed.py marketing/facebook/<date>-feed <scratch>/posts.json <batch>`.
+  It fits each pin onto a 1080 × 1350 canvas without cropping and writes a
+  JPEG per pin.
+- **Captions:** each caption is the pin's title, its description, then "Read
+  the full guide: <link>" ("Try it free" for tool pages). Write them in
+  plain text, with no Markdown, and use "•" for list items.
+- **Links:** tag them `utm_source=facebook&utm_medium=social&utm_content=fb-<pin slug>`.
+  The script builds these.
+- **Notes:** add the posts to `marketing/facebook/<date>-feed-posts.md`.
+  Copy the structure of `2026-10-30-feed-posts.md`, with suggested dates one
+  a day after the last post already planned there.
+- **Posting:** there's no Facebook posting tool. The owner schedules the
+  posts in Meta Business Suite, so log them as `drafted`.
+
 ## What to report back
 
 Report:
