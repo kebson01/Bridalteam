@@ -40,7 +40,7 @@ const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg"]);
  */
 export async function parsePost(raw, postDir) {
   if (!raw || typeof raw !== "object") throw new Error("post.json must be a JSON object");
-  const { publish_at, message, link, images = [] } = /** @type {Record<string, unknown>} */ (raw);
+  const { publish_at, message, link, images } = /** @type {Record<string, unknown>} */ (raw);
 
   if (typeof publish_at !== "string") throw new Error("publish_at is required");
   // A bare "2026-11-04T19:13" would be read in the machine's own clock, often
@@ -53,15 +53,14 @@ export async function parsePost(raw, postDir) {
 
   if (typeof message !== "string" || !message.trim()) throw new Error("message is required");
 
-  if (link !== undefined && (typeof link !== "string" || !/^https:\/\//.test(link))) {
-    throw new Error("link must be an https:// URL");
-  }
+  // Every post carries a photo: the owner's rule since 2026-10-30, because
+  // photo posts get more engagement. Facebook drops the link preview from any
+  // post with photos, so the URL goes at the end of the message instead.
+  if (link !== undefined) throw new Error("link isn't used: every post has a photo, so put the URL at the end of the message");
   if (!Array.isArray(images) || images.some((i) => typeof i !== "string")) {
     throw new Error("images must be a list of file paths");
   }
-  // Facebook drops the link preview from any post with photos, so a post is
-  // either a link post or a photo post. Put the URL in the message instead.
-  if (link && images.length) throw new Error("use link or images, not both: with images, put the URL in the message");
+  if (!images.length) throw new Error("images is required: every post needs at least one photo");
   if (images.length > MAX_IMAGES) throw new Error(`at most ${MAX_IMAGES} images per post`);
 
   const imagePaths = [];
@@ -74,7 +73,7 @@ export async function parsePost(raw, postDir) {
     imagePaths.push(abs);
   }
 
-  return { publishAt, message, link: /** @type {string | undefined} */ (link), imagePaths };
+  return { publishAt, message, imagePaths };
 }
 
 /** The public URL Zapier fetches an image from. */
@@ -113,7 +112,6 @@ export async function nextDue(now = new Date(), queueDir = QUEUE_DIR) {
     name: due.name,
     publish_at: post.publishAt.toISOString(),
     message: post.message,
-    ...(post.link ? { link: post.link } : {}),
     image_urls: post.imagePaths.map(publicImageUrl),
   };
 }
