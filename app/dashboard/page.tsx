@@ -117,7 +117,7 @@ export default async function DashboardPage() {
                     — couples were reaching for Community instead. */}
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-stone-2 pt-4">
                   {[
-                    ["Checklist", `/w/${w.id}`],
+                    ["Checklist", `/w/${w.id}/checklist`],
                     ["Guests", `/w/${w.id}/guests`],
                     ["Budget", `/w/${w.id}/budget`],
                     ["Website", `/w/${w.id}/website`],

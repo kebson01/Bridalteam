@@ -5,6 +5,12 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { failWith } from "@/lib/flash";
 import { PLAN_TEMPLATE } from "@/lib/plan-template";
 
+/** Tasks show on the checklist and, as "next up", on the overview. */
+function refreshPlan(weddingId: string) {
+  revalidatePath(`/w/${weddingId}`);
+  revalidatePath(`/w/${weddingId}/checklist`);
+}
+
 /**
  * Fills an empty wedding with the expert starter plan (milestones, deliverables,
  * tasks and tips), with deadlines computed from the couple's date. The RPC
@@ -20,8 +26,8 @@ export async function seedExpertPlan(formData: FormData) {
     p_template: PLAN_TEMPLATE,
   });
 
-  if (error) failWith(`/w/${weddingId}`, "Couldn’t build your checklist. Please try again.", error);
-  revalidatePath(`/w/${weddingId}`);
+  if (error) failWith(`/w/${weddingId}/checklist`, "Couldn’t build your checklist. Please try again.", error);
+  refreshPlan(weddingId);
 }
 
 /**
@@ -45,8 +51,8 @@ export async function toggleTask(formData: FormData) {
     .update({ completed_at: completed ? null : new Date().toISOString() })
     .eq("id", id);
 
-  if (error) failWith(`/w/${weddingId}`, "Couldn’t update that task. Please try again.", error);
-  revalidatePath(`/w/${weddingId}`);
+  if (error) failWith(`/w/${weddingId}/checklist`, "Couldn’t update that task. Please try again.", error);
+  refreshPlan(weddingId);
 }
 
 export async function addTask(formData: FormData) {
@@ -77,8 +83,8 @@ export async function addTask(formData: FormData) {
     position: (last?.position ?? 0) + 1,
   });
 
-  if (error) failWith(`/w/${weddingId}`, "Couldn’t add that task. Please try again.", error);
-  revalidatePath(`/w/${weddingId}`);
+  if (error) failWith(`/w/${weddingId}/checklist`, "Couldn’t add that task. Please try again.", error);
+  refreshPlan(weddingId);
 }
 
 export async function deleteTask(formData: FormData) {
@@ -94,8 +100,8 @@ export async function deleteTask(formData: FormData) {
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id);
 
-  if (error) failWith(`/w/${weddingId}`, "Couldn’t delete that task. Please try again.", error);
-  revalidatePath(`/w/${weddingId}`);
+  if (error) failWith(`/w/${weddingId}/checklist`, "Couldn’t delete that task. Please try again.", error);
+  refreshPlan(weddingId);
 }
 
 /** Brings a soft-deleted task back into the checklist. */
@@ -106,8 +112,8 @@ export async function restoreTask(formData: FormData) {
 
   const supabase = await supabaseServer();
   const { error } = await supabase.from("tasks").update({ deleted_at: null }).eq("id", id);
-  if (error) failWith(`/w/${weddingId}`, "Couldn’t restore that task. Please try again.", error);
-  revalidatePath(`/w/${weddingId}`);
+  if (error) failWith(`/w/${weddingId}/checklist`, "Couldn’t restore that task. Please try again.", error);
+  refreshPlan(weddingId);
 }
 
 /** Permanently removes a task (only offered from the "Recently deleted" view). */
@@ -123,6 +129,6 @@ export async function purgeTask(formData: FormData) {
     .delete()
     .eq("id", id)
     .not("deleted_at", "is", null);
-  if (error) failWith(`/w/${weddingId}`, "Couldn’t remove that task for good. Please try again.", error);
-  revalidatePath(`/w/${weddingId}`);
+  if (error) failWith(`/w/${weddingId}/checklist`, "Couldn’t remove that task for good. Please try again.", error);
+  refreshPlan(weddingId);
 }

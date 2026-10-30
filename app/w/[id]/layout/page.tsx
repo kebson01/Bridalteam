@@ -122,7 +122,7 @@ export default async function LayoutsPage({
       <div className="border-b border-stone-2 bg-white">
         <div className="mx-auto max-w-6xl px-5 py-8">
           <Link href={`/w/${id}`} className="text-sm font-semibold text-brand-text hover:text-brand-deep">
-            ← Back to plan
+            ← Back to overview
           </Link>
           <WeddingNav weddingId={id} active="layout" />
         </div>
