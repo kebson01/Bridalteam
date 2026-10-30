@@ -63,6 +63,11 @@ One row per community. Check the rule before every post.
 | 2026-12-06 | Pinterest: Choosing Wedding Vendors | 5 questions for your officiant (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=officiant-questions | scheduled | |
 | 2026-12-07 | Pinterest: Choosing Wedding Vendors | What video keeps that photos can't (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=video-moments | scheduled | |
 | 2026-12-08 | Pinterest: Wedding Planning Checklists & Timelines | Final-month checklist (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=final-month | scheduled | |
+| 2026-12-09 | Pinterest: Choosing Wedding Vendors | Check the venue contract (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=venue-contract | scheduled | |
+| 2026-12-10 | Pinterest: Choosing Wedding Vendors | 6 questions for your florist (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=florist-questions | scheduled | |
+| 2026-12-11 | Pinterest: Choosing Wedding Vendors | Photographer contract: get these in writing (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=photographer-contract | scheduled | |
+| 2026-12-12 | Pinterest: Wedding Etiquette & Invitations | How to split the guest list fairly (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=guest-list-split | scheduled | |
+| 2026-12-13 | Pinterest: Wedding Planning Checklists & Timelines | 4 ways to keep the day on time (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=timeline-tips | scheduled | |
 | 2026-10-29 | Facebook Page story | "5 free tools that do the math for you", 6 frames, a link sticker per tool | | utm_source=facebook, utm_medium=story, utm_content=story-2-* | drafted | |
 
 ## Weekly numbers
@@ -99,3 +104,5 @@ One row per community. Check the rule before every post.
 - 2026-10-30: Scheduled Pinterest batch 8 through PinBridge (workspace `36cd9917`): one pin a day at 8:13 pm Eastern from Nov 29 to Dec 3. The images are served from raw.githubusercontent.com at PR commit 8ce5932.
 - 2026-10-30: Drafted Pinterest batch 9 (5 photo pins with no identifiable faces: do you need save-the-dates, the money talk, officiant questions, what video keeps, the final-month checklist) in `marketing/pinterest/2026-10-30-batch-9.md`. Added its 5 Facebook feed posts (#41–45, Dec 10–14) to `marketing/facebook/2026-10-30-feed-posts.md`. Every guide now has at least two pins.
 - 2026-10-30: Scheduled Pinterest batch 9 through PinBridge (workspace `36cd9917`): one pin a day at 8:13 pm Eastern from Dec 4 to Dec 8. The images are served from raw.githubusercontent.com at PR commit fe8a8e3.
+- 2026-10-30: Drafted Pinterest batch 10 (5 photo pins with no identifiable faces, third angles: the venue contract, florist questions, the photographer contract, splitting the guest list, keeping the day on time) in `marketing/pinterest/2026-10-30-batch-10.md`. Added its 5 Facebook feed posts (#46–50, Dec 15–19) to `marketing/facebook/2026-10-30-feed-posts.md`.
+- 2026-10-30: Scheduled Pinterest batch 10 through PinBridge (workspace `36cd9917`): one pin a day at 8:13 pm Eastern from Dec 9 to Dec 13. The images are served from raw.githubusercontent.com at PR commit 5528ee1.

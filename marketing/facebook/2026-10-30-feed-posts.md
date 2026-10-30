@@ -1,4 +1,4 @@
-# Facebook Page feed posts from every pin, batches 1–9 (2026-10-30)
+# Facebook Page feed posts from every pin, batches 1–10 (2026-10-30)
 
 These are the Pinterest pins, reworked as Facebook feed posts. Each post is
 one image, a caption, and a link tagged for Facebook. **Nothing here is
@@ -19,7 +19,7 @@ Every caption is the pin's own description, taken from its batch notes in
 - **How to post:** in Meta Business Suite, choose **Create post**, add the
   image, paste the caption (the link is already at the end), and choose
   **Schedule**.
-- **Timing:** one a day. The suggested dates below run Oct 31 to Dec 14. Use
+- **Timing:** one a day. The suggested dates below run Oct 31 to Dec 19. Use
   any time that suits the Page; 12:13 pm ET keeps them off the top of the
   hour.
 
@@ -832,6 +832,99 @@ The last month is about tying it together:
 • delegate day-of logistics, so you're not fielding questions on the day.
 
 Read the full guide: https://bridalteam.com/guides/wedding-planning-checklist?utm_source=facebook&utm_medium=social&utm_content=fb-final-month
+```
+
+## 46. Wedding Venue Contract: 4 Things to Check Before You Sign
+
+- **Suggested date:** Tue Dec 15
+- **Image:** `10-1-venue-contract-checklist.jpg` (batch 10, pin 1)
+- **Caption:**
+
+```
+Wedding Venue Contract: 4 Things to Check Before You Sign
+
+Before you sign, check:
+• the cancellation and postponement terms;
+• the final headcount deadline;
+• overtime rates;
+• exactly what happens to your deposit.
+
+And get every verbal promise in writing.
+
+Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-venue?utm_source=facebook&utm_medium=social&utm_content=fb-venue-contract
+```
+
+## 47. 6 Questions to Ask Your Wedding Florist
+
+- **Suggested date:** Wed Dec 16
+- **Image:** `10-2-questions-for-your-florist.jpg` (batch 10, pin 2)
+- **Caption:**
+
+```
+6 Questions to Ask Your Wedding Florist
+
+• Have you worked at our venue, and are there any floral restrictions?
+• What's realistic for our budget, and where would you splurge or save?
+• Do you offer rentals (vases, arches, candles), or is everything purchased?
+• Can ceremony flowers be repurposed at the reception?
+• Who sets up and breaks down, and is that included?
+• What happens if a flower we chose isn't available that week?
+
+Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-florist?utm_source=facebook&utm_medium=social&utm_content=fb-florist-questions
+```
+
+## 48. Wedding Photographer Contract: Get These in Writing
+
+- **Suggested date:** Thu Dec 17
+- **Image:** `10-3-photographer-contract.jpg` (batch 10, pin 3)
+- **Caption:**
+
+```
+Wedding Photographer Contract: Get These in Writing
+
+Confirm the deliverables in writing:
+• hours of coverage;
+• the number of edited images;
+• the delivery timeline;
+• image rights;
+• the cancellation and illness-backup policy.
+
+Clarity here prevents the most common post-wedding disputes.
+
+Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-photographer?utm_source=facebook&utm_medium=social&utm_content=fb-photographer-contract
+```
+
+## 49. How to Split the Wedding Guest List Fairly
+
+- **Suggested date:** Fri Dec 18
+- **Image:** `10-4-split-the-guest-list.jpg` (batch 10, pin 4)
+- **Caption:**
+
+```
+How to Split the Wedding Guest List Fairly
+
+If parents are contributing, they'll often expect input. Agree on how the list divides before invitations are drafted. A common split is thirds: one for the two of you and one for each set of parents.
+
+Then track RSVPs in one place, keeping names, meal choices and responses together, so your headcount, seating chart and caterer numbers all match.
+
+Read the full guide: https://bridalteam.com/guides/wedding-guest-list?utm_source=facebook&utm_medium=social&utm_content=fb-guest-list-split
+```
+
+## 50. 4 Ways to Keep Your Wedding Day on Time
+
+- **Suggested date:** Sat Dec 19
+- **Image:** `10-5-keep-the-day-on-time.jpg` (batch 10, pin 5)
+- **Caption:**
+
+```
+4 Ways to Keep Your Wedding Day on Time
+
+1. Pad the morning: have everyone ready 30–45 minutes before you think you need to be.
+2. Buffer the ceremony: seating guests always takes longer than planned.
+3. Space the toasts between courses, not all at once.
+4. Share the timeline a week ahead with vendors, the wedding party and family, with names and phone numbers next to each hand-off.
+
+Read the full guide: https://bridalteam.com/guides/wedding-day-timeline?utm_source=facebook&utm_medium=social&utm_content=fb-timeline-tips
 ```
 
 ---
