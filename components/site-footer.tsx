@@ -33,7 +33,7 @@ const SOCIAL = [
 export default function SiteFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="bg-ink text-white">
+    <footer className="bg-ink text-white print:hidden">
       <div className="mx-auto max-w-6xl px-5 py-7">
         <div className="flex items-center justify-between gap-4">
           <Image

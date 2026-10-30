@@ -19,17 +19,21 @@ Sources:
 - Blog: `lib/blog.ts`.
 - Tools: `/wedding-checklist`, `/wedding-budget-calculator`, `/wedding-rsvp`,
   `/wedding-seating-chart`, `/wedding-website`, and `/planner`.
+- Ready-made feed posts: `marketing/facebook/<date>-feed-posts.md`, made by
+  the `social-graphics` skill from every Pinterest pin, with 1080 × 1350
+  images and checked captions. Use these first for guide and tool posts,
+  photo posts before text graphics, and mark which ones a month uses.
 - Images: the pins in `marketing/pinterest/` and the Story frames in
   `marketing/facebook/` already state their facts correctly.
 
 ## Spacing rules
 
-- No two posts of the same type in a row.
+- No three posts of the same type in a row.
 - No page linked more than 3 times a month, or twice within 7 days.
 - At least 1 post in 5 has no link (the conversation posts cover this).
 - Each tool gets a spotlight at least once a month.
-- Weekends lean to conversation and seasonal posts; weekday evenings to
-  tool spotlights.
+- Midday slots carry the photo and graphic posts; weekday evenings the
+  text posts (conversation, questions, blog, seasonal, about).
 
 ## Format
 

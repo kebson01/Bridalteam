@@ -43,7 +43,8 @@ Three workflows:
   testimonials, press or "couples love…".
 - **Honest about who we are.** Bridal Team is new and small. Never pretend
   to be a couple, a guest or a vendor.
-- **Images we own or may use.** Use the images in `marketing/`, or new ones
+- **Images we own or may use.** Use the images in `marketing/` (including
+  the Unsplash photos credited in the Pinterest batch notes), or new ones
   made for Bridal Team. For photos from `lib/inspiration.ts`, follow each
   photo's license note; if there's no note allowing reuse, don't.
 - **Not every post sells.** At least 1 in 5 posts has no link at all. A Page
