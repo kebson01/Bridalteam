@@ -5,8 +5,8 @@ import LayoutEditor from "@/components/layout/layout-editor";
 import FlashBanner from "@/components/flash-banner";
 import { supabaseServer } from "@/lib/supabase/server";
 import { flashFrom } from "@/lib/flash";
-import { sanitizeItems } from "@/lib/venue-layout";
-import { getLayout, seatedByTable } from "../actions";
+import { FLOOR_SOURCES, sanitizeItems, type FloorSource } from "@/lib/venue-layout";
+import { getLayout, listSeatGuests } from "../actions";
 
 export const metadata: Metadata = {
   title: "Venue layout",
@@ -23,7 +23,9 @@ export default async function LayoutPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { id, layoutId } = await params;
-  const flash = flashFrom(await searchParams);
+  const sp = await searchParams;
+  const flash = flashFrom(sp);
+  const setup = typeof sp.setup === "string" && FLOOR_SOURCES.includes(sp.setup as FloorSource) ? (sp.setup as FloorSource) : null;
 
   const supabase = await supabaseServer();
   const {
@@ -31,23 +33,31 @@ export default async function LayoutPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/auth/login?next=/w/${id}/layout/${layoutId}`);
 
-  const [layout, seated, { data: guests }] = await Promise.all([
+  const [layout, guests, { data: households }, { data: wedding }] = await Promise.all([
     getLayout(id, layoutId),
-    seatedByTable(id),
+    listSeatGuests(id),
     supabase.from("wedding_guests").select("seats").eq("wedding_id", id),
+    supabase.from("weddings").select("partner_one, partner_two").eq("id", id).maybeSingle(),
   ]);
   if (!layout) notFound();
 
   // Invited seats, not RSVPs: the room has to fit everyone who might say yes.
-  const invited = (guests ?? []).reduce((s, g) => s + ((g.seats as number) ?? 0), 0);
+  const invited = (households ?? []).reduce((s: number, g: { seats: number | null }) => s + (g.seats ?? 0), 0);
+  const couple = [wedding?.partner_one, wedding?.partner_two].filter(Boolean).join(" & ");
 
   return (
     <div className="min-h-screen bg-stone-4/40">
-      <div className="mx-auto max-w-6xl px-5 py-6">
-        <Link href={`/w/${id}/layout`} className="text-sm font-semibold text-brand-text hover:text-brand-deep">
-          ← All layouts
-        </Link>
-        <div className="mt-4">
+      <div className="mx-auto max-w-[1440px] px-3 py-5 sm:px-5">
+        <nav className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em]">
+          <Link href={`/w/${id}/layout`} className="text-ink-soft/60 hover:text-brand-text">
+            ← {couple || "Wedding"} · Spaces
+          </Link>
+          <span className="text-ink-soft/30" aria-hidden>
+            /
+          </span>
+          <span className="text-brand-text">{layout.name}</span>
+        </nav>
+        <div className="mt-3">
           <FlashBanner message={flash} />
           <LayoutEditor
             weddingId={id}
@@ -58,8 +68,9 @@ export default async function LayoutPage({
             initialWidth={layout.width_ft}
             initialLength={layout.length_ft}
             initialItems={sanitizeItems(layout.items, layout.width_ft, layout.length_ft)}
-            seatedByTable={seated ?? {}}
+            guests={guests}
             invitedSeats={invited}
+            initialSetup={setup}
           />
         </div>
       </div>

@@ -365,3 +365,49 @@ export function findClashes(items: LayoutItem[], widthFt: number, lengthFt: numb
   }
   return bad;
 }
+
+/**
+ * Feet from a table's edge to the back of its chairs: the chair sits about
+ * 10" off the edge (chairPositions) and is about 18" deep.
+ */
+export const CHAIR_DEPTH = 1.55;
+
+/** The walkway planners keep between chair backs and anything else: 36". */
+export const PATHWAY_FT = 3;
+
+/**
+ * A piece's footprint grown by `pad` feet on every side, plus its chairs for a
+ * table that has any. A rectangle grows as a rectangle, so its corners are a
+ * little generous — it errs towards warning, which is the safe side.
+ */
+function envelope(it: LayoutItem, pad: number): LayoutItem {
+  const grow = pad + (PIECES[it.kind].isTable && it.seats > 0 ? CHAIR_DEPTH : 0);
+  return { ...it, w: it.w + grow * 2, h: it.h + grow * 2 };
+}
+
+/**
+ * Pairs that don't touch but leave less than a 36" walkway behind the chairs:
+ * enough room on paper, not enough for a server with a tray or a bride in a
+ * gown. At least one of the pair is a table people sit at; the dance floor and
+ * the aisle are walkable themselves, and the room's features are left to the
+ * clash check. Pairs that already clash aren't repeated here.
+ */
+export function findTightSpots(items: LayoutItem[], clashes: Set<string> = new Set()): { a: string; b: string }[] {
+  const out: { a: string; b: string }[] = [];
+  const pad = PATHWAY_FT / 2;
+  const counts = (it: LayoutItem) =>
+    PIECES[it.kind].group !== "Room" && it.kind !== "dance" && it.kind !== "stage";
+  for (let i = 0; i < items.length; i++) {
+    for (let j = i + 1; j < items.length; j++) {
+      const a = items[i];
+      const b = items[j];
+      if (!counts(a) || !counts(b)) continue;
+      const seatedA = PIECES[a.kind].isTable && a.seats > 0;
+      const seatedB = PIECES[b.kind].isTable && b.seats > 0;
+      if (!seatedA && !seatedB) continue;
+      if ((clashes.has(a.id) && clashes.has(b.id)) || overlaps(a, b)) continue;
+      if (overlaps(envelope(a, pad), envelope(b, pad))) out.push({ a: a.id, b: b.id });
+    }
+  }
+  return out;
+}

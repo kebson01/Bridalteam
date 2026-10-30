@@ -12,8 +12,8 @@ import {
   tableCount,
   tableKey,
 } from "@/lib/venue-layout";
-import { listGuests } from "../../../guests/actions";
-import { getLayout } from "../../actions";
+import { guestsByTable, seatTable, tableTitle } from "@/lib/seating";
+import { getLayout, listSeatGuests } from "../../actions";
 
 export const metadata: Metadata = {
   title: "Print layout",
@@ -59,7 +59,7 @@ export default async function LayoutPrintPage({
 
   const [layout, guests, { data: wedding }] = await Promise.all([
     getLayout(id, layoutId),
-    listGuests(id),
+    listSeatGuests(id),
     supabase.from("weddings").select("partner_one, partner_two, event_date").eq("id", id).maybeSingle(),
   ]);
   if (!layout || !wedding) notFound();
@@ -68,19 +68,9 @@ export default async function LayoutPrintPage({
   const approximate = isApproximate(layout.floor_source);
   const couple = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ");
 
-  // Confirmed guests by table, the same rule as the guest seating chart: only
-  // people who said yes have a chair.
-  const seatedNames = new Map<string, string[]>();
-  for (const g of guests ?? []) {
-    if (!g.responded_at || !g.attending) continue;
-    g.attendees.forEach((a, i) => {
-      const key = a.table_name ? tableKey(a.table_name) : "";
-      if (!key) return;
-      const name = a.name?.trim() || `${g.household_name} (guest ${i + 1})`;
-      seatedNames.set(key, [...(seatedNames.get(key) ?? []), name]);
-    });
-  }
-  const seatedCounts = Object.fromEntries([...seatedNames].map(([k, v]) => [k, v.length]));
+  // Confirmed guests by table: only people who said yes have a chair.
+  const byTable = guestsByTable(guests ?? []);
+  const seatedCounts = Object.fromEntries([...byTable].map(([k, v]) => [k, v.length]));
 
   const tables = items
     .filter((it) => PIECES[it.kind].isTable)
@@ -88,7 +78,9 @@ export default async function LayoutPrintPage({
   const onLayout = new Set(tables.map((t) => tableKey(t.label)));
   // Guests seated at a table name that isn't on this layout — usually a typo
   // ("Table 12" with no table 12), worth catching before the day.
-  const elsewhere = [...seatedNames].filter(([k]) => !onLayout.has(k));
+  const elsewhere = [...byTable]
+    .filter(([k]) => !onLayout.has(k))
+    .map(([k, gs]) => [gs[0].tableName ?? k, gs.map((g) => g.name)] as const);
 
   const date = wedding.event_date
     ? new Date(`${wedding.event_date}T12:00:00`).toLocaleDateString("en-US", {
@@ -178,31 +170,50 @@ export default async function LayoutPrintPage({
           <section className="mt-8 print:mt-0 print:break-before-page">
             <h2 className="font-display text-xl font-semibold text-ink">Tables</h2>
             <p className="text-sm text-ink-soft/70">
-              Guests who have accepted, by the table they&rsquo;re seated at on the guest list.
+              Guests who have accepted, chair by chair (1 is 12 o&rsquo;clock, then clockwise), with their meal and
+              dietary needs for the caterer.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2 print:grid-cols-3">
               {tables.map((t) => {
-                const names = seatedNames.get(tableKey(t.label)) ?? [];
-                const over = names.length > t.seats;
+                const { chairs, overflow } = seatTable(byTable.get(tableKey(t.label)) ?? [], t.seats);
+                const count = chairs.filter(Boolean).length + overflow.length;
+                const over = overflow.length > 0;
                 return (
                   <div
                     key={t.id}
                     className="break-inside-avoid rounded-xl border border-stone-2 bg-white p-4 print:rounded-none"
                   >
                     <div className="flex items-baseline justify-between gap-2 border-b border-stone-2 pb-1.5">
-                      <h3 className="font-semibold text-ink">
-                        {/^\d+$/.test(t.label) ? `Table ${t.label}` : t.label}
-                      </h3>
+                      <h3 className="font-semibold text-ink">{tableTitle(t.label)}</h3>
                       <span className={`text-xs ${over ? "font-semibold text-red-700" : "text-ink-soft/60"}`}>
-                        {names.length}/{t.seats} · {PIECES[t.kind].label}
+                        {count}/{t.seats} · {PIECES[t.kind].label}
                       </span>
                     </div>
-                    {names.length ? (
-                      <ul className="mt-2 space-y-0.5 text-sm text-ink">
-                        {names.map((n, i) => (
-                          <li key={i}>{n}</li>
+                    {count ? (
+                      <ol className="mt-2 space-y-0.5 text-sm text-ink">
+                        {chairs.map((g, i) =>
+                          g ? (
+                            <li key={g.id} className="flex gap-2">
+                              <span className="w-5 shrink-0 text-right text-xs leading-5 text-ink-soft/50">{i + 1}</span>
+                              <span>
+                                {g.name}
+                                {(g.dish || g.dietary) && (
+                                  <span className="text-ink-soft/70">
+                                    {" — "}
+                                    {[g.dish, g.dietary].filter(Boolean).join(" · ")}
+                                  </span>
+                                )}
+                              </span>
+                            </li>
+                          ) : null,
+                        )}
+                        {overflow.map((g) => (
+                          <li key={g.id} className="flex gap-2 text-red-700">
+                            <span className="w-5 shrink-0 text-right text-xs leading-5">!</span>
+                            {g.name} (no chair)
+                          </li>
                         ))}
-                      </ul>
+                      </ol>
                     ) : (
                       <p className="mt-2 text-sm text-ink-soft/50">No one seated yet</p>
                     )}
