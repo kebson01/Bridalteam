@@ -32,19 +32,21 @@ Sources:
 - No page linked more than 3 times a month, or twice within 7 days.
 - At least 1 post in 5 has no link (the conversation posts cover this).
 - Each tool gets a spotlight at least once a month.
-- Midday slots carry the photo and graphic posts; weekday evenings the
-  text posts (conversation, questions, blog, seasonal, about).
+- Midday slots carry the guide and tool posts with their graphics; weekday
+  evenings the conversation, question, blog, seasonal and about posts, each
+  with an Unsplash photo.
 
 ## Format
 
-- **Link post** (`link` set, no images): Facebook shows the page's preview
-  card. Best for guides and blog posts. Put the hook in the first line,
-  since Facebook cuts the text after about two lines.
-- **Photo post** (`images` set): put the link at the end of the message.
-  Best when you have an image that carries the fact: a pin, a Story frame,
-  or a new image. New images are 1080 × 1350 PNG, under 1 MB, in the style
-  of the pins (Jost and Raleway, brand orange `#f25e00`).
-- **Text post** (neither): conversation posts.
+- **Every post is a photo post** (`images` set). Facebook drops the link
+  preview from photo posts, so any link goes at the end of the message. Put
+  the hook in the first line, since Facebook cuts the text after about two
+  lines.
+- **Guide and tool posts** use an image that carries the fact: a pin, a
+  Story frame, or a new image (1080 × 1350 PNG, under 1 MB, in the style of
+  the pins: Jost and Raleway, brand orange `#f25e00`).
+- **Conversation, question, blog, seasonal and about posts** use a free
+  Unsplash photo that fits the topic (SKILL.md, "Photos").
 - Length: 40–120 words. Short lines, lists with `•`.
 - At most 2 hashtags, only if they're real searches (for example
   `#weddingplanning`). Usually none.

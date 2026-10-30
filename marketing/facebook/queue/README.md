@@ -32,14 +32,14 @@ One folder per post, named `YYYY-MM-DD-<noon|eve>-short-name`, holding a
   `tool`, `question`, `conversation`, `blog`, `seasonal`, `about`), for the
   monthly report.
 - **`message`** is the post text. `\n` is a line break.
-- **`images`** (optional): up to 10 `.png` or `.jpg` files, each under 4 MB
+- **`images`** (required): every post has at least one photo, since photo
+  posts get more engagement. Up to 10 `.png` or `.jpg` files, each under 4 MB
   (ideally under 1 MB). Paths are relative to the post's folder, so an image
   can sit in the folder itself or be reused from elsewhere in `marketing/`.
   Zapier fetches them from `main`, so they must be merged before the post is
   due.
-- **`link`** (optional, only without images): makes a link post with
-  Facebook's preview card. Facebook drops the preview from posts with photos,
-  so with images, put the URL in the message instead.
+- **No `link` field.** Facebook drops the link preview from posts with
+  photos, so put the tagged URL at the end of the message.
 
 Stories and Facebook groups can't be posted from here. Post those from the
 Facebook app.

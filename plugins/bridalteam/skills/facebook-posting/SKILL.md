@@ -43,6 +43,11 @@ Three workflows:
   testimonials, press or "couples love…".
 - **Honest about who we are.** Bridal Team is new and small. Never pretend
   to be a couple, a guest or a vendor.
+- **Every post has a photo.** The owner's rule since 2026-10-30: photo
+  posts get more engagement than text, so conversation, question, blog,
+  seasonal and about posts get one too. With no ready-made image, use a free
+  Unsplash photo (the project has `UNSPLASH_ACCESS_KEY`; see "Photos" below).
+  `facebook-queue.mjs check` fails on a post without one.
 - **Images we own or may use.** Use the images in `marketing/` (including
   the Unsplash photos credited in the Pinterest batch notes), or new ones
   made for Bridal Team. For photos from `lib/inspiration.ts`, follow each
@@ -122,6 +127,27 @@ At the start of each month, for the month before:
 - **Reach,** if the owner shares Page insights from Meta Business Suite.
 
 Keep it short and add a line to the tracker's **Log**.
+
+## Photos
+
+Guide and tool posts use the ready-made feed images (`references/content-mix.md`,
+"Sources"). Every other post gets a free Unsplash photo that fits it:
+
+1. Search `https://api.unsplash.com/search/photos` with the header
+   `Authorization: Client-ID $UNSPLASH_ACCESS_KEY`, `orientation=portrait`
+   and `content_filter=high`. The key allows 50 requests an hour.
+2. Look at the candidates and pick one that follows the photo rules in
+   `../social-graphics/references/photos.md`: free (not Unsplash+), no
+   identifiable faces, no legible personal names (place cards,
+   invitations), no brand logos. Check it at full size.
+3. Call the photo's `links.download_location` with the same header (Unsplash's
+   API terms ask for this on every photo used), download
+   `urls.raw` with `&w=2000`, center-crop to 1080 × 1350 and save it as a
+   JPEG under 1 MB in `marketing/facebook/<YYYY-MM>-photos/<post-name>.jpg`.
+4. Credit each photo in `marketing/facebook/<YYYY-MM>-photos.md`: post,
+   photo page and photographer.
+
+Don't reuse the same photo within a month.
 
 ## Tag every link
 

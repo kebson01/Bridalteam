@@ -28,8 +28,7 @@ Use the write action **Create Page Post** with:
 |---|---|
 | `page` | The Bridal Team Page from step 2 |
 | `message` | `message` from `facebook-queue.mjs next`, exactly as is |
-| `link_url` | `link`, only for a link post |
-| `source` | The `image_urls` list, only for a photo post (1–10 URLs) |
+| `source` | The `image_urls` list (1–10 URLs; every post has at least one) |
 | `save_as_draft` | `false` |
 
 The response is `{"results": [{"id": "<pageid>_<postid>"}]}`; that `id` is

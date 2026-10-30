@@ -18,6 +18,8 @@ beforeAll(async () => {
 afterAll(() => rm(dir, { recursive: true, force: true }));
 
 const base = { publish_at: "2026-11-04T19:13:00-05:00", message: "Hello" };
+// The same post as it sits in a queue folder two levels below the image.
+const queued = { ...base, images: ["../../a.png"] };
 
 async function queueWith(name: string, posts: [string, object][]) {
   const queue = path.join(dir, name);
@@ -29,22 +31,18 @@ async function queueWith(name: string, posts: [string, object][]) {
 }
 
 describe("parsePost", () => {
-  it("accepts a link post and reads publish_at in its own time zone", async () => {
-    const post = await parsePost({ ...base, link: "https://bridalteam.com/" }, dir);
+  it("reads publish_at in its own time zone and resolves images relative to the post's folder", async () => {
+    const post = await parsePost({ ...base, images: ["a.png"] }, dir);
     expect(post.publishAt.toISOString()).toBe("2026-11-05T00:13:00.000Z");
-    expect(post.imagePaths).toEqual([]);
-  });
-
-  it("resolves images relative to the post's folder", async () => {
-    expect((await parsePost({ ...base, images: ["a.png"] }, dir)).imagePaths).toEqual([image]);
+    expect(post.imagePaths).toEqual([image]);
   });
 
   it.each([
     [{ ...base, publish_at: "2026-11-04T19:13:00" }, /time zone/],
     [{ ...base, publish_at: "soon" }, /time zone/],
     [{ ...base, message: " " }, /message is required/],
-    [{ ...base, link: "http://bridalteam.com/" }, /https/],
-    [{ ...base, link: "https://bridalteam.com/", images: ["a.png"] }, /not both/],
+    [{ ...base, images: [] }, /at least one photo/],
+    [{ ...base, link: "https://bridalteam.com/", images: ["a.png"] }, /end of the message/],
     [{ ...base, images: ["missing.png"] }, /not found/],
     [{ ...base, images: ["../../../../../etc/passwd"] }, /outside the repository/],
     [{ ...base, images: Array(11).fill("a.png") }, /at most 10/],
@@ -64,8 +62,8 @@ describe("publicImageUrl", () => {
 describe("readQueue", () => {
   it("returns broken posts first, then oldest first", async () => {
     const queue = await queueWith("q1", [
-      ["later", { ...base, publish_at: "2026-12-01T09:00:00Z" }],
-      ["sooner", { ...base, publish_at: "2026-11-01T09:00:00Z" }],
+      ["later", { ...queued, publish_at: "2026-12-01T09:00:00Z" }],
+      ["sooner", { ...queued, publish_at: "2026-11-01T09:00:00Z" }],
       ["broken", { message: "no date" }],
     ]);
     const posts = await readQueue(queue);
@@ -81,9 +79,9 @@ describe("readQueue", () => {
 describe("nextDue", () => {
   it("returns only the oldest due post, with public image URLs", async () => {
     const queue = await queueWith("q2", [
-      ["a-first", { ...base, publish_at: "2026-11-01T09:00:00Z", images: ["../../a.png"] }],
-      ["b-second", { ...base, publish_at: "2026-11-02T09:00:00Z" }],
-      ["c-future", { ...base, publish_at: "2026-12-01T09:00:00Z" }],
+      ["a-first", { ...queued, publish_at: "2026-11-01T09:00:00Z" }],
+      ["b-second", { ...queued, publish_at: "2026-11-02T09:00:00Z" }],
+      ["c-future", { ...queued, publish_at: "2026-12-01T09:00:00Z" }],
     ]);
     const next = await nextDue(new Date("2026-11-03T00:00:00Z"), queue);
     expect(next).toMatchObject({ name: "a-first", message: "Hello" });
@@ -93,7 +91,7 @@ describe("nextDue", () => {
   it("skips broken posts and returns null when nothing is due", async () => {
     const queue = await queueWith("q3", [
       ["broken", { message: "no date" }],
-      ["future", { ...base, publish_at: "2026-12-01T09:00:00Z" }],
+      ["future", { ...queued, publish_at: "2026-12-01T09:00:00Z" }],
     ]);
     expect(await nextDue(new Date("2026-11-03T00:00:00Z"), queue)).toBeNull();
   });
@@ -101,7 +99,7 @@ describe("nextDue", () => {
 
 describe("markDone", () => {
   it("writes result.json and moves the post to posted/", async () => {
-    const queue = await queueWith("q4", [["post", base]]);
+    const queue = await queueWith("q4", [["post", queued]]);
     const posted = path.join(dir, "posted4");
     const result = await markDone("post", "123_456", {
       queueDir: queue,
@@ -120,7 +118,7 @@ describe("markDone", () => {
     ["missing", "1", /no queued post/],
     ["post", "", /post id is required/],
   ])("refuses %s", async (name, id, message) => {
-    const queue = await queueWith("q5", [["post", base]]);
+    const queue = await queueWith("q5", [["post", queued]]);
     await expect(markDone(name, id, { queueDir: queue, postedDir: path.join(dir, "posted5") })).rejects.toThrow(message);
   });
 });
