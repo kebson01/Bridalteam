@@ -191,8 +191,9 @@ run:
 - **Notes:** add the posts to `marketing/facebook/<date>-feed-posts.md`.
   Copy the structure of `2026-10-30-feed-posts.md`, with suggested dates one
   a day after the last post already planned there.
-- **Posting:** there's no Facebook posting tool. The owner schedules the
-  posts in Meta Business Suite, so log them as `drafted`.
+- **Posting:** don't schedule them by hand. The `facebook-posting` skill
+  picks them up when it plans a month and posts them through Zapier, so log
+  them as `drafted` until it queues them.
 
 ## What to report back
 

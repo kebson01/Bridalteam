@@ -2,8 +2,10 @@
 
 These are the Pinterest pins, reworked as Facebook feed posts. Each post is
 one image, a caption, and a link tagged for Facebook. **Nothing here is
-posted.** There's no Facebook posting tool in Claude's sessions, so the owner
-posts or schedules them from the Bridal Team Page.
+posted by hand any more.** Posts go out through the queue in `queue/` (the
+`bridalteam:facebook-posting` skill): November 2026 uses the photo posts #26–50
+and the tool posts #6–10; the rest are for December. Don't also schedule them
+in Meta Business Suite, or they'll post twice.
 
 Every caption is the pin's own description, taken from its batch notes in
 `marketing/pinterest/`. So every fact still comes from the page it links to.
