@@ -1,4 +1,4 @@
-# Facebook Page feed posts from every pin, batches 1–10 (2026-10-30)
+# Facebook Page feed posts from every pin, batches 1–11 (2026-10-30)
 
 These are the Pinterest pins, reworked as Facebook feed posts. Each post is
 one image, a caption, and a link tagged for Facebook. **Nothing here is
@@ -21,7 +21,7 @@ Every caption is the pin's own description, taken from its batch notes in
 - **How to post:** in Meta Business Suite, choose **Create post**, add the
   image, paste the caption (the link is already at the end), and choose
   **Schedule**.
-- **Timing:** one a day. The suggested dates below run Oct 31 to Dec 19. Use
+- **Timing:** one a day. The suggested dates below run Oct 31 to Dec 24. Use
   any time that suits the Page; 12:13 pm ET keeps them off the top of the
   hour.
 
@@ -927,6 +927,76 @@ Read the full guide: https://bridalteam.com/guides/wedding-guest-list?utm_source
 4. Share the timeline a week ahead with vendors, the wedding party and family, with names and phone numbers next to each hand-off.
 
 Read the full guide: https://bridalteam.com/guides/wedding-day-timeline?utm_source=facebook&utm_medium=social&utm_content=fb-timeline-tips
+```
+
+## 51. Never Book Your Wedding Caterer Without a Tasting
+
+- **Suggested date:** Sun Dec 20
+- **Image:** `11-1-caterer-tasting.jpg` (batch 11, pin 1)
+- **Caption:**
+
+```
+Never Book Your Wedding Caterer Without a Tasting
+
+Never book significant catering without tasting the actual menu. A tasting also shows how the food holds up at scale, and lets you fine-tune seasoning, portions and presentation. Bring anyone helping you decide, and ask how they handle dietary needs.
+
+Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-caterer?utm_source=facebook&utm_medium=social&utm_content=fb-caterer-tasting
+```
+
+## 52. Your Wedding DJ or Band Is Also Your MC
+
+- **Suggested date:** Mon Dec 21
+- **Image:** `11-2-your-dj-is-your-mc.jpg` (batch 11, pin 2)
+- **Caption:**
+
+```
+Your Wedding DJ or Band Is Also Your MC
+
+Your DJ or bandleader usually runs the room: announcing entrances, cueing toasts and dances, and reading the crowd. That hosting skill matters as much as the music. Ask how they handle the flow of the night and requests, and ask for audio or video from an actual wedding, not just a promo clip.
+
+Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-dj-or-band?utm_source=facebook&utm_medium=social&utm_content=fb-dj-mc
+```
+
+## 53. Wedding Hair and Makeup: Count Who's in the Chair
+
+- **Suggested date:** Tue Dec 22
+- **Image:** `11-3-whos-in-the-chair.jpg` (batch 11, pin 3)
+- **Caption:**
+
+```
+Wedding Hair and Makeup: Count Who's in the Chair
+
+Count everyone getting professional hair or makeup (you, attendants, mothers), because it drives both timing and cost. More people means an earlier start or a second artist. Confirm whether the quote is per person, and whether there's a minimum.
+
+Read the full guide: https://bridalteam.com/guides/wedding-hair-and-makeup-guide?utm_source=facebook&utm_medium=social&utm_content=fb-hair-makeup-chair
+```
+
+## 54. Start Your Wedding Budget With Per-Guest Math
+
+- **Suggested date:** Wed Dec 23
+- **Image:** `11-4-per-guest-math.jpg` (batch 11, pin 4)
+- **Caption:**
+
+```
+Start Your Wedding Budget With Per-Guest Math
+
+Guest count is the biggest lever in your entire budget. Catering, bar, rentals, invitations and favors all scale with the number of people. Cutting the list by 20 guests often saves more than trimming any single vendor. Before anything else, estimate your cost per head and multiply.
+
+Read the full guide: https://bridalteam.com/guides/how-much-does-a-wedding-cost?utm_source=facebook&utm_medium=social&utm_content=fb-per-guest-math
+```
+
+## 55. Budget Your Honeymoon Alongside the Wedding
+
+- **Suggested date:** Thu Dec 24
+- **Image:** `11-5-honeymoon-budget.jpg` (batch 11, pin 5)
+- **Caption:**
+
+```
+Budget Your Honeymoon Alongside the Wedding
+
+Decide the honeymoon budget alongside the wedding budget, not after: it's easy to spend everything on the day and leave nothing for the trip. Account for flights, lodging, food, activities and a cushion. A honeymoon registry or cash fund can help guests contribute.
+
+Read the full guide: https://bridalteam.com/guides/honeymoon-planning-guide?utm_source=facebook&utm_medium=social&utm_content=fb-honeymoon-budget
 ```
 
 ---
