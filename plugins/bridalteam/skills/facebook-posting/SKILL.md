@@ -12,7 +12,7 @@ through to a guide, a free tool or the planner.
 Three workflows:
 1. **Plan the month**: draft ~50 posts into the queue, for the owner to approve.
 2. **Post what's due**: publish one due post through Zapier. Usually run by a
-   scheduled task twice a day.
+   scheduled task twice a day, at 12:20 and 19:20 Eastern.
 3. **Monthly report**: what went out and what it brought in.
 
 ## How the pieces fit
@@ -58,16 +58,18 @@ Do this in the last week of the month before, on a branch.
    what's still queued, look at `marketing/facebook/posted/` for the last
    two months, and read `COUPLES-TRACKER.md`. Don't repeat a post from the
    last 60 days, and keep anything already queued for the month.
-2. **Lay out the slots.** About 50 slots: one post every morning at 10:13
+2. **Lay out the slots.** About 50 slots: a midday post every day at 12:13
    ET, plus an evening post at 19:13 ET Monday to Friday. Drop slots to land
-   on 50. Use the right offset: `-04:00` until the first Sunday of November,
+   on 50 (holidays first). The scheduled runs are at 12:20 and 19:20, just
+   after each slot. Use the right offset: `-04:00` until the first Sunday of November,
    `-05:00` until the second Sunday of March.
 3. **Fill the slots** with the mix in `references/content-mix.md`, following
    its spacing rules.
 4. **Write each post** to the guide's or tool's own facts, in the Page's
    voice (`references/content-mix.md`, "Voice"). Tag every link (below).
-5. **Save** each one as `marketing/facebook/queue/<YYYY-MM-DD>-<am|pm>-<slug>/post.json`,
-   with images alongside or referenced from elsewhere in `marketing/`.
+5. **Save** each one as `marketing/facebook/queue/<YYYY-MM-DD>-<noon|eve>-<slug>/post.json`,
+   with its `type` from the mix, and images alongside or referenced from
+   elsewhere in `marketing/`.
 6. **Check** with `node scripts/facebook-queue.mjs check`. It must pass.
 7. **Log** one row per post in `COUPLES-TRACKER.md` under **Posts**, status
    `scheduled`, plus one line in the **Log**.
@@ -129,7 +131,7 @@ utm_source=facebook&utm_medium=social&utm_campaign=<YYYY-MM>&utm_content=<post-f
 ```
 
 For example
-`https://bridalteam.com/guides/wedding-guest-list?utm_source=facebook&utm_medium=social&utm_campaign=2026-11&utm_content=2026-11-09-am-guest-list`.
+`https://bridalteam.com/guides/wedding-guest-list?utm_source=facebook&utm_medium=social&utm_campaign=2026-11&utm_content=2026-11-05-noon-guest-list-tiers`.
 The visit counts by `source` and page; a signup keeps the full tags, so it
 names the exact post that brought it.
 

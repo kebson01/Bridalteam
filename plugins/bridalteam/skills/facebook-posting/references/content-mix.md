@@ -6,7 +6,7 @@
 |---|---|---|---|
 | Guide tip | 15 | One useful fact or step from a guide, written so it helps without clicking | That guide |
 | Tool spotlight | 8 | One free tool and the one thing it works out for you | The tool page |
-| Planning question | 7 | A question couples really ask, answered in 2–4 lines from a guide, then "ask the planner your own" | `/planner` |
+| Planning question | 7 | A question couples really ask, answered in 2–4 lines from a guide | The guide it comes from, or `/planner` ("ask your own") within the 3-a-month page limit |
 | Conversation | 8 | A question for followers: "this or that", "what's the one thing…", "what are you stuck on?" | No link |
 | Blog post | 5 | The main idea of one post in `lib/blog.ts` | That post |
 | Seasonal | 4 | Timely planning: engagement season (December), booking season (January–March), summer weddings, holidays | A matching guide or tool |

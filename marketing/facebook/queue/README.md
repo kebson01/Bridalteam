@@ -13,13 +13,14 @@ schedule. Each published post moves to `marketing/facebook/posted/` with a
 
 ## A post
 
-One folder per post, named `YYYY-MM-DD-<am|pm>-short-name`, holding a
+One folder per post, named `YYYY-MM-DD-<noon|eve>-short-name`, holding a
 `post.json`:
 
 ```json
 {
   "publish_at": "2026-11-04T19:13:00-05:00",
-  "message": "The post text. With images, put the tagged link at the end:\n\nhttps://bridalteam.com/wedding-checklist?utm_source=facebook&utm_medium=social&utm_campaign=2026-11&utm_content=2026-11-04-pm-checklist",
+  "type": "tool",
+  "message": "The post text. With images, put the tagged link at the end:\n\nhttps://bridalteam.com/wedding-checklist?utm_source=facebook&utm_medium=social&utm_campaign=2026-11&utm_content=2026-11-04-eve-checklist",
   "images": ["../../../pinterest/2026-10-29-batch-2/01-wedding-checklist-with-dates.png"]
 }
 ```
@@ -27,6 +28,9 @@ One folder per post, named `YYYY-MM-DD-<am|pm>-short-name`, holding a
 - **`publish_at`** must include the time zone: `-05:00` for Eastern
   standard time (November to March), `-04:00` for daylight time. A post goes
   out on the first run after this time.
+- **`type`** (optional): the content type from the skill's mix (`guide`,
+  `tool`, `question`, `conversation`, `blog`, `seasonal`, `about`), for the
+  monthly report.
 - **`message`** is the post text. `\n` is a line break.
 - **`images`** (optional): up to 10 `.png` or `.jpg` files, each under 4 MB
   (ideally under 1 MB). Paths are relative to the post's folder, so an image
