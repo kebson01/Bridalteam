@@ -29,6 +29,11 @@ One row per community. Check the rule before every post.
 | 2026-11-02 | Pinterest: Free Wedding Planning Tools | How many tables do you need? (seating tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-seating | scheduled | |
 | 2026-11-03 | Pinterest: Free Wedding Planning Tools | Free wedding website (tool) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=tool-website | scheduled | |
 | 2026-10-29 | Facebook Page story | "5 free tools that do the math for you", 6 frames, a link sticker per tool | | utm_source=facebook, utm_medium=story, utm_content=story-2-* | posted | |
+| 2026-11-04 | Facebook Page post | Wedding checklist with dates (tool) | (queued for 7:13 pm ET) | utm_source=facebook, utm_medium=social, utm_content=post-checklist | scheduled | |
+| 2026-11-07 | Facebook Page post | $30,000 budget by category (calculator) | (queued for 10:13 am ET) | utm_source=facebook, utm_medium=social, utm_content=post-budget | scheduled | |
+| 2026-11-11 | Facebook Page post | Guest list & RSVP (tool) | (queued for 7:13 pm ET) | utm_source=facebook, utm_medium=social, utm_content=post-rsvp | scheduled | |
+| 2026-11-14 | Facebook Page post | How many tables do you need? (seating tool) | (queued for 10:13 am ET) | utm_source=facebook, utm_medium=social, utm_content=post-seating | scheduled | |
+| 2026-11-18 | Facebook Page post | Free wedding website (tool) | (queued for 7:13 pm ET) | utm_source=facebook, utm_medium=social, utm_content=post-website | scheduled | |
 
 ## Weekly numbers
 
@@ -50,3 +55,4 @@ One row per community. Check the rule before every post.
 - 2026-10-29: Scheduled Pinterest batch 2 through PinBridge on the `kebsaint` account: one pin a day at 8:13 pm Eastern, Oct 30 to Nov 3. Images are served from raw.githubusercontent.com at commit 3c24f8c. Once each pin publishes, swap in its URL and mark it `posted`. Check `source = 'pinterest'` visits on the tool pages from Nov 10.
 - 2026-10-29: Drafted Facebook Page story 2 (6 frames, one per free tool) in `marketing/facebook/2026-10-29-story-2/`, with a separate tagged link for each tool. Waiting on the owner to post.
 - 2026-10-30: The owner posted Facebook Page story 2 from the Bridal Team Page by hand. Stories expire after 24 hours, so there's no lasting link. Check `source = 'facebook'`, `utm_content` like `story-2-%` visits on the tool pages from Nov 6.
+- 2026-10-30: Set up the Facebook queue: posts in `marketing/facebook/queue/` go out automatically through the "Facebook queue" GitHub workflow once it's on `main` and the `FB_PAGE_ID` and `FB_PAGE_TOKEN` secrets are set (steps in `marketing/facebook/queue/README.md`). Queued the five tool pins from Pinterest batch 2 as Facebook Page posts, Nov 4 to Nov 18. Once each posts, its link is in `marketing/facebook/posted/<name>/result.json`: copy it here and mark it `posted`.
