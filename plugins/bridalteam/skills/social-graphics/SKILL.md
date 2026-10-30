@@ -40,10 +40,32 @@ time, and ships them.
   - It needs an image-generation API, which the user must choose and supply a
     key for (an environment secret, plus that host in the network allow-list).
     Until then, use licensed photos or `palette`.
-- **Nothing is posted until the user asks.** Drafting, rendering and
-  committing are fine. Scheduling, creating boards and posting need the
-  user's go-ahead in this conversation.
-- **Commits** go on the working branch. Open a PR only when the user asks.
+- **Standing go-ahead from the owner (2026-10-30).** A request for pins
+  ("make the next batch", "batch 7", "more pins") is the go-ahead to run the
+  whole pipeline without stopping:
+  1. draft the pins, render them and check the images;
+  2. commit and push, then open a PR;
+  3. schedule them in PinBridge from the PR commit (`references/scheduling.md`);
+  4. log them in `COUPLES-TRACKER.md`;
+  5. merge the PR once CI is green;
+  6. set the follow-up.
+
+  If an earlier batch is drafted but not queued, schedule it first. Each
+  batch starts the day after the last queued pin, at 8:13 pm ET. Don't ask
+  whether to schedule, open a PR or pick dates.
+- **Stop and ask the owner only when:**
+  - a pin needs a board that doesn't exist yet;
+  - PinBridge shows a different workspace from the last batch, an account
+    that needs reconnecting, a token that expires before the last pin, or
+    too little monthly quota;
+  - a photo's license can't be confirmed (pick another photo first);
+  - a pin's facts can't be traced to the page it links to;
+  - the PR would change anything outside `marketing/`, `COUPLES-TRACKER.md`
+    or `plugins/bridalteam/skills/social-graphics/`.
+- **Commits and PRs:** work on the working branch, and give every batch its
+  own PR. Squash-merge it yourself once CI is green, but only if it stays
+  inside the paths above. Otherwise leave it for the owner and say why.
+- **Facebook stories** are drafted only; the owner posts them by hand.
 
 ## Workflow
 
@@ -131,11 +153,11 @@ time, and ships them.
   Waiting on the owner"). Commit, push, then show the user the images and a
   table of the pins.
 
-### 5. Schedule (only when asked)
+### 5. Schedule, merge and follow up
 
-Follow `references/scheduling.md`: images on `main`, the right PinBridge
-workspace, existing schedules, dry run, one pin a day, tracker rows and a
-follow-up check.
+Follow `references/scheduling.md`: images from the pushed PR commit, the
+right PinBridge workspace and token expiry, existing schedules, dry run, one
+pin a day, tracker rows, the merge once CI is green, and a follow-up check.
 
 ## Facebook Page stories
 
@@ -160,4 +182,5 @@ Report:
 - anything you couldn't verify or that needs the user: a new board, photo
   licensing, network access, or a PinBridge workspace mismatch;
 - the files and tracker lines you changed;
-- whether there's a PR (only if asked).
+- the schedule (dates, boards, workspace), the PR link and whether it was
+  merged, and the follow-up times.

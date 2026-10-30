@@ -38,6 +38,16 @@ One row per community. Check the rule before every post.
 | 2026-11-11 | Pinterest: Wedding Etiquette & Invitations | What goes on a wedding invitation | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=invitation-checklist | scheduled | |
 | 2026-11-12 | Pinterest: Choosing Wedding Vendors | Hair & makeup timing | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=hair-makeup | scheduled | |
 | 2026-11-13 | Pinterest: Wedding Planning Checklists & Timelines | Honeymoon in 5 steps | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=honeymoon | scheduled | |
+| 2026-11-14 | Pinterest: Wedding Budget Tips | Save on wedding flowers | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=florist-savings | scheduled | |
+| 2026-11-15 | Pinterest: Choosing Wedding Vendors | DJ or band? | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=dj-or-band | scheduled | |
+| 2026-11-16 | Pinterest: Choosing Wedding Vendors | Catering service styles | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=catering-styles | scheduled | |
+| 2026-11-17 | Pinterest: Wedding Budget Tips | Wedding cake pricing | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=cake-pricing | scheduled | |
+| 2026-11-18 | Pinterest: Choosing Wedding Vendors | Who can officiate | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=officiant | scheduled | |
+| 2026-11-19 | Pinterest: Choosing Wedding Vendors | Cinematic or documentary video? (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=videographer-styles | scheduled | |
+| 2026-11-20 | Pinterest: Choosing Wedding Vendors | Filter venues by 3 things first (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=venue-filter | scheduled | |
+| 2026-11-21 | Pinterest: Choosing Wedding Vendors | Find your wedding photo style (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=photo-styles | scheduled | |
+| 2026-11-22 | Pinterest: Choosing Wedding Vendors | What to bring to a florist consultation (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=florist-brief | scheduled | |
+| 2026-11-23 | Pinterest: Wedding Planning Checklists & Timelines | Minimoon now, big trip later? (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=minimoon | scheduled | |
 | 2026-10-29 | Facebook Page story | "5 free tools that do the math for you", 6 frames, a link sticker per tool | | utm_source=facebook, utm_medium=story, utm_content=story-2-* | drafted | |
 
 ## Weekly numbers
@@ -64,3 +74,6 @@ One row per community. Check the rule before every post.
 - 2026-10-29: Drafted Pinterest batch 4 (5 guide pins: venue questions, photographer questions, invitation checklist, hair and makeup timing, honeymoon) in `marketing/pinterest/2026-10-29-batch-4.md`. It proposes a new board, Choosing Wedding Vendors. Waiting on the owner; to go one a day after batch 3 ends on Nov 8.
 - 2026-10-29: Created the public board **Choosing Wedding Vendors** on `kebsaint`, and scheduled Pinterest batch 4 through PinBridge (workspace `36cd9917`, the same as batch 3): one pin a day at 8:13 pm Eastern from Nov 9 to Nov 13. The images are served from raw.githubusercontent.com at commit e0b4b5c.
 - 2026-10-29: Drafted Pinterest batch 5 (5 vendor-guide pins: florist savings, DJ or band, catering styles, cake pricing, officiants) in `marketing/pinterest/2026-10-29-batch-5.md`. Waiting on the owner; to go one a day after batch 4 ends on Nov 13. Only the videographer guide is left unpinned.
+- 2026-10-30: Drafted Pinterest batch 6 (5 photo pins with free Unsplash photos: videographer styles, filter venues first, photo styles, florist consultation checklist, minimoon) in `marketing/pinterest/2026-10-30-batch-6.md`. Every guide now has at least one pin. Photo credits are in the notes. Waiting on the owner; to go one a day after batch 5.
+- 2026-10-30: Scheduled Pinterest batch 5 through PinBridge (workspace `36cd9917`, the same as batches 3 and 4): one pin a day at 8:13 pm Eastern from Nov 14 to Nov 18. The images are served from raw.githubusercontent.com at commit d550a45. Batch 6 follows Nov 19–23 once its PR is merged.
+- 2026-10-30: Scheduled Pinterest batch 6 through PinBridge (workspace `36cd9917`): one pin a day at 8:13 pm Eastern from Nov 19 to Nov 23. The images are served from raw.githubusercontent.com at PR commit 88ded1a, before the merge. The `kebsaint` token expires 2026-11-23 17:53 UTC, before the last pin (Nov 23 8:13 pm ET), so reconnect in PinBridge before then if it doesn't refresh on its own.
