@@ -40,4 +40,16 @@ describe("WeddingTools", () => {
       expect(screen.getByRole("heading", { name: "Budget & Expenses" })).toBeInTheDocument(),
     );
   });
+
+  it("leads an empty tool with its first step, and a used one with Open", () => {
+    render(
+      <WeddingTools
+        weddingId="w1"
+        initialEnabled={["checklist", "guests"]}
+        stats={{ checklist: { line: "3 of 10 tasks done" }, guests: { line: "No guests yet", empty: true } }}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "Add your first guests →" })).toHaveAttribute("href", "/w/w1/guests");
+    expect(screen.getByRole("link", { name: "Open Checklist" })).toHaveAttribute("href", "/w/w1/checklist");
+  });
 });
