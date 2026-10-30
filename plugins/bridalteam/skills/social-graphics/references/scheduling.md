@@ -1,7 +1,5 @@
 # Scheduling pins through PinBridge
 
-Do this only when the user asks to schedule or post.
-
 1. **Point at a pushed commit.** PinBridge fetches each image from a public
    URL. The images don't need to be on `main`: use the SHA of the pushed
    commit that added them. That can be the merge commit, or the PR branch
