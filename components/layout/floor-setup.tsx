@@ -50,6 +50,7 @@ export default function FloorSetup({
   weddingId,
   initialWidth,
   initialLength,
+  initialMode,
   onDone,
   onCancel,
 }: {
@@ -58,8 +59,10 @@ export default function FloorSetup({
   initialLength: number;
   onDone: (r: FloorResult) => void | Promise<void>;
   onCancel?: () => void;
+  /** Skip the choice and start on this method (picked on the list page). */
+  initialMode?: FloorSource;
 }) {
-  const [mode, setMode] = useState<Mode>("choose");
+  const [mode, setMode] = useState<Mode>(initialMode ?? "choose");
   const [pic, setPic] = useState<Picture | null>(null);
   const [points, setPoints] = useState<Point[]>([]);
   const [lineFt, setLineFt] = useState("");
@@ -249,6 +252,22 @@ export default function FloorSetup({
         </>
       )}
 
+      {(mode === "plan" || mode === "photo") && !pic && (
+        <>
+          <h2 className="font-display text-lg font-semibold text-ink">
+            {mode === "plan" ? "Upload your floor plan" : "Upload a photo of the room"}
+          </h2>
+          <p className="mt-1 max-w-2xl text-sm text-ink-soft/75">
+            {mode === "plan"
+              ? "A photo, screenshot or scan of the venue’s plan works. A PDF can be saved as a picture first. Next you’ll draw one line along something you know the length of."
+              : "Stand in a corner and take it from as high as you can, showing the whole floor. Next you’ll tap the floor’s four corners; the plan itself is drawn on a clean grid."}
+          </p>
+          <button type="button" className={`${BTN} mt-5`} disabled={busy} onClick={() => pickFile(mode)}>
+            {busy ? "Reading the image…" : mode === "plan" ? "Choose floor plan" : "Choose photo"}
+          </button>
+        </>
+      )}
+
       {(mode === "plan" || mode === "photo") && pic && !preview && (
         <>
           <h2 className="font-display text-lg font-semibold text-ink">
@@ -257,7 +276,7 @@ export default function FloorSetup({
           <p className="mt-1 max-w-2xl text-sm text-ink-soft/75">
             {mode === "plan"
               ? "Tap both ends of something you know the length of — a wall, a doorway, the scale bar. You can drag the dots to adjust."
-              : "Tap the four corners where the floor meets the walls. If a corner is hidden, tap where it would be. Drag the dots to adjust."}{" "}
+              : "Tap the four corners of the whole floor, where it meets the walls — not a patch of carpet. If a corner is hidden, tap where it would be. Drag the dots to adjust."}{" "}
             ({Math.min(points.length, needed)} of {needed})
           </p>
 
@@ -287,7 +306,7 @@ export default function FloorSetup({
               disabled={busy || points.length < needed}
               onClick={mode === "plan" ? savePlan : straighten}
             >
-              {busy ? "Working…" : mode === "plan" ? "Use this plan" : "Straighten"}
+              {busy ? "Working…" : mode === "plan" ? "Use this plan" : "Measure the room"}
             </button>
             <button type="button" className={BTN_GHOST} disabled={busy || !points.length} onClick={() => setPoints([])}>
               Start over
@@ -298,23 +317,31 @@ export default function FloorSetup({
 
       {mode === "photo" && preview && (
         <>
-          <h2 className="font-display text-lg font-semibold text-ink">Your room from above</h2>
+          <h2 className="font-display text-lg font-semibold text-ink">Your room, measured</h2>
           <p className="mt-1 max-w-2xl text-sm text-ink-soft/75">
-            The floor is straightened; anything standing up (chairs, walls, people) will look stretched, which is
-            expected. If the floor looks skewed, go back and nudge the corners. A photo can&rsquo;t be measured exactly,
-            so this layout will be marked <strong>approximate</strong> &mdash; for exact sizes, use your venue&rsquo;s
-            floor plan instead.
+            You&rsquo;ll plan on a clean {num(widthFt)} × {num(lengthFt)} ft grid. The photo, flattened to a view from
+            above, is kept as a reference you can switch on under <strong>Layers</strong> to trace walls and doors. A
+            photo can&rsquo;t be measured exactly, so the layout is marked <strong>approximate</strong> until you add
+            your venue&rsquo;s floor plan.
           </p>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={preview.url} alt="Straightened view of the room" className="mt-4 max-h-[60vh] w-auto rounded-lg border border-stone-2" />
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap items-start gap-5">
+            <RoomGrid width={num(widthFt)} length={num(lengthFt)} />
+            <figure className="w-40">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={preview.url} alt="The room photo flattened to a view from above" className="w-full rounded-lg border border-stone-2 opacity-80" />
+              <figcaption className="mt-1 text-xs text-ink-soft/60">
+                Reference only. If the floor edges look bent, adjust the corners.
+              </figcaption>
+            </figure>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
             <button
               type="button"
               className={BTN}
               disabled={busy}
               onClick={() => void finish({ picture: preview, source: "photo", width: num(widthFt), length: num(lengthFt) })}
             >
-              {busy ? "Saving…" : "Use this view"}
+              {busy ? "Saving…" : "Start planning"}
             </button>
             <button type="button" className={BTN_GHOST} disabled={busy} onClick={() => setPreview(null)}>
               Adjust corners
@@ -370,6 +397,25 @@ export default function FloorSetup({
         )}
       </div>
     </div>
+  );
+}
+
+/** The empty room as it will be planned: a to-scale grid with 5 ft squares. */
+function RoomGrid({ width, length }: { width: number; length: number }) {
+  return (
+    <svg
+      viewBox={`-1 -1 ${width + 2} ${length + 2}`}
+      className="h-auto w-full max-w-md rounded-lg border border-stone-2 bg-white"
+      role="img"
+      aria-label={`Empty room, ${width} by ${length} feet`}
+    >
+      <defs>
+        <pattern id="room-grid" width={5} height={5} patternUnits="userSpaceOnUse">
+          <path d="M 5 0 L 0 0 0 5" fill="none" stroke="#222222" strokeOpacity={0.14} strokeWidth={0.08} />
+        </pattern>
+      </defs>
+      <rect width={width} height={length} fill="url(#room-grid)" stroke="#222222" strokeWidth={0.2} />
+    </svg>
   );
 }
 

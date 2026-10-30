@@ -1,22 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { deleteLayout, saveLayout } from "@/app/w/[id]/layout/actions";
+import { deleteLayout, saveLayout, updateSeating } from "@/app/w/[id]/layout/actions";
 import FloorSetup, { type FloorResult } from "@/components/layout/floor-setup";
 import LayoutDrawing, {
-  ALL_LAYERS,
   LAYER_LABELS,
   MARGIN,
   type Layers,
   type PieceHandlers,
 } from "@/components/layout/layout-drawing";
+import Icon, { type IconName } from "@/components/layout/icons";
+import TableInspector, { CHIP_BTN, PANEL } from "@/components/layout/table-inspector";
+import SeatingList from "@/components/layout/seating-list";
 import {
   PIECES,
   PIECE_GROUPS,
   PIECE_KINDS,
   MAX_PIECE_FT,
   MAX_SEATS,
+  CHAIR_DEPTH,
+  PATHWAY_FT,
   findClashes,
+  findTightSpots,
   isApproximate,
   newItem,
   normalizeRotation,
@@ -28,16 +33,27 @@ import {
   type FloorSource,
   type LayoutItem,
   type PieceDef,
+  type PieceGroup,
   type PieceKind,
 } from "@/lib/venue-layout";
+import {
+  applySeatChanges,
+  guestsByTable,
+  seatTable,
+  tableTitle,
+  type SeatChange,
+  type SeatGuest,
+  type TableSeating,
+} from "@/lib/seating";
 
 const INPUT =
   "mt-1 w-full rounded-lg border border-stone-2 px-3 py-2 text-sm text-ink outline-none focus:border-brand";
 const TOOL =
-  "rounded-full border border-stone-2 bg-white px-3.5 py-1.5 text-sm font-medium text-ink-soft hover:border-brand hover:text-brand-text disabled:opacity-40";
+  "inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-medium text-ink-soft hover:bg-stone-4 hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent";
 
 const ZOOMS = [1, 1.5, 2, 3, 4];
 const HISTORY = 60;
+const DRAG_TYPE = "application/x-bridalteam-piece";
 
 type SaveStatus = "saved" | "pending" | "saving" | "error";
 
@@ -51,18 +67,38 @@ type Drag = { id: string; before: LayoutItem[]; moved: boolean } & (
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const clamp = (n: number, lo: number, hi: number) => Math.min(Math.max(n, lo), hi);
 
+/** An icon for each piece in the library. */
+function pieceIcon(kind: PieceKind): IconName {
+  const def: PieceDef = PIECES[kind];
+  if (def.shape === "round" && def.group === "Tables") return "round";
+  if (kind === "banquet6" || kind === "banquet8") return "banquet";
+  if (kind === "head" || kind === "sweetheart") return "head";
+  if (def.group === "Floor") return "floor";
+  if (def.group === "Service") return "service";
+  return "room";
+}
+
+/** "10 guests" for a table, "16 × 16 ft" for the rest. */
+function pieceNote(kind: PieceKind): string {
+  const def: PieceDef = PIECES[kind];
+  if (def.seats) return `${def.seats} guests`;
+  return def.shape === "round" ? `${def.w} ft across` : `${def.w} × ${def.h} ft`;
+}
+
 /**
- * The overhead layout editor: the room (a floor plan, a straightened photo or
- * a plain grid) drawn to scale in an SVG whose units are feet, with pieces
- * dragged, rotated and labelled on top.
+ * The overhead layout editor: the room drawn to scale in an SVG whose units
+ * are feet, pieces dragged, rotated and labelled on top, and — for a selected
+ * table — who sits in each chair.
  *
  * SVG rather than a canvas library because the drawing is a few hundred simple
  * shapes, it stays crisp at any zoom, every piece is a real element that can
  * take focus and a label for keyboard and screen-reader users, and it adds no
  * dependency.
  *
- * Changes autosave about a second after they stop, sending the whole layout;
- * the server action re-validates every field (lib/venue-layout.ts).
+ * The layout autosaves about a second after changes stop, sending the whole
+ * thing; the server action re-validates every field (lib/venue-layout.ts).
+ * Seat moves are saved straight away, one small batch per move, because they
+ * change the guest list everyone else on the team is looking at.
  */
 export default function LayoutEditor({
   weddingId,
@@ -73,8 +109,9 @@ export default function LayoutEditor({
   initialWidth,
   initialLength,
   initialItems,
-  seatedByTable,
+  guests: initialGuests,
   invitedSeats,
+  initialSetup = null,
 }: {
   weddingId: string;
   layoutId: string;
@@ -84,44 +121,107 @@ export default function LayoutEditor({
   initialWidth: number;
   initialLength: number;
   initialItems: LayoutItem[];
-  /** Guests seated per table, keyed by tableKey(). */
-  seatedByTable: Record<string, number>;
+  /** Everyone who has accepted. Null = the guest list couldn't be read. */
+  guests: SeatGuest[] | null;
   /** Seats across every invited household. */
   invitedSeats: number;
+  /** Open the room step on this method (chosen on the list page). */
+  initialSetup?: FloorSource | null;
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [name, setName] = useState(initialName);
   const [imageUrl, setImageUrl] = useState(initialImageUrl);
   const [source, setSource] = useState<FloorSource | null>(initialSource);
-  const [layers, setLayers] = useState<Layers>(ALL_LAYERS);
+  // A photo is only a reference: the plan is drawn on the clean grid, with
+  // the photo one switch away for tracing.
+  const [layers, setLayers] = useState<Layers>({
+    photo: initialSource !== "photo",
+    grid: true,
+    room: true,
+    chairs: true,
+    labels: true,
+  });
   const [width, setWidth] = useState(initialWidth);
   const [length, setLength] = useState(initialLength);
   const [items, setItems] = useState<LayoutItem[]>(initialItems);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // A brand-new layout opens on the "what's the room?" step.
-  const [settingUp, setSettingUp] = useState(!initialImageUrl && initialItems.length === 0);
+  const [settingUp, setSettingUp] = useState(
+    Boolean(initialSetup) || (!initialImageUrl && !initialSource && initialItems.length === 0),
+  );
+  const [view, setView] = useState<"canvas" | "list">("canvas");
+  const [tab, setTab] = useState<PieceGroup>("Tables");
   const [zoom, setZoom] = useState(1);
   const [snap, setSnap] = useState(true);
   const [photoStrength, setPhotoStrength] = useState(0.8);
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [guests, setGuests] = useState<SeatGuest[]>(initialGuests ?? []);
+  const [seatSaving, setSeatSaving] = useState(0);
+  const [seatError, setSeatError] = useState<string | null>(null);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<Drag | null>(null);
   const history = useRef<LayoutItem[][]>([]);
+  const future = useRef<LayoutItem[][]>([]);
   const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
 
   const selected = items.find((i) => i.id === selectedId) ?? null;
   const clashes = useMemo(() => findClashes(items, width, length), [items, width, length]);
+  const tightPairs = useMemo(() => findTightSpots(items, clashes), [items, clashes]);
+  const tight = useMemo(() => new Set(tightPairs.flatMap((p) => [p.a, p.b])), [tightPairs]);
   const seats = seatTotal(items);
-  const tables = tableCount(items);
+  const tables = useMemo(() => items.filter((it) => PIECES[it.kind].isTable), [items]);
+
+  // ── Seating ───────────────────────────────────────────────────────────────
+  const seating = useMemo(() => {
+    const byTable = guestsByTable(guests);
+    const out = new Map<string, TableSeating>();
+    for (const t of tables) out.set(t.id, seatTable(byTable.get(tableKey(t.label)) ?? [], t.seats));
+    return out;
+  }, [guests, tables]);
+  const seatingOf = useCallback(
+    (t: LayoutItem) => seating.get(t.id) ?? { chairs: [], overflow: [] },
+    [seating],
+  );
+  const occupancy = useMemo(
+    () => Object.fromEntries([...seating].map(([id, s]) => [id, s.chairs.map(Boolean)])),
+    [seating],
+  );
+  const seatedCounts = useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const [k, gs] of guestsByTable(guests)) out[k] = gs.length;
+    return out;
+  }, [guests]);
+  const seatedHere = [...seating.values()].reduce((s, t) => s + t.chairs.filter(Boolean).length + t.overflow.length, 0);
+  const waiting = guests.filter((g) => !g.tableName).length;
+
+  async function changeSeats(changes: SeatChange[]) {
+    if (!changes.length) return;
+    const before = guests;
+    setGuests((cur) => applySeatChanges(cur, changes));
+    setSeatSaving((n) => n + 1);
+    const res = await updateSeating(weddingId, changes).catch(() => ({
+      ok: false,
+      error: "Couldn’t save that seat. Check your connection and try again.",
+    }));
+    setSeatSaving((n) => n - 1);
+    if (res.ok) setSeatError(null);
+    else {
+      setGuests(before);
+      setSeatError(res.error ?? "Couldn’t save that seat.");
+    }
+  }
 
   // ── History ───────────────────────────────────────────────────────────────
   const remember = useCallback((snapshot: LayoutItem[]) => {
     history.current.push(snapshot);
     if (history.current.length > HISTORY) history.current.shift();
+    future.current = [];
     setCanUndo(true);
+    setCanRedo(false);
   }, []);
 
   /** A discrete change (add, delete, edit a field): remembered for undo. */
@@ -135,13 +235,34 @@ export default function LayoutEditor({
 
   function undo() {
     const prev = history.current.pop();
-    if (prev) setItems(prev);
+    if (!prev) return;
+    future.current.push(items);
+    setItems(prev);
     setCanUndo(history.current.length > 0);
+    setCanRedo(true);
+  }
+
+  function redo() {
+    const next = future.current.pop();
+    if (!next) return;
+    history.current.push(items);
+    setItems(next);
+    setCanUndo(true);
+    setCanRedo(future.current.length > 0);
   }
 
   function patchSelected(patch: Partial<LayoutItem>) {
     if (!selected) return;
     commit(items.map((it) => (it.id === selected.id ? { ...it, ...patch } : it)));
+    // Renaming a table takes its guests along, so "Table 4" → "Oak" doesn't
+    // leave everyone seated at a table that no longer exists.
+    if (patch.label !== undefined && PIECES[selected.kind].isTable && tableKey(patch.label) !== tableKey(selected.label)) {
+      const moving = seatingOf(selected);
+      const changes: SeatChange[] = [];
+      moving.chairs.forEach((g, i) => g && changes.push({ id: g.id, table_name: tableTitle(patch.label!), seat_number: i + 1 }));
+      moving.overflow.forEach((g) => changes.push({ id: g.id, table_name: tableTitle(patch.label!), seat_number: null }));
+      void changeSeats(changes);
+    }
   }
 
   // ── Autosave ──────────────────────────────────────────────────────────────
@@ -180,11 +301,11 @@ export default function LayoutEditor({
   }, [payload, weddingId, layoutId]);
 
   useEffect(() => {
-    if (status === "saved") return;
+    if (status === "saved" && !seatSaving) return;
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [status]);
+  }, [status, seatSaving]);
 
   function retrySave() {
     // Re-running the effect needs a payload it hasn't sent; forget the last one.
@@ -195,11 +316,12 @@ export default function LayoutEditor({
   // ── Placing pieces ────────────────────────────────────────────────────────
   /**
    * Somewhere free near the middle of the room: tries the centre, then rings
-   * outward, so adding ten tables doesn't stack ten tables on one spot.
+   * outward, so adding ten tables doesn't stack ten tables on one spot — or
+   * leave less than a walkway between them.
    */
   function freeSpot(kind: PieceKind): { x: number; y: number } {
     const probe = newItem(kind, width / 2, length / 2, items, "probe");
-    const step = Math.max(probe.w, probe.h) + 2;
+    const step = Math.max(probe.w, probe.h) + (probe.seats ? CHAIR_DEPTH * 2 : 0) + PATHWAY_FT;
     for (let ring = 0; ring < 12; ring++) {
       const n = ring === 0 ? 1 : ring * 8;
       for (let k = 0; k < n; k++) {
@@ -208,17 +330,20 @@ export default function LayoutEditor({
         const y = round2(length / 2 + Math.sin(a) * ring * step);
         if (x < probe.w / 2 || y < probe.h / 2 || x > width - probe.w / 2 || y > length - probe.h / 2) continue;
         const cand = { ...probe, x, y };
-        if (!items.some((it) => it.kind !== "stage" && overlaps(cand, it))) return { x, y };
+        if (!items.some((it) => it.kind !== "stage" && overlaps(cand, it)) && !findTightSpots([cand, ...items]).some((p) => p.a === "probe")) {
+          return { x, y };
+        }
       }
     }
     return { x: width / 2, y: length / 2 };
   }
 
-  function add(kind: PieceKind) {
-    const { x, y } = freeSpot(kind);
-    const it = newItem(kind, x, y, items, crypto.randomUUID());
+  function add(kind: PieceKind, at?: { x: number; y: number }) {
+    const { x, y } = at ?? freeSpot(kind);
+    const it = newItem(kind, clamp(x, 0, width), clamp(y, 0, length), items, crypto.randomUUID());
     commit([...items, it]);
     setSelectedId(it.id);
+    setView("canvas");
   }
 
   function duplicate() {
@@ -300,7 +425,13 @@ export default function LayoutEditor({
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+    const mod = e.metaKey || e.ctrlKey;
+    if (mod && (e.key.toLowerCase() === "y" || (e.key.toLowerCase() === "z" && e.shiftKey))) {
+      e.preventDefault();
+      redo();
+      return;
+    }
+    if (mod && e.key.toLowerCase() === "z") {
       e.preventDefault();
       undo();
       return;
@@ -323,12 +454,22 @@ export default function LayoutEditor({
     } else if (e.key === "r" || e.key === "R") {
       e.preventDefault();
       patchSelected({ rotation: normalizeRotation(selected.rotation + (e.shiftKey ? -15 : 15)) });
-    } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "d") {
+    } else if (mod && e.key.toLowerCase() === "d") {
       e.preventDefault();
       duplicate();
     } else if (e.key === "Escape") {
       setSelectedId(null);
     }
+  }
+
+  // Pieces dragged in from the library land where they're dropped.
+  function onDrop(e: React.DragEvent) {
+    const kind = e.dataTransfer.getData(DRAG_TYPE) as PieceKind;
+    if (!kind || !Object.hasOwn(PIECES, kind)) return;
+    e.preventDefault();
+    const p = toFeet(e);
+    if (!p) return;
+    add(kind, snap ? { x: Math.round(p.x * 2) / 2, y: Math.round(p.y * 2) / 2 } : p);
   }
 
   // ── Floor ─────────────────────────────────────────────────────────────────
@@ -341,6 +482,7 @@ export default function LayoutEditor({
     setSource(r.source);
     setWidth(r.width);
     setLength(r.length);
+    setLayers((l) => ({ ...l, photo: r.source !== "photo" }));
     setSettingUp(false);
   }
 
@@ -358,7 +500,7 @@ export default function LayoutEditor({
     try {
       const vbW = width + MARGIN * 2;
       const vbH = length + MARGIN * 2;
-      const scale = Math.min(30, 3000 / Math.max(vbW, vbH));
+      const scale = Math.min(40, 3840 / Math.max(vbW, vbH));
       const W = Math.round(vbW * scale);
       const H = Math.round(vbH * scale);
 
@@ -419,14 +561,8 @@ export default function LayoutEditor({
 
   // ── Render ────────────────────────────────────────────────────────────────
   const statusText =
-    status === "saved" ? "All changes saved" : status === "error" ? saveError : status === "saving" ? "Saving…" : "Unsaved changes";
+    status === "saved" ? "Saved" : status === "error" ? saveError : status === "saving" ? "Saving…" : "Unsaved changes";
 
-  const groups = PIECE_GROUPS.map((g) => ({
-    group: g,
-    kinds: PIECE_KINDS.filter((k) => PIECES[k].group === g),
-  }));
-
-  const seatedAt = (it: LayoutItem) => seatedByTable[tableKey(it.label)] ?? 0;
   const approximate = isApproximate(source);
   const handlers: PieceHandlers = {
     onPointerDown: startMove,
@@ -436,6 +572,13 @@ export default function LayoutEditor({
 
   const off = (Object.keys(layers) as (keyof Layers)[]).filter((k) => !layers[k]);
   const hiddenLayers = off.length ? `?hide=${off.join(",")}` : "";
+  const shownLayers = LAYER_LABELS.filter(([key]) => key !== "photo" || imageUrl);
+  const issues = clashes.size + tightPairs.length;
+  const labelOf = (id: string) => {
+    const it = items.find((x) => x.id === id);
+    if (!it) return "";
+    return PIECES[it.kind].isTable ? tableTitle(it.label) : it.label;
+  };
 
   function toggleLayer(key: keyof Layers, on: boolean) {
     setLayers((l) => ({ ...l, [key]: on }));
@@ -444,239 +587,382 @@ export default function LayoutEditor({
     if (key === "room" && !on && selected && PIECES[selected.kind].group === "Room") setSelectedId(null);
   }
 
+  const fields = selected && (
+    <PieceFields key={selected.id} item={selected} onChange={patchSelected} />
+  );
+
   return (
     <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <label className="block min-w-0 flex-1">
-          <span className="sr-only">Layout name</span>
-          <input
-            value={name}
-            maxLength={80}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full max-w-md border-b border-transparent bg-transparent text-3xl font-light uppercase tracking-wide text-ink outline-none hover:border-stone-2 focus:border-brand"
-          />
-        </label>
-        <p
-          role="status"
-          className={`text-sm ${status === "error" ? "text-red-700" : "text-ink-soft/70"}`}
-        >
-          {statusText}
-          {status === "error" && (
-            <button type="button" onClick={retrySave} className="ml-2 font-semibold underline">
-              Retry
-            </button>
-          )}
-        </p>
+      {/* Header: name, room and what's been placed */}
+      <div className={`${PANEL} p-4 sm:p-5`}>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <label className="block min-w-0 flex-1">
+            <span className="sr-only">Layout name</span>
+            <input
+              value={name}
+              maxLength={80}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full max-w-md border-b border-transparent bg-transparent font-display text-2xl font-light text-ink outline-none hover:border-stone-2 focus:border-brand sm:text-3xl"
+            />
+          </label>
+          <span className="rounded-full bg-stone-4 px-2.5 py-1 text-xs font-medium text-ink-soft">
+            {width} × {length} ft
+          </span>
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+              approximate ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700"
+            }`}
+            title={approximate ? "This floor was measured from a photo, so sizes are estimates." : undefined}
+          >
+            {approximate ? "Approximate scale" : "To scale"}
+          </span>
+          <p
+            role="status"
+            className={`flex items-center gap-1.5 text-xs font-medium ${status === "error" ? "text-red-700" : "text-ink-soft/70"}`}
+          >
+            <span
+              aria-hidden
+              className={`h-1.5 w-1.5 rounded-full ${
+                status === "error" ? "bg-red-600" : status === "saved" ? "bg-emerald-600" : "animate-pulse-dot bg-brand"
+              }`}
+            />
+            {statusText}
+            {status === "error" && (
+              <button type="button" onClick={retrySave} className="ml-1 font-semibold underline">
+                Retry
+              </button>
+            )}
+          </p>
+        </div>
+
+        {!settingUp && (
+          <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1.5 text-sm">
+            <Stat label="Tables" value={String(tableCount(items))} />
+            <Stat
+              label="Seats"
+              value={invitedSeats > 0 ? `${seats} / ${invitedSeats} invited` : String(seats)}
+              tone={invitedSeats > 0 ? (seats >= invitedSeats ? "text-emerald-700" : "text-red-700") : undefined}
+            />
+            {initialGuests && (
+              <Stat label="Seated" value={`${seatedHere} of ${guests.length} confirmed`} />
+            )}
+            <Stat
+              label="Walkways"
+              value={issues ? `${issues} to check` : "All clear"}
+              tone={issues ? "text-red-700" : "text-emerald-700"}
+            />
+          </dl>
+        )}
       </div>
 
       {settingUp ? (
-        <div className="mt-6">
+        <div className="mt-5">
           <FloorSetup
             weddingId={weddingId}
             initialWidth={width}
             initialLength={length}
+            initialMode={initialSetup ?? undefined}
             onDone={onFloor}
-            onCancel={imageUrl || items.length ? () => setSettingUp(false) : undefined}
+            onCancel={source || imageUrl || items.length ? () => setSettingUp(false) : undefined}
           />
         </div>
       ) : (
         <>
-          <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-soft">
-            <Stat label="Room" value={`${width} × ${length} ft`} />
-            {approximate && (
-              <span
-                className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800"
-                title="This floor was straightened from a photo, so sizes are estimates."
-              >
-                Approximate
-              </span>
-            )}
-            <Stat label="Tables" value={String(tables)} />
-            <Stat label="Seats" value={String(seats)} />
-            {invitedSeats > 0 && (
-              <Stat
-                label="Invited"
-                value={
-                  seats >= invitedSeats
-                    ? `${invitedSeats} · room for everyone${seats > invitedSeats ? ` (+${seats - invitedSeats})` : ""}`
-                    : `${invitedSeats} · ${invitedSeats - seats} seats short`
-                }
-                tone={seats >= invitedSeats ? "text-emerald-700" : "text-red-700"}
-              />
-            )}
-          </dl>
-          {approximate && (
-            <p className="mt-2 max-w-3xl text-sm text-amber-800">
-              This floor comes from a photo, so its measurements are estimates. Before booking rentals, ask your venue
-              for their floor plan and use <strong>Change floor</strong> to switch to it &mdash; your tables stay where
-              they are.
-            </p>
-          )}
-          {clashes.size > 0 && (
-            <p className="mt-2 text-sm text-red-700">
-              {clashes.size === 1 ? "1 piece overlaps" : `${clashes.size} pieces overlap`} another or runs off the
-              floor &mdash; outlined in red.
-            </p>
-          )}
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button type="button" className={TOOL} onClick={undo} disabled={!canUndo}>
-              Undo
+          {/* Toolbar */}
+          <div className="sticky top-0 z-20 mt-4 flex flex-wrap items-center gap-1 rounded-2xl border border-stone-2 bg-white/95 px-2 py-1.5 shadow-card backdrop-blur">
+            <button type="button" className={TOOL} onClick={undo} disabled={!canUndo} aria-label="Undo" title="Undo (Ctrl+Z)">
+              <Icon name="undo" />
             </button>
+            <button type="button" className={TOOL} onClick={redo} disabled={!canRedo} aria-label="Redo" title="Redo (Ctrl+Shift+Z)">
+              <Icon name="redo" />
+            </button>
+            <span className="mx-1 h-5 w-px bg-stone-2" aria-hidden />
+            <label className={`${TOOL} cursor-pointer`}>
+              <input type="checkbox" checked={snap} onChange={(e) => setSnap(e.target.checked)} className="accent-brand" />
+              Snap
+            </label>
             <button
               type="button"
               className={TOOL}
               onClick={() => setZoom(ZOOMS[Math.max(0, ZOOMS.indexOf(zoom) - 1)])}
-              disabled={zoom === ZOOMS[0]}
+              disabled={zoom === ZOOMS[0] || view !== "canvas"}
               aria-label="Zoom out"
             >
               −
             </button>
-            <span className="w-12 text-center text-sm text-ink-soft">{Math.round(zoom * 100)}%</span>
+            <span className="w-11 text-center text-xs font-medium text-ink-soft">{Math.round(zoom * 100)}%</span>
             <button
               type="button"
               className={TOOL}
               onClick={() => setZoom(ZOOMS[Math.min(ZOOMS.length - 1, ZOOMS.indexOf(zoom) + 1)])}
-              disabled={zoom === ZOOMS[ZOOMS.length - 1]}
+              disabled={zoom === ZOOMS[ZOOMS.length - 1] || view !== "canvas"}
               aria-label="Zoom in"
             >
               +
             </button>
-            <label className="ml-1 flex items-center gap-1.5 text-sm text-ink-soft">
-              <input type="checkbox" checked={snap} onChange={(e) => setSnap(e.target.checked)} className="accent-brand" />
-              Snap
-            </label>
-            {imageUrl && layers.photo && (
-              <label className="ml-1 flex items-center gap-1.5 text-sm text-ink-soft">
-                Photo
-                <input
-                  type="range"
-                  min={0.15}
-                  max={1}
-                  step={0.05}
-                  value={photoStrength}
-                  onChange={(e) => setPhotoStrength(Number(e.target.value))}
-                  className="w-24 accent-brand"
-                  aria-label="How strongly the floor plan shows"
-                />
-              </label>
-            )}
+            <details className="relative">
+              <summary className={`${TOOL} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
+                <Icon name="layers" /> Layers
+              </summary>
+              <fieldset className="absolute left-0 z-30 mt-2 w-64 rounded-xl border border-stone-2 bg-white p-3 text-sm text-ink-soft shadow-card">
+                <legend className="sr-only">Layers to show</legend>
+                {shownLayers.map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={layers[key]}
+                      onChange={(e) => toggleLayer(key, e.target.checked)}
+                      className="accent-brand"
+                    />
+                    {key === "photo" && source === "photo" ? "Room photo (reference)" : label}
+                  </label>
+                ))}
+                {imageUrl && layers.photo && (
+                  <label className="mt-1 block">
+                    <span className="text-xs text-ink-soft/70">Picture strength</span>
+                    <input
+                      type="range"
+                      min={0.15}
+                      max={1}
+                      step={0.05}
+                      value={photoStrength}
+                      onChange={(e) => setPhotoStrength(Number(e.target.value))}
+                      className="w-full accent-brand"
+                      aria-label="How strongly the picture shows"
+                    />
+                  </label>
+                )}
+                <p className="mt-2 text-xs text-ink-soft/60">Hidden layers stay saved and are left out of the image and print.</p>
+              </fieldset>
+            </details>
+            <span className="mx-1 h-5 w-px bg-stone-2" aria-hidden />
+            <div className="flex rounded-full bg-stone-4 p-0.5" role="group" aria-label="View">
+              {(["canvas", "list"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setView(v)}
+                  aria-pressed={view === v}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium ${
+                    view === v ? "bg-white text-brand-text shadow-sm" : "text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  <Icon name={v === "canvas" ? "grid" : "list"} width={16} height={16} />
+                  {v === "canvas" ? "Canvas" : "Seating"}
+                </button>
+              ))}
+            </div>
             <span className="flex-1" />
+            <button type="button" className={TOOL} onClick={() => setSettingUp(true)}>
+              <Icon name="ruler" /> <span className="hidden sm:inline">Change room</span>
+            </button>
+            <button type="button" className={TOOL} onClick={exportPng} disabled={exporting || view !== "canvas"}>
+              <Icon name="download" /> <span className="hidden sm:inline">{exporting ? "Preparing…" : "PNG"}</span>
+            </button>
             {/* The print page reads what's saved, so it waits for the save. */}
             <a
               href={`/w/${weddingId}/layout/${layoutId}/print${hiddenLayers}`}
-              className={`${TOOL} ${status === "saved" ? "" : "pointer-events-none opacity-40"}`}
+              className={`inline-flex h-9 items-center gap-1.5 rounded-full bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-deep ${
+                status === "saved" ? "" : "pointer-events-none opacity-50"
+              }`}
               aria-disabled={status !== "saved"}
             >
-              Print / PDF
+              <Icon name="print" /> Print / PDF
             </a>
-            <button type="button" className={TOOL} onClick={() => setSettingUp(true)}>
-              Change floor
-            </button>
-            <button type="button" className={TOOL} onClick={exportPng} disabled={exporting}>
-              {exporting ? "Preparing…" : "Download image"}
-            </button>
           </div>
 
-          <fieldset className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-ink-soft">
-            <legend className="sr-only">Layers to show</legend>
-            <span aria-hidden className="text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft/50">
-              Show
-            </span>
-            {LAYER_LABELS.filter(([key]) => key !== "photo" || imageUrl).map(([key, label]) => (
-              <label key={key} className="flex items-center gap-1.5">
-                <input
-                  type="checkbox"
-                  checked={layers[key]}
-                  onChange={(e) => toggleLayer(key, e.target.checked)}
-                  className="accent-brand"
-                />
-                {label}
-              </label>
-            ))}
-            <span className="text-xs text-ink-soft/50">Hidden layers stay saved and are left out of the image and print.</span>
-          </fieldset>
+          {approximate && (
+            <p className="mt-3 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+              Measured from a photo, so sizes are estimates. You&rsquo;re planning on a clean grid; switch on the room
+              photo under <strong>Layers</strong> to trace from it. Before booking rentals, ask the venue for their floor
+              plan and use <strong>Change room</strong> &mdash; your tables stay where they are.
+            </p>
+          )}
+          {seatError && (
+            <p role="alert" className="mt-3 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-800">
+              {seatError}
+            </p>
+          )}
+          {!initialGuests && (
+            <p className="mt-3 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+              Couldn&rsquo;t load the guest list, so seats can&rsquo;t be assigned right now. Refresh to try again.
+            </p>
+          )}
 
-          <div className="mt-4 grid gap-5 lg:grid-cols-[180px_minmax(0,1fr)_240px]">
-            {/* Palette */}
-            <div className="order-3 lg:order-1">
-              {groups.map(({ group, kinds }) => (
-                <div key={group} className="mb-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft/50">{group}</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5 lg:flex-col">
-                    {kinds.map((k) => (
+          {view === "list" ? (
+            <div className="mt-4">
+              <SeatingList
+                tables={tables}
+                seatingOf={seatingOf}
+                guests={guests}
+                onOpen={(id) => {
+                  setSelectedId(id);
+                  setView("canvas");
+                }}
+                onSeats={changeSeats}
+              />
+            </div>
+          ) : (
+            <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[210px_minmax(0,1fr)_340px]">
+              {/* Library */}
+              <div className="order-2 min-w-0 lg:order-1">
+                <div className={`${PANEL} p-3 lg:sticky lg:top-16`}>
+                  <p className="px-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-ink-soft/60">Library</p>
+                  <p className="px-1 text-xs text-ink-soft/60">Tap to add, or drag onto the room</p>
+                  <div className="mt-2 grid grid-cols-4 gap-0.5 rounded-lg bg-stone-4 p-0.5" role="tablist">
+                    {PIECE_GROUPS.map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        role="tab"
+                        aria-selected={tab === g}
+                        onClick={() => setTab(g)}
+                        className={`rounded-md px-1 py-1 text-xs font-semibold ${
+                          tab === g ? "bg-white text-ink shadow-sm" : "text-ink-soft/70 hover:text-ink"
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0" role="tabpanel">
+                    {PIECE_KINDS.filter((k) => PIECES[k].group === tab).map((k) => (
                       <button
                         key={k}
                         type="button"
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData(DRAG_TYPE, k);
+                          e.dataTransfer.effectAllowed = "copy";
+                        }}
                         onClick={() => add(k)}
-                        className="rounded-lg border border-stone-2 bg-white px-3 py-2 text-left text-sm text-ink hover:border-brand"
+                        className="flex shrink-0 items-center gap-2.5 rounded-xl px-2 py-2 text-left hover:bg-brand-wash"
                       >
-                        <span className="font-medium">{PIECES[k].label}</span>
-                        {PIECES[k].seats > 0 && (
-                          <span className="ml-1 text-xs text-ink-soft/60">· {PIECES[k].seats}</span>
-                        )}
+                        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-stone-4 text-ink-soft">
+                          <Icon name={pieceIcon(k)} />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block whitespace-nowrap text-sm font-medium text-ink">{PIECES[k].label}</span>{" "}
+                          <span className="block whitespace-nowrap text-xs text-ink-soft/60">{pieceNote(k)}</span>
+                        </span>
                       </button>
                     ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            {/* Canvas */}
-            <div
-              className="order-1 max-h-[75vh] self-start overflow-auto rounded-2xl border border-stone-2 bg-white shadow-card lg:order-2"
-              onKeyDown={onKeyDown}
-            >
-              <LayoutDrawing
-                svgRef={svgRef}
-                idPrefix={uid}
-                width={width}
-                length={length}
-                imageUrl={imageUrl}
-                photoStrength={photoStrength}
-                items={items}
-                layers={layers}
-                approximate={approximate}
-                seatedByTable={seatedByTable}
-                clashes={clashes}
-                selectedId={selectedId}
-                handlers={handlers}
-                style={{ width: `${zoom * 100}%`, minWidth: zoom > 1 ? `${zoom * 100}%` : undefined }}
-                className="block touch-none select-none"
-                role="application"
-                aria-label={`Overhead layout, ${width} by ${length} feet. Select a piece, then use arrow keys to move it, R to rotate, Delete to remove.`}
-                onPointerDown={() => setSelectedId(null)}
-                onPointerMove={onPointerMove}
-                onPointerUp={endDrag}
-                onPointerCancel={endDrag}
-              />
-            </div>
-
-            {/* Selected piece */}
-            <div className="order-2 lg:order-3">
-              {selected ? (
-                <SelectedPanel
-                  key={selected.id}
-                  item={selected}
-                  seated={PIECES[selected.kind].isTable ? seatedAt(selected) : null}
-                  onChange={patchSelected}
-                  onDuplicate={duplicate}
-                  onDelete={remove}
-                />
-              ) : (
-                <div className="rounded-2xl border border-dashed border-stone-2 p-4 text-sm leading-relaxed text-ink-soft/70">
-                  <p>Add pieces from the list, then drag them into place.</p>
-                  <p className="mt-2">
-                    Tap a piece to rename it, change its seats or turn it. Drag the round handle to rotate.
-                  </p>
-                  <p className="mt-2">
-                    Name tables the way your guest list does (&ldquo;4&rdquo; matches &ldquo;Table 4&rdquo;) and each
-                    shows how many guests are seated there.
-                  </p>
+              {/* Canvas */}
+              <div className="order-1 min-w-0 lg:order-2">
+                <div
+                  className="relative max-h-[78vh] overflow-auto rounded-2xl border border-stone-2 bg-[#fbf7f2] p-2 sm:p-4"
+                  onKeyDown={onKeyDown}
+                  onDragOver={(e) => {
+                    if (e.dataTransfer.types.includes(DRAG_TYPE)) e.preventDefault();
+                  }}
+                  onDrop={onDrop}
+                >
+                  <LayoutDrawing
+                    svgRef={svgRef}
+                    idPrefix={uid}
+                    width={width}
+                    length={length}
+                    imageUrl={imageUrl}
+                    photoStrength={photoStrength}
+                    items={items}
+                    layers={layers}
+                    approximate={approximate}
+                    seatedByTable={seatedCounts}
+                    occupancy={occupancy}
+                    clashes={clashes}
+                    tight={tight}
+                    selectedId={selectedId}
+                    handlers={handlers}
+                    style={{ width: `${zoom * 100}%`, minWidth: zoom > 1 ? `${zoom * 100}%` : undefined }}
+                    className="block touch-none select-none rounded-lg bg-white shadow-card"
+                    role="application"
+                    aria-label={`Overhead layout, ${width} by ${length} feet. Select a piece, then use arrow keys to move it, R to rotate, Delete to remove.`}
+                    onPointerDown={() => setSelectedId(null)}
+                    onPointerMove={onPointerMove}
+                    onPointerUp={endDrag}
+                    onPointerCancel={endDrag}
+                  />
                 </div>
-              )}
+                <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 px-1 text-xs text-ink-soft/80" aria-label="Key">
+                  <li className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full border border-brand-deep bg-brand" aria-hidden /> Seated
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-2.5 rounded-full border border-ink/50 bg-white" aria-hidden /> Open chair
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-3.5 rounded-sm border-2 border-dashed border-amber-600" aria-hidden /> Under 36″ walkway
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <span className="h-2.5 w-3.5 rounded-sm border-2 border-red-600" aria-hidden /> Overlap or off the floor
+                  </li>
+                </ul>
+              </div>
+
+              {/* Inspector */}
+              <div className="order-3">
+                {selected && PIECES[selected.kind].isTable ? (
+                  <TableInspector
+                    key={selected.id}
+                    item={selected}
+                    seating={seatingOf(selected)}
+                    guests={guests}
+                    tables={tables}
+                    saving={seatSaving > 0}
+                    onSeats={changeSeats}
+                    onChange={patchSelected}
+                    onDuplicate={duplicate}
+                    onDelete={remove}
+                    onClose={() => setSelectedId(null)}
+                    nameField={fields}
+                  />
+                ) : selected ? (
+                  <div className={PANEL}>
+                    <div className="flex items-start justify-between gap-3 border-b border-stone-2 p-5">
+                      <div>
+                        <p className="font-display text-xl font-semibold text-ink">{selected.label}</p>
+                        <p className="text-sm text-ink-soft/70">
+                          {PIECES[selected.kind].label} · {selected.w} × {selected.h} ft
+                        </p>
+                      </div>
+                      <button type="button" onClick={() => setSelectedId(null)} aria-label="Close" className="rounded-full p-1.5 text-ink-soft hover:bg-stone-4">
+                        <Icon name="close" />
+                      </button>
+                    </div>
+                    <div className="p-5">
+                      <div className="grid grid-cols-2 gap-2">
+                        <button type="button" className={CHIP_BTN} onClick={() => patchSelected({ rotation: (selected.rotation + 45) % 360 })}>
+                          <Icon name="rotate" /> Rotate 45°
+                        </button>
+                        <button type="button" className={CHIP_BTN} onClick={duplicate}>
+                          <Icon name="copy" /> Duplicate
+                        </button>
+                        <button type="button" className={`${CHIP_BTN} col-span-2 text-red-700`} onClick={remove}>
+                          <Icon name="trash" /> Delete
+                        </button>
+                      </div>
+                      {fields}
+                    </div>
+                  </div>
+                ) : (
+                  <Overview
+                    confirmed={initialGuests ? guests.length : null}
+                    seated={seatedHere}
+                    waiting={waiting}
+                    clashIds={[...clashes]}
+                    tightPairs={tightPairs}
+                    labelOf={labelOf}
+                    onSelect={setSelectedId}
+                    onSeating={() => setView("list")}
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           <form
             action={deleteLayout.bind(null, weddingId, layoutId)}
@@ -695,61 +981,130 @@ export default function LayoutEditor({
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: string }) {
   return (
-    <div className="flex gap-1.5">
-      <dt className="text-ink-soft/60">{label}</dt>
+    <div className="flex items-baseline gap-1.5">
+      <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft/50">{label}</dt>
       <dd className={`font-semibold ${tone ?? "text-ink"}`}>{value}</dd>
     </div>
   );
 }
 
-/**
- * Fields for the selected piece. Text and number inputs keep their own draft
- * and apply on blur or Enter, so typing "12" doesn't save "1" first and push
- * two steps onto the undo history.
- */
-function SelectedPanel({
-  item,
+/** What the inspector shows with nothing selected: seating progress and what needs a look. */
+function Overview({
+  confirmed,
   seated,
-  onChange,
-  onDuplicate,
-  onDelete,
+  waiting,
+  clashIds,
+  tightPairs,
+  labelOf,
+  onSelect,
+  onSeating,
 }: {
-  item: LayoutItem;
-  seated: number | null;
-  onChange: (p: Partial<LayoutItem>) => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
+  confirmed: number | null;
+  seated: number;
+  waiting: number;
+  clashIds: string[];
+  tightPairs: { a: string; b: string }[];
+  labelOf: (id: string) => string;
+  onSelect: (id: string) => void;
+  onSeating: () => void;
 }) {
+  const pct = confirmed ? Math.round((seated / confirmed) * 100) : 0;
+  return (
+    <div className="space-y-4">
+      <div className={`${PANEL} p-5`}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-ink-soft/60">Seating</p>
+        {confirmed === null ? (
+          <p className="mt-2 text-sm text-ink-soft/70">The guest list couldn&rsquo;t be loaded.</p>
+        ) : confirmed === 0 ? (
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft/70">
+            No one has accepted yet. As RSVPs come in, guests appear here ready to seat.
+          </p>
+        ) : (
+          <>
+            <p className="mt-1 font-display text-2xl font-light text-ink">
+              {seated} <span className="text-base text-ink-soft/70">of {confirmed} guests seated</span>
+            </p>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-2">
+              <div className="h-full rounded-full bg-brand" style={{ width: `${Math.min(100, pct)}%` }} />
+            </div>
+            <p className="mt-2 text-sm text-ink-soft/70">
+              {waiting ? `${waiting} still waiting for a table.` : "Everyone who accepted has a table."}
+            </p>
+          </>
+        )}
+        <button type="button" onClick={onSeating} className={`${CHIP_BTN} mt-4 w-full`}>
+          <Icon name="users" /> Open seating chart
+        </button>
+      </div>
+
+      <div className={`${PANEL} p-5`}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-ink-soft/60">Walkways &amp; clashes</p>
+        {clashIds.length + tightPairs.length === 0 ? (
+          <p className="mt-2 flex items-center gap-2 text-sm text-emerald-700">
+            <Icon name="check" /> No overlaps, and at least 36″ behind every chair.
+          </p>
+        ) : (
+          <ul className="mt-2 space-y-1.5 text-sm">
+            {clashIds.map((id) => (
+              <li key={id}>
+                <button type="button" onClick={() => onSelect(id)} className="flex items-start gap-2 text-left text-red-700 hover:underline">
+                  <Icon name="alert" className="mt-0.5 shrink-0" />
+                  {labelOf(id)} overlaps something or runs off the floor
+                </button>
+              </li>
+            ))}
+            {tightPairs.map((p) => (
+              <li key={`${p.a}-${p.b}`}>
+                <button type="button" onClick={() => onSelect(p.a)} className="flex items-start gap-2 text-left text-amber-800 hover:underline">
+                  <Icon name="alert" className="mt-0.5 shrink-0" />
+                  Under 36″ between {labelOf(p.a)} and {labelOf(p.b)} — nudge apart or try a smaller table
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="rounded-2xl border border-dashed border-stone-5 p-4 text-sm leading-relaxed text-ink-soft/75">
+        <p>Tap a table to see its chairs and seat guests. Drag the round handle, or press R, to turn it.</p>
+        <p className="mt-2">
+          Name tables the way your guest list does (&ldquo;4&rdquo; matches &ldquo;Table 4&rdquo;) and they pick up the
+          guests already seated there.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The selected piece's name, seats and size. Text and number inputs keep their
+ * own draft and apply on blur or Enter, so typing "12" doesn't save "1" first
+ * and push two steps onto the undo history.
+ */
+function PieceFields({ item, onChange }: { item: LayoutItem; onChange: (p: Partial<LayoutItem>) => void }) {
   const def: PieceDef = PIECES[item.kind];
   return (
-    <div className="rounded-2xl border border-stone-2 bg-white p-4 shadow-card">
-      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-ink-soft/50">{def.label}</p>
-
-      <Field label={def.isTable ? "Table name or number" : "Label"} value={item.label} onCommit={(v) => onChange({ label: v.trim().slice(0, 40) || def.label })} />
-
+    <div className="mt-4 grid grid-cols-2 gap-x-3">
+      <div className={def.isTable ? "" : "col-span-2"}>
+        <Field
+          label={def.isTable ? "Table name" : "Label"}
+          value={item.label}
+          onCommit={(v) => onChange({ label: v.trim().slice(0, 40) || def.label })}
+        />
+      </div>
       {def.isTable && (
-        <>
-          <Field
-            label="Seats"
-            numeric
-            value={String(item.seats)}
-            onCommit={(v) => {
-              const n = Number.parseInt(v, 10);
-              if (Number.isFinite(n)) onChange({ seats: clamp(n, 0, MAX_SEATS) });
-            }}
-          />
-          {seated !== null && (
-            <p className={`mt-1 text-xs ${seated > item.seats ? "text-red-700" : "text-ink-soft/60"}`}>
-              {seated === 0
-                ? "No guests seated here yet."
-                : `${seated} guest${seated === 1 ? "" : "s"} seated here from your guest list.`}
-            </p>
-          )}
-        </>
+        <Field
+          label="Seats"
+          numeric
+          value={String(item.seats)}
+          onCommit={(v) => {
+            const n = Number.parseInt(v, 10);
+            if (Number.isFinite(n)) onChange({ seats: clamp(n, 0, MAX_SEATS) });
+          }}
+        />
       )}
-
       {def.resizable && (
-        <div className="grid grid-cols-2 gap-2">
+        <>
           <Field
             label="Length (ft)"
             numeric
@@ -768,33 +1123,8 @@ function SelectedPanel({
               if (Number.isFinite(n)) onChange({ h: round2(clamp(n, 1, MAX_PIECE_FT)) });
             }}
           />
-        </div>
+        </>
       )}
-
-      <p className="mt-3 text-sm font-medium text-ink-soft">Turn</p>
-      <div className="mt-1 flex items-center gap-2">
-        <button type="button" className={TOOL} onClick={() => onChange({ rotation: normalizeRotation(item.rotation - 15) })} aria-label="Turn left 15 degrees">
-          ⟲
-        </button>
-        <span className="w-12 text-center text-sm text-ink">{item.rotation}°</span>
-        <button type="button" className={TOOL} onClick={() => onChange({ rotation: normalizeRotation(item.rotation + 15) })} aria-label="Turn right 15 degrees">
-          ⟳
-        </button>
-        {item.rotation !== 0 && (
-          <button type="button" className="text-xs font-semibold text-brand-text" onClick={() => onChange({ rotation: 0 })}>
-            Reset
-          </button>
-        )}
-      </div>
-
-      <div className="mt-4 flex gap-2">
-        <button type="button" className={TOOL} onClick={onDuplicate}>
-          Duplicate
-        </button>
-        <button type="button" className={`${TOOL} text-red-700 hover:border-red-300 hover:text-red-800`} onClick={onDelete}>
-          Delete
-        </button>
-      </div>
     </div>
   );
 }

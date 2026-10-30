@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { failWith } from "@/lib/flash";
 import { SUPABASE_URL } from "@/lib/supabase";
-import { FLOOR_SOURCES, cleanDimension, sanitizeItems, tableKey, type FloorSource } from "@/lib/venue-layout";
+import { FLOOR_SOURCES, cleanDimension, sanitizeItems, type FloorSource } from "@/lib/venue-layout";
+import { cleanSeatChanges, type SeatGuest } from "@/lib/seating";
 
 // RLS enforces edit access: venue_layouts writes are can_edit_wedding(wedding_id).
 
@@ -58,36 +59,90 @@ function normalize(r: Record<string, unknown>): VenueLayout {
 }
 
 /**
- * How many people are seated at each table, keyed by tableKey(), so the
- * editor can show "7 / 8" on a table labelled "4" for guests at "Table 4".
- * Null when it couldn't be read — the layout still works without it.
+ * Everyone who has accepted, with their table, chair, dish and the household's
+ * dietary note, for the seat dial and the table rosters. Only people who said
+ * yes have a guest_attendees row, so this is exactly who needs a chair. Null
+ * when it couldn't be read — the layout still works without it.
  */
-export async function seatedByTable(weddingId: string): Promise<Record<string, number> | null> {
+export async function listSeatGuests(weddingId: string): Promise<SeatGuest[] | null> {
   const supabase = await supabaseServer();
   const { data: guests, error } = await supabase
     .from("wedding_guests")
-    .select("id")
-    .eq("wedding_id", weddingId);
+    .select("id, household_name, dietary, attending, responded_at")
+    .eq("wedding_id", weddingId)
+    .order("created_at", { ascending: true });
   if (error) {
-    console.error("seatedByTable guests failed:", error.message);
+    console.error("listSeatGuests guests failed:", error.message);
     return null;
   }
-  if (!guests?.length) return {};
-  const { data: rows, error: aErr } = await supabase
-    .from("guest_attendees")
-    .select("table_name")
-    .in("guest_id", guests.map((g) => g.id as string))
-    .not("table_name", "is", null);
+  const coming = (guests ?? []).filter((g) => g.responded_at && g.attending);
+  if (!coming.length) return [];
+
+  const [{ data: rows, error: aErr }, { data: menu }] = await Promise.all([
+    supabase
+      .from("guest_attendees")
+      .select("id, guest_id, name, menu_option_id, position, table_name, seat_number")
+      .in("guest_id", coming.map((g) => g.id as string))
+      .order("position", { ascending: true }),
+    supabase.from("wedding_menu_options").select("id, name").eq("wedding_id", weddingId),
+  ]);
   if (aErr) {
-    console.error("seatedByTable attendees failed:", aErr.message);
+    console.error("listSeatGuests attendees failed:", aErr.message);
     return null;
   }
-  const counts: Record<string, number> = {};
-  for (const r of rows ?? []) {
-    const k = tableKey((r.table_name as string) ?? "");
-    if (k) counts[k] = (counts[k] ?? 0) + 1;
+
+  const dish = new Map((menu ?? []).map((m) => [m.id as string, m.name as string]));
+  const order = new Map(coming.map((g, i) => [g.id as string, i]));
+  const household = new Map(coming.map((g) => [g.id as string, g]));
+  return [...(rows ?? [])]
+    .sort((a, b) => (order.get(a.guest_id as string) ?? 0) - (order.get(b.guest_id as string) ?? 0))
+    .map((r) => {
+      const g = household.get(r.guest_id as string)!;
+      const name = (r.name as string | null)?.trim();
+      return {
+        id: r.id as string,
+        name: name || `${g.household_name} (guest ${Number(r.position) + 1})`,
+        household: g.household_name as string,
+        tableName: (r.table_name as string | null) ?? null,
+        seat: (r.seat_number as number | null) ?? null,
+        dish: r.menu_option_id ? (dish.get(r.menu_option_id as string) ?? null) : null,
+        dietary: (g.dietary as string | null) ?? null,
+      };
+    });
+}
+
+/**
+ * Saves seat moves from the layout: who sits at which table, in which chair.
+ * Each change is checked again here, and only people on THIS wedding's guest
+ * list are touched — RLS would stop a stranger, but someone who edits two
+ * weddings shouldn't be able to reach across from one to the other.
+ */
+export async function updateSeating(weddingId: string, raw: unknown): Promise<{ ok: boolean; error?: string }> {
+  const changes = cleanSeatChanges(raw);
+  if (!changes.length) return { ok: true };
+  const supabase = await supabaseServer();
+  const { data: guests, error } = await supabase.from("wedding_guests").select("id").eq("wedding_id", weddingId);
+  if (error) {
+    console.error("updateSeating guests failed:", error.message);
+    return { ok: false, error: "Couldn’t save that seat. Please try again." };
   }
-  return counts;
+  const ids = (guests ?? []).map((g) => g.id as string);
+  const results = await Promise.all(
+    changes.map((c) =>
+      supabase
+        .from("guest_attendees")
+        .update({ table_name: c.table_name, seat_number: c.seat_number })
+        .eq("id", c.id)
+        .in("guest_id", ids),
+    ),
+  );
+  const failed = results.find((r) => r.error);
+  if (failed?.error) {
+    console.error("updateSeating failed:", failed.error.code, failed.error.message);
+    return { ok: false, error: "Couldn’t save that seat. Please try again." };
+  }
+  revalidatePath(`/w/${weddingId}/guests`);
+  return { ok: true };
 }
 
 export async function createLayout(weddingId: string, formData: FormData) {
@@ -100,7 +155,11 @@ export async function createLayout(weddingId: string, formData: FormData) {
     .single();
   if (error || !data) failWith(`/w/${weddingId}/layout`, "Couldn’t create that layout. Please try again.", error);
   revalidatePath(`/w/${weddingId}/layout`);
-  redirect(`/w/${weddingId}/layout/${data.id}`);
+  // Which way to set the room up, picked on the list page, so the editor
+  // opens on that step instead of asking again.
+  const method = String(formData.get("method") ?? "");
+  const setup = FLOOR_SOURCES.includes(method as FloorSource) ? `?setup=${method}` : "";
+  redirect(`/w/${weddingId}/layout/${data.id}${setup}`);
 }
 
 export async function deleteLayout(weddingId: string, layoutId: string) {

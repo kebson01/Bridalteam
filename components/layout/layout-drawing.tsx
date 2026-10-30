@@ -25,6 +25,8 @@ const ORANGE = "#ff8c1c";
 const ORANGE_DEEP = "#ec5400";
 const INK = "#222222";
 export const CLASH = "#dc2626";
+/** Less than a 36" walkway: a warning, not an error. */
+export const TIGHT = "#d97706";
 const FONT = "Jost, Futura, 'Segoe UI', sans-serif";
 
 /**
@@ -87,6 +89,8 @@ export default function LayoutDrawing({
   approximate = false,
   seatedByTable,
   clashes,
+  tight,
+  occupancy,
   selectedId = null,
   handlers,
   svgRef,
@@ -105,6 +109,10 @@ export default function LayoutDrawing({
   /** Guests seated per table, keyed by tableKey(). Omit to hide the tallies. */
   seatedByTable?: Record<string, number>;
   clashes?: Set<string>;
+  /** Pieces with less than a 36" walkway to a neighbour. */
+  tight?: Set<string>;
+  /** Per table id, which chairs have someone in them; filled chairs are drawn solid. */
+  occupancy?: Record<string, boolean[]>;
   selectedId?: string | null;
   /** Present in the editor only; without them the pieces are a plain picture. */
   handlers?: PieceHandlers;
@@ -171,6 +179,8 @@ export default function LayoutDrawing({
           layers={layers}
           selected={it.id === selectedId}
           clash={clashes?.has(it.id) ?? false}
+          tight={tight?.has(it.id) ?? false}
+          occupied={occupancy?.[it.id]}
           seated={seatedByTable && PIECES[it.kind].isTable ? (seatedByTable[tableKey(it.label)] ?? 0) : null}
           handlers={handlers}
         />
@@ -214,6 +224,8 @@ function Piece({
   layers,
   selected,
   clash,
+  tight,
+  occupied,
   seated,
   handlers,
 }: {
@@ -222,14 +234,16 @@ function Piece({
   layers: Layers;
   selected: boolean;
   clash: boolean;
+  tight: boolean;
+  occupied?: boolean[];
   seated: number | null;
   handlers?: PieceHandlers;
 }) {
   const def: PieceDef = PIECES[item.kind];
   const chairs = layers.chairs ? chairPositions(item) : [];
   const isDoor = item.kind === "door" || item.kind === "doubledoor";
-  const stroke = clash ? CLASH : selected ? ORANGE_DEEP : item.kind === "nogo" ? CLASH : INK;
-  const strokeWidth = clash || selected ? 0.18 : 0.1;
+  const stroke = clash ? CLASH : selected ? ORANGE_DEEP : tight ? TIGHT : item.kind === "nogo" ? CLASH : INK;
+  const strokeWidth = clash || selected || tight ? 0.18 : 0.1;
   // Fit the label inside the piece: ~0.6em per character, 90% of the width.
   const fontSize = clamp((1.5 * Math.min(item.w, item.h * 3)) / Math.max(item.label.length, 2), 0.35, 1.1);
   const handleY = -(item.h / 2 + (chairs.length ? 2.4 : 1.2));
@@ -253,10 +267,25 @@ function Piece({
           : {})}
       >
         {chairs.map((c, i) => (
-          <circle key={i} cx={c.x} cy={c.y} r={0.7} fill="#ffffff" stroke={INK} strokeOpacity={0.55} strokeWidth={0.08} />
+          <circle
+            key={i}
+            cx={c.x}
+            cy={c.y}
+            r={0.7}
+            fill={occupied?.[i] ? ORANGE : "#ffffff"}
+            stroke={occupied?.[i] ? ORANGE_DEEP : INK}
+            strokeOpacity={occupied?.[i] ? 1 : 0.55}
+            strokeWidth={0.08}
+          />
         ))}
         {def.shape === "round" ? (
-          <circle r={item.w / 2} fill={fill(def, item.kind)} stroke={stroke} strokeWidth={strokeWidth} />
+          <circle
+            r={item.w / 2}
+            fill={selected && def.isTable ? "#fff6ee" : fill(def, item.kind)}
+            stroke={stroke}
+            strokeWidth={strokeWidth}
+            strokeDasharray={tight && !clash && !selected ? "0.5 0.25" : undefined}
+          />
         ) : (
           <rect
             x={-item.w / 2}
@@ -264,13 +293,17 @@ function Piece({
             width={item.w}
             height={item.h}
             rx={isDoor || item.kind === "pillar" ? 0 : 0.2}
-            fill={item.kind === "nogo" ? `url(#${hatchId})` : fill(def, item.kind)}
+            fill={item.kind === "nogo" ? `url(#${hatchId})` : selected && def.isTable ? "#fff6ee" : fill(def, item.kind)}
             // A door's footprint is only its swing area: outlined faintly
             // unless it's selected or in a clash, so it doesn't read as furniture.
             stroke={stroke}
             strokeOpacity={isDoor && !clash && !selected ? 0.2 : 1}
             strokeWidth={strokeWidth}
-            strokeDasharray={item.kind === "dance" || item.kind === "nogo" || item.kind === "aisle" ? "0.6 0.3" : undefined}
+            strokeDasharray={
+              item.kind === "dance" || item.kind === "nogo" || item.kind === "aisle" || (tight && !clash && !selected)
+                ? "0.6 0.3"
+                : undefined
+            }
             // The room's outline and doors still need to be grabbable where
             // the rect itself has no fill.
             pointerEvents={handlers ? "all" : undefined}

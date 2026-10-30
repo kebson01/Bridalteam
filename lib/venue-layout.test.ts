@@ -4,6 +4,7 @@ import {
   chairPositions,
   cleanDimension,
   findClashes,
+  findTightSpots,
   isApproximate,
   newItem,
   nextTableNumber,
@@ -193,5 +194,24 @@ describe("isApproximate", () => {
     expect(isApproximate("plan")).toBe(false);
     expect(isApproximate("blank")).toBe(false);
     expect(isApproximate(null)).toBe(false);
+  });
+});
+
+describe("findTightSpots", () => {
+  // A 60" round with chairs reaches 2.5 + 1.55 ft from its centre; two of them
+  // need 2 × 4.05 + 3 = 11.1 ft between centres for a 36" walkway.
+  it("flags tables whose chair backs leave less than 36 inches", () => {
+    expect(findTightSpots([item({ id: "a", x: 10 }), item({ id: "b", x: 20 })])).toEqual([{ a: "a", b: "b" }]);
+    expect(findTightSpots([item({ id: "a", x: 10 }), item({ id: "b", x: 22 })])).toEqual([]);
+  });
+
+  it("leaves clashes, the dance floor and pieces nobody sits at alone", () => {
+    expect(findTightSpots([item({ id: "a", x: 10 }), item({ id: "b", x: 12 })])).toEqual([]);
+    const dance = item({ id: "d", kind: "dance", w: 16, h: 16, x: 22, y: 10, seats: 0 });
+    expect(findTightSpots([item({ id: "a", x: 10 }), dance])).toEqual([]);
+    const bar = item({ id: "b", kind: "bar", w: 8, h: 2.5, x: 20, y: 10, seats: 0 });
+    const buffet = item({ id: "c", kind: "buffet", w: 8, h: 2.5, x: 20, y: 13, seats: 0 });
+    expect(findTightSpots([bar, buffet])).toEqual([]);
+    expect(findTightSpots([item({ id: "a", x: 10 }), bar])).toEqual([{ a: "a", b: "b" }]);
   });
 });
