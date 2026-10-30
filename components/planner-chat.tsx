@@ -5,11 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import { track } from "@/lib/events";
 import { readDraft, saveDraft, type DraftMessage } from "@/lib/planner-draft";
 import { SIGNUP_URL, LOGIN_URL } from "@/lib/config";
+import ProposalCard from "@/components/proposal-card";
+import type { Proposal } from "@/lib/planner-actions";
 
 type Role = "user" | "assistant";
 interface Msg {
   role: Role;
   content: string;
+  /** Items the planner offers to add to the connected wedding. Not persisted. */
+  proposals?: Proposal[];
+  weddingId?: string;
 }
 
 const STARTER: Msg = {
@@ -107,6 +112,16 @@ export default function PlannerChat({
   const [tier, setTier] = useState<string | null>(null);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  /**
+   * The wedding to work on, from /planner?w=<id> (the link on a wedding's
+   * dashboard). Read in an effect for the same reason as the draft: the page
+   * is prerendered. Without it the server falls back to the caller's soonest
+   * wedding, or none for a signed-out visitor.
+   */
+  const [weddingId, setWeddingId] = useState<string | null>(null);
+  useEffect(() => {
+    setWeddingId(new URLSearchParams(window.location.search).get("w"));
+  }, []);
 
   // Restored in an effect rather than as lazy initial state: this component is
   // still server-rendered, and reading sessionStorage during render would
@@ -123,7 +138,9 @@ export default function PlannerChat({
   // moment to throw their work away. The opener is dropped: it is canned, and
   // restoring it twice would show it twice.
   useEffect(() => {
-    const body = messages.filter((m) => m !== STARTER) as DraftMessage[];
+    const body: DraftMessage[] = messages
+      .filter((m) => m !== STARTER)
+      .map(({ role, content }) => ({ role, content }));
     if (body.length) saveDraft(body);
   }, [messages]);
 
@@ -148,6 +165,7 @@ export default function PlannerChat({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
+          ...(weddingId ? { weddingId } : {}),
         }),
       });
       const data = await res.json();
@@ -164,7 +182,13 @@ export default function PlannerChat({
       if (typeof data.tier === "string") setTier(data.tier);
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: data.reply ?? "Sorry, I hit a snag. Try again?" },
+        {
+          role: "assistant",
+          content: data.reply ?? "Sorry, I hit a snag. Try again?",
+          ...(Array.isArray(data.proposals) && data.proposals.length && typeof data.weddingId === "string"
+            ? { proposals: data.proposals as Proposal[], weddingId: data.weddingId }
+            : {}),
+        },
       ]);
     } catch {
       setMessages((m) => [
@@ -230,6 +254,9 @@ export default function PlannerChat({
                 }
               >
                 {m.role === "assistant" ? renderMessage(m.content) : m.content}
+                {m.proposals?.map((p, j) => (
+                  <ProposalCard key={j} proposal={p} weddingId={m.weddingId!} />
+                ))}
               </div>
             </div>
           ))}

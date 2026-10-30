@@ -492,27 +492,29 @@ export default async function WeddingOverviewPage({
           {/* Side cards */}
           <aside className="space-y-6">
             {on.has("ai") && (
-              <section className="rounded-3xl bg-gradient-to-br from-brand to-brand-dark p-6 text-white shadow-glow">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/75">
+              // Cream rather than solid orange: orange stays an accent (the
+              // button), matching the soft brand band used across the site.
+              <section className="rounded-3xl border border-brand/15 bg-brand-soft p-6 shadow-card">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b34a04]">
                   ✨ Bridal AI assistant
                 </p>
-                <h2 className="mt-2 text-lg font-light">
+                <h2 className="mt-2 text-lg font-light text-ink">
                   Stuck on something? Ask about your {wedding.city ? `${wedding.city} ` : ""}wedding.
                 </h2>
                 <ul className="mt-4 space-y-2 text-sm">
                   {[
-                    "What should we book first?",
-                    "How much should a photographer cost?",
-                    "Help me word our invitations",
+                    "Build us a checklist for the next 3 months",
+                    "Make a budget for our wedding",
+                    "Which vendors do we still need?",
                   ].map((q) => (
-                    <li key={q} className="rounded-xl bg-white/15 px-3 py-2">
+                    <li key={q} className="rounded-xl border border-stone-2 bg-white px-3 py-2 text-ink-soft">
                       “{q}”
                     </li>
                   ))}
                 </ul>
                 <Link
-                  href="/planner"
-                  className="mt-5 block rounded-full bg-white py-2.5 text-center text-sm font-semibold text-brand-text transition-transform hover:-translate-y-0.5"
+                  href={`/planner?w=${id}`}
+                  className="mt-5 block rounded-full bg-gradient-to-r from-brand to-brand-dark py-2.5 text-center text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
                 >
                   Ask Bridal AI
                 </Link>

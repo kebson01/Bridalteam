@@ -14,10 +14,11 @@ const FEATURES = [
   ["Budgets", "Realistic estimates and category breakdowns."],
   ["Checklists", "The right to-dos, shared with your team."],
   ["Vendor ideas", "Who to book first and what to ask."],
+  ["Adds it for you", "Signed in, it can add the checklist, budget, vendors or guests it suggests — one tap, nothing saved without you."],
 ];
 
 const PROMPTS = [
-  "Build me a 12-month planning timeline",
+  "Build me a checklist for the next 3 months",
   "Estimate a budget for 150 guests in Miami",
   "What should I book first?",
   "Ideas for a modern minimalist wedding",
@@ -42,7 +43,7 @@ export default function PlannerPage() {
           <h2 className="text-center text-2xl font-light uppercase tracking-wide text-ink">
             What it can do
           </h2>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {FEATURES.map(([title, body]) => (
               <div
                 key={title}

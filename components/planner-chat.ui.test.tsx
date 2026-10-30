@@ -4,6 +4,8 @@ import userEvent from "@testing-library/user-event";
 import PlannerChat from "./planner-chat";
 import { SIGNUP_URL } from "@/lib/config";
 
+vi.mock("@/app/planner/actions", () => ({ applyProposal: vi.fn() }));
+
 /**
  * What this guards is a conversion path, not a crash.
  *
@@ -138,5 +140,41 @@ describe("PlannerChat signup target", () => {
     await ask(user, "budget for 150 guests?");
     const link = await screen.findByRole("link", { name: /create my free account/i });
     expect(link.getAttribute("href")).toBe("/auth/signup");
+  });
+});
+
+describe("PlannerChat proposals", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("shows what the planner offers to add, under its reply", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockReply({
+        reply: "Here's your next three months.",
+        tier: "free",
+        weddingId: "w1",
+        proposals: [{ kind: "tasks", items: [{ title: "Book the DJ", due_date: null }] }],
+      }),
+    );
+    const user = userEvent.setup();
+    render(<PlannerChat />);
+    await ask(user, "Build us a checklist");
+
+    expect(await screen.findByText("Book the DJ")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add 1 task to my checklist" })).toBeInTheDocument();
+  });
+
+  it("sends the wedding the chat was opened for", async () => {
+    window.history.replaceState(null, "", "/planner?w=11111111-2222-3333-4444-555555555555");
+    const fetchMock = mockReply({ reply: "Sure." });
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<PlannerChat />);
+    await ask(user, "Hi");
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+    expect(body.weddingId).toBe("11111111-2222-3333-4444-555555555555");
+    window.history.replaceState(null, "", "/");
   });
 });

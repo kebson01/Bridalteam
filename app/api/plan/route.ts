@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { clientIp } from "@/lib/ai-quota";
+import { PLANNER_TOOLS, proposalFromToolUse, type Proposal } from "@/lib/planner-actions";
 
 export const runtime = "nodejs";
 
@@ -44,7 +45,24 @@ Guidelines (when answering in scope):
 - When asked about budget, give a realistic percentage breakdown and a total range, and note it varies by region.
 - When asked about vendors, suggest the categories to book and what to prioritize first.
 - Always sound encouraging. End with one friendly next step.
-- Keep responses under ~250 words unless the couple asks for deep detail.`;
+- Keep responses under ~250 words unless the couple asks for deep detail.
+
+ADDING THINGS TO THEIR WEDDING:
+When a wedding is connected (a "Connected wedding" note follows), you have tools that offer
+items the couple can add to their workspace with one tap: propose_tasks (checklist),
+propose_budget_items (budget), propose_vendors (vendor tracker) and propose_guests (guest list).
+- Use them whenever the couple asks you to make, build, create, set up or add a checklist,
+  timeline, to-do list, budget, vendor list or guest list — and whenever a list you're giving
+  them is clearly meant to become one of those. Put the full list in the tool call.
+- Alongside the tool call, write a short reply: what you prepared and why, in a few lines.
+  Don't repeat every item in the text — the couple sees them on a card with an Add button.
+- Nothing is saved until they tap Add. Never say you've added or saved anything.
+- Base deadlines on today's date and their wedding date (YYYY-MM-DD, never in the past or after
+  the wedding). Skip items they already have (listed in the note) rather than duplicating them.
+- Vendors: never invent business names. Use a name the couple gave, or a placeholder such as
+  "Photographer (to find)". Guests: only people the couple named.
+If no wedding is connected, you can't add anything: give the list in your reply and mention that
+signing in (or opening the planner from their wedding dashboard) lets you add it for them.`;
 
 // A useful, deterministic fallback so the demo works with no API key.
 function demoReply(messages: ChatMsg[]): string {
@@ -113,11 +131,59 @@ For a **rustic autumn** feel, I'd pair candlelight, eucalyptus + amber tones, an
 From there I can build your timeline, estimate a budget, and suggest which vendors to book first. What should we tackle first?`;
 }
 
+const dollars = (cents: number | null) =>
+  cents == null ? "not set" : `$${Math.round(cents / 100).toLocaleString("en-US")}`;
+
+/**
+ * The wedding the planner works on, plus a note describing it for the model.
+ * `requested` is the id the chat was opened with (/planner?w=…); without one we
+ * take the caller's soonest wedding. RLS scopes both reads to weddings the
+ * caller can reach, so a forged id simply finds nothing.
+ */
+async function connectedWedding(
+  supabase: Awaited<ReturnType<typeof supabaseServer>>,
+  requested: string | null,
+): Promise<{ id: string; note: string } | null> {
+  let query = supabase
+    .from("weddings")
+    .select("id, partner_one, partner_two, event_date, city, venue, guest_count, budget_cents, style");
+  query = requested
+    ? query.eq("id", requested)
+    : query.order("event_date", { ascending: true, nullsFirst: false });
+  const { data: w } = await query.limit(1).maybeSingle();
+  if (!w) return null;
+
+  const [tasks, vendors, guests, budget] = await Promise.all([
+    supabase.from("tasks").select("title").eq("wedding_id", w.id).is("deleted_at", null).limit(150),
+    supabase.from("wedding_vendors").select("name, category").eq("wedding_id", w.id).limit(60),
+    supabase.from("wedding_guests").select("household_name").eq("wedding_id", w.id).limit(300),
+    supabase.from("budget_items").select("label").eq("wedding_id", w.id).limit(80),
+  ]);
+  const list = (rows: unknown[] | null, pick: (r: Record<string, string>) => string) =>
+    (rows ?? []).map((r) => pick(r as Record<string, string>)).join("; ") || "none yet";
+
+  const note = [
+    `Today is ${new Date().toISOString().slice(0, 10)}.`,
+    `Connected wedding: ${[w.partner_one, w.partner_two].filter(Boolean).join(" & ") || "unnamed"}.`,
+    `Date: ${w.event_date ?? "not set"}. City: ${w.city ?? "not set"}. Venue: ${w.venue ?? "not set"}.`,
+    `Guests expected: ${w.guest_count ?? "not set"}. Total budget: ${dollars(w.budget_cents)}. Style: ${w.style ?? "not set"}.`,
+    `Existing checklist tasks: ${list(tasks.data, (r) => r.title)}.`,
+    `Existing vendors: ${list(vendors.data, (r) => [r.name, r.category].filter(Boolean).join(" — "))}.`,
+    `Existing budget items: ${list(budget.data, (r) => r.label)}.`,
+    `Guest households: ${(guests.data ?? []).length}.`,
+  ].join("\n");
+  return { id: w.id as string, note };
+}
+
 export async function POST(req: Request) {
   let messages: ChatMsg[] = [];
+  let requestedWedding: string | null = null;
   try {
     const body = await req.json();
     messages = Array.isArray(body?.messages) ? body.messages : [];
+    if (typeof body?.weddingId === "string" && /^[0-9a-f-]{36}$/i.test(body.weddingId)) {
+      requestedWedding = body.weddingId;
+    }
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
@@ -183,6 +249,10 @@ export async function POST(req: Request) {
     }
   }
 
+  // Signed-in couples get their wedding connected, and with it the tools to
+  // add things to it. Anonymous visitors get the plain chat.
+  const wedding = user ? await connectedWedding(supabase, requestedWedding) : null;
+
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -193,7 +263,8 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
-        max_tokens: 1024,
+        // Room for a full proposal: a 40-task checklist is a long tool call.
+        max_tokens: 4096,
         // The system prompt is ~2.4k tokens, identical on every request, and
         // sent ahead of the messages — so it is the whole cacheable prefix.
         // Marking it cuts those tokens to roughly a tenth of input price on a
@@ -217,7 +288,11 @@ export async function POST(req: Request) {
             text: SYSTEM_PROMPT,
             cache_control: { type: "ephemeral" },
           },
+          // Per-couple and per-day, so it goes after the cache breakpoint.
+          ...(wedding ? [{ type: "text", text: wedding.note }] : []),
         ],
+        // Constant, so they're part of the cached prefix (tools render first).
+        ...(wedding ? { tools: PLANNER_TOOLS } : {}),
         messages: clean.map((m) => ({ role: m.role, content: m.content })),
       }),
     });
@@ -236,11 +311,34 @@ export async function POST(req: Request) {
     }
 
     const data = await res.json();
-    const reply =
-      data?.content?.map((c: { text?: string }) => c.text ?? "").join("").trim() ||
-      demoReply(clean);
+    const blocks: { type?: string; text?: string; name?: string; input?: unknown }[] =
+      Array.isArray(data?.content) ? data.content : [];
 
-    return NextResponse.json({ reply, demo: false, tier: quota.tier });
+    // The propose_* calls end the turn: they're shown as cards for the couple
+    // to confirm, not executed, so no tool_result round trip is needed. A tool
+    // name we don't know is ignored.
+    const proposals: Proposal[] = wedding
+      ? blocks
+          .filter((b) => b.type === "tool_use")
+          .map((b) => proposalFromToolUse(b.name, b.input))
+          .filter((p): p is Proposal => p !== null)
+      : [];
+
+    const text = blocks
+      .filter((b) => b.type === "text")
+      .map((b) => b.text ?? "")
+      .join("")
+      .trim();
+    const reply =
+      text ||
+      (proposals.length ? "Here's what I put together — review it and tap Add to save it." : demoReply(clean));
+
+    return NextResponse.json({
+      reply,
+      demo: false,
+      tier: quota.tier,
+      ...(wedding ? { weddingId: wedding.id, proposals } : {}),
+    });
   } catch (err) {
     console.error("Anthropic API request threw:", err);
     return NextResponse.json({ reply: demoReply(clean), demo: true });
