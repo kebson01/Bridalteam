@@ -5,8 +5,11 @@ import { useState, useTransition } from "react";
 import { saveEnabledTools } from "@/app/w/[id]/tools/actions";
 import { TOOL_CATEGORIES, WEDDING_TOOLS, type ToolCategory } from "@/lib/wedding-tools";
 
-/** One summary line per tool key, worked out on the server. */
-export type ToolStats = Partial<Record<string, string>>;
+/**
+ * Per tool key, worked out on the server: a one-line summary, and whether the
+ * tool is still empty (its card then leads with the first thing to do).
+ */
+export type ToolStats = Partial<Record<string, { line: string; empty?: boolean }>>;
 
 /**
  * The couple's pinned tools, and the marketplace to add or remove more.
@@ -175,41 +178,54 @@ export default function WeddingTools({
 
       {/* Pinned tools */}
       <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {pinned.map((t) => (
-          <li
-            key={t.key}
-            className="group flex flex-col rounded-2xl border border-stone-2 bg-stone-4/50 p-5 transition-shadow hover:shadow-card"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <span aria-hidden className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg shadow-sm">
-                {t.icon}
-              </span>
-              {!t.core && (
-                <button
-                  type="button"
-                  onClick={() => toggle(t.key)}
-                  disabled={pending}
-                  aria-label={`Remove ${t.name} from your dashboard`}
-                  title="Remove from dashboard"
-                  className="rounded-full px-2 py-0.5 text-xs text-ink-soft/50 opacity-100 transition hover:bg-white hover:text-brand-text sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-            <h3 className="mt-3 font-medium text-ink">{t.name}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-ink-soft/70">{t.blurb}</p>
-            {stats[t.key] && (
-              <p className="mt-3 text-xs font-semibold text-brand-text">{stats[t.key]}</p>
-            )}
-            <Link
-              href={t.path(weddingId)}
-              className="mt-4 block rounded-full bg-white py-2 text-center text-xs font-semibold text-ink shadow-sm transition-colors hover:text-brand-text"
+        {pinned.map((t) => {
+          const stat = stats[t.key];
+          const empty = stat?.empty ?? false;
+          return (
+            <li
+              key={t.key}
+              className="group relative flex flex-col rounded-2xl border border-stone-2 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-card"
             >
-              Open {t.nav}
-            </Link>
-          </li>
-        ))}
+              <div className="flex items-start justify-between gap-2">
+                <span aria-hidden className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-wash text-xl">
+                  {t.icon}
+                </span>
+                {!t.core && (
+                  <button
+                    type="button"
+                    onClick={() => toggle(t.key)}
+                    disabled={pending}
+                    aria-label={`Remove ${t.name} from your dashboard`}
+                    title="Remove from dashboard"
+                    className="relative z-10 rounded-full px-2 py-0.5 text-xs text-ink-soft/50 opacity-100 transition hover:bg-stone-4 hover:text-brand-text sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <h3 className="mt-3 font-medium text-ink">{t.name}</h3>
+              {stat && (
+                <p className={`mt-1 text-sm font-semibold ${empty ? "text-ink-soft/50" : "text-brand-text"}`}>
+                  {stat.line}
+                </p>
+              )}
+              <p className="mt-1 text-xs leading-relaxed text-ink-soft/60">{t.blurb}</p>
+              {/* The whole card is the link; the visible button is the label. */}
+              <div className="mt-auto pt-4">
+              <Link
+                href={t.path(weddingId)}
+                className={`block rounded-full py-2 text-center text-xs font-semibold transition-colors after:absolute after:inset-0 after:rounded-2xl after:content-[''] ${
+                  empty
+                    ? "bg-gradient-to-r from-brand to-brand-dark text-white"
+                    : "border border-stone-2 text-ink group-hover:border-brand group-hover:text-brand-text"
+                }`}
+              >
+                {empty ? `${t.start} →` : `Open ${t.nav}`}
+              </Link>
+              </div>
+            </li>
+          );
+        })}
         <li>
           <button
             type="button"
@@ -218,6 +234,9 @@ export default function WeddingTools({
           >
             <span aria-hidden className="text-2xl">+</span>
             Add a tool
+            <span className="mt-1 text-xs font-normal">
+              {WEDDING_TOOLS.length - pinned.length} more in the marketplace
+            </span>
           </button>
         </li>
       </ul>

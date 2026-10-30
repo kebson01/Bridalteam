@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
-import CommunityManager from "@/components/dashboard/community-manager";
-import { listGroups, listMyEvents } from "@/app/community/actions";
 import { supabaseServer } from "@/lib/supabase/server";
+import { enabledTools } from "@/lib/wedding-tools";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -20,6 +19,11 @@ function formatDate(d: string | null) {
     month: "long",
     day: "numeric",
   });
+}
+
+function daysUntil(date: string | null) {
+  if (!date) return null;
+  return Math.ceil((new Date(`${date}T00:00:00`).getTime() - Date.now()) / 86_400_000);
 }
 
 export default async function DashboardPage() {
@@ -51,13 +55,15 @@ export default async function DashboardPage() {
   // RLS already limits this to weddings this user can reach, so no filter here.
   const { data: weddings } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, event_date, city, status")
+    .select("id, partner_one, partner_two, event_date, city, status, enabled_tools")
     .order("event_date", { ascending: true, nullsFirst: false });
 
   const isCompany = org.type === "planner_company";
 
-  // Community groups + events the user manages (independent of any wedding).
-  const [myGroups, myEvents] = await Promise.all([listGroups(), listMyEvents()]);
+  // A couple planning one wedding has nothing to choose between here, and
+  // every tool lives on the wedding's own page — so "Dashboard" takes them
+  // straight there instead of to a card they have to click through.
+  if (!isCompany && weddings?.length === 1) redirect(`/w/${weddings[0].id}`);
 
   return (
     <>
@@ -110,18 +116,18 @@ export default async function DashboardPage() {
                   </h2>
                   <p className="mt-1 text-sm text-ink-soft/70">{formatDate(w.event_date)}</p>
                   {w.city && <p className="mt-1 text-sm text-ink-soft/70">{w.city}</p>}
+                  {daysUntil(w.event_date) != null && daysUntil(w.event_date)! >= 0 && (
+                    <p className="mt-3 inline-block rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand-text">
+                      {daysUntil(w.event_date)} days to go
+                    </p>
+                  )}
                 </Link>
 
-                {/* The sections people actually come back for. Guests in
-                    particular was three levels deep and effectively unfindable
-                    — couples were reaching for Community instead. */}
+                {/* Every tool switched on for this wedding, one tap away. */}
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-stone-2 pt-4">
-                  {[
-                    ["Checklist", `/w/${w.id}/checklist`],
-                    ["Guests", `/w/${w.id}/guests`],
-                    ["Budget", `/w/${w.id}/budget`],
-                    ["Website", `/w/${w.id}/website`],
-                  ].map(([label, href]) => (
+                  {enabledTools(w.enabled_tools as string[] | null)
+                    .map((t) => [`${t.icon} ${t.nav}`, t.path(w.id)])
+                    .map(([label, href]) => (
                     <Link
                       key={label}
                       href={href}
@@ -138,23 +144,18 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mx-auto max-w-5xl px-5 pb-16" id="community">
-        <div className="mb-4">
-          <h2 className="font-display text-2xl font-semibold text-ink">Community</h2>
-          <p className="mt-1 text-sm text-ink-soft/70">
-            Create and manage your groups, invites and events here. Browsing, posting and RSVPs
-            happen on the{" "}
-            <Link href="/community" className="font-semibold text-brand-text hover:underline">
-              Community page
-            </Link>
-            .
-          </p>
-        </div>
-        <CommunityManager
-          viewerId={user.id}
-          initialGroups={myGroups ?? []}
-          initialEvents={myEvents ?? []}
-          loadFailed={myGroups === null || myEvents === null}
-        />
+        <Link
+          href="/dashboard/community"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-2 bg-white px-6 py-5 shadow-card transition-transform hover:-translate-y-0.5"
+        >
+          <div>
+            <h2 className="font-display text-xl font-semibold text-ink">🎉 Groups &amp; events</h2>
+            <p className="mt-1 text-sm text-ink-soft/70">
+              Bridesmaids, groomsmen and family groups, invites, and events like the rehearsal dinner.
+            </p>
+          </div>
+          <span className="text-sm font-semibold text-brand-text">Manage →</span>
+        </Link>
       </section>
     </>
   );

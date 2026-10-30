@@ -466,7 +466,7 @@ export default function Community({
           </nav>
 
           <Link
-            href="/dashboard#community"
+            href="/dashboard/community"
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-3 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -475,7 +475,7 @@ export default function Community({
             Create a group
           </Link>
           <p className="mt-2 text-center text-[11px] leading-snug text-ink-soft/50">
-            Create groups &amp; events and manage invites from your Dashboard.
+            Create groups &amp; events and manage invites from your wedding dashboard.
           </p>
 
           {/* Community groups and wedding guests are different things that both
@@ -690,7 +690,7 @@ export default function Community({
             <h2 className="font-display text-xl font-semibold text-ink">{scopeTitle}</h2>
             {activeGroup ? (
               <Link
-                href="/dashboard#community"
+                href="/dashboard/community"
                 className="rounded-full border border-stone-2 px-3 py-1 text-xs font-semibold text-ink-soft transition-colors hover:border-brand hover:text-brand-text"
               >
                 Members &amp; invites →

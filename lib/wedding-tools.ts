@@ -23,6 +23,8 @@ export interface WeddingTool {
   path: (weddingId: string) => string;
   /** Emoji icon — matches the emoji the rest of the site already uses. */
   icon: string;
+  /** The first thing to do in it, shown while the tool is still empty. */
+  start: string;
   /** Can't be switched off: the dashboard is built around it. */
   core?: boolean;
 }
@@ -43,6 +45,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "planning",
     path: (id) => `/w/${id}/checklist`,
     icon: "✅",
+    start: "Build your checklist",
     core: true,
   },
   {
@@ -53,6 +56,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "planning",
     path: (id) => `/w/${id}/budget`,
     icon: "💰",
+    start: "Set up your budget",
   },
   {
     key: "guests",
@@ -62,6 +66,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "guests",
     path: (id) => `/w/${id}/guests`,
     icon: "💌",
+    start: "Add your first guests",
   },
   {
     key: "vendors",
@@ -71,6 +76,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "vendors",
     path: (id) => `/w/${id}/vendors`,
     icon: "🤝",
+    start: "Add your first vendor",
   },
   {
     key: "layout",
@@ -80,6 +86,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "vendors",
     path: (id) => `/w/${id}/layout`,
     icon: "🪑",
+    start: "Draw your floor plan",
   },
   {
     key: "website",
@@ -89,6 +96,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "guests",
     path: (id) => `/w/${id}/website`,
     icon: "🌐",
+    start: "Set up your website",
   },
   {
     key: "travel",
@@ -98,6 +106,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "guests",
     path: (id) => `/w/${id}/travel`,
     icon: "✈️",
+    start: "Add hotels & travel",
   },
   {
     key: "ideas",
@@ -107,6 +116,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "planning",
     path: (id) => `/w/${id}/ideas`,
     icon: "💡",
+    start: "Save some inspiration",
   },
   {
     key: "team",
@@ -116,6 +126,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "collaborate",
     path: (id) => `/w/${id}/team`,
     icon: "👥",
+    start: "Invite your partner",
   },
   {
     key: "community",
@@ -123,8 +134,9 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     nav: "Community",
     blurb: "Bridesmaids, groomsmen and family groups, plus events like the rehearsal dinner.",
     category: "collaborate",
-    path: () => "/dashboard#community",
+    path: () => "/dashboard/community",
     icon: "🎉",
+    start: "Create a group",
   },
   {
     key: "ai",
@@ -134,6 +146,7 @@ export const WEDDING_TOOLS: WeddingTool[] = [
     category: "planning",
     path: () => "/planner",
     icon: "✨",
+    start: "Ask a question",
   },
 ];
 
