@@ -83,7 +83,7 @@ export default async function TeamPage({
       <div className="border-b border-stone-2 bg-white">
         <div className="mx-auto max-w-4xl px-5 py-8">
           <Link href={`/w/${id}`} className="text-sm font-semibold text-brand-text hover:text-brand-deep">
-            ← Back to plan
+            ← Back to overview
           </Link>
           <h1 className="mt-3 text-3xl font-light uppercase tracking-wide text-ink">Team</h1>
           {names && <p className="mt-1 text-sm text-ink-soft/70">{names}</p>}

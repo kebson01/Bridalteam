@@ -1,33 +1,52 @@
 import Link from "next/link";
+import { supabaseServer } from "@/lib/supabase/server";
+import { enabledTools, WEDDING_TOOLS } from "@/lib/wedding-tools";
+
+type NavKey = "overview" | "details" | (typeof WEDDING_TOOLS)[number]["key"];
 
 /**
- * Sub-navigation across a wedding's sections. `active` highlights the current
- * one. Server component — just links.
+ * Sub-navigation across a wedding's sections. Shows the overview, the tools
+ * the couple has switched on (see lib/wedding-tools.ts), a shortcut to the tool
+ * marketplace, and details. `active` highlights the current one.
+ *
+ * Pages that already loaded `enabled_tools` pass it in; otherwise this reads it.
  */
-export default function WeddingNav({
+export default async function WeddingNav({
   weddingId,
   active,
+  enabled,
 }: {
   weddingId: string;
-  active: "plan" | "budget" | "vendors" | "travel" | "team" | "ideas" | "website" | "details" | "guests" | "layout";
+  active: NavKey;
+  enabled?: string[] | null;
 }) {
-  const items = [
-    { key: "plan", label: "Checklist", href: `/w/${weddingId}` },
-    { key: "budget", label: "Budget", href: `/w/${weddingId}/budget` },
-    { key: "vendors", label: "Vendors", href: `/w/${weddingId}/vendors` },
-    { key: "ideas", label: "Ideas", href: `/w/${weddingId}/ideas` },
-    { key: "travel", label: "Travel", href: `/w/${weddingId}/travel` },
-    { key: "team", label: "Team", href: `/w/${weddingId}/team` },
-    { key: "guests", label: "Guests", href: `/w/${weddingId}/guests` },
-    { key: "layout", label: "Layout", href: `/w/${weddingId}/layout` },
-    { key: "website", label: "Website", href: `/w/${weddingId}/website` },
+  let stored = enabled;
+  if (stored === undefined) {
+    const supabase = await supabaseServer();
+    const { data } = await supabase
+      .from("weddings")
+      .select("enabled_tools")
+      .eq("id", weddingId)
+      .maybeSingle();
+    stored = (data?.enabled_tools as string[] | null) ?? null;
+  }
+
+  // A tool that's switched off still gets a pill while you're on its page, so
+  // following an old link never leaves you somewhere the nav doesn't know about.
+  const tools = enabledTools(stored);
+  const activeTool = WEDDING_TOOLS.find((t) => t.key === active);
+  if (activeTool && !tools.includes(activeTool)) tools.push(activeTool);
+
+  const items: { key: string; label: string; href: string }[] = [
+    { key: "overview", label: "Overview", href: `/w/${weddingId}` },
+    ...tools.map((t) => ({ key: t.key, label: t.nav, href: t.path(weddingId) })),
     // Last: details are set at onboarding and edited rarely, so this sits at the
     // end rather than competing with the day-to-day sections.
     { key: "details", label: "Details", href: `/w/${weddingId}/details` },
-  ] as const;
+  ];
 
   return (
-    // Wraps on narrow screens — eight pills no longer fit one mobile row.
+    // Wraps on narrow screens — a full set of pills doesn't fit one mobile row.
     <nav className="mt-4 flex flex-wrap gap-1">
       {items.map((it) => (
         <Link
@@ -42,6 +61,12 @@ export default function WeddingNav({
           {it.label}
         </Link>
       ))}
+      <Link
+        href={`/w/${weddingId}#tools`}
+        className="rounded-full border border-dashed border-stone-5 px-3.5 py-1.5 text-sm font-medium text-ink-soft/70 transition-colors hover:border-brand hover:text-brand-text"
+      >
+        + Add tools
+      </Link>
     </nav>
   );
 }
