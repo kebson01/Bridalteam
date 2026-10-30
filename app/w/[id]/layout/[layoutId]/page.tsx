@@ -54,6 +54,7 @@ export default async function LayoutPage({
             layoutId={layout.id}
             initialName={layout.name}
             initialImageUrl={layout.base_image_url}
+            initialSource={layout.floor_source}
             initialWidth={layout.width_ft}
             initialLength={layout.length_ft}
             initialItems={sanitizeItems(layout.items, layout.width_ft, layout.length_ft)}

@@ -5,7 +5,7 @@ import WeddingNav from "@/components/wedding-nav";
 import FlashBanner from "@/components/flash-banner";
 import { supabaseServer } from "@/lib/supabase/server";
 import { flashFrom } from "@/lib/flash";
-import { sanitizeItems, seatTotal, tableCount } from "@/lib/venue-layout";
+import { isApproximate, sanitizeItems, seatTotal, tableCount } from "@/lib/venue-layout";
 import { createLayout, listLayouts } from "./actions";
 
 export const metadata: Metadata = {
@@ -85,7 +85,14 @@ export default async function LayoutsPage({
                           )}
                         </div>
                         <div className="p-4">
-                          <p className="font-display text-lg font-semibold text-ink">{l.name}</p>
+                          <p className="flex items-center gap-2 font-display text-lg font-semibold text-ink">
+                            {l.name}
+                            {isApproximate(l.floor_source) && (
+                              <span className="rounded-full bg-amber-50 px-2 py-0.5 font-body text-xs font-semibold text-amber-800">
+                                Approximate
+                              </span>
+                            )}
+                          </p>
                           <p className="mt-1 text-sm text-ink-soft/70">
                             {l.width_ft} × {l.length_ft} ft · {tableCount(items)} tables ·{" "}
                             {seatTotal(items)} seats

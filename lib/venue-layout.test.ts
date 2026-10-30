@@ -4,6 +4,7 @@ import {
   chairPositions,
   cleanDimension,
   findClashes,
+  isApproximate,
   newItem,
   nextTableNumber,
   normalizeRotation,
@@ -160,5 +161,37 @@ describe("findClashes", () => {
     const stage = item({ id: "s", kind: "stage", w: 16, h: 8, x: 20, y: 10, seats: 0 });
     const dj = item({ id: "d", kind: "dj", w: 6, h: 2.5, x: 20, y: 10, seats: 0 });
     expect(findClashes([stage, dj], 60, 40).size).toBe(0);
+  });
+});
+
+describe("room features", () => {
+  const pillar = item({ id: "p", kind: "pillar", w: 2, h: 2, x: 10, y: 10, seats: 0, label: "Pillar" });
+
+  it("flags a table pushed onto a pillar", () => {
+    expect(findClashes([pillar, item({ id: "t", x: 11, y: 10 })], 60, 40).size).toBe(2);
+  });
+
+  it("lets room features sit on each other", () => {
+    const nogo = item({ id: "n", kind: "nogo", w: 8, h: 6, x: 10, y: 10, seats: 0, label: "No-go area" });
+    expect(findClashes([pillar, nogo], 60, 40).size).toBe(0);
+  });
+
+  it("treats a door's swing as its footprint", () => {
+    const door = item({ id: "d", kind: "door", w: 3, h: 3, x: 10, y: 2, seats: 0, label: "Door" });
+    expect(findClashes([door, item({ id: "t", x: 10, y: 5 })], 60, 40).size).toBe(2);
+  });
+
+  it("gives doors their catalogue size whatever is sent", () => {
+    const [d] = sanitizeItems([item({ kind: "doubledoor", w: 40, h: 40, seats: 0 })], 60, 40);
+    expect(d).toMatchObject({ w: 6, h: 3, seats: 0 });
+  });
+});
+
+describe("isApproximate", () => {
+  it("is true only for a floor straightened from a photo", () => {
+    expect(isApproximate("photo")).toBe(true);
+    expect(isApproximate("plan")).toBe(false);
+    expect(isApproximate("blank")).toBe(false);
+    expect(isApproximate(null)).toBe(false);
   });
 });
