@@ -15,6 +15,14 @@ on:
   pull_request:
   push:
     branches: [main]
+    # The Facebook posting run commits to main after every post (about 50 a
+    # month) to record it in the queue and the tracker. Those commits change
+    # no code, and a CI run here also triggers a production deploy (see
+    # deploy.yml), so pushes that only touch these files skip both.
+    # Pull requests still run CI whatever they touch.
+    paths-ignore:
+      - 'marketing/**'
+      - 'COUPLES-TRACKER.md'
   # Lets anyone re-run the checks from the Actions tab without pushing —
   # useful when a run failed for a reason outside the diff, or when Actions
   # was switched on after the event that should have triggered a run. The
