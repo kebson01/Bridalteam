@@ -53,6 +53,11 @@ One row per community. Check the rule before every post.
 | 2026-11-26 | Pinterest: Choosing Wedding Vendors | 6 questions for your DJ or band (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=dj-questions | scheduled | |
 | 2026-11-27 | Pinterest: Choosing Wedding Vendors | What the per-plate price includes (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=per-plate-price | scheduled | |
 | 2026-11-28 | Pinterest: Wedding Planning Checklists & Timelines | Should you do a first look? (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=first-look | scheduled | |
+| 2026-11-29 | Pinterest: Wedding Etiquette & Invitations | 3 guest list rules (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=guest-list-rules | scheduled | |
+| 2026-11-30 | Pinterest: Wedding Etiquette & Invitations | How many invitations to order (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=invitation-count | scheduled | |
+| 2026-12-01 | Pinterest: Wedding Etiquette & Invitations | Invitation wording: traditional or modern (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=invitation-wording | scheduled | |
+| 2026-12-02 | Pinterest: Choosing Wedding Vendors | 6 questions for your hair and makeup artist (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=hair-makeup-questions | scheduled | |
+| 2026-12-03 | Pinterest: Choosing Wedding Vendors | Make the cake tasting count (photo) | (scheduled 8:13 pm ET) | utm_source=pinterest, utm_content=cake-tasting | scheduled | |
 | 2026-10-29 | Facebook Page story | "5 free tools that do the math for you", 6 frames, a link sticker per tool | | utm_source=facebook, utm_medium=story, utm_content=story-2-* | drafted | |
 
 ## Weekly numbers
@@ -85,3 +90,5 @@ One row per community. Check the rule before every post.
 - 2026-10-30: Drafted Pinterest batch 7 (5 photo pins with no identifiable faces: ways to save, where couples overspend, DJ questions, what a per-plate price includes, first look) in `marketing/pinterest/2026-10-30-batch-7.md`. From now on, photos must show no identifiable faces (the owner's rule), so batch 6's photographer pin now uses a camera photo.
 - 2026-10-30: Drafted 35 Facebook Page feed posts, one per Pinterest pin from batches 1–7, in `marketing/facebook/2026-10-30-feed-posts.md`, with 1080 × 1350 images in `2026-10-30-feed/`. Links are tagged `utm_source=facebook`, `utm_content=fb-<slug>`. There's no Facebook posting tool, so the owner schedules them in Meta Business Suite, one a day from Oct 31. Waiting on the owner.
 - 2026-10-30: Scheduled Pinterest batch 7 through PinBridge (workspace `36cd9917`): one pin a day at 8:13 pm Eastern from Nov 24 to Nov 28. The images are served from raw.githubusercontent.com at PR commit cb3a78f. All of these run after the `kebsaint` token's listed expiry (Nov 23), so the account may need reconnecting in PinBridge before then.
+- 2026-10-30: Drafted Pinterest batch 8 (5 photo pins with no identifiable faces: guest list rules, how many invitations to order, invitation wording, hair and makeup questions, cake tasting) in `marketing/pinterest/2026-10-30-batch-8.md`. Added its 5 Facebook feed posts (#36–40, Dec 5–9) to `marketing/facebook/2026-10-30-feed-posts.md`.
+- 2026-10-30: Scheduled Pinterest batch 8 through PinBridge (workspace `36cd9917`): one pin a day at 8:13 pm Eastern from Nov 29 to Dec 3. The images are served from raw.githubusercontent.com at PR commit 8ce5932.

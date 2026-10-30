@@ -1,6 +1,6 @@
-# Facebook Page feed posts from every pin, batches 1–7 (2026-10-30)
+# Facebook Page feed posts from every pin, batches 1–8 (2026-10-30)
 
-These are the 35 Pinterest pins, reworked as Facebook feed posts. Each post is
+These are the Pinterest pins, reworked as Facebook feed posts. Each post is
 one image, a caption, and a link tagged for Facebook. **Nothing here is
 posted.** There's no Facebook posting tool in Claude's sessions, so the owner
 posts or schedules them from the Bridal Team Page.
@@ -19,7 +19,7 @@ Every caption is the pin's own description, taken from its batch notes in
 - **How to post:** in Meta Business Suite, choose **Create post**, add the
   image, paste the caption (the link is already at the end), and choose
   **Schedule**.
-- **Timing:** one a day. The suggested dates below run Oct 31 to Dec 4. Use
+- **Timing:** one a day. The suggested dates below run Oct 31 to Dec 9. Use
   any time that suits the Page; 12:13 pm ET keeps them off the top of the
   hour.
 
@@ -651,6 +651,93 @@ Should You Do a First Look at Your Wedding?
 A first look lets you take couple and wedding-party photos before the ceremony. That frees up the cocktail hour, shortens the gap for guests and keeps the schedule from running late. It's a personal choice, not a rule.
 
 Read the full guide: https://bridalteam.com/guides/wedding-day-timeline?utm_source=facebook&utm_medium=social&utm_content=fb-first-look
+```
+
+## 36. 3 Wedding Guest List Rules to Set Before You Invite Anyone
+
+- **Suggested date:** Sat Dec 5
+- **Image:** `08-1-guest-list-rules.jpg` (batch 8, pin 1)
+- **Caption:**
+
+```
+3 Wedding Guest List Rules to Set Before You Invite Anyone
+
+Ambiguity causes hurt feelings, so decide your policies up front and apply them evenly:
+• Plus-ones: for example, only for married, engaged or long-term partners.
+• Kids: all, none, or immediate family only. Pick one and hold it.
+• Coworkers: all or none from a team, never a select few.
+
+Read the full guide: https://bridalteam.com/guides/wedding-guest-list?utm_source=facebook&utm_medium=social&utm_content=fb-guest-list-rules
+```
+
+## 37. How Many Wedding Invitations to Order (and the Costs People Forget)
+
+- **Suggested date:** Sun Dec 6
+- **Image:** `08-2-how-many-invitations-to-order.jpg` (batch 8, pin 2)
+- **Caption:**
+
+```
+How Many Wedding Invitations to Order (and the Costs People Forget)
+
+Order by household, not by guest: one invitation per couple or family. Count your households, then add 15–20 extras for mistakes, keepsakes and last-minute additions. Reprinting a small batch later costs far more per piece.
+
+Budget for the extras too: postage (bulky or square envelopes cost more), RSVP return postage, and any inner envelopes, belly bands or wax seals.
+
+Read the full guide: https://bridalteam.com/guides/wedding-invitations-guide?utm_source=facebook&utm_medium=social&utm_content=fb-invitation-count
+```
+
+## 38. Wedding Invitation Wording: Traditional or Modern?
+
+- **Suggested date:** Mon Dec 7
+- **Image:** `08-3-invitation-wording.jpg` (batch 8, pin 3)
+- **Caption:**
+
+```
+Wedding Invitation Wording: Traditional or Modern?
+
+Formality is a spectrum:
+• Traditional wording spells everything out: "request the honour of your presence".
+• Modern wording is warmer and plainer: "together with their families, invite you to celebrate".
+
+Match the wording to the wedding's tone, and be consistent across every piece.
+
+Read the full guide: https://bridalteam.com/guides/wedding-invitations-guide?utm_source=facebook&utm_medium=social&utm_content=fb-invitation-wording
+```
+
+## 39. 6 Questions to Ask Your Wedding Hair and Makeup Artist
+
+- **Suggested date:** Tue Dec 8
+- **Image:** `08-4-hair-and-makeup-questions.jpg` (batch 8, pin 4)
+- **Caption:**
+
+```
+6 Questions to Ask Your Wedding Hair and Makeup Artist
+
+• Is a trial included, and when should we schedule it?
+• Do you come to us, and is there a travel fee?
+• How long do you allow per person, and do you bring an assistant for larger groups?
+• Do you use long-wear or airbrush products for photos and heat?
+• Can you do touch-ups later, or provide a touch-up kit?
+• What's the deposit and cancellation policy?
+
+Read the full guide: https://bridalteam.com/guides/wedding-hair-and-makeup-guide?utm_source=facebook&utm_medium=social&utm_content=fb-hair-makeup-questions
+```
+
+## 40. How to Make Your Wedding Cake Tasting Count
+
+- **Suggested date:** Wed Dec 9
+- **Image:** `08-5-wedding-cake-tasting.jpg` (batch 8, pin 5)
+- **Caption:**
+
+```
+How to Make Your Wedding Cake Tasting Count
+
+Taste before you commit, and bring your color palette and a photo or two of styles you like. Ask how the cake holds up in your venue's temperature, since buttercream can soften in summer heat. Then ask:
+• Are delivery and setup included?
+• Can you accommodate allergies or a gluten-free tier?
+• When do you need the final design and guest count?
+
+Read the full guide: https://bridalteam.com/guides/how-to-choose-a-wedding-cake?utm_source=facebook&utm_medium=social&utm_content=fb-cake-tasting
 ```
 
 ---
