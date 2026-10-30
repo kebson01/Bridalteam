@@ -4,6 +4,7 @@ import { POSTS } from "@/lib/blog";
 import { GUIDES } from "@/lib/guides";
 import { supabasePublic } from "@/lib/supabase";
 import { SHOW_COMMUNITY, SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
+import { hasIndexableContent } from "@/lib/vendor-content";
 
 /**
  * Public marketing pages, plus every published vendor listing.
@@ -35,12 +36,18 @@ import { SHOW_COMMUNITY, SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 export const revalidate = 3600;
 
 /**
- * Published vendor listings.
+ * Published vendor listings that have content of their own.
  *
- * This is the one thing a *free* listing actually buys a vendor — an indexed
- * page they control — and until now it was the one thing the sitemap never
- * mentioned. `/v/[id]` already sets real per-vendor metadata and robots.ts
- * allows it; the page was simply never submitted.
+ * An indexed page they control is what a free listing buys a vendor, but only
+ * once there's something on it: a listing with no description and no picture
+ * is left out here and marked noindex on the page itself (see
+ * lib/vendor-content.ts for why). The day a vendor fills theirs in, it joins
+ * on the next hourly revalidation.
+ *
+ * Gallery photos also make a page indexable (the page checks them), but aren't
+ * looked up here, to keep this to one query. A vendor with photos and no
+ * description or logo is rare, and Google still reaches that page through
+ * /vendors.
  *
  * Reads with the publishable key, and RLS only exposes `status = 'published'`,
  * so this cannot leak a draft listing even if the filter below were dropped.
@@ -55,10 +62,10 @@ async function vendorRoutes(): Promise<MetadataRoute.Sitemap> {
   try {
     const { data, error } = await supabasePublic()
       .from("vendor_profiles")
-      .select("org_id, updated_at")
+      .select("org_id, updated_at, description, logo_url, cover_url")
       .eq("status", "published");
     if (error) throw new Error(`${error.code}: ${error.message}`);
-    return (data ?? []).map((v) => ({
+    return (data ?? []).filter((v) => hasIndexableContent(v)).map((v) => ({
       url: `${SITE_URL}/v/${v.org_id}`,
       lastModified: v.updated_at ? new Date(v.updated_at) : new Date(),
       changeFrequency: "weekly" as const,
@@ -71,8 +78,6 @@ async function vendorRoutes(): Promise<MetadataRoute.Sitemap> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const lastModified = new Date();
-
   const routes: Array<{ path: string; priority: number }> = [
     { path: "/", priority: 1 },
     { path: "/planner", priority: 0.9 },
@@ -94,9 +99,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/terms", priority: 0.3 },
   ];
 
+  // No lastModified on these. It used to be "now", and with the hourly
+  // revalidation that told Google every page changed every hour. Google stops
+  // trusting a sitemap's dates once they're shown to be wrong, which would
+  // also cost the guides and posts below their real ones.
   const staticRoutes = routes.map(({ path, priority }) => ({
     url: `${SITE_URL}${path}`,
-    lastModified,
     changeFrequency: (path === "/" ? "weekly" : "monthly") as "weekly" | "monthly",
     priority,
   }));

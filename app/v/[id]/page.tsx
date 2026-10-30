@@ -11,6 +11,7 @@ import VendorInquiryButton from "@/components/vendor/inquiry-button";
 import TrackView from "@/components/vendor/track-view";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
+import { hasIndexableContent } from "@/lib/vendor-content";
 import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 
 export const dynamic = "force-dynamic";
@@ -37,10 +38,14 @@ async function getVendor(id: string) {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const { vendor } = await getVendor(id);
+  const { vendor, media } = await getVendor(id);
   if (!vendor) return { title: "Vendor" };
   return {
     title: `${vendor.business_name} — Wedding Vendor`,
+    // An unclaimed shell stays browsable but isn't offered to Google until it
+    // has something of its own (lib/vendor-content.ts). "follow" keeps links
+    // from it counting.
+    ...(hasIndexableContent(vendor, media.length) ? {} : { robots: { index: false, follow: true } }),
     description: vendor.description ?? `${vendor.category ?? "Wedding vendor"} on Bridal Team.`,
     openGraph: { title: vendor.business_name, url: `${SITE_URL}/v/${vendor.org_id}` },
   };

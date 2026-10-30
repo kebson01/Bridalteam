@@ -31,11 +31,11 @@ beforeEach(() => {
 });
 
 describe("sitemap", () => {
-  it("lists every published vendor as its own /v/<org id> entry", async () => {
+  it("lists each published vendor with content as its own /v/<org id> entry", async () => {
     select.mockResolvedValue({
       data: [
-        { org_id: "aaa", updated_at: "2026-09-01T00:00:00Z" },
-        { org_id: "bbb", updated_at: null },
+        { org_id: "aaa", updated_at: "2026-09-01T00:00:00Z", logo_url: "https://x/logo.png" },
+        { org_id: "bbb", updated_at: null, cover_url: "https://x/cover.jpg" },
       ],
       error: null,
     });
@@ -44,8 +44,34 @@ describe("sitemap", () => {
     expect(found).toContain("https://bridalteam.com/v/bbb");
   });
 
+  it("leaves out unclaimed listings with nothing on them", async () => {
+    // Hundreds of name-category-city shells told Google the site was mostly
+    // thin pages. They stay browsable, marked noindex (lib/vendor-content.ts).
+    select.mockResolvedValue({
+      data: [
+        { org_id: "empty", updated_at: null, description: null, logo_url: null, cover_url: null },
+        {
+          org_id: "full",
+          updated_at: null,
+          description: "Documentary wedding photography across Broward and Palm Beach since 2014.",
+        },
+      ],
+      error: null,
+    });
+    const found = await urls();
+    expect(found).not.toContain("https://bridalteam.com/v/empty");
+    expect(found).toContain("https://bridalteam.com/v/full");
+  });
+
+  it("doesn't claim the static pages changed just now", async () => {
+    select.mockResolvedValue({ data: [], error: null });
+    const { default: sitemap } = await import("./sitemap");
+    const home = (await sitemap()).find((e) => e.url === "https://bridalteam.com/");
+    expect(home?.lastModified).toBeUndefined();
+  });
+
   it("still carries the static marketing routes alongside them", async () => {
-    select.mockResolvedValue({ data: [{ org_id: "aaa", updated_at: null }], error: null });
+    select.mockResolvedValue({ data: [], error: null });
     const found = await urls();
     expect(found).toContain("https://bridalteam.com/");
     expect(found).toContain("https://bridalteam.com/guides");
@@ -85,12 +111,15 @@ describe("sitemap", () => {
     vi.unstubAllEnvs();
   });
 
-  it("keeps published vendor listings even with the directory tab hidden", async () => {
-    // A published listing is real content and the one thing a free listing
+  it("keeps vendor listings with content even with the directory tab hidden", async () => {
+    // A filled-in listing is real content and the one thing a free listing
     // actually buys a vendor, so it goes to Google whatever the index page is
     // doing. Gating these too would quietly renege on the outreach pitch in
     // VENDOR-OUTREACH.md.
-    select.mockResolvedValue({ data: [{ org_id: "aaa", updated_at: null }], error: null });
+    select.mockResolvedValue({
+      data: [{ org_id: "aaa", updated_at: null, logo_url: "https://x/logo.png" }],
+      error: null,
+    });
     const found = await urls();
     expect(found).not.toContain("https://bridalteam.com/vendors");
     expect(found).toContain("https://bridalteam.com/v/aaa");
