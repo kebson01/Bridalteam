@@ -2,15 +2,19 @@
 
 Do this only when the user asks to schedule or post.
 
-1. **Get the images onto `main`.** PinBridge fetches each image from a public
-   URL, so the batch PR must be merged first. Use the merge commit's SHA, so a
-   later change can't swap an image:
+1. **Point at a pushed commit.** PinBridge fetches each image from a public
+   URL. The images don't need to be on `main`: use the SHA of the pushed
+   commit that added them. That can be the merge commit, or the PR branch
+   commit before the merge. GitHub keeps a PR's commits reachable through
+   `refs/pull/<n>/head` even after a squash merge deletes the branch. A
+   fixed SHA also means a later change can't swap an image:
 
    ```
-   https://raw.githubusercontent.com/kebson01/Bridalteam/<merge-sha>/marketing/pinterest/<batch>/<file>.png
+   https://raw.githubusercontent.com/kebson01/Bridalteam/<commit-sha>/marketing/pinterest/<batch>/<file>.png
    ```
 
    Check that every URL returns `200 image/png` with `curl` before scheduling.
+   Batch 6 was scheduled this way, from its PR commit.
 2. **Check the workspace.** Call `list_pinterest_accounts` and note the
    `workspace_id` and the account `id`.
    - The PinBridge connection has switched workspaces before:
