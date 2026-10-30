@@ -32,8 +32,8 @@ Use the write action **Create Page Post** with:
 | `source` | The `image_urls` list, only for a photo post (1–10 URLs) |
 | `save_as_draft` | `false` |
 
-The response includes the new post's id (usually `id`, in the form
-`<pageid>_<postid>`). Pass it to `facebook-queue.mjs done`.
+The response is `{"results": [{"id": "<pageid>_<postid>"}]}`; that `id` is
+the post id. Pass it to `facebook-queue.mjs done`.
 
 Image URLs point at `main` on raw.githubusercontent.com, so the images must be
 merged before the post is due. Zapier needs each image under 4 MB, ideally
