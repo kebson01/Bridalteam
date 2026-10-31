@@ -7,6 +7,8 @@ import GetTheApp from "@/components/get-the-app";
 import type { Metadata } from "next";
 import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
+import JsonLd from "@/components/json-ld";
+import { webApplicationSchema } from "@/lib/structured-data";
 
 // Self-canonical for the homepage. og:url has to be stated here rather than
 // inherited: the root layout deliberately no longer carries a page-specific url
@@ -28,6 +30,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
+      <JsonLd data={webApplicationSchema()} />
       <Hero />
       <Pillars />
       <Highlights />

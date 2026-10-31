@@ -3,6 +3,8 @@ import PageHero from "@/components/page-hero";
 import VendorDirectoryList, { type DirectoryVendor } from "@/components/vendor-directory-list";
 import { supabaseServer } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/site";
+import JsonLd from "@/components/json-ld";
+import { vendorItemListSchema } from "@/lib/structured-data";
 import { effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 
 export const metadata = pageMetadata({
@@ -38,6 +40,7 @@ export default async function VendorsPage() {
 
   return (
     <>
+      {list.length > 0 && <JsonLd data={vendorItemListSchema(list)} />}
       <PageHero
         eyebrow="Find your team"
         title="Find your dream team"

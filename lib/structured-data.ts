@@ -30,6 +30,81 @@ export function organizationSchema() {
     description: SITE_DESCRIPTION,
     foundingDate: "2014",
     sameAs: SOCIAL_PROFILES,
+    // What we do and where, stated as data. An assistant deciding whether we
+    // belong in an answer to "wedding planning help in Florida" reads these
+    // instead of inferring them from marketing copy.
+    areaServed: [
+      { "@type": "State", name: "Florida" },
+      { "@type": "Country", name: "United States" },
+    ],
+    knowsAbout: [
+      "Wedding planning",
+      "Wedding budgets",
+      "Wedding checklists",
+      "Wedding guest lists and RSVPs",
+      "Wedding seating charts",
+      "Wedding websites",
+      "Wedding vendors",
+      "Wedding venues",
+    ],
+  };
+}
+
+/**
+ * The product itself, as free software.
+ *
+ * Organization says who we are; this says what someone gets, and that it costs
+ * nothing — the fact an assistant needs to recommend us for "free wedding
+ * planning app". The price is the couples' price; vendor plans live on
+ * /pricing and are not what this page offers.
+ */
+export function webApplicationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "@id": `${SITE_URL}/#app`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    description: SITE_DESCRIPTION,
+    applicationCategory: "LifestyleApplication",
+    operatingSystem: "Any (web browser), iOS, Android",
+    browserRequirements: "Requires JavaScript",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    featureList: [
+      "AI wedding planner",
+      "Wedding checklist with due dates",
+      "Wedding budget calculator",
+      "Guest list and RSVP tracking",
+      "Seating chart and table calculator",
+      "Free wedding website",
+      "Wedding vendor directory",
+    ],
+    publisher: { "@id": ORG_ID },
+  };
+}
+
+/**
+ * The vendor directory as an ItemList of the profile pages it links to.
+ *
+ * Lets a crawler that reads only /vendors see every listing as a distinct,
+ * citable business rather than as one page of cards. Pass only published
+ * listings — the same ones the page renders.
+ */
+export function vendorItemListSchema(
+  vendors: Array<{ org_id: string; business_name: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Wedding vendors",
+    url: `${SITE_URL}/vendors`,
+    numberOfItems: vendors.length,
+    itemListElement: vendors.map((v, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: v.business_name,
+      url: `${SITE_URL}/v/${v.org_id}`,
+    })),
   };
 }
 
