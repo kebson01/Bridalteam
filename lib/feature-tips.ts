@@ -3,7 +3,7 @@
  * components/feature-tips.tsx from the wedding nav.
  *
  * Writing them:
- *   - 3 or 4 per page. Each is a short bold lead ("Paste a whole list") and
+ *   - 2 to 4 per page. Each is a short bold lead ("Paste a whole list") and
  *     one plain sentence. If it needs two sentences, it's a help article.
  *   - Only things the page really does today, in the words its buttons use.
  *     A tip that promises a feature that moved is worse than no tip.
@@ -26,89 +26,91 @@ const TIPS: Record<string, FeatureTips> = {
   overview: {
     title: "Overview",
     items: [
-      { title: "Your next steps live here", body: "Upcoming tasks and a snapshot of each tool you use, so you can see where things stand at a glance." },
-      { title: "Only see what you need", body: "Use “+ Add tools” to switch tools on or off. Turning one off hides it from your menu without deleting anything." },
-      { title: "Plan with your partner", body: "Invite them, family or a planner from the Team tab so everyone works from the same plan." },
+      { title: "Your next steps live here", body: "“Next up” shows your soonest tasks, and you can tick them off right on this page." },
+      { title: "Only see what you need", body: "“+ Add tools” switches tools on or off. Removing one just hides it; nothing is deleted." },
+      { title: "Stuck on something?", body: "“Ask Bridal AI” can draft tasks, a budget or guest ideas, and add them to your plan when you say so." },
     ],
   },
   checklist: {
     title: "Checklist",
     items: [
-      { title: "Start from the expert plan", body: "One click builds a full checklist from “just engaged” to the big day, with deadlines worked out from your wedding date." },
-      { title: "Add your own tasks", body: "Anything specific to your wedding can sit alongside the plan, with its own due date." },
-      { title: "Deleted something by mistake?", body: "Deleted tasks go to “Recently deleted”, where you can restore them." },
-      { title: "Date changed?", body: "When you move your wedding date on the Details tab, you can shift every deadline by the same number of days." },
+      { title: "Don't start from a blank page", body: "“Build my plan with AI” or the expert checklist fills in every step, with deadlines worked out from your wedding date." },
+      { title: "Watch the labels", body: "Tasks due within two weeks say “soon”, and late ones turn red with “overdue”." },
+      { title: "Deleted something by mistake?", body: "It's in “Recently deleted” at the bottom, ready to restore." },
+      { title: "Date changed?", body: "Change it on the Details tab and your deadlines can move by the same number of days." },
     ],
   },
   budget: {
     title: "Budget",
     items: [
-      { title: "Start from a template", body: "The starter budget spreads your total across the usual categories, so you have realistic numbers to adjust." },
-      { title: "Estimated vs paid", body: "Fill in what you've paid as deposits go out, and you'll always see what's still to come." },
-      { title: "Set your total first", body: "Your overall budget lives on the Details tab; the starter budget uses it to size each category." },
+      { title: "Start from a template", body: "“Build my starter budget” splits your total into categories and adds costs couples often forget, like tips and alterations." },
+      { title: "Just type", body: "Estimated and paid amounts save on their own as soon as you click away." },
+      { title: "Keep an eye on the total", body: "If your estimates add up to more than your budget, you'll see by how much." },
+      { title: "Set your total first", body: "Your overall budget lives on the Details tab." },
     ],
   },
   guests: {
     title: "Guests",
     items: [
-      { title: "Paste a whole list", body: "Add households one per line, like “Alex & Sam Smith, alex@example.com, 2”. Email and seat count are optional." },
-      { title: "One RSVP link per household", body: "Each household gets a private link, so replies land on the right row and nobody can answer for someone else." },
-      { title: "Took a reply by phone?", body: "Record it yourself; it's saved exactly as if the guest had used their link." },
-      { title: "Menu choices", body: "Add your dishes and guests pick one per person when they RSVP, so your caterer counts are done for you." },
+      { title: "Paste a whole list", body: "One household per line, like “Alex & Sam Smith, alex@example.com, 2”. Email and seats are optional." },
+      { title: "Invite in one click", body: "“Send invitations” emails everyone's private RSVP link; “Remind” nudges anyone who hasn't replied (at most every 3 days)." },
+      { title: "Took a reply by phone?", body: "Open the household, choose Edit, and fill in “Their reply” for them." },
+      { title: "Caterer counts, done", body: "Add dishes under Menu and guests pick one when they RSVP; “Export for caterer” downloads the list." },
     ],
   },
   vendors: {
     title: "Vendors",
     items: [
-      { title: "Track every vendor in one place", body: "Move each from considering to contacted to booked as things progress." },
-      { title: "Never miss a payment", body: "Add the cost, what you've paid and the next payment date so nothing sneaks up on you." },
-      { title: "Keep the details handy", body: "Contact name, phone, email, contract status and notes all sit with the vendor." },
+      { title: "Track where each one stands", body: "Move vendors from Considering to Contacted to Booked as things progress." },
+      { title: "Never miss a payment", body: "Add the cost and what you've paid to see what's remaining; set “Next payment due” under Contact, contract & dates." },
+      { title: "No save button needed", body: "Every field saves on its own when you click away." },
     ],
   },
   layout: {
     title: "Layout",
     items: [
-      { title: "Draw it to scale", body: "Set your room's size in feet, then add tables, a dance floor, bar and more from standard rental sizes." },
-      { title: "Watch for clashes", body: "Pieces that overlap, or sit too close to walk between, are flagged so you can fix them before the day." },
-      { title: "Seat guests on the plan", body: "Table labels like “4” or “Head table” are what your guests are seated by, so name tables the way you'll refer to them." },
+      { title: "Start from what you have", body: "Upload the venue's floor plan, snap a photo of the room, or draw a blank room to size." },
+      { title: "Tap or drag to add", body: "Select a piece and use arrow keys to nudge it, R to rotate, and Ctrl/Cmd+Z to undo." },
+      { title: "Room to walk", body: "Overlaps and gaps under 36″ behind chairs are flagged, so problems show up before the day does." },
+      { title: "Seat guests here", body: "Switch to Seating and tap a table to fill its chairs. Guests are matched to tables by name, so renaming a table moves its guests too." },
     ],
   },
   website: {
     title: "Website",
     items: [
-      { title: "Design first, then publish", body: "Start from a theme, describe it to the Bridal Team AI, paste your own code, or connect ChatGPT or Claude." },
-      { title: "Publish & go live", body: "Publishing switches your website on and gives it an address from your names; change the address any time in Settings." },
-      { title: "Your details fill in themselves", body: "Names, date, venue, countdown and registry come from your account, so the page stays current when they change." },
-      { title: "Nothing is lost", body: "Every save is kept as a version you can restore, and you can download a copy of your site from the preview." },
+      { title: "Four ways to design", body: "Pick a theme, describe it to the Bridal Team AI, paste your own code, or connect ChatGPT or Claude." },
+      { title: "Publish & go live", body: "Publishing switches your site on and gives it an address from your names; change the address in Settings." },
+      { title: "Your details fill in themselves", body: "Names, date, countdown, venue and registry come from your account and stay up to date." },
+      { title: "Nothing is lost", body: "Restore any earlier version from Version history, or keep a copy with “Download my site”." },
     ],
   },
   travel: {
     title: "Travel",
     items: [
-      { title: "Hotel blocks", body: "Add the hotel, booking link, group code, rate and book-by date so guests have everything in one place." },
-      { title: "Getting around", body: "Shuttles, flights and parking go under transport; anything else guests should know goes under info." },
+      { title: "Hotel blocks", body: "Add the booking link, room-block code, nightly rate and reserve-by date so guests have everything in one place." },
+      { title: "Getting around", body: "Shuttles and flights go under Transportation; anything else guests should know goes in Travel notes." },
     ],
   },
   ideas: {
     title: "Ideas",
     items: [
-      { title: "Save as you browse", body: "Inspiration you save around Bridal Team collects here: dresses, décor, cakes and more." },
-      { title: "Share the vision", body: "Your team sees the same board, which makes it easier to show a vendor or your partner what you mean." },
+      { title: "Save as you browse", body: "Tap ♥ on anything in Inspiration and it lands here." },
+      { title: "Share the vision", body: "Everyone on your wedding sees the same board, handy for showing a vendor what you mean." },
     ],
   },
   team: {
     title: "Team",
     items: [
-      { title: "Plan together", body: "Invite your partner, family or wedding party by email so everyone works from the same plan." },
-      { title: "Working with a planner?", body: "A connect code links your wedding to their Bridal Team account without sharing your password." },
-      { title: "You stay in control", body: "Remove someone's access at any time from this page." },
+      { title: "Plan together", body: "“Send invite” to your partner, family or wedding party, with a role like Maid of Honor or Best Man." },
+      { title: "No email? Share the link", body: "Every invite also gives you a link you can text instead." },
+      { title: "Working with a planner?", body: "“Create a connect code” and they enter it to join your wedding, no password sharing." },
     ],
   },
   details: {
     title: "Details",
     items: [
-      { title: "Everything starts here", body: "Your date, venue, guest count and budget feed your checklist, starter budget and website." },
-      { title: "Moving the date?", body: "Tick the option to shift your checklist deadlines by the same number of days." },
+      { title: "Everything starts here", body: "Your date, venue, guest count and budget shape your checklist, budget and AI suggestions." },
+      { title: "Moving the date?", body: "Leave “Also move your existing deadlines” ticked and every checklist date shifts with it." },
     ],
   },
 };
