@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PageHero from "@/components/page-hero";
+import RecommendVendor from "@/components/recommend-vendor";
 import VendorDirectoryList, { type DirectoryVendor } from "@/components/vendor-directory-list";
 import { supabaseServer } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/site";
@@ -19,13 +20,16 @@ export default async function VendorsPage() {
 
   // Only published vendor profiles are visible (RLS enforces this too). We pull
   // the org's plan so Featured vendors can be surfaced first.
-  const { data: vendors } = await supabase
-    .from("vendor_profiles")
-    .select(
-      `org_id, business_name, category, description, city, region, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
-    )
-    .eq("status", "published")
-    .order("business_name");
+  const [{ data: vendors }, { data: auth }] = await Promise.all([
+    supabase
+      .from("vendor_profiles")
+      .select(
+        `org_id, business_name, category, description, city, region, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
+      )
+      .eq("status", "published")
+      .order("business_name"),
+    supabase.auth.getUser(),
+  ]);
 
   const list: DirectoryVendor[] = (vendors ?? [])
     .map((v) => ({
@@ -64,6 +68,8 @@ export default async function VendorsPage() {
         ) : (
           <VendorDirectoryList vendors={list} />
         )}
+
+        <RecommendVendor signedIn={Boolean(auth.user)} />
       </section>
     </>
   );

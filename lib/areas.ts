@@ -161,6 +161,10 @@ const CITY_METRO: Record<string, MetroId> = {
   lakeland: "orlando",
   davenport: "orlando",
   "haines city": "orlando",
+  "lake wales": "orlando",
+  // Highlands County. Bok Tower Gardens' vendor list is where its vendors
+  // come from, and that list is a Central Florida one.
+  sebring: "orlando",
 
   // Tampa Bay
   tampa: "tampa",
@@ -225,6 +229,9 @@ const CITY_METRO: Record<string, MetroId> = {
   "palm bay": "space-coast",
   cocoa: "space-coast",
   "cocoa beach": "space-coast",
+  // Indian River County: the Treasure Coast's north end, closer in practice
+  // to Melbourne than to Palm Beach.
+  "vero beach": "space-coast",
   rockledge: "space-coast",
   "merritt island": "space-coast",
   "satellite beach": "space-coast",
@@ -258,6 +265,7 @@ const CITY_METRO: Record<string, MetroId> = {
   "ponte vedra": "jacksonville",
   "ponte vedra beach": "jacksonville",
   "st augustine": "jacksonville",
+  "st. augustine": "jacksonville",
   "saint augustine": "jacksonville",
   "st augustine beach": "jacksonville",
   "saint augustine beach": "jacksonville",
