@@ -1,5 +1,11 @@
 # Florida vendor prospects
 
+> **New vendors no longer go in this file.** Since 2026-10-31 every source
+> (web search, venue lists, Google Places, county tax rolls, DBPR licences,
+> couples' recommendations) lands in `public.vendor_leads` and is imported from
+> there. See `VENDOR-SOURCING.md`. This file remains the record of the first
+> 931 rows.
+
 A research shortlist for the founding-vendor outreach in `VENDOR-OUTREACH.md`.
 931 real businesses across 34 categories and seven metros, sourced from public
 web search. South Florida came first and is still much the deepest; the rest

@@ -313,3 +313,14 @@ describe("a city is not a region", () => {
     }
   });
 });
+
+describe("cities added for the 2026-10-31 lead import", () => {
+  it.each([
+    ["Vero Beach", "space-coast"],
+    ["Sebring", "orlando"],
+    ["Lake Wales", "orlando"],
+    ["St. Augustine", "jacksonville"],
+  ])("%s -> %s", (city, metro) => {
+    expect(metroOf(city)).toBe(metro);
+  });
+});
