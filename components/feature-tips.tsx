@@ -96,7 +96,7 @@ export default function FeatureTips({ page, tips }: { page: string; tips: Tips }
         <section
           id={panelId}
           aria-label={`How ${tips.title} works`}
-          className="order-last mt-2 w-full basis-full rounded-2xl border border-brand/25 bg-brand-wash/70 px-5 py-4"
+          className="order-last mt-2 w-full basis-full rounded-2xl border border-[#f6dcc3] bg-brand-wash px-5 py-4"
         >
           <div className="flex items-start justify-between gap-4">
             <p className="text-sm font-semibold text-ink">{tips.title}: quick tips</p>
@@ -113,7 +113,7 @@ export default function FeatureTips({ page, tips }: { page: string; tips: Tips }
               <li key={t.title} className="flex gap-2.5 text-sm leading-relaxed">
                 <span className="mt-[0.55rem] h-1.5 w-1.5 flex-none rounded-full bg-brand" aria-hidden="true" />
                 <span>
-                  <span className="font-semibold text-ink">{t.title}.</span>{" "}
+                  <span className="font-semibold text-ink">{/[.?!]$/.test(t.title) ? t.title : `${t.title}.`}</span>{" "}
                   <span className="text-ink-soft/85">{t.body}</span>
                 </span>
               </li>
