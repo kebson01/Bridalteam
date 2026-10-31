@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { enabledTools, WEDDING_TOOLS } from "@/lib/wedding-tools";
+import FeatureTips from "@/components/feature-tips";
+import { tipsFor } from "@/lib/feature-tips";
 
 type NavKey = "overview" | "details" | (typeof WEDDING_TOOLS)[number]["key"];
 
@@ -47,9 +49,12 @@ export default async function WeddingNav({
     { key: "details", label: "Details", href: `/w/${weddingId}/details` },
   ];
 
+  // "How it works" for this page, at the end of the row (components/feature-tips.tsx).
+  const tips = tipsFor(active);
+
   return (
     // Wraps on narrow screens — a full set of pills doesn't fit one mobile row.
-    <nav className="mt-4 flex flex-wrap gap-1">
+    <nav className="mt-4 flex flex-wrap items-center gap-1">
       {items.map((it) => (
         <Link
           key={it.key}
@@ -69,6 +74,7 @@ export default async function WeddingNav({
       >
         + Add tools
       </Link>
+      {tips && <FeatureTips page={active} tips={tips} />}
     </nav>
   );
 }
