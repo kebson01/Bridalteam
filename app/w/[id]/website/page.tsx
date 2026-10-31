@@ -6,6 +6,9 @@ import WeddingNav from "@/components/wedding-nav";
 import WebsiteManager from "@/components/wedding/website-manager";
 import RegistryManager from "@/components/wedding/registry-manager";
 import CoverPhoto from "@/components/wedding/cover-photo";
+import SiteBuilder from "@/components/wedding/site-builder";
+import { listSiteKeys, listSiteVersions } from "@/app/w/[id]/website/site-actions";
+import { mcpEnabled } from "@/lib/flags";
 import { listRegistryLinks } from "@/app/wedding/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
@@ -16,6 +19,8 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
+// The AI designer writes a whole page in one call; give its server action room.
+export const maxDuration = 180;
 
 export default async function WeddingWebsitePage({
   params,
@@ -32,12 +37,21 @@ export default async function WeddingWebsitePage({
 
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position")
+    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position, site_mode")
     .eq("id", id)
     .maybeSingle();
   if (!wedding) notFound();
 
-  const registry = await listRegistryLinks(id);
+  const [registry, { data: site }, versions, keys] = await Promise.all([
+    listRegistryLinks(id),
+    supabase
+      .from("wedding_custom_sites")
+      .select("draft_html, draft_source, draft_updated_at, live_updated_at")
+      .eq("wedding_id", id)
+      .maybeSingle(),
+    listSiteVersions(id),
+    listSiteKeys(id),
+  ]);
   const names = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ") || "Your wedding";
 
   return (
@@ -62,6 +76,24 @@ export default async function WeddingWebsitePage({
             initialPosition={wedding.cover_position ?? 50}
           />
 
+          <SiteBuilder
+            weddingId={id}
+            siteUrl={SITE_URL}
+            mcpOn={mcpEnabled()}
+            aiOn={Boolean(process.env.ANTHROPIC_API_KEY)}
+            websitePublished={Boolean(wedding.website_published)}
+            slug={wedding.public_slug ?? null}
+            initialMode={wedding.site_mode === "custom" ? "custom" : "standard"}
+            initialDraft={site?.draft_html ?? null}
+            initialDraftSource={site?.draft_source ?? null}
+            initialDraftAt={site?.draft_updated_at ?? null}
+            initialLiveAt={site?.live_updated_at ?? null}
+            initialVersions={versions}
+            initialKeys={keys}
+          />
+
+          {/* Registry links show on the standard page and wherever a custom
+              site uses data-bt="registry", so they're managed once, here. */}
           <RegistryManager weddingId={id} initialLinks={registry} />
 
           {/* RSVPs live on the Guests tab now.

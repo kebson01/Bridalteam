@@ -14,7 +14,9 @@
  * proposal is shown, and again before it's written.
  */
 
-export type ProposalKind = "tasks" | "budget" | "vendors" | "guests";
+import { THEME_IDS, sanitizeBrief, type SiteBrief } from "@/lib/custom-site/templates";
+
+export type ProposalKind = "tasks" | "budget" | "vendors" | "guests" | "website";
 
 export interface TaskItem {
   title: string;
@@ -40,10 +42,12 @@ export type Proposal =
   | { kind: "tasks"; items: TaskItem[] }
   | { kind: "budget"; items: BudgetItem[] }
   | { kind: "vendors"; items: VendorItem[] }
-  | { kind: "guests"; items: GuestItem[] };
+  | { kind: "guests"; items: GuestItem[] }
+  /** A one-item list: the brief for a themed guest website (lib/custom-site/templates.ts). */
+  | { kind: "website"; items: SiteBrief[] };
 
 /** Caps per proposal: enough for a full plan, small enough to review. */
-const MAX_ITEMS: Record<ProposalKind, number> = { tasks: 60, budget: 30, vendors: 25, guests: 100 };
+const MAX_ITEMS: Record<ProposalKind, number> = { tasks: 60, budget: 30, vendors: 25, guests: 100, website: 1 };
 
 /**
  * Tool definitions sent to the Messages API. Deterministic and constant, so
@@ -144,6 +148,36 @@ export const PLANNER_TOOLS = [
       required: ["guests"],
     },
   },
+  {
+    name: "propose_website",
+    description:
+      "Offer a ready-made guest wedding website in one of Bridal Team's themes, which the couple can save as their site draft with one tap. Use when they ask you to make, design or set up their wedding website. The page fills in their names, date, location, cover photo, registry and RSVP note automatically — put only what they told you (or clearly-general wording) in the brief; never invent times, hotels or dress codes. Nothing is saved until they confirm, and nothing is shown to guests until they publish.",
+    input_schema: {
+      type: "object",
+      properties: {
+        theme: { type: "string", enum: THEME_IDS, description: "classic, garden, modern, tropical or romantic — match their style." },
+        headline: { type: "string", description: "A short line under the hero, e.g. 'We can't wait to celebrate with you'." },
+        story: { type: "string", description: "Optional: their story in a few short paragraphs, from what they told you." },
+        schedule: {
+          type: "array",
+          description: "Optional: the day's events they gave you.",
+          items: {
+            type: "object",
+            properties: { time: { type: "string" }, title: { type: "string" }, detail: { type: "string" } },
+            required: ["title"],
+          },
+        },
+        dress_code: { type: "string" },
+        travel: { type: "string", description: "Optional: travel and hotel notes they gave you." },
+        faq: {
+          type: "array",
+          items: { type: "object", properties: { q: { type: "string" }, a: { type: "string" } }, required: ["q", "a"] },
+        },
+        accent: { type: "string", description: "Optional accent colour as #rrggbb, if they named their colours." },
+      },
+      required: ["theme"],
+    },
+  },
 ];
 
 const TOOL_KIND: Record<string, ProposalKind> = {
@@ -151,6 +185,7 @@ const TOOL_KIND: Record<string, ProposalKind> = {
   propose_budget_items: "budget",
   propose_vendors: "vendors",
   propose_guests: "guests",
+  propose_website: "website",
 };
 const TOOL_LIST_KEY: Record<string, string> = {
   propose_tasks: "tasks",
@@ -187,6 +222,8 @@ function cleanItem(kind: ProposalKind, raw: unknown) {
       const name = str(r.name, 200);
       return name ? { name, category: orNull(str(r.category, 80)), notes: orNull(str(r.notes, 1000)) } : null;
     }
+    case "website":
+      return sanitizeBrief(raw);
     case "guests": {
       const household_name = str(r.household_name, 200);
       const seats = Math.round(Number(r.seats ?? 1));
@@ -203,7 +240,7 @@ function cleanItem(kind: ProposalKind, raw: unknown) {
 
 /** Validates a proposal of a known kind; null when nothing usable is left. */
 export function sanitizeProposal(kind: unknown, items: unknown): Proposal | null {
-  if (kind !== "tasks" && kind !== "budget" && kind !== "vendors" && kind !== "guests") return null;
+  if (kind !== "tasks" && kind !== "budget" && kind !== "vendors" && kind !== "guests" && kind !== "website") return null;
   if (!Array.isArray(items)) return null;
   const clean = items
     .slice(0, MAX_ITEMS[kind])
@@ -215,6 +252,8 @@ export function sanitizeProposal(kind: unknown, items: unknown): Proposal | null
 /** Turns one `tool_use` block from the API into a proposal, or null. */
 export function proposalFromToolUse(name: unknown, input: unknown): Proposal | null {
   if (typeof name !== "string" || !(name in TOOL_KIND)) return null;
+  // The website brief is the whole input, not a list inside it.
+  if (name === "propose_website") return sanitizeProposal("website", [input]);
   const list = input && typeof input === "object" ? (input as Record<string, unknown>)[TOOL_LIST_KEY[name]] : null;
   return sanitizeProposal(TOOL_KIND[name], list);
 }
@@ -225,4 +264,5 @@ export const PROPOSAL_TARGET: Record<ProposalKind, { label: string; noun: [strin
   budget: { label: "budget", noun: ["budget item", "budget items"], path: (id) => `/w/${id}/budget` },
   vendors: { label: "vendors", noun: ["vendor", "vendors"], path: (id) => `/w/${id}/vendors` },
   guests: { label: "guest list", noun: ["household", "households"], path: (id) => `/w/${id}/guests` },
+  website: { label: "guest website", noun: ["website draft", "website drafts"], path: (id) => `/w/${id}/website` },
 };

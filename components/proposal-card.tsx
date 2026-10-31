@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { applyProposal } from "@/app/planner/actions";
 import { PROPOSAL_TARGET, type Proposal } from "@/lib/planner-actions";
 import { shortDate } from "@/lib/dates";
+import { THEMES } from "@/lib/custom-site/templates";
 
 function money(cents: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(
@@ -26,6 +27,18 @@ function describe(p: Proposal, i: number): [string, string | null] {
     case "vendors": {
       const v = p.items[i];
       return [v.name, v.category];
+    }
+    case "website": {
+      const w = p.items[i];
+      const parts = [
+        w.schedule.length && "schedule",
+        w.story && "your story",
+        (w.dress_code || w.travel) && "details",
+        w.faq.length && "FAQ",
+        "RSVP",
+        "registry",
+      ].filter(Boolean);
+      return [`${THEMES[w.theme].label} theme website${w.headline ? ` — “${w.headline}”` : ""}`, parts.join(" · ")];
     }
     case "guests": {
       const g = p.items[i];
@@ -64,10 +77,12 @@ export default function ProposalCard({ proposal, weddingId }: { proposal: Propos
     return (
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-brand/30 bg-brand-wash px-4 py-3 text-sm">
         <span className="font-medium text-ink">
-          ✓ Added {result.added} {target.noun[result.added === 1 ? 0 : 1]} to your {target.label}
+          {proposal.kind === "website"
+            ? "✓ Saved as your website draft"
+            : `✓ Added ${result.added} ${target.noun[result.added === 1 ? 0 : 1]} to your ${target.label}`}
         </span>
         <Link href={result.href} className="font-semibold text-brand-text hover:underline">
-          View {target.label} →
+          {proposal.kind === "website" ? "Preview & publish →" : `View ${target.label} →`}
         </Link>
       </div>
     );
@@ -119,7 +134,7 @@ export default function ProposalCard({ proposal, weddingId }: { proposal: Propos
         disabled={pending || count === 0}
         className="mt-3 w-full rounded-full bg-gradient-to-r from-brand to-brand-dark py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
       >
-        {pending ? "Adding…" : `Add ${count} ${noun} to my ${target.label}`}
+        {pending ? "Adding…" : proposal.kind === "website" ? "Save as my website draft" : `Add ${count} ${noun} to my ${target.label}`}
       </button>
     </div>
   );

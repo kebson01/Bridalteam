@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicWedding, getPublicRegistry } from "@/app/wedding/actions";
+import { supabaseServer } from "@/lib/supabase/server";
+import { SANDBOX_IFRAME_ATTR } from "@/lib/custom-site/serve";
 
 export const dynamic = "force-dynamic";
 
@@ -42,8 +45,35 @@ export default async function PublicWeddingPage({
   const w = await getPublicWedding(slug);
   if (!w) notFound();
 
-  const registry = await getPublicRegistry(slug);
   const names = coupleNames(w.partner_one, w.partner_two);
+
+  // A couple who published their own site gets it instead of this layout.
+  // The code itself never runs on this page: it's framed from /sandbox/,
+  // which serves it with an opaque origin (lib/custom-site/serve.ts).
+  const supabase = await supabaseServer();
+  const { data: customHtml } = await supabase.rpc("get_public_custom_site", { p_slug: slug });
+  if (typeof customHtml === "string" && customHtml) {
+    return (
+      <div className="fixed inset-0 z-[60] flex flex-col bg-white">
+        <iframe
+          src={`/sandbox/wedding/${encodeURIComponent(slug)}`}
+          title={`${names} — wedding website`}
+          sandbox={SANDBOX_IFRAME_ATTR}
+          referrerPolicy="no-referrer"
+          className="min-h-0 w-full flex-1 border-0"
+        />
+        <div className="flex flex-none items-center justify-center gap-3 border-t border-stone-2 bg-white px-4 py-1.5 text-[11px] text-ink-soft/60">
+          <Link href="/" className="hover:text-brand-text">Made with Bridal Team</Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/contact" className="hover:text-brand-text">
+            Report this page
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const registry = await getPublicRegistry(slug);
   const date = formatDate(w.event_date);
   const location = [w.venue, w.city, w.region].filter(Boolean).join(" · ");
 

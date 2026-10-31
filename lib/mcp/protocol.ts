@@ -80,7 +80,11 @@ function negotiateVersion(requested: unknown): string {
  * Handles one JSON-RPC message. Returns null for a notification (no `id`),
  * which the transport answers with 202 and no body.
  */
-export async function handleMessage(message: unknown, tools: ToolRegistry): Promise<RpcResponse | null> {
+export async function handleMessage(
+  message: unknown,
+  tools: ToolRegistry,
+  server: { info: typeof SERVER_INFO; instructions: string } = { info: SERVER_INFO, instructions: SERVER_INSTRUCTIONS },
+): Promise<RpcResponse | null> {
   if (!isObject(message) || message.jsonrpc !== "2.0" || typeof message.method !== "string") {
     const id = isObject(message) && (typeof message.id === "string" || typeof message.id === "number") ? message.id : null;
     return fail(id, JSONRPC_ERRORS.invalidRequest, "Invalid JSON-RPC request.");
@@ -100,8 +104,8 @@ export async function handleMessage(message: unknown, tools: ToolRegistry): Prom
       return ok(id, {
         protocolVersion: negotiateVersion(params.protocolVersion),
         capabilities: { tools: { listChanged: false } },
-        serverInfo: SERVER_INFO,
-        instructions: SERVER_INSTRUCTIONS,
+        serverInfo: server.info,
+        instructions: server.instructions,
       });
 
     case "ping":
