@@ -14,6 +14,7 @@ import {
   type SiteKey,
   type SiteVersion,
 } from "@/app/w/[id]/builder/site-actions";
+import { setWeddingWebsite } from "@/app/wedding/actions";
 import { PLACEHOLDERS, MAX_SITE_BYTES } from "@/lib/custom-site/runtime";
 import { THEMES, THEME_IDS, type ThemeId } from "@/lib/custom-site/templates";
 import { SANDBOX_IFRAME_ATTR } from "@/lib/custom-site/serve";
@@ -59,7 +60,9 @@ export interface SiteBuilderProps {
   aiOn: boolean;
   websitePublished: boolean;
   slug: string | null;
-  /** How many registry links the couple has; they're managed on the Guest website tab. */
+  /** Kept as-is when publishing switches the website on. */
+  welcome: string;
+  /** How many registry links the couple has; they're managed in Settings. */
   registryCount: number;
   /** For the "comes down on" date (lib/custom-site/retention.ts). */
   eventDate: string | null;
@@ -83,6 +86,8 @@ export default function SiteBuilder(props: SiteBuilderProps) {
   const [liveAt, setLiveAt] = useState(props.initialLiveAt);
   const [versions, setVersions] = useState(props.initialVersions);
   const [keys, setKeys] = useState(props.initialKeys);
+  const [websiteOn, setWebsiteOn] = useState(props.websitePublished);
+  const [slug, setSlug] = useState(props.slug);
   const [tab, setTab] = useState<Tab>(props.initialDraft ? "code" : "themes");
   const [theme, setTheme] = useState<ThemeId>("classic");
   const [headline, setHeadline] = useState("");
@@ -98,7 +103,8 @@ export default function SiteBuilder(props: SiteBuilderProps) {
 
   const hasDraft = draft.trim().length > 0;
   const unpublishedChanges = hasDraft && (!liveAt || (draftAt !== null && Date.parse(draftAt) > Date.parse(liveAt)));
-  const liveUrl = props.slug ? `${siteUrl}/wedding/${props.slug}` : null;
+  const liveUrl = slug ? `${siteUrl}/wedding/${slug}` : null;
+  const settingsHref = `/w/${weddingId}/website?section=settings`;
   const codeBytes = new TextEncoder().encode(code).length;
   const mcpBase = `${siteUrl}/api/mcp/site`;
 
@@ -180,7 +186,7 @@ export default function SiteBuilder(props: SiteBuilderProps) {
           <span className="text-xs text-ink-soft/70">{status}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {liveUrl && props.websitePublished && guestsSeeCustom && (
+          {liveUrl && websiteOn && guestsSeeCustom && (
             <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-brand-text hover:underline">
               View live site ↗
             </a>
@@ -190,20 +196,44 @@ export default function SiteBuilder(props: SiteBuilderProps) {
             className={btn}
             disabled={busy !== null || !unpublishedChanges}
             onClick={() =>
-              run("publish", () => publishCustomSite(weddingId), () => {
-                const now = new Date().toISOString();
-                setLiveAt(now);
-                setMode("custom");
-                setMsg({
-                  kind: "ok",
-                  text: props.websitePublished
-                    ? "Published — guests now see your custom site."
-                    : "Published. Turn on your guest website on the Website tab so guests can see it.",
-                });
-              })
+              run(
+                "publish",
+                async () => {
+                  const published = await publishCustomSite(weddingId);
+                  if (!published.ok || websiteOn) return { ...published, address: slug };
+                  // The website was off: switch it on too, so publishing means
+                  // guests can actually see it. The first time, this also picks
+                  // a web address from the couple's names.
+                  const on = await setWeddingWebsite({ weddingId, published: true, welcome: props.welcome });
+                  return on.ok
+                    ? { ok: true as const, address: on.slug ?? slug, turnedOn: true }
+                    : { ok: true as const, address: slug, turnOnFailed: true };
+                },
+                (r: { address: string | null; turnedOn?: boolean; turnOnFailed?: boolean }) => {
+                  setLiveAt(new Date().toISOString());
+                  setMode("custom");
+                  if (r.turnedOn) setWebsiteOn(true);
+                  if (r.address) setSlug(r.address);
+                  const where = r.address ? ` at ${siteUrl.replace(/^https?:\/\//, "")}/wedding/${r.address}` : "";
+                  setMsg({
+                    kind: "ok",
+                    text: r.turnOnFailed
+                      ? "Published, but we couldn't switch your website on. Turn it on in Settings."
+                      : r.turnedOn
+                        ? `Your website is live${where}. You can change the address in Settings.`
+                        : "Published — guests now see your custom site.",
+                  });
+                },
+              )
             }
           >
-            {busy === "publish" ? "Checking & publishing…" : hasDraft && !unpublishedChanges ? "Published" : "Publish to guests"}
+            {busy === "publish"
+              ? "Checking & publishing…"
+              : hasDraft && !unpublishedChanges
+                ? "Published"
+                : websiteOn
+                  ? "Publish to guests"
+                  : "Publish & go live"}
           </button>
         </div>
       </div>
@@ -212,13 +242,22 @@ export default function SiteBuilder(props: SiteBuilderProps) {
         {retentionNote(props.eventDate, props.createdAt)} Download a copy any time from the preview.
       </p>
 
-      {!props.websitePublished && (
+      {!websiteOn && (
         <p className="rounded-lg bg-stone-4 px-3 py-2 text-xs text-ink-soft/80">
-          Your guest website is turned off, so guests can&rsquo;t see either page yet. Turn it on in the{" "}
-          <a href={`/w/${weddingId}/website`} className="font-semibold text-brand-text hover:underline">
-            Website tab
-          </a>{" "}
-          when you&rsquo;re ready.
+          Your website isn&rsquo;t live yet.{" "}
+          {hasDraft
+            ? "Publishing your design switches it on"
+            : "Publish a design, or switch on the standard page in Settings,"}{" "}
+          {slug ? (
+            <>
+              at <span className="font-semibold text-ink">{siteUrl.replace(/^https?:\/\//, "")}/wedding/{slug}</span>.
+            </>
+          ) : (
+            "and gives it a web address from your names."
+          )}{" "}
+          <a href={settingsHref} className="font-semibold text-brand-text hover:underline">
+            Choose the address in Settings
+          </a>
         </p>
       )}
 
@@ -393,7 +432,7 @@ export default function SiteBuilder(props: SiteBuilderProps) {
                     </span>
                   </div>
                   <details className="mt-3 rounded-lg border border-stone-2 p-3 text-xs text-ink-soft">
-                    <summary className="cursor-pointer font-semibold text-ink">Placeholders Bridal Team fills in</summary>
+                    <summary className="cursor-pointer font-semibold text-ink">Tip: placeholders Bridal Team fills in for you</summary>
                     <ul className="mt-2 space-y-1">
                       {PLACEHOLDERS.map((p) => (
                         <li key={p.attr}>
@@ -431,26 +470,38 @@ export default function SiteBuilder(props: SiteBuilderProps) {
                       switched on.
                     </p>
                   )}
-                  <p className="text-ink-soft/80">
-                    Let Claude, ChatGPT or any assistant that supports MCP design your site in as much detail as you like.
-                    It can read your wedding details and registry, save drafts and — when you say so — publish. It
-                    can&rsquo;t see anything else in your account.
-                  </p>
-                  <ol className="space-y-1 text-xs text-ink-soft">
-                    <li>
-                      <span className="font-semibold text-brand-text">1</span> <b className="text-ink">Create a key</b> — name
-                      it, e.g. &ldquo;My Claude&rdquo;
-                    </li>
-                    <li>
-                      <span className="font-semibold text-brand-text">2</span> <b className="text-ink">Paste the URL</b> into
-                      your AI&rsquo;s custom connector settings
-                    </li>
-                    <li>
-                      <span className="font-semibold text-brand-text">3</span> <b className="text-ink">Ask for your site</b> —
-                      drafts show up in the preview
-                    </li>
-                  </ol>
+                  <div className="rounded-xl border border-brand/40 bg-brand-wash p-4">
+                    <p className="font-semibold text-ink">Connect ChatGPT or Claude by signing in</p>
+                    <p className="mt-1 text-xs leading-relaxed text-ink-soft/80">
+                      Your assistant can then plan your whole wedding, not just the website: checklist, budget, guests,
+                      seating, vendors and travel. You approve it on a Bridal Team page, and can disconnect it below.
+                    </p>
+                    <ol className="mt-3 space-y-1 text-xs text-ink-soft">
+                      <li>
+                        <span className="font-semibold text-brand-text">1</span> In ChatGPT or Claude, add a{" "}
+                        <b className="text-ink">custom connector</b> (or &ldquo;custom MCP server&rdquo;) in its settings
+                      </li>
+                      <li>
+                        <span className="font-semibold text-brand-text">2</span> Use this URL and choose <b className="text-ink">OAuth</b>{" "}
+                        sign-in
+                      </li>
+                      <li>
+                        <span className="font-semibold text-brand-text">3</span> Log in to Bridal Team, pick this wedding and click{" "}
+                        <b className="text-ink">Allow</b>
+                      </li>
+                    </ol>
+                    <KeyLine label="Connector URL" value={mcpBase} />
+                  </div>
 
+                  <details className="rounded-xl border border-stone-2 p-4">
+                    <summary className="cursor-pointer text-sm font-semibold text-ink">
+                      Or connect with a key (website only)
+                    </summary>
+                    <p className="mt-2 text-xs text-ink-soft/80">
+                      For Claude Code, Cursor and other tools that take a key instead of a sign-in. A key can read your
+                      wedding details and registry, save drafts and publish your website — nothing else in your account.
+                    </p>
+                    <div className="mt-3 space-y-3">
                   {newKey ? (
                     <div className="rounded-xl border border-brand/40 bg-brand-wash p-4">
                       <p className="font-semibold text-ink">Your new key — copy it now, it won&rsquo;t be shown again.</p>
@@ -498,12 +549,15 @@ export default function SiteBuilder(props: SiteBuilderProps) {
                     </div>
                   )}
 
+                    </div>
+                  </details>
+
                   <div className="rounded-xl bg-stone-4 p-4 text-xs text-ink-soft">
                     <p className="font-semibold text-ink">Then ask your assistant something like:</p>
                     <p className="mt-1 italic">
-                      &ldquo;Use the Bridal Team site tools to design our wedding website. Start with get_site_guide. I
-                      want an elegant black-tie look with a gold accent, a photo timeline of our story, and an FAQ. Save it
-                      as a draft so I can preview it.&rdquo;
+                      &ldquo;Use Bridal Team to design our wedding website. Start with get_site_guide. I want an elegant
+                      black-tie look with a gold accent, a photo timeline of our story, and an FAQ. Use only real image
+                      links. Save it as a draft so I can preview it.&rdquo;
                     </p>
                   </div>
 
@@ -551,7 +605,7 @@ export default function SiteBuilder(props: SiteBuilderProps) {
               <span className="text-ink">
                 Registry · {props.registryCount} {props.registryCount === 1 ? "link" : "links"}
               </span>
-              <a href={`/w/${weddingId}/website#registry`} className="font-semibold text-brand-text hover:underline">
+              <a href={`${settingsHref}#registry`} className="font-semibold text-brand-text hover:underline">
                 Manage →
               </a>
             </div>
