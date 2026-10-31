@@ -121,6 +121,19 @@ function parseVerdict(text: string): { allowed: boolean; reason?: string } | nul
   }
 }
 
+/**
+ * Whether an API error means the image itself couldn't be used — a dead link,
+ * a page that isn't an image, a format the checker can't read — rather than
+ * the checker being unavailable. Anthropic answers those with a 400 whose
+ * message is about the file ("Unable to download the file…", "Could not
+ * process image", "…returned 404…"). Matching only "image" missed the
+ * download errors, so a broken photo link reported "try again in a few
+ * minutes", which never succeeds, instead of naming the photo to fix.
+ */
+export function isUnreadableImageError(status: number, detail: string): boolean {
+  return status === 400 && /image|download|fetch|url|media|file/i.test(detail);
+}
+
 type Ask = (system: string, content: unknown[]) => Promise<
   { ok: true; text: string } | { ok: false; badInput: boolean }
 >;
@@ -142,8 +155,7 @@ function anthropicAsk(apiKey: string): Ask {
       if (!res.ok) {
         const detail = (await res.text().catch(() => "")).slice(0, 300);
         console.error("site policy check: Anthropic error", res.status, detail);
-        // 400 on an image means the image itself couldn't be opened.
-        return { ok: false, badInput: res.status === 400 && /image/i.test(detail) };
+        return { ok: false, badInput: isUnreadableImageError(res.status, detail) };
       }
       const data = await res.json();
       const text: string = data?.content?.map((c: { text?: string }) => c.text ?? "").join("") ?? "";
