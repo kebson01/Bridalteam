@@ -59,7 +59,7 @@ export async function handleSitePost(req: Request, key: string | null): Promise<
 
   if (!key || !KEY_PATTERN.test(key)) {
     return json(
-      rpcError(null, JSONRPC_ERRORS.invalidRequest, "A Bridal Team site key is required. Create one in your dashboard under Guest website → Site design → Your own AI."),
+      rpcError(null, JSONRPC_ERRORS.invalidRequest, "A Bridal Team site key is required. Create one in your dashboard under Website builder → Your own AI."),
       401,
       { "WWW-Authenticate": 'Bearer realm="bridalteam-site"' },
     );

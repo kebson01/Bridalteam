@@ -264,5 +264,5 @@ export const PROPOSAL_TARGET: Record<ProposalKind, { label: string; noun: [strin
   budget: { label: "budget", noun: ["budget item", "budget items"], path: (id) => `/w/${id}/budget` },
   vendors: { label: "vendors", noun: ["vendor", "vendors"], path: (id) => `/w/${id}/vendors` },
   guests: { label: "guest list", noun: ["household", "households"], path: (id) => `/w/${id}/guests` },
-  website: { label: "guest website", noun: ["website draft", "website drafts"], path: (id) => `/w/${id}/website` },
+  website: { label: "website builder", noun: ["website draft", "website drafts"], path: (id) => `/w/${id}/builder` },
 };

@@ -37,7 +37,7 @@ describe("site tools", () => {
     const r = await call(tools, "get_site_guide");
     expect("data" in r && r.data.guide).toContain('data-bt="registry"');
     expect("data" in r && r.data.live_url).toBe("https://bridalteam.com/wedding/ana-ben");
-    expect("data" in r && r.data.builder_url).toBe("https://bridalteam.com/w/w1/website");
+    expect("data" in r && r.data.builder_url).toBe("https://bridalteam.com/w/w1/builder");
   });
 
   it("saves to the draft only, never publishing as a side effect", async () => {

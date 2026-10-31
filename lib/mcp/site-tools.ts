@@ -67,7 +67,7 @@ export function createSiteTools(source: SiteKeySource): ToolRegistry {
     return {
       live_url: slug && ctx.website_published ? `${SITE_URL}/wedding/${slug}` : null,
       builder_url:
-        typeof ctx.wedding_id === "string" ? `${SITE_URL}/w/${ctx.wedding_id}/website` : `${SITE_URL}/dashboard`,
+        typeof ctx.wedding_id === "string" ? `${SITE_URL}/w/${ctx.wedding_id}/builder` : `${SITE_URL}/dashboard`,
     };
   };
 
@@ -83,7 +83,7 @@ export function createSiteTools(source: SiteKeySource): ToolRegistry {
         saved_at,
         bytes: siteByteLength(html),
         next:
-          "Saved as a draft — guests can't see it yet. The couple can preview it under Guest website → Site design in their Bridal Team dashboard. Call publish_site only once they approve.",
+          "Saved as a draft — guests can't see it yet. The couple can preview it in the Website builder tab of their Bridal Team dashboard. Call publish_site only once they approve.",
         ...links(await source.context()),
       },
     };
@@ -207,7 +207,7 @@ export function createSiteTools(source: SiteKeySource): ToolRegistry {
             ...links(ctx),
             note: ctx.website_published
               ? "Guests now see the custom site."
-              : "Saved as the live custom site, but the wedding website itself is turned off. The couple can turn it on under Guest website in their dashboard.",
+              : "Saved as the live custom site, but the wedding website itself is turned off. The couple can turn it on in the Website tab of their dashboard.",
           },
         };
       },
@@ -262,7 +262,7 @@ export function createSiteTools(source: SiteKeySource): ToolRegistry {
         return await t.run(args);
       } catch (err) {
         if (err instanceof InvalidSiteKeyError) {
-          return { error: "This Bridal Team site key isn't valid any more. Create a new one under Guest website → Site design → Your own AI." };
+          return { error: "This Bridal Team site key isn't valid any more. Create a new one under Website builder → Your own AI." };
         }
         throw err;
       }

@@ -57,6 +57,8 @@ async function signedIn() {
 }
 
 function refresh(weddingId: string) {
+  revalidatePath(`/w/${weddingId}/builder`);
+  // The Guest website tab shows the site's status in its builder card.
   revalidatePath(`/w/${weddingId}/website`);
 }
 
