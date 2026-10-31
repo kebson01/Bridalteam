@@ -38,7 +38,7 @@ export default async function WebsiteBuilderPage({
 
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, public_slug, website_published, site_mode, enabled_tools")
+    .select("id, partner_one, partner_two, public_slug, website_published, site_mode, enabled_tools, event_date, created_at")
     .eq("id", id)
     .maybeSingle();
   if (!wedding) notFound();
@@ -71,6 +71,8 @@ export default async function WebsiteBuilderPage({
             websitePublished={Boolean(wedding.website_published)}
             slug={wedding.public_slug ?? null}
             registryCount={registry.length}
+            eventDate={wedding.event_date ?? null}
+            createdAt={wedding.created_at}
             initialMode={wedding.site_mode === "custom" ? "custom" : "standard"}
             initialDraft={site?.draft_html ?? null}
             initialDraftSource={site?.draft_source ?? null}

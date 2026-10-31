@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { approveForPublish } from "@/lib/custom-site/publish-gate";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { consumeAiQuota, QUOTA_UNMETERED } from "@/lib/ai-quota";
@@ -43,6 +44,7 @@ function explain(error: { code?: string; message?: string } | null, fallback: st
   if (error.code === "42501") return "You don't have permission to edit this wedding's site.";
   if (error.code === "22001") return "That page is too big. Keep it under 500 KB (host large images elsewhere).";
   if (error.code === "P0002") return "Save a draft before publishing.";
+  if (error.code === "BT001") return "Your draft changed since it was checked. Please publish again.";
   if (error.code === "54000") return "You've reached the limit. Remove one first.";
   console.error("site action failed:", error.code, error.message);
   return fallback;
@@ -148,6 +150,18 @@ export async function designSiteWithAI(
 export async function publishCustomSite(weddingId: string): Promise<Result> {
   const { supabase, user } = await signedIn();
   if (!user) return { ok: false, error: "Please sign in again." };
+
+  // Content policy check first (lib/custom-site/policy.ts). The database
+  // refuses to publish a draft that hasn't passed, so this can't be skipped.
+  const { data: site } = await supabase
+    .from("wedding_custom_sites")
+    .select("draft_html, draft_approved_hash")
+    .eq("wedding_id", weddingId)
+    .maybeSingle();
+  if (!site?.draft_html) return { ok: false, error: "Save a draft before publishing." };
+  const gate = await approveForPublish(weddingId, { html: site.draft_html, approvedHash: site.draft_approved_hash ?? null });
+  if (!gate.ok) return gate;
+
   const { error } = await supabase.rpc("publish_custom_site", { p_wid: weddingId });
   if (error) return { ok: false, error: explain(error, "Couldn't publish. Please try again.") };
   refresh(weddingId);

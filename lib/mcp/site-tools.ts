@@ -41,6 +41,9 @@ export interface SiteKeySource {
 /** Thrown by a source for a key that doesn't exist or was revoked. */
 export class InvalidSiteKeyError extends Error {}
 
+/** Thrown when a draft can't be published: it failed (or couldn't get) the content policy check. */
+export class SitePolicyError extends Error {}
+
 const WRITE = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
 const READ = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 
@@ -194,12 +197,18 @@ export function createSiteTools(source: SiteKeySource): ToolRegistry {
         name: "publish_site",
         title: "Publish the draft to guests",
         description:
-          "Make the current draft the live wedding website and switch guests to the custom site. Only call this when the couple has said to publish.",
+          "Make the current draft the live wedding website and switch guests to the custom site. Only call this when the couple has said to publish. The draft is first checked against Bridal Team's content policy (no explicit, hateful or scam content, nothing that attacks or impersonates Bridal Team); if it fails, the error says what to change.",
         inputSchema: { type: "object", properties: {}, additionalProperties: false },
         annotations: { title: "Publish the draft to guests", ...WRITE },
       },
       async run() {
-        const at = await source.publish();
+        let at: string;
+        try {
+          at = await source.publish();
+        } catch (err) {
+          if (err instanceof SitePolicyError) return { error: err.message };
+          throw err;
+        }
         const ctx = await source.context();
         return {
           data: {

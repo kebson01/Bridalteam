@@ -48,7 +48,12 @@ export const PLACEHOLDERS: { attr: string; fills: string }[] = [
 
 /** Plain-text guide for AI prompts and MCP results. */
 export const PLACEHOLDER_GUIDE = [
-  "Your page is plain HTML (inline CSS/JS, or scripts/fonts from any https CDN).",
+  "Your page is plain HTML: inline CSS/JS, or scripts and stylesheets from cdn.jsdelivr.net, cdnjs.cloudflare.com,",
+  "unpkg.com, cdn.tailwindcss.com, code.jquery.com, ajax.googleapis.com or Google Fonts. Images, fonts and video",
+  "can come from any https URL; embeds from YouTube, Vimeo or Google Maps. Scripts can't fetch() or call APIs.",
+  "Before it goes live, the page is checked against Bridal Team's content policy: no sexual or explicit content,",
+  "hate or harassment, scams (never ask guests for passwords or payment details outside a registry or gift fund),",
+  "nothing that mocks, attacks or impersonates Bridal Team, and no ads or spam.",
   "Bridal Team fills these attributes with the couple's live details, so prefer them over hard-coding:",
   ...PLACEHOLDERS.map((p) => `  <… ${p.attr}> → ${p.fills}`),
   "For custom scripting, window.bridalTeam holds the same data (names, event_date, date_display, location,",
