@@ -6,25 +6,47 @@ import WeddingNav from "@/components/wedding-nav";
 import WebsiteManager from "@/components/wedding/website-manager";
 import RegistryManager from "@/components/wedding/registry-manager";
 import CoverPhoto from "@/components/wedding/cover-photo";
+import SiteBuilder from "@/components/wedding/site-builder";
+import { listSiteKeys, listSiteVersions } from "@/app/w/[id]/builder/site-actions";
 import { listRegistryLinks } from "@/app/wedding/actions";
+import { mcpEnabled } from "@/lib/flags";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
 import { retentionNote } from "@/lib/custom-site/retention";
 import { namesSlug } from "@/lib/custom-site/slug";
 
 export const metadata: Metadata = {
-  title: "Guest website",
+  title: "Wedding website",
   robots: { index: false, follow: false },
 };
 
 export const dynamic = "force-dynamic";
+// The Bridal Team AI designer writes a whole page in one server action, and
+// server actions run under the page that calls them: give it room.
+export const maxDuration = 180;
 
+type Section = "design" | "settings";
+
+/**
+ * The Website tab: one place for the couple's guest website.
+ *
+ *   Design   — build the page (themes, Bridal Team AI, pasted code, their own
+ *              AI over MCP), preview it and publish. Opens first.
+ *   Settings — on/off, web address, welcome message, cover photo, registry.
+ *
+ * These used to be two nav tabs ("Website" and "Website builder"), which sent
+ * couples back and forth: they published in one and had to switch the site
+ * on in the other. /w/[id]/builder now redirects here.
+ */
 export default async function WeddingWebsitePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ section?: string }>;
 }) {
   const { id } = await params;
+  const section: Section = (await searchParams).section === "settings" ? "settings" : "design";
 
   const supabase = await supabaseServer();
   const {
@@ -34,39 +56,114 @@ export default async function WeddingWebsitePage({
 
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position, site_mode, event_date, created_at, website_ended_at")
+    .select(
+      "id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position, site_mode, enabled_tools, event_date, created_at, website_ended_at",
+    )
     .eq("id", id)
     .maybeSingle();
   if (!wedding) notFound();
 
-  const [registry, { data: site }] = await Promise.all([
-    listRegistryLinks(id),
-    supabase
-      .from("wedding_custom_sites")
-      .select("draft_updated_at, live_updated_at")
-      .eq("wedding_id", id)
-      .maybeSingle(),
-  ]);
   const names = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ") || "Your wedding";
-  const customLive = wedding.site_mode === "custom" && Boolean(site?.live_updated_at);
-  const draftAt = site?.draft_updated_at ?? null;
-  const liveAt = site?.live_updated_at ?? null;
-  const draftAhead = draftAt !== null && (liveAt === null || Date.parse(draftAt) > Date.parse(liveAt));
+  const enabled = (wedding.enabled_tools as string[] | null) ?? null;
+  const tab = (s: Section) => `/w/${id}/website${s === "settings" ? "?section=settings" : ""}`;
+  const liveUrl = wedding.website_published && wedding.public_slug ? `${SITE_URL}/wedding/${wedding.public_slug}` : null;
+
+  const sectionTabs = (
+    <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <nav className="flex rounded-full bg-stone-4 p-1" aria-label="Website sections">
+        {(["design", "settings"] as const).map((s) => (
+          <Link
+            key={s}
+            href={tab(s)}
+            aria-current={section === s ? "page" : undefined}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+              section === s ? "bg-white text-ink shadow-sm" : "text-ink-soft/70 hover:text-ink"
+            }`}
+          >
+            {s === "design" ? "Design" : "Settings"}
+          </Link>
+        ))}
+      </nav>
+      <p className="text-sm text-ink-soft/80">
+        {liveUrl ? (
+          <>
+            <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-green-600 align-middle" aria-hidden="true" />
+            Live at{" "}
+            <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-brand-text hover:underline">
+              {liveUrl.replace(/^https?:\/\//, "")}
+            </a>
+          </>
+        ) : (
+          <>
+            <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-stone-2 align-middle" aria-hidden="true" />
+            Not live yet — guests can&rsquo;t see your website
+          </>
+        )}
+      </p>
+    </div>
+  );
+
+  if (section === "design") {
+    const [registry, { data: site }, versions, keys] = await Promise.all([
+      listRegistryLinks(id),
+      supabase
+        .from("wedding_custom_sites")
+        .select("draft_html, draft_source, draft_updated_at, live_updated_at")
+        .eq("wedding_id", id)
+        .maybeSingle(),
+      listSiteVersions(id),
+      listSiteKeys(id),
+    ]);
+
+    return (
+      <>
+        <PageHero eyebrow={names} title="Wedding website" />
+        <section className="mx-auto max-w-7xl px-5 pb-16">
+          <WeddingNav weddingId={id} active="website" enabled={enabled} />
+          {sectionTabs}
+          <div className="mt-4">
+            <SiteBuilder
+              weddingId={id}
+              siteUrl={SITE_URL}
+              mcpOn={mcpEnabled()}
+              aiOn={Boolean(process.env.ANTHROPIC_API_KEY)}
+              websitePublished={Boolean(wedding.website_published)}
+              slug={wedding.public_slug ?? null}
+              welcome={wedding.welcome_message ?? ""}
+              registryCount={registry.length}
+              eventDate={wedding.event_date ?? null}
+              createdAt={wedding.created_at}
+              initialMode={wedding.site_mode === "custom" ? "custom" : "standard"}
+              initialDraft={site?.draft_html ?? null}
+              initialDraftSource={site?.draft_source ?? null}
+              initialDraftAt={site?.draft_updated_at ?? null}
+              initialLiveAt={site?.live_updated_at ?? null}
+              initialVersions={versions}
+              initialKeys={keys}
+            />
+          </div>
+        </section>
+      </>
+    );
+  }
+
+  const registry = await listRegistryLinks(id);
 
   return (
     <>
-      <PageHero eyebrow={names} title="Guest website" />
+      <PageHero eyebrow={names} title="Wedding website" />
 
-      <section className="mx-auto max-w-3xl px-5 pb-16">
-        <WeddingNav weddingId={id} active="website" />
+      <section className="mx-auto max-w-7xl px-5 pb-16">
+        <WeddingNav weddingId={id} active="website" enabled={enabled} />
+        {sectionTabs}
 
-        <p className="mt-4 rounded-lg bg-stone-4 px-3 py-2 text-xs text-ink-soft/80">
-          {wedding.website_ended_at
-            ? "Your guest website came down after your wedding. Turn it on again to publish a new one."
-            : retentionNote(wedding.event_date ?? null, wedding.created_at)}
-        </p>
+        <div className="mx-auto mt-6 max-w-3xl space-y-6">
+          <p className="rounded-lg bg-stone-4 px-3 py-2 text-xs text-ink-soft/80">
+            {wedding.website_ended_at
+              ? "Your guest website came down after your wedding. Turn it on again to publish a new one."
+              : retentionNote(wedding.event_date ?? null, wedding.created_at)}
+          </p>
 
-        <div className="mt-6 space-y-6">
           <WebsiteManager
             weddingId={id}
             initialPublished={Boolean(wedding.website_published)}
@@ -82,38 +179,14 @@ export default async function WeddingWebsitePage({
             initialPosition={wedding.cover_position ?? 50}
           />
 
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-brand bg-brand-wash p-6 shadow-card">
-            <div className="min-w-0 flex-[1_1_18rem]">
-              <h2 className="font-display text-lg font-semibold text-ink">Design your own site</h2>
-              <p className="mt-1 max-w-md text-sm leading-relaxed text-ink-soft/80">
-                Pick a theme, describe it to our AI, paste your own code, or connect Claude or ChatGPT.
-              </p>
-              <p className="mt-2 text-xs text-ink-soft/70">
-                Guests see: <span className="font-semibold text-ink">{customLive ? "Custom site" : "Standard page"}</span>
-                {draftAhead ? " · unpublished draft waiting" : ""}
-              </p>
-            </div>
-            <Link
-              href={`/w/${id}/builder`}
-              className="flex-none rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white"
-            >
-              Open Website builder →
-            </Link>
-          </div>
-
           {/* Registry links show on the standard page and wherever a custom
               site uses data-bt="registry", so they're managed once, here. */}
           <div id="registry" className="scroll-mt-24">
             <RegistryManager weddingId={id} initialLinks={registry} />
           </div>
 
-          {/* RSVPs live on the Guests tab now.
-              Replies used to arrive through an open form on the public page and
-              landed in `rsvps`. RSVP is invite-only since the guest list
-              shipped: each household replies through its own link and the
-              answer is stored against their row. Listing the old table here
-              would show an empty box forever, so this points at the real one
-              rather than duplicating it. */}
+          {/* RSVPs live on the Guests tab: each household replies through its
+              own private link, stored against their row. */}
           <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
             <h2 className="font-display text-lg font-semibold text-ink">RSVPs</h2>
             <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-soft/75">

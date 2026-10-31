@@ -27,7 +27,7 @@ describe("siteEndsOn", () => {
 });
 
 describe("reminderEmail", () => {
-  it("says when, links to the builder and escapes names", () => {
+  it("says when, links to the Website tab and escapes names", () => {
     const { subject, html } = reminderEmail({
       wedding_id: "w1",
       days: 30,
@@ -36,7 +36,7 @@ describe("reminderEmail", () => {
       emails: ["a@example.com"],
     });
     expect(subject).toBe("Your wedding website comes down on December 6, 2027");
-    expect(html).toContain("/w/w1/builder");
+    expect(html).toContain("/w/w1/website");
     expect(html).toContain("Download my site");
     expect(html).not.toContain("<script>");
   });

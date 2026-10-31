@@ -19,7 +19,7 @@ const ERRORS: Record<string, string> = {
   signin: "Your session ended. Please log in again.",
   not_editor: "You need edit access to that wedding to connect an assistant to it.",
   too_many:
-    "That wedding already has 5 assistant connections. Remove one under Website builder → Your own AI, then try again.",
+    "That wedding already has 5 assistant connections. Remove one under Website → Design → Your own AI, then try again.",
   failed: "Something went wrong creating the connection. Please try again.",
   invalid: "This connection request isn't valid any more. Start again from your assistant.",
 };
@@ -110,7 +110,7 @@ export default async function AuthorizePage({
           </ul>
           <p className="mt-2 text-sm text-ink-soft/80">
             It can&apos;t send emails to your guests, manage your team, or see your account, payments or messages.
-            Disconnect it any time under Website builder → Your own AI.
+            Disconnect it any time under Website → Design → Your own AI.
           </p>
 
           {!weddings || weddings.length === 0 ? (

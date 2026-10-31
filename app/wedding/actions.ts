@@ -289,6 +289,5 @@ export async function claimWeddingSlug(
     return { ok: false, error: "Couldn't change your address. Please try again." };
   }
   revalidatePath(`/w/${weddingId}/website`);
-  revalidatePath(`/w/${weddingId}/builder`);
   return { ok: true, slug: data as string };
 }
