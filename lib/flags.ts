@@ -40,3 +40,17 @@ export const SHOW_VENDOR_DIRECTORY =
  * Read at build time (NEXT_PUBLIC_*), so flipping it needs a redeploy.
  */
 export const SHOW_COMMUNITY = process.env.NEXT_PUBLIC_SHOW_COMMUNITY === "true";
+
+/**
+ * MCP_ENABLED — turns on the public MCP server at /api/mcp (app/api/mcp/route.ts),
+ * which lets assistants such as Claude and ChatGPT search the vendor directory,
+ * split a budget, plan tables, build a dated checklist and read the guides.
+ *
+ * Off by default so it ships dark: set MCP_ENABLED=true in the environment to
+ * open it. Unlike the NEXT_PUBLIC_* flags above this is read per request on
+ * the server, so flipping it needs a restart, not a rebuild. While it is off,
+ * /api/mcp answers 404 as though it did not exist.
+ */
+export function mcpEnabled(): boolean {
+  return process.env.MCP_ENABLED === "true";
+}
