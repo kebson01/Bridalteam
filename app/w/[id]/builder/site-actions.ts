@@ -44,6 +44,7 @@ function explain(error: { code?: string; message?: string } | null, fallback: st
   if (error.code === "42501") return "You don't have permission to edit this wedding's site.";
   if (error.code === "22001") return "That page is too big. Keep it under 500 KB (host large images elsewhere).";
   if (error.code === "P0002") return "Save a draft before publishing.";
+  if (error.code === "BT003") return "Bridal Team took this site down for breaking our content rules. Check your email for details, update it, then contact us to review it.";
   if (error.code === "BT001") return "Your draft changed since it was checked. Please publish again.";
   if (error.code === "54000") return "You've reached the limit. Remove one first.";
   console.error("site action failed:", error.code, error.message);

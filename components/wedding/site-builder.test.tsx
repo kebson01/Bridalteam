@@ -68,4 +68,20 @@ describe("SiteBuilder", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add an FAQ section" }));
     expect(brief).toHaveValue("Sage and cream. Add an FAQ section.");
   });
+
+  it("shows a takedown and won't publish while the site is taken down", () => {
+    render(
+      <SiteBuilder
+        {...props({
+          blockedReason: "Sexual or explicit content",
+          initialDraft: "<h1>x</h1>",
+          initialDraftSource: "paste",
+          initialDraftAt: "2026-10-31T15:00:00Z",
+        })}
+      />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("taken your guest website down");
+    expect(screen.getByRole("alert")).toHaveTextContent("Sexual or explicit content");
+    expect(screen.getByRole("button", { name: "Publish to guests" })).toBeDisabled();
+  });
 });

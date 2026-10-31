@@ -127,6 +127,7 @@ export async function setWeddingWebsite(input: {
   if (error && (error.code === "BT002" || error.code === "23505") && candidate) {
     ({ data, error } = await call(randomSuffixSlug(namesSlug(w?.partner_one ?? null, w?.partner_two ?? null))));
   }
+  if (error?.code === "BT003") return { ok: false, error: "Bridal Team took this site down for breaking our content rules. Check your email for details, update it, then contact us to review it." };
   if (error) {
     console.error("setWeddingWebsite failed:", error.message);
     return { ok: false, error: "Couldn't save your site. Please try again." };

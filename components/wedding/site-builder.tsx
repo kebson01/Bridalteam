@@ -64,6 +64,8 @@ export interface SiteBuilderProps {
   /** For the "comes down on" date (lib/custom-site/retention.ts). */
   eventDate: string | null;
   createdAt: string;
+  /** Set when Bridal Team has taken the site down (app/admin/sites). */
+  blockedReason?: string | null;
   initialMode: "standard" | "custom";
   initialDraft: string | null;
   initialDraftSource: string | null;
@@ -188,7 +190,7 @@ export default function SiteBuilder(props: SiteBuilderProps) {
           <button
             type="button"
             className={btn}
-            disabled={busy !== null || !unpublishedChanges}
+            disabled={busy !== null || !unpublishedChanges || Boolean(props.blockedReason)}
             onClick={() =>
               run("publish", () => publishCustomSite(weddingId), () => {
                 const now = new Date().toISOString();
@@ -207,6 +209,21 @@ export default function SiteBuilder(props: SiteBuilderProps) {
           </button>
         </div>
       </div>
+
+      {props.blockedReason && (
+        <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p className="font-semibold">Bridal Team has taken your guest website down.</p>
+          <p className="mt-1">Reason: {props.blockedReason}</p>
+          <p className="mt-1 text-red-800/80">
+            You can keep editing your draft, but you can&rsquo;t publish until we&rsquo;ve reviewed it again. Fix the
+            issue, then{" "}
+            <a href="/contact" className="font-semibold underline">
+              contact us
+            </a>
+            .
+          </p>
+        </div>
+      )}
 
       <p className="text-xs text-ink-soft/70">
         {retentionNote(props.eventDate, props.createdAt)} Download a copy any time from the preview.

@@ -125,6 +125,24 @@ async function hasValidSession(admin: SupabaseClient, req: Request): Promise<boo
   return Boolean(data);
 }
 
+/**
+ * Which admin is making this request, for audit logs: the session's username,
+ * or the x-admin-user header on the legacy path. Call only after adminGuard
+ * has accepted the request. "" for the single-password admin.
+ */
+export async function adminUsername(admin: SupabaseClient, req: Request): Promise<string> {
+  const token = sessionTokenFromRequest(req);
+  if (token) {
+    const { data } = await admin
+      .from("admin_sessions")
+      .select("username")
+      .eq("token_hash", sha256(token))
+      .maybeSingle();
+    if (data) return (data.username as string | null) ?? "";
+  }
+  return (req.headers.get("x-admin-user") ?? "").slice(0, 100);
+}
+
 /** Deletes the session for the request's cookie, if any (used by logout). */
 export async function destroyAdminSession(admin: SupabaseClient, req: Request): Promise<void> {
   const token = sessionTokenFromRequest(req);

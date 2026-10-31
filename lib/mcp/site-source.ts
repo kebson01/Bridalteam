@@ -17,6 +17,7 @@ export function supabaseSiteSource(key: string): SiteKeySource {
       if (error.code === "28000") throw new InvalidSiteKeyError();
       if (error.code === "22001") throw new Error("site too large");
       if (error.code === "54000") throw new Error("limit reached");
+      if (error.code === "BT003") throw new SitePolicyError("Bridal Team took this wedding's site down for breaking its content rules, so it can't be published. The couple has been emailed the reason.");
       if (error.code === "BT001") throw new SitePolicyError("The draft changed while it was being checked. Call publish_site again.");
       throw new Error(`${fn} failed: ${error.code} ${error.message}`);
     }

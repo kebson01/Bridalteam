@@ -34,7 +34,7 @@ export default async function WeddingWebsitePage({
 
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position, site_mode, event_date, created_at, website_ended_at")
+    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position, site_mode, event_date, created_at, website_ended_at, site_blocked_at, site_block_reason")
     .eq("id", id)
     .maybeSingle();
   if (!wedding) notFound();
@@ -59,6 +59,17 @@ export default async function WeddingWebsitePage({
 
       <section className="mx-auto max-w-3xl px-5 pb-16">
         <WeddingNav weddingId={id} active="website" />
+
+        {wedding.site_blocked_at && (
+          <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <p className="font-semibold">Bridal Team has taken your guest website down.</p>
+            <p className="mt-1">Reason: {wedding.site_block_reason ?? "Content rules"}</p>
+            <p className="mt-1 text-red-800/80">
+              Update your site, then <Link href="/contact" className="font-semibold underline">contact us</Link> and
+              we&rsquo;ll review it. Your planning is unaffected.
+            </p>
+          </div>
+        )}
 
         <p className="mt-4 rounded-lg bg-stone-4 px-3 py-2 text-xs text-ink-soft/80">
           {wedding.website_ended_at
