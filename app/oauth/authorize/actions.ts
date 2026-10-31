@@ -47,10 +47,18 @@ export async function approveConnection(form: FormData) {
   } = await supabase.auth.getUser();
   if (!user) backToPage(params, "signin");
 
-  const { data: key, error } = await supabase.rpc("create_site_key", {
+  // A planner key reaches the whole wedding (lib/mcp/planner-tools.ts). Until
+  // migration 20261101150000 is applied, create_assistant_key doesn't exist:
+  // fall back to a website-only key so connecting still works.
+  const label = request.client.name.slice(0, 60);
+  let { data: key, error } = await supabase.rpc("create_assistant_key", {
     p_wid: weddingId,
-    p_label: request.client.name.slice(0, 60),
+    p_label: label,
+    p_scope: "planner",
   });
+  if (error && (error.code === "PGRST202" || error.code === "42883")) {
+    ({ data: key, error } = await supabase.rpc("create_site_key", { p_wid: weddingId, p_label: label }));
+  }
   if (error || typeof key !== "string") {
     backToPage(params, error?.code === "54000" ? "too_many" : error?.code === "42501" ? "not_editor" : "failed");
   }

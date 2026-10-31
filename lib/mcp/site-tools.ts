@@ -5,8 +5,9 @@
  *
  * Kept apart from the public server (lib/mcp/tools.ts) on purpose: that one is
  * read-only, open and cacheable; this one writes, and every call carries a
- * secret. A key can read the wedding's site details and write its site and
- * registry — nothing else (no guests, budget, messages or account).
+ * secret. A 'site' key (made under "Your own AI") can read the wedding's site
+ * details and write its site and registry — nothing else. A 'planner' key,
+ * minted by OAuth sign-in, also gets lib/mcp/planner-tools.ts.
  *
  * Saves always land in the DRAFT. publish_site is a separate, explicit step,
  * and every save is kept as a version the couple can restore.

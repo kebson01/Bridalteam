@@ -4,6 +4,9 @@ import { mcpEnabled } from "@/lib/flags";
 import { handleMessage, rpcError, JSONRPC_ERRORS } from "@/lib/mcp/protocol";
 import { createSiteTools, SITE_SERVER_INFO, SITE_SERVER_INSTRUCTIONS } from "@/lib/mcp/site-tools";
 import { supabaseSiteSource } from "@/lib/mcp/site-source";
+import { supabasePlannerSource, type PlannerSource } from "@/lib/mcp/planner-source";
+import { createPlannerTools, PLANNER_INSTRUCTIONS } from "@/lib/mcp/planner-tools";
+import type { ToolRegistry } from "@/lib/mcp/tools";
 import { resourceMetadataUrl } from "@/lib/oauth/core";
 import { oauthAvailable } from "@/lib/oauth/http";
 
@@ -93,12 +96,37 @@ export async function handleSitePost(req: Request, key: string | null): Promise<
     return json(rpcError(null, JSONRPC_ERRORS.invalidRequest, "Batch requests are not supported."), 400);
   }
 
-  const response = await handleMessage(message, createSiteTools(supabaseSiteSource(key)), {
-    info: SITE_SERVER_INFO,
-    instructions: SITE_SERVER_INSTRUCTIONS,
+  // Website keys get the site tools; planner keys (OAuth sign-in) get those
+  // plus the rest of the wedding. See lib/mcp/planner-tools.ts.
+  const planner = supabasePlannerSource(key);
+  const site = createSiteTools(supabaseSiteSource(key));
+  const isPlanner = (await keyScope(planner)) === "planner";
+  const response = await handleMessage(message, isPlanner ? mergeTools(site, createPlannerTools(planner)) : site, {
+    info: isPlanner ? PLANNER_SERVER_INFO : SITE_SERVER_INFO,
+    instructions: isPlanner ? `${SITE_SERVER_INSTRUCTIONS} ${PLANNER_INSTRUCTIONS}` : SITE_SERVER_INSTRUCTIONS,
   });
   if (response === null) return new NextResponse(null, { status: 202, headers: CORS });
   return json(response);
+}
+
+const PLANNER_SERVER_INFO = { name: "bridalteam-site", title: "Bridal Team — Your Wedding", version: "1.1.0" };
+
+/**
+ * A key's scope. Anything that isn't a confirmed planner key — an unknown
+ * key, or a database without the planner migration yet — gets the site
+ * tools, which already explain an invalid key to the model.
+ */
+async function keyScope(source: PlannerSource): Promise<"site" | "planner"> {
+  try {
+    return await source.scope();
+  } catch {
+    return "site";
+  }
+}
+
+function mergeTools(...registries: ToolRegistry[]): ToolRegistry {
+  const definitions = registries.flatMap((r) => r.definitions);
+  return { definitions, byName: new Map(registries.flatMap((r) => [...r.byName])) };
 }
 
 export function siteMethodNotAllowed(): Response {

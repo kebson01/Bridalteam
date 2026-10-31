@@ -12,12 +12,21 @@ vi.mock("@/lib/mcp/site-source", () => ({
   }),
 }));
 
+let scope: "site" | "planner" = "site";
+vi.mock("@/lib/mcp/planner-source", async (orig) => ({
+  ...(await orig<typeof import("@/lib/mcp/planner-source")>()),
+  supabasePlannerSource: () => ({ scope: async () => scope }),
+}));
+
 const KEY = `btsite_${"a".repeat(48)}`;
 const body = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "get_site_guide" } });
 const req = (url: string, headers: Record<string, string> = {}) =>
   new Request(url, { method: "POST", headers: { "content-type": "application/json", ...headers }, body });
 
-beforeEach(() => vi.stubEnv("MCP_ENABLED", "true"));
+beforeEach(() => {
+  vi.stubEnv("MCP_ENABLED", "true");
+  scope = "site";
+});
 afterEach(() => vi.unstubAllEnvs());
 
 describe("/api/mcp/site", () => {
@@ -57,5 +66,29 @@ describe("/api/mcp/site", () => {
     const { POST } = await import("./[key]/route");
     const res = await POST(req(`https://bridalteam.com/api/mcp/site/${KEY}`), { params: Promise.resolve({ key: KEY }) });
     expect(res.status).toBe(200);
+  });
+
+  it("offers only the website tools to a website key", async () => {
+    const { POST } = await import("./route");
+    const list = new Request("https://bridalteam.com/api/mcp/site", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${KEY}` },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list" }),
+    });
+    const names = (await (await POST(list)).json()).result.tools.map((t: { name: string }) => t.name);
+    expect(names).toContain("save_site_draft");
+    expect(names).not.toContain("list_guests");
+  });
+
+  it("offers the whole planner to a planner key", async () => {
+    scope = "planner";
+    const { POST } = await import("./route");
+    const list = new Request("https://bridalteam.com/api/mcp/site", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${KEY}` },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list" }),
+    });
+    const names = (await (await POST(list)).json()).result.tools.map((t: { name: string }) => t.name);
+    expect(names).toEqual(expect.arrayContaining(["save_site_draft", "list_guests", "save_budget_item", "save_layout", "seat_guest"]));
   });
 });

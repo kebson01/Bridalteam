@@ -87,7 +87,7 @@ export default async function AuthorizePage({
 
         <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
           <p className="text-ink">
-            <strong>{request.client.name}</strong> wants to work on your Bridal Team wedding website.
+            <strong>{request.client.name}</strong> wants to help plan your wedding on Bridal Team.
           </p>
           <p className="mt-2 text-sm text-ink-soft/80">
             Signed in as {user.email}. It will be sent back to <strong>{host}</strong>
@@ -99,15 +99,18 @@ export default async function AuthorizePage({
             </p>
           )}
 
-          <p className="mt-5 text-sm font-medium text-ink">It will be able to:</p>
+          <p className="mt-5 text-sm font-medium text-ink">For the wedding you choose, it will be able to see and change:</p>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-soft">
-            <li>Read your wedding&apos;s names, date, venue, welcome message and registry</li>
-            <li>Save website drafts (every save is kept as a version you can restore)</li>
-            <li>Publish your website and add registry links</li>
+            <li>Wedding details: names, date, venue, guest count and total budget</li>
+            <li>Checklist and deadlines</li>
+            <li>Budget and expenses</li>
+            <li>Guest list, RSVPs, meal options and seating, including guests&apos; emails</li>
+            <li>Vendors, travel and hotel blocks, and floor plans</li>
+            <li>Your wedding website (drafts, publishing) and registry links</li>
           </ul>
           <p className="mt-2 text-sm text-ink-soft/80">
-            It can&apos;t see your guests, budget, messages or payment details. You can disconnect it any time under
-            Website builder → Your own AI.
+            It can&apos;t send emails to your guests, manage your team, or see your account, payments or messages.
+            Disconnect it any time under Website builder → Your own AI.
           </p>
 
           {!weddings || weddings.length === 0 ? (
