@@ -1,5 +1,6 @@
 import { supabasePublic } from "@/lib/supabase";
-import { InvalidSiteKeyError, type SiteKeySource } from "@/lib/mcp/site-tools";
+import { InvalidSiteKeyError, SitePolicyError, type SiteKeySource } from "@/lib/mcp/site-tools";
+import { approveForPublish } from "@/lib/custom-site/publish-gate";
 
 /**
  * The site tools' view of the database: the key_* functions from migration
@@ -16,6 +17,7 @@ export function supabaseSiteSource(key: string): SiteKeySource {
       if (error.code === "28000") throw new InvalidSiteKeyError();
       if (error.code === "22001") throw new Error("site too large");
       if (error.code === "54000") throw new Error("limit reached");
+      if (error.code === "BT001") throw new SitePolicyError("The draft changed while it was being checked. Call publish_site again.");
       throw new Error(`${fn} failed: ${error.code} ${error.message}`);
     }
     return data as T;
@@ -25,7 +27,18 @@ export function supabaseSiteSource(key: string): SiteKeySource {
     context: () => call<Record<string, unknown>>("key_site_context", {}),
     getSite: (which) => call<string | null>("key_get_site", { p_which: which }),
     saveDraft: (html, note) => call<string>("key_save_site", { p_html: html, p_note: note }),
-    publish: () => call<string>("key_publish_site", {}),
+    // Same content policy check as the Publish button: the database refuses
+    // drafts the server hasn't approved, so an assistant can't skip it.
+    publish: async () => {
+      const [weddingId, html] = await Promise.all([
+        call<string>("key_wedding_id", {}),
+        call<string | null>("key_get_site", { p_which: "draft" }),
+      ]);
+      if (!html) throw new SitePolicyError("There's no draft to publish yet. Save one with save_site_draft first.");
+      const gate = await approveForPublish(weddingId, { html, approvedHash: null });
+      if (!gate.ok) throw new SitePolicyError(gate.error);
+      return call<string>("key_publish_site", {});
+    },
     useStandard: () => call<void>("key_use_standard_site", {}),
     addRegistryLink: (label, url) => call<void>("key_add_registry_link", { p_label: label, p_url: url }),
   };

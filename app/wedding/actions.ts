@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { namesSlug, randomSuffixSlug, slugCandidates, slugProblemMessage, toSlug } from "@/lib/custom-site/slug";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export type PublicWedding = {
@@ -82,20 +83,6 @@ export async function submitRsvp(input: {
   return { ok: true };
 }
 
-function slugify(a: string | null, b: string | null): string {
-  const base =
-    [a, b]
-      .filter(Boolean)
-      .join("-")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 40) || "our-wedding";
-  const alphabet = "abcdefghijklmnopqrstuvwxyz0123456789";
-  const suffix = Array.from({ length: 5 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
-  return `${base}-${suffix}`;
-}
-
 /** Publish/unpublish or update a wedding's guest site. Edit permission enforced in the RPC. */
 export async function setWeddingWebsite(input: {
   weddingId: string;
@@ -108,20 +95,38 @@ export async function setWeddingWebsite(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "sign_in" };
 
-  // Candidate slug from the couple's names (only used on first publish).
+  // First publish: the cleanest free address from the couple's names
+  // ("gene-and-john"), then with their year, then a random suffix. Ignored
+  // once the wedding has an address. The database re-checks every rule.
   const { data: w } = await supabase
     .from("weddings")
-    .select("partner_one, partner_two")
+    .select("partner_one, partner_two, event_date, public_slug")
     .eq("id", input.weddingId)
     .maybeSingle();
-  const candidate = slugify(w?.partner_one ?? null, w?.partner_two ?? null);
+  let candidate: string | null = null;
+  if (!w?.public_slug) {
+    for (const option of slugCandidates(w?.partner_one ?? null, w?.partner_two ?? null, w?.event_date ?? null)) {
+      const { data: problem } = await supabase.rpc("wedding_slug_problem", { p_slug: option, p_wid: input.weddingId });
+      if (problem === null) {
+        candidate = option;
+        break;
+      }
+    }
+    candidate ??= randomSuffixSlug(namesSlug(w?.partner_one ?? null, w?.partner_two ?? null));
+  }
 
-  const { data, error } = await supabase.rpc("set_wedding_website", {
-    p_wid: input.weddingId,
-    p_published: input.published,
-    p_welcome: input.welcome?.slice(0, 2000) || null,
-    p_slug: candidate,
-  });
+  const call = (slug: string | null) =>
+    supabase.rpc("set_wedding_website", {
+      p_wid: input.weddingId,
+      p_published: input.published,
+      p_welcome: input.welcome?.slice(0, 2000) || null,
+      p_slug: slug,
+    });
+  let { data, error } = await call(candidate);
+  // Someone took it between the check and the save: fall back to a suffix.
+  if (error && (error.code === "BT002" || error.code === "23505") && candidate) {
+    ({ data, error } = await call(randomSuffixSlug(namesSlug(w?.partner_one ?? null, w?.partner_two ?? null))));
+  }
   if (error) {
     console.error("setWeddingWebsite failed:", error.message);
     return { ok: false, error: "Couldn't save your site. Please try again." };
@@ -254,4 +259,36 @@ export async function setWeddingCover(
 
   revalidatePath(`/w/${weddingId}/website`);
   return { ok: true };
+}
+
+/** Is this address free for this wedding? null when it is, else a sentence. */
+export async function checkWeddingSlug(weddingId: string, input: string): Promise<{ slug: string; problem: string | null }> {
+  const slug = toSlug(input);
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.rpc("wedding_slug_problem", { p_slug: slug, p_wid: weddingId });
+  if (error) return { slug, problem: "Couldn't check that address. Please try again." };
+  return { slug, problem: typeof data === "string" ? slugProblemMessage(data) : null };
+}
+
+/** Choose or change a wedding's address. The old one is held for 30 days. */
+export async function claimWeddingSlug(
+  weddingId: string,
+  input: string,
+): Promise<{ ok: true; slug: string } | { ok: false; error: string }> {
+  const supabase = await supabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in again." };
+  const { data, error } = await supabase.rpc("claim_wedding_slug", { p_wid: weddingId, p_slug: toSlug(input) });
+  if (error) {
+    if (error.code === "BT002") return { ok: false, error: slugProblemMessage(error.message) };
+    if (error.code === "23505") return { ok: false, error: slugProblemMessage("taken") };
+    if (error.code === "42501") return { ok: false, error: "You don't have permission to change this wedding's address." };
+    console.error("claimWeddingSlug failed:", error.code, error.message);
+    return { ok: false, error: "Couldn't change your address. Please try again." };
+  }
+  revalidatePath(`/w/${weddingId}/website`);
+  revalidatePath(`/w/${weddingId}/builder`);
+  return { ok: true, slug: data as string };
 }

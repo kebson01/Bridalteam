@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createSiteTools, InvalidSiteKeyError, type SiteKeySource } from "@/lib/mcp/site-tools";
+import { createSiteTools, InvalidSiteKeyError, SitePolicyError, type SiteKeySource } from "@/lib/mcp/site-tools";
 import { handleMessage } from "@/lib/mcp/protocol";
 
 function fakeSource(over: Partial<SiteKeySource> = {}) {
@@ -32,6 +32,23 @@ const call = (tools: ReturnType<typeof createSiteTools>, name: string, args: Rec
   tools.byName.get(name)!.run(args);
 
 describe("site tools", () => {
+  it("publish_site passes on a content policy refusal as a readable error", async () => {
+    const { tools } = fakeSource({
+      publish: async () => {
+        throw new SitePolicyError("Your site wasn't published: remove the scam link.");
+      },
+    });
+    const r = await call(tools, "publish_site");
+    expect("error" in r && r.error).toContain("remove the scam link");
+  });
+
+  it("publish_site publishes when the check passes", async () => {
+    const { tools, calls } = fakeSource();
+    const r = await call(tools, "publish_site");
+    expect("data" in r && r.data.published_at).toBeTruthy();
+    expect(calls.published).toBe(1);
+  });
+
   it("guide returns the wedding, placeholder guide and links", async () => {
     const { tools } = fakeSource();
     const r = await call(tools, "get_site_guide");

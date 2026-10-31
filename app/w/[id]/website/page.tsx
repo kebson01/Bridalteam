@@ -9,6 +9,8 @@ import CoverPhoto from "@/components/wedding/cover-photo";
 import { listRegistryLinks } from "@/app/wedding/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
+import { retentionNote } from "@/lib/custom-site/retention";
+import { namesSlug } from "@/lib/custom-site/slug";
 
 export const metadata: Metadata = {
   title: "Guest website",
@@ -32,7 +34,7 @@ export default async function WeddingWebsitePage({
 
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position, site_mode")
+    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position, site_mode, event_date, created_at, website_ended_at")
     .eq("id", id)
     .maybeSingle();
   if (!wedding) notFound();
@@ -58,12 +60,19 @@ export default async function WeddingWebsitePage({
       <section className="mx-auto max-w-3xl px-5 pb-16">
         <WeddingNav weddingId={id} active="website" />
 
+        <p className="mt-4 rounded-lg bg-stone-4 px-3 py-2 text-xs text-ink-soft/80">
+          {wedding.website_ended_at
+            ? "Your guest website came down after your wedding. Turn it on again to publish a new one."
+            : retentionNote(wedding.event_date ?? null, wedding.created_at)}
+        </p>
+
         <div className="mt-6 space-y-6">
           <WebsiteManager
             weddingId={id}
             initialPublished={Boolean(wedding.website_published)}
             initialWelcome={wedding.welcome_message ?? ""}
             initialSlug={wedding.public_slug ?? null}
+            suggestedSlug={namesSlug(wedding.partner_one, wedding.partner_two)}
             siteUrl={SITE_URL}
           />
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getPublicWedding, getPublicRegistry } from "@/app/wedding/actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SANDBOX_IFRAME_ATTR } from "@/lib/custom-site/serve";
@@ -43,7 +43,30 @@ export default async function PublicWeddingPage({
 }) {
   const { slug } = await params;
   const w = await getPublicWedding(slug);
-  if (!w) notFound();
+  if (!w) {
+    // Sites come down 6 months after the wedding; for 30 days the address
+    // says so instead of 404ing (and nobody else can claim it).
+    const supabase = await supabaseServer();
+    const { data: movedTo } = await supabase.rpc("wedding_slug_moved_to", { p_slug: slug });
+    if (typeof movedTo === "string" && movedTo) redirect(`/wedding/${movedTo}`);
+    const { data: ended } = await supabase.rpc("wedding_site_has_ended", { p_slug: slug });
+    if (ended === true) {
+      return (
+        <section className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center px-5 py-20 text-center">
+          <p className="font-display text-xs font-semibold tracking-[0.32em] text-brand-text">THANK YOU FOR CELEBRATING</p>
+          <h1 className="mt-4 font-display text-3xl font-semibold text-ink">This wedding website has ended</h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft/75">
+            The couple&rsquo;s guest website was taken down after their wedding. If you&rsquo;re looking for their
+            registry or photos, please reach out to them directly.
+          </p>
+          <Link href="/" className="mt-6 text-sm font-semibold text-brand-text hover:underline">
+            Planning your own wedding? Bridal Team →
+          </Link>
+        </section>
+      );
+    }
+    notFound();
+  }
 
   const names = coupleNames(w.partner_one, w.partner_two);
 

@@ -1,0 +1,43 @@
+name: Guest website clean-up
+
+# Once a day: trims version history 30 days after each wedding, emails
+# couples 30 and 7 days before their site comes down, takes sites down
+# 6 months after the wedding, and frees held addresses after 30 days.
+# The work happens in app/api/cron/site-retention (public.run_site_retention).
+#
+# Needs the CRON_SECRET repository secret, set to the same value as the
+# app's CRON_SECRET environment variable (32+ random characters).
+# Optional SITE_URL repository variable (default https://bridalteam.com).
+
+on:
+  schedule:
+    - cron: "17 10 * * *" # 10:17 UTC daily (early morning in the US)
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: site-retention
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: Run guest website clean-up
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Like deploy.yml: without the secret this finishes green with a notice,
+      # rather than a red X every day before it's configured.
+      - name: Call the clean-up endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://bridalteam.com' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::notice::CRON_SECRET is not set; skipping guest website clean-up."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error --max-time 300 \
+            --retry 3 --retry-delay 30 --retry-all-errors \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/site-retention"

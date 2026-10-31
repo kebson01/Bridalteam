@@ -17,6 +17,8 @@ import {
 import { PLACEHOLDERS, MAX_SITE_BYTES } from "@/lib/custom-site/runtime";
 import { THEMES, THEME_IDS, type ThemeId } from "@/lib/custom-site/templates";
 import { SANDBOX_IFRAME_ATTR } from "@/lib/custom-site/serve";
+import { POLICY_SUMMARY } from "@/lib/custom-site/policy-summary";
+import { retentionNote } from "@/lib/custom-site/retention";
 
 type Tab = "themes" | "ai" | "code" | "own";
 
@@ -59,6 +61,9 @@ export interface SiteBuilderProps {
   slug: string | null;
   /** How many registry links the couple has; they're managed on the Guest website tab. */
   registryCount: number;
+  /** For the "comes down on" date (lib/custom-site/retention.ts). */
+  eventDate: string | null;
+  createdAt: string;
   initialMode: "standard" | "custom";
   initialDraft: string | null;
   initialDraftSource: string | null;
@@ -198,10 +203,14 @@ export default function SiteBuilder(props: SiteBuilderProps) {
               })
             }
           >
-            {busy === "publish" ? "Publishing…" : hasDraft && !unpublishedChanges ? "Published" : "Publish to guests"}
+            {busy === "publish" ? "Checking & publishing…" : hasDraft && !unpublishedChanges ? "Published" : "Publish to guests"}
           </button>
         </div>
       </div>
+
+      <p className="text-xs text-ink-soft/70">
+        {retentionNote(props.eventDate, props.createdAt)} Download a copy any time from the preview.
+      </p>
 
       {!props.websitePublished && (
         <p className="rounded-lg bg-stone-4 px-3 py-2 text-xs text-ink-soft/80">
@@ -393,8 +402,10 @@ export default function SiteBuilder(props: SiteBuilderProps) {
                       ))}
                     </ul>
                     <p className="mt-2">
-                      Scripts and fonts from any https CDN work. Pages run sandboxed: no forms, cookies or redirects, and
-                      outside links open in a new tab.
+                      Scripts and stylesheets can come from jsDelivr, cdnjs, unpkg, Tailwind, jQuery, Google&rsquo;s CDN
+                      or Google Fonts; images and video from any https link; embeds from YouTube, Vimeo or Google Maps.
+                      Pages run sandboxed: no forms, cookies, redirects or fetching data, and outside links open in a new
+                      tab.
                     </p>
                   </details>
                   <button
@@ -546,6 +557,19 @@ export default function SiteBuilder(props: SiteBuilderProps) {
             </div>
           </div>
 
+          <details className={`${card} p-5`}>
+            <summary className="cursor-pointer text-sm font-semibold text-ink">Content rules</summary>
+            <p className="mt-2 text-xs leading-relaxed text-ink-soft/70">
+              Every custom site is checked before it goes live. If something needs changing, we&rsquo;ll say what, and
+              your draft stays saved.
+            </p>
+            <ul className="mt-2 list-disc space-y-1 pl-4 text-xs leading-relaxed text-ink-soft">
+              {POLICY_SUMMARY.map((rule) => (
+                <li key={rule}>{rule}</li>
+              ))}
+            </ul>
+          </details>
+
           {versions.length > 0 && (
             <details className={`${card} p-5`}>
               <summary className="cursor-pointer text-sm font-semibold text-ink">Version history ({versions.length})</summary>
@@ -620,6 +644,9 @@ export default function SiteBuilder(props: SiteBuilderProps) {
                 <button type="button" className={btnSmall} onClick={() => setPreviewStamp(Date.now())}>
                   Refresh
                 </button>
+                <button type="button" className={btnSmall} onClick={() => downloadHtml(draft)}>
+                  Download my site
+                </button>
                 <a
                   href={`/sandbox/preview/${weddingId}?t=${previewStamp}`}
                   target="_blank"
@@ -660,6 +687,18 @@ export default function SiteBuilder(props: SiteBuilderProps) {
   );
 }
 
+
+/** Saves the draft as an .html file the couple can keep or host elsewhere. */
+function downloadHtml(html: string) {
+  const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "wedding-website.html";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 function KeyLine({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);

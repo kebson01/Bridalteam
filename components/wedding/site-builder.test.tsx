@@ -24,6 +24,8 @@ const props = (over: Partial<SiteBuilderProps> = {}): SiteBuilderProps => ({
   websitePublished: true,
   slug: "ana-and-ben",
   registryCount: 3,
+  eventDate: "2027-06-06",
+  createdAt: "2026-10-01T00:00:00Z",
   initialMode: "standard",
   initialDraft: null,
   initialDraftSource: null,

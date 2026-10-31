@@ -97,6 +97,13 @@ provide the Service, then delete or de-identify it, except where we must retain
 it to comply with law, resolve disputes, or enforce agreements. Backups are
 purged on a rolling basis.
 
+Guest websites are kept for a shorter time: earlier versions of a custom site
+are deleted 30 days after the wedding, and the site itself (its code, history
+and connected-assistant keys) is deleted six months after the wedding date, or
+24 months after the wedding was created if it has no date. We email the couple
+30 and 7 days beforehand. Your planning data (guests, budget, checklist) stays
+in your account.
+
 ## 8. Security
 
 We use administrative, technical, and organizational safeguards (including

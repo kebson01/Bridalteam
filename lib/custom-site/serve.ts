@@ -17,9 +17,15 @@
  *    look-alike sign-in form anywhere. RSVPs are invite-only anyway.
  *  - `frame-ancestors 'self'`: only our own pages may frame it.
  *
- * script-src/style-src/img-src are left open on purpose: couples load fonts,
- * animation libraries and photos from CDNs, and with an opaque origin there is
- * nothing on our side for those scripts to reach.
+ * What a page may load is limited so that what guests see is what passed the
+ * content policy check at publish (lib/custom-site/policy.ts):
+ *  - Scripts and stylesheets only inline or from the well-known CDNs in
+ *    SITE_CDNS, so a page can't pull in new code from its own server later.
+ *  - connect-src 'none': no fetch/XHR/WebSocket, so a script can't download
+ *    new text after the review.
+ *  - Embeds only from YouTube, Vimeo and Google Maps (livestreams, venues).
+ *  - Images, fonts and video from any https URL. Images are checked at
+ *    publish; the "Report this page" link covers anything swapped later.
  *
  * middleware.ts skips its own CSP for /sandbox/ (two policies would
  * intersect and block the CDNs), and next.config.ts swaps X-Frame-Options
@@ -30,8 +36,36 @@ export const SANDBOX_PREFIX = "/sandbox/";
 
 export const SANDBOX_IFRAME_ATTR = "allow-scripts allow-popups allow-popups-to-escape-sandbox";
 
+/** Where custom sites may load scripts and stylesheets from. */
+export const SITE_CDNS = [
+  "https://cdn.jsdelivr.net",
+  "https://cdnjs.cloudflare.com",
+  "https://unpkg.com",
+  "https://cdn.tailwindcss.com",
+  "https://code.jquery.com",
+  "https://ajax.googleapis.com",
+  "https://fonts.googleapis.com",
+];
+
+/** Embeds a custom site may show. */
+export const SITE_EMBEDS = [
+  "https://www.youtube.com",
+  "https://www.youtube-nocookie.com",
+  "https://player.vimeo.com",
+  "https://www.google.com/maps/",
+  "https://maps.google.com",
+];
+
 export const SANDBOX_CSP = [
   `sandbox ${SANDBOX_IFRAME_ATTR}`,
+  "default-src 'none'",
+  `script-src 'unsafe-inline' 'unsafe-eval' ${SITE_CDNS.join(" ")}`,
+  `style-src 'unsafe-inline' ${SITE_CDNS.join(" ")}`,
+  "img-src https: data: blob:",
+  "font-src https: data:",
+  "media-src https: blob:",
+  `frame-src ${SITE_EMBEDS.join(" ")}`,
+  "connect-src 'none'",
   "form-action 'none'",
   "frame-ancestors 'self'",
   "base-uri 'none'",

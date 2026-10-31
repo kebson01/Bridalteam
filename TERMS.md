@@ -116,6 +116,18 @@ security; misuse AI features to generate prohibited content; or interfere with
 the Service. We may remove content and suspend or terminate accounts that violate
 these Terms.
 
+**Custom guest websites.** If you build your own guest website (from a theme,
+with our AI, with your own code, or with your own AI assistant), it must not
+contain sexual or explicit content; hate, harassment or threats; scams or
+requests for guests' passwords, bank or card details (registry and gift-fund
+links are fine); content that mocks, attacks, misrepresents or impersonates
+Bridal Team; or advertising and spam. We check every custom site automatically
+before it goes live and may decline to publish it, and we may take down a
+published site that breaks these rules. Guest websites, including custom ones,
+are taken down six months after your wedding date (or 24 months after you
+created the wedding, if it has no date), and their web address may then be
+released for another couple to use after 30 days.
+
 ## 8. Vendor listings and accuracy
 
 Vendors are responsible for the accuracy of their listings, pricing, and

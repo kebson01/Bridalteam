@@ -13,6 +13,12 @@ describe("sandboxed custom sites", () => {
     expect(sandbox).not.toContain("allow-forms");
     expect(SANDBOX_CSP).toContain("form-action 'none'");
     expect(SANDBOX_CSP).toContain("frame-ancestors 'self'");
+    // What passed the content check is what guests see: no fetching new
+    // content, scripts only from known CDNs.
+    expect(SANDBOX_CSP).toContain("connect-src 'none'");
+    expect(SANDBOX_CSP).toContain("default-src 'none'");
+    expect(SANDBOX_CSP).toMatch(/script-src 'unsafe-inline' 'unsafe-eval' https:\/\/cdn\.jsdelivr\.net/);
+    expect(SANDBOX_CSP).not.toMatch(/script-src[^;]*\shttps:(\s|;|$)/);
   });
 
   it("ship the policy on every response", () => {
