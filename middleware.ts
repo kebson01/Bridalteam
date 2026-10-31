@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
 import { buildCsp } from "@/lib/csp";
+import { SANDBOX_PREFIX } from "@/lib/custom-site/serve";
 
 // Signed-in areas. Everything else is the public marketing site.
 const PROTECTED = ["/dashboard", "/onboarding", "/w"];
@@ -38,8 +39,14 @@ export async function middleware(request: NextRequest) {
 
   // Attach the response-side CSP header (enforcing or report-only) to anything
   // we return, so both normal responses and redirects carry it.
+  //
+  // Except under /sandbox/: those routes serve couple-written custom sites
+  // with their own `sandbox` policy (lib/custom-site/serve.ts). Browsers
+  // enforce every CSP header they get, so adding ours there would intersect
+  // the two and block the CDNs those sites load from.
+  const sandboxed = request.nextUrl.pathname.startsWith(SANDBOX_PREFIX);
   const withCsp = (res: NextResponse) => {
-    res.headers.set(cspHeaderName, csp);
+    if (!sandboxed) res.headers.set(cspHeaderName, csp);
     return res;
   };
 

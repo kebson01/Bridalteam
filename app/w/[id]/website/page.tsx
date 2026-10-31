@@ -32,13 +32,24 @@ export default async function WeddingWebsitePage({
 
   const { data: wedding } = await supabase
     .from("weddings")
-    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position")
+    .select("id, partner_one, partner_two, public_slug, website_published, welcome_message, cover_image_url, cover_position, site_mode")
     .eq("id", id)
     .maybeSingle();
   if (!wedding) notFound();
 
-  const registry = await listRegistryLinks(id);
+  const [registry, { data: site }] = await Promise.all([
+    listRegistryLinks(id),
+    supabase
+      .from("wedding_custom_sites")
+      .select("draft_updated_at, live_updated_at")
+      .eq("wedding_id", id)
+      .maybeSingle(),
+  ]);
   const names = [wedding.partner_one, wedding.partner_two].filter(Boolean).join(" & ") || "Your wedding";
+  const customLive = wedding.site_mode === "custom" && Boolean(site?.live_updated_at);
+  const draftAt = site?.draft_updated_at ?? null;
+  const liveAt = site?.live_updated_at ?? null;
+  const draftAhead = draftAt !== null && (liveAt === null || Date.parse(draftAt) > Date.parse(liveAt));
 
   return (
     <>
@@ -62,7 +73,30 @@ export default async function WeddingWebsitePage({
             initialPosition={wedding.cover_position ?? 50}
           />
 
-          <RegistryManager weddingId={id} initialLinks={registry} />
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-brand bg-brand-wash p-6 shadow-card">
+            <div className="min-w-0 flex-[1_1_18rem]">
+              <h2 className="font-display text-lg font-semibold text-ink">Design your own site</h2>
+              <p className="mt-1 max-w-md text-sm leading-relaxed text-ink-soft/80">
+                Pick a theme, describe it to our AI, paste your own code, or connect Claude or ChatGPT.
+              </p>
+              <p className="mt-2 text-xs text-ink-soft/70">
+                Guests see: <span className="font-semibold text-ink">{customLive ? "Custom site" : "Standard page"}</span>
+                {draftAhead ? " · unpublished draft waiting" : ""}
+              </p>
+            </div>
+            <Link
+              href={`/w/${id}/builder`}
+              className="flex-none rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              Open Website builder →
+            </Link>
+          </div>
+
+          {/* Registry links show on the standard page and wherever a custom
+              site uses data-bt="registry", so they're managed once, here. */}
+          <div id="registry" className="scroll-mt-24">
+            <RegistryManager weddingId={id} initialLinks={registry} />
+          </div>
 
           {/* RSVPs live on the Guests tab now.
               Replies used to arrive through an open form on the public page and

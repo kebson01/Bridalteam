@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { supabaseServer } from "@/lib/supabase/server";
 import { PROPOSAL_TARGET, sanitizeProposal, type ProposalKind } from "@/lib/planner-actions";
+import { buildTemplateSite } from "@/lib/custom-site/templates";
 
 export interface ApplyResult {
   ok: boolean;
@@ -11,7 +12,7 @@ export interface ApplyResult {
   href?: string;
 }
 
-const TABLE: Record<ProposalKind, string> = {
+const TABLE: Record<Exclude<ProposalKind, "website">, string> = {
   tasks: "tasks",
   budget: "budget_items",
   vendors: "wedding_vendors",
@@ -39,6 +40,28 @@ export async function applyProposal(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Sign in to save this to your wedding." };
+
+  // A website brief becomes a themed draft (not a row per item), saved through
+  // the same permission-checked RPC the site builder uses. Guests see nothing
+  // until the couple publishes it there.
+  if (proposal.kind === "website") {
+    const { error } = await supabase.rpc("save_custom_site", {
+      p_wid: weddingId,
+      p_html: buildTemplateSite(proposal.items[0]),
+      p_source: "template",
+      p_note: `AI planner: ${proposal.items[0].theme} theme`,
+    });
+    if (error) {
+      console.error("applyProposal website failed:", error.code, error.message);
+      return {
+        ok: false,
+        error: error.code === "42501" ? "You don't have permission to edit this wedding." : "Couldn't save the site. Please try again.",
+      };
+    }
+    const href = PROPOSAL_TARGET.website.path(weddingId);
+    revalidatePath(href);
+    return { ok: true, added: 1, href };
+  }
 
   const table = TABLE[proposal.kind];
 

@@ -58,7 +58,19 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      // Everything except /sandbox/ refuses to be framed.
+      { source: "/((?!sandbox/).*)", headers: securityHeaders },
+      // /sandbox/ serves couples' custom sites, which our own /wedding/[slug]
+      // and the site builder frame. Same-origin framing only; the routes add
+      // `frame-ancestors 'self'` too. See lib/custom-site/serve.ts.
+      {
+        source: "/sandbox/:path*",
+        headers: securityHeaders.map((h) =>
+          h.key === "X-Frame-Options" ? { key: h.key, value: "SAMEORIGIN" } : h,
+        ),
+      },
+    ];
   },
 };
 

@@ -70,4 +70,14 @@ describe("sanitizeProposal", () => {
     const many = Array.from({ length: 500 }, (_, i) => ({ title: `Task ${i}` }));
     expect(sanitizeProposal("tasks", many)?.items).toHaveLength(60);
   });
+
+  it("turns a propose_website call into a one-item website proposal", () => {
+    const p = proposalFromToolUse("propose_website", { theme: "tropical", headline: "See you in Nassau", accent: "#F2735A" });
+    expect(p?.kind).toBe("website");
+    expect(p?.items).toHaveLength(1);
+    const brief = p!.items[0] as { theme: string; headline: string; accent: string };
+    expect(brief.theme).toBe("tropical");
+    expect(brief.headline).toBe("See you in Nassau");
+    expect(brief.accent).toBe("#f2735a");
+  });
 });
