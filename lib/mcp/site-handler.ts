@@ -4,6 +4,8 @@ import { mcpEnabled } from "@/lib/flags";
 import { handleMessage, rpcError, JSONRPC_ERRORS } from "@/lib/mcp/protocol";
 import { createSiteTools, SITE_SERVER_INFO, SITE_SERVER_INSTRUCTIONS } from "@/lib/mcp/site-tools";
 import { supabaseSiteSource } from "@/lib/mcp/site-source";
+import { resourceMetadataUrl } from "@/lib/oauth/core";
+import { oauthAvailable } from "@/lib/oauth/http";
 
 /**
  * Transport for the private site MCP server (/api/mcp/site). Same stateless
@@ -13,8 +15,11 @@ import { supabaseSiteSource } from "@/lib/mcp/site-source";
  * The key can arrive two ways, because clients differ:
  *   Authorization: Bearer btsite_…   — Claude Code, Claude Desktop config,
  *                                       Cursor, the MCP Inspector
- *   /api/mcp/site/btsite_…           — clients that only take a URL (custom
- *                                       connectors in Claude and ChatGPT)
+ *   /api/mcp/site/btsite_…           — clients that only take a URL
+ * and a third way to GET one: OAuth sign-in (lib/oauth/core.ts), whose access
+ * token is a site key and so arrives as the Bearer header. The 401 below names
+ * the resource metadata that starts that flow (RFC 9728), which is what
+ * ChatGPT's and Claude's "OAuth" connector option looks for.
  * The URL form puts the secret in access logs; the site builder says so and
  * offers revocation. Bodies are larger than the public server's because a
  * whole page travels in save_site_draft.
@@ -49,6 +54,11 @@ const CORS = {
 const json = (body: unknown, status = 200, extra: Record<string, string> = {}) =>
   NextResponse.json(body, { status, headers: { ...CORS, "Cache-Control": "no-store", ...extra } });
 
+function wwwAuthenticate(): string {
+  const base = 'Bearer realm="bridalteam-site"';
+  return oauthAvailable() ? `${base}, resource_metadata="${resourceMetadataUrl()}", scope="site"` : base;
+}
+
 export function keyFromHeader(req: Request): string | null {
   const m = req.headers.get("authorization")?.match(/^Bearer\s+(\S+)$/i);
   return m ? m[1] : null;
@@ -61,7 +71,7 @@ export async function handleSitePost(req: Request, key: string | null): Promise<
     return json(
       rpcError(null, JSONRPC_ERRORS.invalidRequest, "A Bridal Team site key is required. Create one in your dashboard under Website builder → Your own AI."),
       401,
-      { "WWW-Authenticate": 'Bearer realm="bridalteam-site"' },
+      { "WWW-Authenticate": wwwAuthenticate() },
     );
   }
 

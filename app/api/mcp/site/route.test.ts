@@ -34,6 +34,13 @@ describe("/api/mcp/site", () => {
     expect(res.headers.get("www-authenticate")).toContain("Bearer");
   });
 
+  it("points OAuth clients at the resource metadata", async () => {
+    vi.stubEnv("OAUTH_SECRET", "s");
+    const { POST } = await import("./route");
+    const res = await POST(req("https://bridalteam.com/api/mcp/site"));
+    expect(res.headers.get("www-authenticate")).toMatch(/resource_metadata="https:\/\/[^"]+\/\.well-known\/oauth-protected-resource"/);
+  });
+
   it("rejects a malformed key without touching the database", async () => {
     const { POST } = await import("./route");
     expect((await POST(req("https://bridalteam.com/api/mcp/site", { authorization: "Bearer nope" }))).status).toBe(401);
