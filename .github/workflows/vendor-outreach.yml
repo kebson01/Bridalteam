@@ -1,0 +1,55 @@
+name: Vendor outreach
+
+# Sends the day's vendor claim emails by calling /api/outreach/run, which does
+# all the work (lib/outreach/run.ts). Weekdays only: 10:17 Eastern in winter,
+# 11:17 in summer. Business mail sent mid-morning on a weekday gets read.
+#
+# Needs one repository secret, OUTREACH_SECRET, with the same value as the
+# app's OUTREACH_SECRET environment variable. Until that secret exists this
+# workflow does nothing, and until OUTREACH_ENABLED=true is set on the app the
+# endpoint only answers "disabled". So merging this sends nothing on its own.
+#
+# The "Run workflow" button runs it by hand, as a dry run by default: it
+# prints who would be emailed today without sending anything.
+
+on:
+  schedule:
+    - cron: "17 15 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview only, send nothing"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vendor-outreach
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Run today's batch
+        env:
+          OUTREACH_SECRET: ${{ secrets.OUTREACH_SECRET }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '0' }}
+        run: |
+          if [ -z "$OUTREACH_SECRET" ]; then
+            echo "OUTREACH_SECRET is not set as a repository secret; nothing to do."
+            exit 0
+          fi
+          url="https://bridalteam.com/api/outreach/run"
+          if [ "$DRY_RUN" = "1" ]; then url="$url?dry_run=1"; fi
+          status=$(curl -sS -o response.json -w "%{http_code}" -X POST "$url" \
+            -H "authorization: Bearer $OUTREACH_SECRET" --max-time 300)
+          echo "HTTP $status"
+          cat response.json
+          echo
+          # Fail the run (and email the repo owner, GitHub's default) when the
+          # campaign is paused, misconfigured or erroring, so it isn't missed.
+          if [ "$status" != "200" ] || grep -q '"status":"paused"' response.json; then exit 1; fi

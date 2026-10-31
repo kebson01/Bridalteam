@@ -1,6 +1,6 @@
 ---
 name: vendor-outreach
-description: Run founding-vendor outreach for Bridal Team's wedding vendor directory. Use whenever the user wants to recruit, contact, call, email, DM or follow up with wedding vendors (photographers, florists, DJs, venues, caterers and so on); plan a call list or outreach batch; prepare call scripts or claim-your-listing messages; record outreach outcomes; research and add new vendor prospects in a metro; answer a vendor's objection; ask vendors for backlinks; or check how many listings are claimed and published. Trigger on phrases like "vendor outreach", "who should I call today", "get vendors to claim their listings", "add vendors in Orlando", "write to this photographer", "how's the vendor side going" — even if the word outreach never appears.
+description: Run founding-vendor outreach for Bridal Team's wedding vendor directory, including the automated claim-your-listing email campaign. Use whenever the user wants to recruit, contact, call, email, DM or follow up with wedding vendors (photographers, florists, DJs, venues, caterers and so on); check on, pause, resume or report on the email campaign; plan a call list or outreach batch; prepare call scripts or claim-your-listing messages; record outreach outcomes; research and add new vendor prospects in a metro; answer a vendor's objection; ask vendors for backlinks; or check how many listings are claimed and published. Trigger on phrases like "vendor outreach", "who should I call today", "get vendors to claim their listings", "add vendors in Orlando", "write to this photographer", "how's the vendor side going", "how is the email campaign doing", "why did the campaign pause" — even if the word outreach never appears.
 ---
 
 # Bridal Team vendor outreach
@@ -36,12 +36,13 @@ instead of the file's counts.
 
 ## Ground rules (non-negotiable)
 
-- **No cold commercial email yet.** CAN-SPAM requires a physical mailing
-  address in every commercial email, and the site has none: `TERMS.md` still
-  has `[TODO: mailing address for legal notices]`, and the published
-  `/terms` lists only email addresses. Until the user gives you a real
-  address to put in messages, don't draft cold emails for sending. Phone calls
-  and replies to vendors who asked to hear from us aren't blocked.
+- **Cold email goes through the automated campaign only.** It lives in
+  `lib/outreach/` (setup and operations: "Automated email campaign" in
+  `VENDOR-OUTREACH.md`) and already handles the mailing address, unsubscribe,
+  suppression, warm-up limits and the one follow-up. Never send cold email any
+  other way, and never draft one-off cold emails to vendors the campaign
+  covers: it would double-contact them. CAN-SPAM's mailing address is set by
+  `OUTREACH_MAILING_ADDRESS`; until it is, the campaign refuses to send.
 - **Only a business's own published contact details.** Never guess `info@` or
   `hello@` addresses. Never use a personal-looking address (the file flags
   these `do not mail`). Never scrape. This domain's sending reputation has
@@ -88,7 +89,38 @@ early on the couples side, so I can't promise you bookings."
 
 ## Workflows
 
+### 0. The automated email campaign (the default channel)
+
+Most outreach now runs itself: every weekday, `.github/workflows/vendor-outreach.yml`
+calls `/api/outreach/run`, which emails the next batch of listings that have
+a contact address and follows up once a week later. The user does not call
+or write to these vendors. Your jobs:
+
+- **"How's the campaign going?"** Run the queries under "Day to day" in
+  `VENDOR-OUTREACH.md` (Supabase SQL, read-only) and report: emailed so far,
+  claimed, claim rate by category, bounces and complaints, unsubscribes, how
+  many addresses remain and roughly how many weekdays that is at 50 a day.
+  The number that matters most is emailed to claimed. If vendors open and
+  click but don't claim, say the claim flow is the problem, not the email.
+- **Removal requests.** List them (same section) and remind the user to delete
+  each listing that day. Never delete anything yourself.
+- **Paused.** If a run reports `"status":"paused"`, explain the reason it gave,
+  check the bounce and complaint numbers, and propose the fix. Resuming
+  (inserting a `resumed` event) is the user's decision; give them the SQL.
+- **Preview a day.** Tell the user to run the workflow by hand with "dry run"
+  ticked, or call the endpoint with `?dry_run=1`; it lists who would be emailed.
+- **Wording changes** go in `lib/outreach/templates.ts`, through a pull
+  request, with its tests. Keep the honesty rules and the CAN-SPAM footer.
+- **Vendors the campaign can't reach** are listings without a contact
+  address. They are the only ones left for the manual workflows below
+  (calls the user chooses to make, Instagram DMs the user sends), and for
+  `find-vendor-emails`, which adds addresses the campaign then picks up on
+  its own.
+
 ### 1. Plan a call batch ("who should I call today?")
+
+Only for vendors the email campaign can't reach (no contact address), and
+only if the user wants to call.
 
 1. Ask which metro, or default to South Florida (the launch market,
    `LAUNCH_METRO` in `lib/site.ts`).
