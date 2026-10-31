@@ -118,6 +118,40 @@ Without these set, the directory still displays; only editing is disabled.
 > Note: this is lightweight password protection suitable for a single admin.
 > For multiple users, swap it for Supabase Auth later.
 
+## MCP server (assistants like Claude and ChatGPT)
+
+`/api/mcp` is a public, read-only [Model Context Protocol](https://modelcontextprotocol.io)
+server, so an AI assistant can use Bridal Team directly. It is **off until
+`MCP_ENABLED=true`** is set (`lib/flags.ts`); while off the URL is a 404.
+
+| Tool | What it does | Built on |
+| --- | --- | --- |
+| `search_vendors` | Published vendors by category, metro, county, keywords | `/vendors` query |
+| `get_vendor` | One profile, rating and recent reviews | `/v/[id]` query |
+| `estimate_budget` | Split a total into categories, cost per guest | `lib/budget-calculator.ts` |
+| `plan_tables` | Tables needed for a guest count | `lib/seating-calculator.ts` |
+| `get_checklist` | Dated planning checklist from a wedding date | `lib/checklist.ts` |
+| `search_guides` / `get_guide` | Find and read the planning guides | `lib/guides.ts` |
+
+- No sign-in and no writes: vendor data is read with the public anon key, so
+  RLS limits it to published profiles. Vendor email and phone are left out on
+  purpose: inquiries go through the profile page, where vendors see them as leads.
+  Review author names are left out too.
+- Every result links back to the matching bridalteam.com page.
+- Stateless Streamable HTTP: POST only, one JSON response per request,
+  60 requests a minute per IP.
+- Code: `app/api/mcp/route.ts` (HTTP), `lib/mcp/protocol.ts` (JSON-RPC),
+  `lib/mcp/tools.ts` (tools), `lib/mcp/vendor-source.ts` (Supabase).
+
+**Try it.** In Claude: Settings → Connectors → Add custom connector →
+`https://bridalteam.com/api/mcp`. Or run the MCP Inspector
+(`npx @modelcontextprotocol/inspector`) and connect over Streamable HTTP.
+
+**Getting listed** (so people can find it without the URL): submit it to
+Anthropic's connector directory and OpenAI's ChatGPT app directory, and
+publish it to the official MCP Registry (registry.modelcontextprotocol.io).
+Check each one's current requirements when submitting.
+
 ## Relationship to the original
 
 This repository is the new, self-contained version of Bridal Team. The original
