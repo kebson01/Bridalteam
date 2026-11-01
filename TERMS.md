@@ -211,7 +211,7 @@ the effective date means you accept the updated Terms.
 Questions or legal notices:
 
 - **Bridal Team, LLC**
-- [TODO: mailing address for legal notices]
+- 2139 N University Dr #2055, Coral Springs, FL 33071, United States
 - General/support: hello@bridalteam.com
 - Legal: legal@bridalteam.com
 
@@ -221,7 +221,7 @@ If you believe content on the Service infringes your copyright, send a notice
 with the information required by 17 U.S.C. §512(c)(3) to our designated agent:
 
 - **DMCA Agent:** [TODO: agent name / role]
-- [TODO: agent mailing address]
+- 2139 N University Dr #2055, Coral Springs, FL 33071, United States
 - legal@bridalteam.com
 
 We may remove infringing content and terminate repeat infringers.
@@ -240,8 +240,7 @@ acquisition, or sale of assets.
 
 - [TODO] Effective date (set at publication)
 - [TODO] County (for venue + arbitration seat)
-- [TODO] Mailing address for legal notices
-- [TODO] DMCA agent name + mailing address
+- [TODO] DMCA agent name (mailing address set above)
 - [TODO] Refund policy detail
 - [TODO] Arbitration body (e.g. AAA) + any opt-out/carve-outs
 - Have a Florida-licensed attorney review §6, §13, §15 and remove the

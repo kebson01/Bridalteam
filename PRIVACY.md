@@ -153,7 +153,7 @@ they take effect and update the "Last updated" date above.
 Questions or privacy requests:
 
 - **Bridal Team, LLC**
-- [TODO: mailing address]
+- 2139 N University Dr #2055, Coral Springs, FL 33071, United States
 - Privacy: privacy@bridalteam.com
 
 ---
@@ -161,7 +161,6 @@ Questions or privacy requests:
 ### Still to provide before publishing
 
 - [TODO] Effective date (set at publication)
-- [TODO] Mailing address
 - [TODO] Confirm each sub-processor's data region (esp. Supabase) for §5 and §11
 - [TODO] Analytics/cookie-banner description if you add one (§6)
 - Have a Florida-licensed attorney confirm which state privacy laws apply and

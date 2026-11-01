@@ -122,11 +122,12 @@ Re-read those migrations before drafting, in case the columns have changed.
 
 Finding an address doesn't make it OK to email it yet.
 
-- **Cold commercial email is blocked** until a physical mailing address is
-  in place (CAN-SPAM, see the `vendor-outreach` skill). Say so whenever the
-  user asks to start sending.
-- Once unblocked, sending follows the `vendor-outreach` skill: hand-written,
-  20–30 a day, one metro at a time, one follow-up, and a permanent "no".
+- **Cold commercial email goes through the automated campaign only**
+  (`lib/outreach/`, see the `vendor-outreach` skill). The CAN-SPAM mailing
+  address is `Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States`,
+  set as `OUTREACH_MAILING_ADDRESS`. Never send cold email by hand.
+- The campaign warms up at 20, then 35, then 50 a day, one metro at a time,
+  with one follow-up, and treats every unsubscribe as permanent.
 
 ## Report back
 

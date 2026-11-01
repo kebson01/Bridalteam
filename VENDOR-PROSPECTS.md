@@ -92,10 +92,10 @@ emails real customers depend on are the first thing to land in spam when
 reputation goes. `VENDOR-OUTREACH.md` says it too: *the business's own published
 contact address, never a scraped personal one.*
 
-**2. No outreach can legally go out yet.** `TERMS.md:202` is still
-`[TODO: mailing address for legal notices]`. CAN-SPAM requires a physical mailing
-address *inside* the message, so the first cold email is blocked on that TODO
-regardless of how many prospects are listed here.
+**2. The mailing address is set.** CAN-SPAM requires a physical mailing
+address inside the message: Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States. It
+is in `TERMS.md` and goes out through `OUTREACH_MAILING_ADDRESS`, so email waits
+only on the campaign setup in `VENDOR-OUTREACH.md`.
 
 ## How the columns work
 
@@ -120,9 +120,8 @@ a claim link on it.
 Every table below has a **Phone** column, and 430 of the 931 rows have a number
 because a search result published one. Those 430 can be contacted **today**:
 
-- **CAN-SPAM does not apply to a phone call.** The unresolved
-  `[TODO: mailing address for legal notices]` in `TERMS.md` blocks commercial
-  *email*. It does not block picking up the phone.
+- **CAN-SPAM does not apply to a phone call.** Email waits on the campaign
+  setup in `VENDOR-OUTREACH.md`; a call waits on nothing.
 - **The phone-claim flow is live.** Search the number on `/admin/claims`, type
   the address the vendor reads out, and tell them to sign up with it — their
   listing is offered to them above the onboarding form. See
@@ -1718,9 +1717,8 @@ Vanessa + Johnny and Boogietek above shoot both — approach once, not twice.
 1. **Call the 430 above, unflagged ones first.** The only step waiting on
    nothing. Confirm the business, ask for the best address, and attach it on
    `/admin/claims` — no email of ours is sent, so this works today.
-2. **Resolve the `TERMS.md` mailing address.** Nothing can be *emailed* until
-   then. The phone-claim flow is the way around it, not a replacement for it:
-   fixing the TODO unblocks the other 501 rows.
+2. **Finish the email campaign setup** in `VENDOR-OUTREACH.md`. The mailing
+   address is done; the remaining steps unblock the other 501 rows.
 3. **Then photographers and florists** — the top two categories, 203 names.
    Open each site, take the published contact email, fill the row. This needs
    the egress block lifted (see the top of this file) or a human with a

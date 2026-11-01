@@ -65,9 +65,9 @@ when reputation goes. A cold blast from the same domain would finish the job.
 
 For commercial email in the US, CAN-SPAM applies whether or not it feels like
 marketing: accurate `From` and subject, a physical mailing address in the
-message, and a working opt-out that you honour. Note that the mailing address
-is one of the unresolved `[TODO]`s in `TERMS.md` — settle it before the first
-send, because it has to appear in the email. If the volume ever grows past
+message, and a working opt-out that you honour. The mailing address is
+Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States (a virtual mailbox registered to Bridal Team). It is
+in `TERMS.md` and `PRIVACY.md` and must appear in every email. If the volume ever grows past
 hand-sending, send from a **subdomain**, never the root domain that carries
 transactional mail.
 
@@ -102,7 +102,7 @@ like a template.
 > If it's not useful, no hard feelings — just tell me and I won't follow up.
 >
 > [your name]
-> [physical mailing address]
+> Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States
 > [unsubscribe link]
 
 Why it works: the bad news is in paragraph three, before the ask. The offer is
@@ -146,7 +146,7 @@ never heard of, because the work is already done:
 > If you'd rather I delete it, reply "delete" and it's gone today.
 >
 > [your name]
-> [physical mailing address]
+> Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States
 
 The "reply delete and it's gone" line is doing real work: it removes the fear
 that someone has published something about their business without asking. Mean
@@ -236,8 +236,8 @@ hand-written templates: no promised bookings, one follow-up, an easy way out.
 
 ## Setting it up (once)
 
-1. **Mailing address.** A P.O. box or virtual mailbox. It goes in every email
-   (CAN-SPAM). Also settle the `[TODO]` in `TERMS.md` with it.
+1. **Mailing address.** Done: `Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States`.
+   It goes in every email (CAN-SPAM) and is already in `TERMS.md` and `PRIVACY.md`.
 2. **Resend sending domain.** In Resend (the account `RESEND_API_KEY` already
    uses): Domains → Add domain → `outreach.bridalteam.com`. Paste the DNS
    records it shows into Cloudflare (DNS only, not proxied) and wait for
@@ -257,7 +257,7 @@ hand-written templates: no promised bookings, one follow-up, an easy way out.
    | `OUTREACH_SECRET` (encrypt) | 40+ random characters, e.g. from `openssl rand -base64 48` |
    | `OUTREACH_FROM` | `Kebson at Bridal Team <kebson@outreach.bridalteam.com>` |
    | `OUTREACH_REPLY_TO` | `vendors@bridalteam.com` |
-   | `OUTREACH_MAILING_ADDRESS` | the address, one line |
+   | `OUTREACH_MAILING_ADDRESS` | `Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States` |
    | `OUTREACH_SENDER_NAME` | the first name that signs the emails |
    | `RESEND_WEBHOOK_SECRET` (encrypt) | `whsec_...` from step 5 |
    | `OUTREACH_ALERT_TO` | where a pause alert should go |
