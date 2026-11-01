@@ -265,6 +265,9 @@ export default function TermsPage() {
               <Lead>Bridal Team, LLC</Lead>
             </Item>
             <Item>
+              Mail: 2139 N University Dr #2055, Coral Springs, FL 33071, United States
+            </Item>
+            <Item>
               Legal notices: <MailLink address="info@bridalteam.com" />
             </Item>
             <Item>

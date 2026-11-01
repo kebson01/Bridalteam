@@ -42,7 +42,9 @@ instead of the file's counts.
   suppression, warm-up limits and the one follow-up. Never send cold email any
   other way, and never draft one-off cold emails to vendors the campaign
   covers: it would double-contact them. CAN-SPAM's mailing address is set by
-  `OUTREACH_MAILING_ADDRESS`; until it is, the campaign refuses to send.
+  `OUTREACH_MAILING_ADDRESS`, whose value is
+  `Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States`. If the
+  variable is missing in DigitalOcean, the campaign refuses to send.
 - **Only a business's own published contact details.** Never guess `info@` or
   `hello@` addresses. Never use a personal-looking address (the file flags
   these `do not mail`). Never scrape. This domain's sending reputation has
@@ -171,8 +173,8 @@ Start from the templates in `VENDOR-OUTREACH.md` and update the facts as
 above. Write each message for one vendor, opening with something specific
 about their work that a person who looked at it would say.
 
-- **Email:** only to a verified business address. Cold email is blocked until
-  there's a mailing address (see ground rules). A message to a vendor who said
+- **Email:** only to a verified business address. Cold email goes through the campaign
+  only (see ground rules). A message to a vendor who said
   yes on a call and asked for their link is a reply, not cold outreach.
 - **Instagram DM:** under 100 words, no link in the first message unless they
   asked.
