@@ -104,4 +104,20 @@ describe("SiteBuilder", () => {
     expect(screen.getByText("https://bridalteam.com/api/mcp/site")).toBeInTheDocument();
     expect(screen.getByText("Or connect with a key (website only)")).toBeInTheDocument();
   });
+
+  it("shows a takedown and won't publish while the site is taken down", () => {
+    render(
+      <SiteBuilder
+        {...props({
+          blockedReason: "Sexual or explicit content",
+          initialDraft: "<h1>x</h1>",
+          initialDraftSource: "paste",
+          initialDraftAt: "2026-10-31T15:00:00Z",
+        })}
+      />,
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("taken your guest website down");
+    expect(screen.getByRole("alert")).toHaveTextContent("Sexual or explicit content");
+    expect(screen.getByRole("button", { name: "Publish to guests" })).toBeDisabled();
+  });
 });
