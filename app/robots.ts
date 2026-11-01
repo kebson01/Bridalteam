@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
   // search result is a claim link anyone can use. The pages also set
   // robots: { index: false }, but that only helps once a crawler has already
   // fetched the URL, which is exactly what we would rather it never did.
-  const disallow = ["/admin", "/api/", "/claim"];
+  const disallow = ["/admin", "/api/", "/claim", "/unsubscribe"];
 
   return {
     rules: [{ userAgent: "*", allow: "/", disallow }],

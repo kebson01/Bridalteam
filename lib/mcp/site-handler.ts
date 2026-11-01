@@ -4,6 +4,11 @@ import { mcpEnabled } from "@/lib/flags";
 import { handleMessage, rpcError, JSONRPC_ERRORS } from "@/lib/mcp/protocol";
 import { createSiteTools, SITE_SERVER_INFO, SITE_SERVER_INSTRUCTIONS } from "@/lib/mcp/site-tools";
 import { supabaseSiteSource } from "@/lib/mcp/site-source";
+import { supabasePlannerSource, type PlannerSource } from "@/lib/mcp/planner-source";
+import { createPlannerTools, PLANNER_INSTRUCTIONS } from "@/lib/mcp/planner-tools";
+import type { ToolRegistry } from "@/lib/mcp/tools";
+import { resourceMetadataUrl } from "@/lib/oauth/core";
+import { oauthAvailable } from "@/lib/oauth/http";
 
 /**
  * Transport for the private site MCP server (/api/mcp/site). Same stateless
@@ -13,8 +18,11 @@ import { supabaseSiteSource } from "@/lib/mcp/site-source";
  * The key can arrive two ways, because clients differ:
  *   Authorization: Bearer btsite_…   — Claude Code, Claude Desktop config,
  *                                       Cursor, the MCP Inspector
- *   /api/mcp/site/btsite_…           — clients that only take a URL (custom
- *                                       connectors in Claude and ChatGPT)
+ *   /api/mcp/site/btsite_…           — clients that only take a URL
+ * and a third way to GET one: OAuth sign-in (lib/oauth/core.ts), whose access
+ * token is a site key and so arrives as the Bearer header. The 401 below names
+ * the resource metadata that starts that flow (RFC 9728), which is what
+ * ChatGPT's and Claude's "OAuth" connector option looks for.
  * The URL form puts the secret in access logs; the site builder says so and
  * offers revocation. Bodies are larger than the public server's because a
  * whole page travels in save_site_draft.
@@ -49,6 +57,11 @@ const CORS = {
 const json = (body: unknown, status = 200, extra: Record<string, string> = {}) =>
   NextResponse.json(body, { status, headers: { ...CORS, "Cache-Control": "no-store", ...extra } });
 
+function wwwAuthenticate(): string {
+  const base = 'Bearer realm="bridalteam-site"';
+  return oauthAvailable() ? `${base}, resource_metadata="${resourceMetadataUrl()}", scope="site"` : base;
+}
+
 export function keyFromHeader(req: Request): string | null {
   const m = req.headers.get("authorization")?.match(/^Bearer\s+(\S+)$/i);
   return m ? m[1] : null;
@@ -59,9 +72,9 @@ export async function handleSitePost(req: Request, key: string | null): Promise<
 
   if (!key || !KEY_PATTERN.test(key)) {
     return json(
-      rpcError(null, JSONRPC_ERRORS.invalidRequest, "A Bridal Team site key is required. Create one in your dashboard under Website builder → Your own AI."),
+      rpcError(null, JSONRPC_ERRORS.invalidRequest, "A Bridal Team site key is required. Create one in your dashboard under Website → Design → Your own AI."),
       401,
-      { "WWW-Authenticate": 'Bearer realm="bridalteam-site"' },
+      { "WWW-Authenticate": wwwAuthenticate() },
     );
   }
 
@@ -83,12 +96,37 @@ export async function handleSitePost(req: Request, key: string | null): Promise<
     return json(rpcError(null, JSONRPC_ERRORS.invalidRequest, "Batch requests are not supported."), 400);
   }
 
-  const response = await handleMessage(message, createSiteTools(supabaseSiteSource(key)), {
-    info: SITE_SERVER_INFO,
-    instructions: SITE_SERVER_INSTRUCTIONS,
+  // Website keys get the site tools; planner keys (OAuth sign-in) get those
+  // plus the rest of the wedding. See lib/mcp/planner-tools.ts.
+  const planner = supabasePlannerSource(key);
+  const site = createSiteTools(supabaseSiteSource(key));
+  const isPlanner = (await keyScope(planner)) === "planner";
+  const response = await handleMessage(message, isPlanner ? mergeTools(site, createPlannerTools(planner)) : site, {
+    info: isPlanner ? PLANNER_SERVER_INFO : SITE_SERVER_INFO,
+    instructions: isPlanner ? `${SITE_SERVER_INSTRUCTIONS} ${PLANNER_INSTRUCTIONS}` : SITE_SERVER_INSTRUCTIONS,
   });
   if (response === null) return new NextResponse(null, { status: 202, headers: CORS });
   return json(response);
+}
+
+const PLANNER_SERVER_INFO = { name: "bridalteam-site", title: "Bridal Team — Your Wedding", version: "1.1.0" };
+
+/**
+ * A key's scope. Anything that isn't a confirmed planner key — an unknown
+ * key, or a database without the planner migration yet — gets the site
+ * tools, which already explain an invalid key to the model.
+ */
+async function keyScope(source: PlannerSource): Promise<"site" | "planner"> {
+  try {
+    return await source.scope();
+  } catch {
+    return "site";
+  }
+}
+
+function mergeTools(...registries: ToolRegistry[]): ToolRegistry {
+  const definitions = registries.flatMap((r) => r.definitions);
+  return { definitions, byName: new Map(registries.flatMap((r) => [...r.byName])) };
 }
 
 export function siteMethodNotAllowed(): Response {

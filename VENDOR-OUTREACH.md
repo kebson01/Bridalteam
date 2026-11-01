@@ -202,6 +202,114 @@ complaints.
 
 ---
 
+# Automated email campaign
+
+Emails every listing that has a business contact address (705 at launch), one
+metro and one category tier at a time, with one follow-up a week later. No
+calls, no hand-written batches. Code: `lib/outreach/`; daily trigger:
+`.github/workflows/vendor-outreach.yml`; tables: `vendor_outreach`,
+`outreach_suppressions`, `outreach_events`
+(`supabase/migrations/20261101090000_vendor_outreach.sql`).
+
+## What it does each weekday (about 10:15 Eastern)
+
+1. Stops if the last batches drew too many bounces (over 5%) or 2+ spam
+   complaints, and emails `OUTREACH_ALERT_TO`. Nothing sends until it is resumed.
+2. Marks any listing claimed since yesterday so it gets no follow-up.
+3. Sends the follow-ups that are 7+ days old, then first emails, within the
+   warm-up limit: 20 a day for the first 5 sending days, 35 for the next 5,
+   then 50. South Florida first, photographers and videographers, then
+   florists and cakes, then music and officiants, then beauty and planners,
+   other categories, and venues and caterers last.
+4. Before each first email: skips the address if its domain takes no mail,
+   makes the listing's claim link work for 60 days from today, and (if
+   `OUTREACH_OFFER_PRO=true`) grants a year of Pro.
+
+Every message has the sender, the reason they got it, the mailing address and
+an unsubscribe link. Gmail and Yahoo also get the one-click unsubscribe header.
+An unsubscribe, a hard bounce or a spam complaint blocks the address forever.
+"Unsubscribe and remove my listing" takes the listing off the site at once (back to draft);
+delete it for good with the SQL in the templates section above.
+
+The wording lives in `lib/outreach/templates.ts`. Same honesty rules as the
+hand-written templates: no promised bookings, one follow-up, an easy way out.
+
+## Setting it up (once)
+
+1. **Mailing address.** A P.O. box or virtual mailbox. It goes in every email
+   (CAN-SPAM). Also settle the `[TODO]` in `TERMS.md` with it.
+2. **Resend sending domain.** In Resend (the account `RESEND_API_KEY` already
+   uses): Domains → Add domain → `outreach.bridalteam.com`. Paste the DNS
+   records it shows into Cloudflare (DNS only, not proxied) and wait for
+   "Verified". Never send the campaign from `bridalteam.com` itself: that
+   domain carries signup and password-reset mail. Leave open and click tracking off.
+3. **DMARC** for the subdomain, if Resend doesn't add one: a TXT record
+   `_dmarc.outreach` = `v=DMARC1; p=none; rua=mailto:<your address>`.
+4. **Reply inbox.** A Google Workspace alias such as `vendors@bridalteam.com`.
+5. **Webhook.** Resend → Webhooks → Add endpoint →
+   `https://bridalteam.com/api/outreach/webhook`, events `email.delivered`,
+   `email.bounced`, `email.complained`. Copy its signing secret.
+6. **App environment variables** (DigitalOcean → Settings → Environment
+   variables, encrypted where marked):
+
+   | Variable | Value |
+   |---|---|
+   | `OUTREACH_SECRET` (encrypt) | 40+ random characters, e.g. from `openssl rand -base64 48` |
+   | `OUTREACH_FROM` | `Kebson at Bridal Team <kebson@outreach.bridalteam.com>` |
+   | `OUTREACH_REPLY_TO` | `vendors@bridalteam.com` |
+   | `OUTREACH_MAILING_ADDRESS` | the address, one line |
+   | `OUTREACH_SENDER_NAME` | the first name that signs the emails |
+   | `RESEND_WEBHOOK_SECRET` (encrypt) | `whsec_...` from step 5 |
+   | `OUTREACH_ALERT_TO` | where a pause alert should go |
+   | `OUTREACH_OFFER_PRO` | `true` to offer a free year of Pro, else leave unset |
+   | `OUTREACH_ENABLED` | leave unset until the dry run looks right |
+
+7. **Apply the migration** `20261101090000_vendor_outreach.sql` to Supabase.
+8. **GitHub secret.** Repository → Settings → Secrets and variables → Actions →
+   `OUTREACH_SECRET`, the same value as in step 6.
+9. **Dry run.** Actions → Vendor outreach → Run workflow (dry run is ticked).
+   The log lists today's 20 vendors. Nothing is sent.
+10. **Switch on.** Set `OUTREACH_ENABLED=true`. The next weekday run sends.
+
+## Day to day
+
+```sql
+-- Where the campaign stands
+select status, count(*) from vendor_outreach group by status order by 2 desc;
+
+-- Contacted vs claimed, by category
+select p.category, count(*) as emailed, count(*) filter (where o.status = 'claimed') as claimed
+  from vendor_outreach o join vendor_profiles p using (org_id)
+ where o.status <> 'invalid' group by 1 order by 2 desc;
+
+-- Bounces and complaints so far
+select kind, count(*) from outreach_events
+ where kind in ('sent_first','sent_followup','delivered','bounced','complained','unsubscribed')
+ group by 1;
+
+-- Removal requests to delete for good
+select e.created_at, p.business_name, e.org_id from outreach_events e
+  join vendor_profiles p using (org_id) where e.kind = 'removal_requested' order by 1 desc;
+```
+
+**Pause and resume.** To stop at once, unset `OUTREACH_ENABLED`. If the
+campaign paused itself, find out why (the alert email and the bounce query
+above), fix it, then resume:
+
+```sql
+insert into outreach_events (kind, detail) values ('resumed', '{"note":"<what was fixed>"}');
+```
+
+**Someone replies "no" or "delete".** Do it by hand the same day:
+
+```sql
+insert into outreach_suppressions (email, reason, note) values (lower('<address>'), 'manual', 'replied no');
+```
+
+and delete the listing if they asked.
+
+---
+
 # Objections, answered honestly
 
 **"How many couples actually use this?"**

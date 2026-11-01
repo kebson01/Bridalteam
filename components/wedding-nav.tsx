@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { enabledTools, WEDDING_TOOLS } from "@/lib/wedding-tools";
+import FeatureTips from "@/components/feature-tips";
+import { tipsFor } from "@/lib/feature-tips";
 
-type NavKey = "overview" | "details" | "builder" | (typeof WEDDING_TOOLS)[number]["key"];
+type NavKey = "overview" | "details" | (typeof WEDDING_TOOLS)[number]["key"];
 
 /**
  * Sub-navigation across a wedding's sections. Shows the overview, the tools
@@ -34,27 +36,25 @@ export default async function WeddingNav({
   // A tool that's switched off still gets a pill while you're on its page, so
   // following an old link never leaves you somewhere the nav doesn't know about.
   const tools = enabledTools(stored);
-  const activeTool = WEDDING_TOOLS.find((t) => t.key === (active === "builder" ? "website" : active));
+  const activeTool = WEDDING_TOOLS.find((t) => t.key === active);
   if (activeTool && !tools.includes(activeTool)) tools.push(activeTool);
 
   const items: { key: string; label: string; href: string }[] = [
     { key: "overview", label: "Overview", href: `/w/${weddingId}` },
-    ...tools.flatMap((t) => {
-      const pill = { key: t.key, label: t.nav, href: t.path(weddingId) };
-      // The Website builder is part of the website tool, not a tool of its own:
-      // it gets its own pill wherever the website does.
-      return t.key === "website"
-        ? [pill, { key: "builder", label: "Website builder", href: `/w/${weddingId}/builder` }]
-        : [pill];
-    }),
+    // The Website builder is the Design section of the Website tab, not a
+    // pill of its own (app/w/[id]/website/page.tsx).
+    ...tools.map((t) => ({ key: t.key, label: t.nav, href: t.path(weddingId) })),
     // Last: details are set at onboarding and edited rarely, so this sits at the
     // end rather than competing with the day-to-day sections.
     { key: "details", label: "Details", href: `/w/${weddingId}/details` },
   ];
 
+  // "How it works" for this page, at the end of the row (components/feature-tips.tsx).
+  const tips = tipsFor(active);
+
   return (
     // Wraps on narrow screens — a full set of pills doesn't fit one mobile row.
-    <nav className="mt-4 flex flex-wrap gap-1">
+    <nav className="mt-4 flex flex-wrap items-center gap-1">
       {items.map((it) => (
         <Link
           key={it.key}
@@ -74,6 +74,7 @@ export default async function WeddingNav({
       >
         + Add tools
       </Link>
+      {tips && <FeatureTips page={active} tips={tips} />}
     </nav>
   );
 }

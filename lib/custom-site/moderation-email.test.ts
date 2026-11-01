@@ -16,7 +16,7 @@ describe("couple emails", () => {
   it("gives the reason, escaped, and links to the builder", () => {
     const { subject, html } = takedownEmail({ weddingId: "w1", names: "Ana <b>", reason: "Scam <script>" });
     expect(subject).toBe("Your wedding website has been taken down");
-    expect(html).toContain("/w/w1/builder");
+    expect(html).toContain("/w/w1/website");
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<b>");
   });

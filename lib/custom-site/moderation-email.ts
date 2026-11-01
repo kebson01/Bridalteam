@@ -11,8 +11,8 @@ export function takedownEmail(input: { weddingId: string; names: string; reason:
     `<p>${input.names ? `Hi ${escape(input.names)},` : "Hi,"}</p>
      <p>We've taken your Bridal Team guest website offline because it doesn't follow our content rules:</p>
      <p style="padding:12px 16px;background:#f6f4f1;border-radius:8px;"><strong>${escape(input.reason)}</strong></p>
-     <p>Your draft and the rest of your planning are safe. Please update your site in the Website builder, then reply to this email or contact us and we'll take another look.</p>`,
-    { label: "Open the Website builder", url: `${SITE_URL}/w/${input.weddingId}/builder` },
+     <p>Your draft and the rest of your planning are safe. Please update your site on the Website tab, then reply to this email or contact us and we'll take another look.</p>`,
+    { label: "Open your Website tab", url: `${SITE_URL}/w/${input.weddingId}/website` },
   );
   return { subject: "Your wedding website has been taken down", html };
 }
