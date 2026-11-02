@@ -27,6 +27,10 @@ If `page_view` is near zero, this document's Part 1 is the work. If `page_view`
 is healthy but `planner_message` is not, the landing page is the problem. If
 people reach `planner_limit` and never `signup_success`, the wall is.
 
+The same numbers, and more (visits, time on site, landing pages, where people
+go next, signups by source), are on **/admin/analytics**. Visits are counted
+from 2026-11-02, when a per-tab visit id was added to `page_events`.
+
 ## What the site stops advertising until it is true
 
 Two pages render an honest empty state: `/community` ("No posts yet — be the
