@@ -36,7 +36,11 @@ export async function POST(req: Request) {
 
   try {
     const report = await runOutreach({ db, config }, dryRun);
-    return NextResponse.json({ status: report.paused ? "paused" : "ok", ...(missing.length ? { missing } : {}), ...report });
+    // "send_failures" whenever any email failed, so the workflow goes red and
+    // GitHub emails the owner instead of showing a green tick over a day
+    // where nothing actually went out.
+    const status = report.paused ? "paused" : report.failures.length ? "send_failures" : "ok";
+    return NextResponse.json({ status, ...(missing.length ? { missing } : {}), ...report });
   } catch (err) {
     console.error("outreach run failed:", err);
     return NextResponse.json({ status: "error", error: String(err).slice(0, 500) }, { status: 500 });

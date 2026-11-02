@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const runOutreach = vi.fn(async (_deps: unknown, dryRun: boolean) => ({ dryRun, paused: null, planned: { followUps: 0, firsts: 3 } }));
+let failures: { orgId: string; error: string }[] = [];
+const runOutreach = vi.fn(async (_deps: unknown, dryRun: boolean) => ({ dryRun, paused: null, failures, planned: { followUps: 0, firsts: 3 } }));
 vi.mock("@/lib/outreach/run", () => ({ runOutreach }));
 vi.mock("@/lib/supabase/admin", () => ({ supabaseAdmin: () => ({}) }));
 
@@ -54,6 +55,12 @@ describe("POST /api/outreach/run", () => {
     });
     const res = await call();
     expect(res.status).toBe(200);
+    expect((await res.json()).status).toBe("ok");
     expect(runOutreach).toHaveBeenCalledWith(expect.anything(), false);
+
+    // Any failed send reports "send_failures", which the workflow turns red.
+    failures = [{ orgId: "x", error: "Resend 403: domain is not verified" }];
+    expect((await (await call()).json()).status).toBe("send_failures");
+    failures = [];
   });
 });

@@ -292,6 +292,14 @@ select e.created_at, p.business_name, e.org_id from outreach_events e
   join vendor_profiles p using (org_id) where e.kind = 'removal_requested' order by 1 desc;
 ```
 
+**A red run in GitHub Actions** means something needs a look: the campaign
+paused itself, or at least one email failed to send. The run's log shows the
+JSON report; `failures` gives each error. A Resend 401 or 403 (wrong key,
+unverified domain) stops the day and leaves every vendor for the next run. A
+rate limit or outage does the same. An address Resend rejects on its own is
+marked `invalid` and never retried. GitHub emails the repository owner about
+failed runs by default.
+
 **Pause and resume.** To stop at once, unset `OUTREACH_ENABLED`. If the
 campaign paused itself, find out why (the alert email and the bounce query
 above), fix it, then resume:

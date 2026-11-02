@@ -18,7 +18,25 @@ export interface SendRequest {
   idempotencyKey: string;
 }
 
-export type SendResult = { ok: true; messageId: string } | { ok: false; error: string; retryable: boolean };
+/**
+ * Why a send failed, which decides what the run does next:
+ *  - "setup": Resend refused the request itself (401/403: bad key, unverified
+ *    domain). Every other send would fail the same way, so stop for the day
+ *    and leave the vendors to be tried again once it's fixed.
+ *  - "temporary": rate limit, Resend outage or network error. Stop for the
+ *    day; tomorrow's run tries again.
+ *  - "address": this message was rejected (another 4xx, e.g. an address
+ *    Resend won't accept). Skip that vendor for good and carry on.
+ */
+export type FailureScope = "setup" | "temporary" | "address";
+
+export type SendResult = { ok: true; messageId: string } | { ok: false; error: string; scope: FailureScope };
+
+export function failureScope(status: number): FailureScope {
+  if (status === 401 || status === 403) return "setup";
+  if (status === 429 || status >= 500) return "temporary";
+  return "address";
+}
 
 export async function sendViaResend(r: SendRequest, fetchImpl: typeof fetch = fetch): Promise<SendResult> {
   try {
@@ -50,12 +68,10 @@ export async function sendViaResend(r: SendRequest, fetchImpl: typeof fetch = fe
     return {
       ok: false,
       error: `Resend ${res.status}: ${body.message ?? body.name ?? "unknown error"}`.slice(0, 300),
-      // 429 and 5xx are worth another try on a later run; 4xx means this
-      // message itself is wrong.
-      retryable: res.status === 429 || res.status >= 500,
+      scope: failureScope(res.status),
     };
   } catch (err) {
-    return { ok: false, error: `Resend request failed: ${String(err)}`.slice(0, 300), retryable: true };
+    return { ok: false, error: `Resend request failed: ${String(err)}`.slice(0, 300), scope: "temporary" };
   }
 }
 
