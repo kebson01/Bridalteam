@@ -37,7 +37,7 @@ export default function PrivacyPage() {
       <PageHero eyebrow="Legal" title="Privacy Policy" />
       <LegalBody>
         <div className="space-y-4">
-          <LastUpdated date="August 24, 2026" />
+          <LastUpdated date="November 2, 2026" />
           <Preamble>
             <P>
               This Privacy Policy explains how <Lead>Bridal Team, LLC</Lead> (&ldquo;Bridal
@@ -134,13 +134,17 @@ export default function PrivacyPage() {
             break core features such as signing in.
           </P>
           <P>
-            We do count how the site is used &mdash; how many people opened a particular guide,
-            how many tried the AI planner, how many went on to create an account. Those counts are
-            recorded on our own servers and contain <Lead>no identifier of any kind:</Lead> no IP
-            address, no account id, no session id, no cookie and no fingerprint. Two of those
-            records cannot be connected to each other, so they cannot describe you or reconstruct
-            where you went &mdash; even by us, with full access to our own database. They tell us
-            how many, never who.
+            We do count how the site is used &mdash; which pages are visited, how long they stay
+            on screen, which page people go to next, how many tried the AI planner and how many
+            went on to create an account. Those records are kept on our own servers and contain{" "}
+            <Lead>no IP address, no account id, no cookie and no fingerprint.</Lead> To tell one
+            visit from another, your browser keeps a random visit number in session storage for
+            the tab you have open; it is forgotten when you close the tab or after 30 minutes of
+            inactivity, and a new one is made next time. It is never linked to your account, your
+            device or any earlier visit, so these records can show how a visit moved through the
+            site but cannot tell us who you are or connect today&rsquo;s visit to another one
+            &mdash; even by us, with full access to our own database. They tell us how many and
+            in what order, never who.
           </P>
           <P>
             If you arrive from an advertisement or a tagged link, we note which one in your

@@ -63,8 +63,9 @@ export default function Hero() {
           These three steps can be told truthfully on day one and stay true at
           ten thousand couples, so nothing here has to be revisited when the
           real numbers arrive. Swap in the counts then, with the honest caveat
-          that `page_events` records views and not visitors (see the migration
-          in supabase/migrations/20260920060000_page_events.sql).
+          that `page_events` counts visits, not people: a returning visitor is
+          a new visit (see supabase/migrations/20261102120000_page_events_visits.sql
+          and /admin/analytics).
         */}
         <ol className="animate-fade-up mt-16 grid w-full max-w-2xl grid-cols-1 gap-6 text-white sm:grid-cols-3 sm:gap-4">
           {[

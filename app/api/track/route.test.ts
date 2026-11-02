@@ -44,16 +44,37 @@ describe("POST /api/track", () => {
       name: "page_view",
       path: "/guides/how-to-choose-a-wedding-venue",
       source: null,
+      visit_id: null,
+      duration_ms: null,
     });
   });
 
-  it("stores no identifier of any kind", async () => {
-    // The migration promises rows cannot be linked to a person. If a future
-    // edit adds an ip, user_id or session column "just for debugging", this is
-    // what should object.
-    await post({ name: "signup_success", source: "instagram" });
+  it("stores nothing that identifies a person", async () => {
+    // The migrations promise rows cannot be linked to a person: the only id is
+    // the random per-tab visit id. If a future edit adds an ip, user_id or
+    // cookie column "just for debugging", this is what should object.
+    await post({ name: "signup_success", source: "instagram", ip: "203.0.113.1", user_id: "u1", email: "a@b.c" });
     const row = insert.mock.calls[0][0] as Record<string, unknown>;
-    expect(Object.keys(row).sort()).toEqual(["name", "path", "source"]);
+    expect(Object.keys(row).sort()).toEqual(["duration_ms", "name", "path", "source", "visit_id"]);
+  });
+
+  it("keeps a well-formed visit id and drops anything else", async () => {
+    await post({ name: "page_view", path: "/", visit_id: "11111111-1111-4111-8111-11111111111A" });
+    expect(insert.mock.calls[0][0]).toMatchObject({ visit_id: "11111111-1111-4111-8111-11111111111a" });
+    insert.mockClear();
+    await post({ name: "page_view", path: "/", visit_id: "me@example.com" });
+    expect(insert.mock.calls[0][0]).toMatchObject({ visit_id: null });
+  });
+
+  it("records time on page only for page_leave, capped at 30 minutes", async () => {
+    await post({ name: "page_leave", path: "/vendors", duration_ms: 4 * 60 * 60 * 1000 });
+    expect(insert.mock.calls[0][0]).toMatchObject({ name: "page_leave", duration_ms: 1_800_000 });
+    insert.mockClear();
+    await post({ name: "page_view", path: "/", duration_ms: 5000 });
+    expect(insert.mock.calls[0][0]).toMatchObject({ duration_ms: null });
+    insert.mockClear();
+    await post({ name: "page_leave", path: "/" }); // no duration: nothing worth storing
+    expect(insert).not.toHaveBeenCalled();
   });
 
   it("strips the query string from the path", async () => {
