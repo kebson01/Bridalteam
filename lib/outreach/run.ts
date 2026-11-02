@@ -170,6 +170,9 @@ export async function runOutreach({ db, config, now = new Date(), send = sendVia
     });
   };
 
+  // Set when a setup problem or outage makes every further send pointless today.
+  let stopForDay = false;
+
   for (const f of due) {
     const p = profileByOrg.get(f.orgId);
     if (!p) continue;
@@ -182,11 +185,19 @@ export async function runOutreach({ db, config, now = new Date(), send = sendVia
       await db.from("outreach_events").insert({ org_id: f.orgId, email: f.email, kind: "sent_followup", message_id: result.messageId });
     } else {
       report.failures.push({ orgId: f.orgId, error: result.error });
-      await db.from("outreach_events").insert({ org_id: f.orgId, email: f.email, kind: "send_failed", detail: { error: result.error, kind: "followup" } });
+      await db.from("outreach_events").insert({ org_id: f.orgId, email: f.email, kind: "send_failed", detail: { error: result.error, kind: "followup", scope: result.scope } });
+      if (result.scope === "address") {
+        // The first email reached them; the follow-up can't. Close it out
+        // rather than retry it every day.
+        await db.from("vendor_outreach").update({ status: "followed_up", detail: `follow-up rejected: ${result.error}`, updated_at: now.toISOString() }).eq("org_id", f.orgId);
+        continue;
+      }
+      stopForDay = true;
+      break;
     }
   }
 
-  for (const c of firsts) {
+  for (const c of stopForDay ? [] : firsts) {
     if (!(await acceptsMail(c.email))) {
       report.skippedInvalid.push(c.email);
       await db.from("vendor_outreach").insert({ org_id: c.orgId, email: c.email, status: "invalid", detail: "Domain has no mail servers (MX)", updated_at: now.toISOString() });
@@ -224,9 +235,17 @@ export async function runOutreach({ db, config, now = new Date(), send = sendVia
       await db.from("outreach_events").insert({ org_id: c.orgId, email: c.email, kind: "sent_first", message_id: result.messageId });
     } else {
       report.failures.push({ orgId: c.orgId, error: result.error });
-      await db.from("outreach_events").insert({ org_id: c.orgId, email: c.email, kind: "send_failed", detail: { error: result.error, kind: "first" } });
-      // A rate limit or outage: stop for today rather than burn through the list.
-      if (result.retryable) break;
+      await db.from("outreach_events").insert({ org_id: c.orgId, email: c.email, kind: "send_failed", detail: { error: result.error, kind: "first", scope: result.scope } });
+      if (result.scope === "address") {
+        // Rejected for this address alone: never try it again, so it can't
+        // fail (and turn the run red) every single day.
+        await db.from("vendor_outreach").insert({ org_id: c.orgId, email: c.email, status: "invalid", detail: result.error, updated_at: now.toISOString() });
+        report.skippedInvalid.push(c.email);
+        continue;
+      }
+      // A setup problem or an outage would fail every remaining send the same
+      // way: stop for today and leave the rest untouched for the next run.
+      break;
     }
   }
 
