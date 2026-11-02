@@ -18,6 +18,19 @@ Paste each file into **Supabase Dashboard → Authentication → Email Templates
 | `change-email.html` | Change Email Address | `{{ .ConfirmationURL }}`, `{{ .NewEmail }}` |
 | `reauthentication.html` | Reauthentication | `{{ .Token }}` |
 
+## Uploading to Supabase
+
+Instead of pasting by hand, upload all six in one go with a personal access
+token from https://supabase.com/dashboard/account/tokens:
+
+```bash
+SUPABASE_ACCESS_TOKEN=sbp_... node scripts/push-auth-emails.mjs --dry-run
+SUPABASE_ACCESS_TOKEN=sbp_... node scripts/push-auth-emails.mjs
+```
+
+It only changes the template bodies, then reads them back to confirm.
+Subjects and sender settings stay as set in the dashboard.
+
 ## Editing
 
 Don't hand-edit the `.html` files — they're generated. Change the copy or shell
