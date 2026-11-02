@@ -221,3 +221,12 @@ One row per community. Check the rule before every post.
 - 2026-10-30: Posted feed post #15 ("4 Wedding Registry Rules") to the Facebook Page through Zapier ahead of the November queue, at the owner's request: https://www.facebook.com/671229889580227_1821166639512064. The queue starts as planned with the wedding checklist post on Nov 1 at 12:13 pm ET.
 - 2026-10-30: Gave every Facebook post a photo, at the owner's request (photo posts get more engagement). The 20 November evening posts (conversation, question, blog, seasonal, about) each got a free Unsplash photo chosen through the API, credited in `marketing/facebook/2026-11-photos.md`, with their links moved into the text. `facebook-queue.mjs check` now fails on any post without a photo, and the facebook-posting skill says how to pick one.
 - 2026-10-30: Planned December 2026 for the Facebook Page, 50 posts, every one with a photo: 15 guide posts from the ready-made feed images (#1–4, 11–14, 16–18, 20, 22, 23, 54), 8 tool spotlights (the AI planner feed post plus 7 new ones), 7 questions, 8 conversations, 5 blog posts, 4 seasonal and 3 about posts. The 34 posts without a feed image use Unsplash photos credited in `marketing/facebook/2026-12-photos.md`. Feed posts #19, 21, 24, 25 and 51–53, 55 are left for January. Evening slots on Dec 24, 25, 30 and 31 are dropped for the holidays.
+
+## Conversations
+
+People who commented on or messaged the Bridal Team Page and got a personal
+reply (the `bridalteam:facebook-couples-outreach` skill). Counts only, never
+names.
+
+| Date | Source (post or inbox) | Replies sent | Link clicks (if known) | Signups (if known) | Notes |
+|---|---|---|---|---|---|
