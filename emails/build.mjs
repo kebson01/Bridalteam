@@ -176,7 +176,7 @@ ${action}
             <td class="bt-pad" align="center" style="padding:34px 48px 30px 48px;">
               <span style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:600;letter-spacing:0.5px;color:#ffffff;">Bridal Team</span>
               <p style="margin:12px auto 0 auto;max-width:360px;font-family:${FONT_BODY};font-size:13px;line-height:1.6;color:rgba(255,255,255,0.6);">
-                Fun, simple wedding planning — reimagined for today and powered by AI.
+                Fun, simple wedding planning, powered by AI.
                 Organize details, find ideas, and collaborate with your team.
               </p>
 
@@ -226,21 +226,21 @@ const TEMPLATES = {
   "confirm-signup": {
     title: "Confirm your email address",
     preheader:
-      "You're one click away — confirm your email to finish setting up Bridal Team.",
+      "You're one click away. Confirm your email to finish setting up Bridal Team.",
     eyebrow: "Welcome to the team",
     h1: "Confirm your email address",
     body: "You're almost ready to start planning. Tap the button below to confirm this email address and finish setting up your Bridal Team account.",
     cta: "Confirm email address",
-    note: "If you didn't create a Bridal Team account, you can safely ignore this email — no account will be created without confirmation.",
+    note: "If you didn't create a Bridal Team account, you can safely ignore this email. No account will be created without confirmation.",
   },
   "magic-link": {
     title: "Your sign-in link",
     preheader: "Your secure, one-time link to sign in to Bridal Team.",
     eyebrow: "Your sign-in link",
     h1: "Sign in to Bridal Team",
-    body: "Tap the button below to securely sign in — no password needed. For your safety, this link works once and expires shortly.",
+    body: "Tap the button below to sign in. No password needed. For your safety, this link works once and expires shortly.",
     cta: "Sign in to Bridal Team",
-    note: "If you didn't request this link, you can safely ignore this email — your account stays secure and no one can sign in without it.",
+    note: "If you didn't request this link, you can safely ignore this email. Your account stays secure and no one can sign in without it.",
   },
   "reset-password": {
     title: "Reset your password",
@@ -249,7 +249,7 @@ const TEMPLATES = {
     h1: "Reset your password",
     body: "We received a request to reset the password for your Bridal Team account. Tap the button below to choose a new one. This link expires shortly.",
     cta: "Reset password",
-    note: "Didn't ask to reset your password? You can safely ignore this email — your current password will stay the same.",
+    note: "Didn't ask to reset your password? You can safely ignore this email. Your current password will stay the same.",
   },
   invite: {
     title: "You're invited to Bridal Team",
@@ -258,7 +258,7 @@ const TEMPLATES = {
     h1: "Join your team on Bridal Team",
     body: "You've been invited to help plan on Bridal Team. Accept your invitation below to create your account and start collaborating with your team.",
     cta: "Accept invitation",
-    note: "If you weren't expecting this invitation, you can safely ignore this email — no account will be created without your action.",
+    note: "If you weren't expecting this invitation, you can safely ignore this email. No account will be created without your action.",
   },
   "change-email": {
     title: "Confirm your email change",
@@ -267,7 +267,7 @@ const TEMPLATES = {
     h1: "Confirm your email change",
     body: "You asked to change the email address on your Bridal Team account to <strong style=\"color:#222222;\">{{ .NewEmail }}</strong>. Tap the button below to confirm the switch.",
     cta: "Confirm email change",
-    note: "If you didn't request this change, you can safely ignore this email — your current email address will stay active until the new one is confirmed.",
+    note: "If you didn't request this change, you can safely ignore this email. Your current email address will stay active until the new one is confirmed.",
   },
   reauthentication: {
     title: "Your verification code",
@@ -276,7 +276,7 @@ const TEMPLATES = {
     h1: "Your verification code",
     body: "Enter the code below to confirm it's really you. For your safety, it expires shortly.",
     mode: "code",
-    note: "If you didn't request this code, you can safely ignore this email — no changes will be made to your account.",
+    note: "If you didn't request this code, you can safely ignore this email. No changes will be made to your account.",
   },
 };
 

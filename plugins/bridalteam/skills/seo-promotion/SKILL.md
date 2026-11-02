@@ -36,6 +36,11 @@ undo months of progress overnight.
   nearly empty. Copy that says so ("brand new", "free", "built by a small
   team") is more believable and survives scrutiny. `VENDOR-OUTREACH.md` shows
   the tone.
+- **Sound like a person wrote it.** Before showing the user anything that
+  will be posted, sent or read aloud to the public, run the `human-voice`
+  pass: `node scripts/human-voice.mjs` on the draft, fix every `✗`, then
+  read it against that skill's `references/tells.md`. No emoji, em dashes,
+  stock AI phrases or Title Case headlines.
 
 ## Know the current state before acting
 

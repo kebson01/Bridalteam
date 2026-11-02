@@ -55,6 +55,11 @@ or tagged the Page, a personal reply is welcome, and it's allowed.
 - **Collect no personal data.** Don't copy names, photos, wedding dates or
   profile links into the repository. The tracker records the group or post and
   what happened, never who.
+- **Sound like a person wrote it.** Before showing the user anything that
+  will be posted, sent or read aloud to the public, run the `human-voice`
+  pass: `node scripts/human-voice.mjs` on the draft, fix every `✗`, then
+  read it against that skill's `references/tells.md`. No emoji, em dashes,
+  stock AI phrases or Title Case headlines.
 
 ## Workflows
 

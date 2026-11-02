@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { createHash, createHmac } from "node:crypto";
 import { claimToken, tokenHash, verifyUnsubscribe, unsubscribeSignature, bearerMatches } from "./tokens";
 import { firstEmail, followUpEmail, type VendorForEmail } from "./templates";
+import { findTells } from "../../scripts/human-voice.mjs";
 import { planToday, pauseReason, warmupCap, type Candidate } from "./plan";
 import { classifyResendEvent, domainAcceptsMail, verifyResendWebhook } from "./delivery";
 
@@ -52,6 +53,14 @@ describe("emails", () => {
         expect(part).toContain(links.unsubscribeUrl.replace(/&/g, part === e.html ? "&amp;" : "&"));
         expect(part).toContain("hello@sunrise.example");
         expect(part).toContain(links.claimUrl);
+      }
+    }
+  });
+
+  it("reads as written by a person: no emoji, em dashes or stock AI phrases", () => {
+    for (const offerPro of [false, true]) {
+      for (const e of [firstEmail(v, links, { ...settings, offerPro }), followUpEmail(v, links, { ...settings, offerPro })]) {
+        expect(findTells(`${e.subject}\n\n${e.text}`).filter((t) => t.level === "fix")).toEqual([]);
       }
     }
   });

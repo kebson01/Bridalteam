@@ -46,6 +46,11 @@ bans don't come back.
   but they press publish.
 - **Honest about scale.** Bridal Team is new. Never claim user numbers,
   testimonials or press you don't have.
+- **Sound like a person wrote it.** Before showing the user anything that
+  will be posted, sent or read aloud to the public, run the `human-voice`
+  pass: `node scripts/human-voice.mjs` on the draft, fix every `✗`, then
+  read it against that skill's `references/tells.md`. No emoji, em dashes,
+  stock AI phrases or Title Case headlines.
 
 ## Workflows
 

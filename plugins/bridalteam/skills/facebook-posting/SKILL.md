@@ -55,6 +55,11 @@ Three workflows:
 - **Not every post sells.** At least 1 in 5 posts has no link at all. A Page
   that only promotes itself gets ignored, and Facebook shows it to fewer
   people.
+- **Sound like a person wrote it.** Before showing the user anything that
+  will be posted, sent or read aloud to the public, run the `human-voice`
+  pass: `node scripts/human-voice.mjs` on the draft, fix every `✗`, then
+  read it against that skill's `references/tells.md`. No emoji, em dashes,
+  stock AI phrases or Title Case headlines.
 
 ## 1. Plan the month
 

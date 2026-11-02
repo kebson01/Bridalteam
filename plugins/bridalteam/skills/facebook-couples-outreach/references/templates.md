@@ -1,6 +1,7 @@
 # Message templates
 
-These are starting points, not scripts. Rewrite each one for the person or
+These are starting points, not scripts. Run every final draft through the
+`human-voice` skill before showing it. Rewrite each one for the person or
 group: their city, their date, what they actually said. Never send the same
 text twice. Keep messages short, with at most one link, always tagged.
 
@@ -20,7 +21,7 @@ text twice. Keep messages short, with at most one link, always tagged.
 > timelines. No card needed.
 >
 > We're new and small, so any feedback is really welcome. Congrats to everyone
-> planning! 💍
+> planning.
 >
 > https://bridalteam.com/wedding-website?utm_source=facebook&utm_medium=group&utm_campaign=<group-slug>
 
@@ -28,12 +29,12 @@ text twice. Keep messages short, with at most one link, always tagged.
 
 Give these to the `facebook-posting` queue. No link is needed.
 
-- "Just got engaged? 💍 Tell us your season and city below and we'll
+- "Just got engaged? Tell us your season and city below and we'll
   reply with what to book first."
 - "Planning a 2027 wedding in South Florida? What's the one question you
   can't find a straight answer to? We'll answer every comment."
 - "Showers, engagement parties, vow renewals: what are you celebrating
-  this year? Tell us below 🎉"
+  this year? Tell us below."
 
 ## Replies
 
@@ -41,7 +42,7 @@ Answer what they said first. Invite them only where it fits.
 
 **Someone shares their engagement or date:**
 
-> Congratulations!! 🎉 <one specific, genuine line about their date, season
+> Congratulations! <one specific, genuine line about their date, season
 > or city>. If it helps, you can set up a free wedding page with RSVPs on
 > Bridal Team whenever you're ready: <tagged /wedding-website link>
 
