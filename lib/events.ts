@@ -3,7 +3,9 @@
  *
  * The counting half of "is anyone arriving, and where do they stop?" — see
  * supabase/migrations/20260920060000_page_events.sql for why this is built in
- * house rather than bought, and why it holds no identifier.
+ * house rather than bought, and 20261102120000_page_events_visits.sql for the
+ * one identifier it does hold: a random per-tab visit id, never linked across
+ * visits. The numbers are read on /admin/analytics.
  *
  * Keep the list short. Every event added here is a number someone has to
  * interpret later, and a funnel with thirty stages tells you less than one
@@ -18,6 +20,8 @@ export const EVENT_NAMES = [
   "planner_limit",
   /** An account was created. The end of the funnel. */
   "signup_success",
+  /** The visitor left a page (navigated, hid the tab or closed it). Carries the on-screen time. */
+  "page_leave",
 ] as const;
 
 export type EventName = (typeof EVENT_NAMES)[number];
@@ -78,6 +82,82 @@ export function cleanPath(input: string | null | undefined): string | undefined 
   return path.slice(0, MAX_FIELD);
 }
 
+// ── Visits ────────────────────────────────────────────────────────────────────
+//
+// One visit = one browser tab until it closes or sits idle for 30 minutes. The
+// id is random, lives in sessionStorage (not a cookie, not localStorage), and
+// is never linked to an account, an IP or any earlier visit. See
+// supabase/migrations/20261102120000_page_events_visits.sql.
+
+const VISIT_KEY = "bt_visit";
+export const VISIT_IDLE_MS = 30 * 60 * 1000;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The current visit's id, starting a new visit after 30 idle minutes. Undefined if storage is blocked. */
+export function visitId(now: number = Date.now()): string | undefined {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(VISIT_KEY) ?? "null") as { id?: string; last?: number } | null;
+    const id =
+      saved?.id && UUID_RE.test(saved.id) && typeof saved.last === "number" && now - saved.last < VISIT_IDLE_MS
+        ? saved.id
+        : crypto.randomUUID();
+    sessionStorage.setItem(VISIT_KEY, JSON.stringify({ id, last: now }));
+    return id;
+  } catch {
+    return undefined;
+  }
+}
+
+// Opening /admin marks this browser as the owner's, so testing the site and
+// checking the dashboard don't show up as visitor traffic. Undo from the
+// analytics page.
+const NO_TRACK_KEY = "bt_no_track";
+
+export function trackingDisabled(): boolean {
+  try {
+    return localStorage.getItem(NO_TRACK_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** An explicit choice from the analytics page. "0" is remembered too, so it sticks. */
+export function setTrackingDisabled(disabled: boolean): void {
+  try {
+    localStorage.setItem(NO_TRACK_KEY, disabled ? "1" : "0");
+  } catch {
+    // Storage blocked: nothing to remember, nothing to undo.
+  }
+}
+
+/**
+ * Called on every /admin page: excludes this browser unless its owner has
+ * already chosen (on /admin/analytics) to be counted. Without the "unless",
+ * switching counting back on would be silently undone by the next admin visit.
+ */
+export function excludeAdminBrowserByDefault(): void {
+  try {
+    if (localStorage.getItem(NO_TRACK_KEY) === null) localStorage.setItem(NO_TRACK_KEY, "1");
+  } catch {
+    // Storage blocked: this browser will be counted, which is the safe default.
+  }
+}
+
+// ── Server-side validation of the two new fields ──────────────────────────────
+
+/** A visit id the server will store: a v4-shaped UUID, nothing else. */
+export function cleanVisitId(value: unknown): string | undefined {
+  return typeof value === "string" && UUID_RE.test(value) ? value.toLowerCase() : undefined;
+}
+
+/** On-screen milliseconds, capped at 30 minutes so a forgotten tab can't skew averages. */
+export const MAX_DURATION_MS = 30 * 60 * 1000;
+
+export function cleanDuration(value: unknown): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return undefined;
+  return Math.min(Math.round(value), MAX_DURATION_MS);
+}
+
 /**
  * Reports an event. Deliberately unawaited and failure-swallowing at every
  * layer: a metrics call must never delay a render, block a navigation, or
@@ -87,10 +167,11 @@ export function cleanPath(input: string | null | undefined): string | undefined 
  * which is exactly when the last event of a visit fires, and exactly when a
  * normal fetch gets cancelled.
  */
-export function track(name: EventName, path?: string, source?: string): void {
+export function track(name: EventName, path?: string, source?: string, durationMs?: number): void {
   if (typeof window === "undefined") return;
   try {
-    const body = JSON.stringify({ name, path, source });
+    if (trackingDisabled()) return;
+    const body = JSON.stringify({ name, path, source, visit_id: visitId(), duration_ms: durationMs });
     if (navigator.sendBeacon) {
       navigator.sendBeacon("/api/track", new Blob([body], { type: "application/json" }));
       return;

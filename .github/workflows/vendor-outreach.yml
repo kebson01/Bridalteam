@@ -51,5 +51,9 @@ jobs:
           cat response.json
           echo
           # Fail the run (and email the repo owner, GitHub's default) when the
-          # campaign is paused, misconfigured or erroring, so it isn't missed.
-          if [ "$status" != "200" ] || grep -q '"status":"paused"' response.json; then exit 1; fi
+          # campaign is paused, misconfigured, erroring, or any email failed to
+          # send, so a bad day isn't hidden behind a green tick.
+          if [ "$status" != "200" ] || grep -qE '"status":"(paused|send_failures)"' response.json; then
+            echo "::error::Vendor outreach needs attention. See the JSON above (status, failures, paused)."
+            exit 1
+          fi

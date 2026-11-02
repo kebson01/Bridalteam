@@ -201,6 +201,7 @@ export default function AdminDashboardPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-light uppercase tracking-wide text-ink">Admin dashboard</h1>
         <div className="flex items-center gap-4 text-sm">
+          <Link href="/admin/analytics" className="font-semibold text-brand-text">Analytics →</Link>
           <Link href="/admin/sites" className="font-semibold text-brand-text">Guest websites →</Link>
           <Link href="/admin/leads" className="font-semibold text-brand-text">Vendor leads →</Link>
           <Link href="/admin/venues" className="font-semibold text-brand-text">Manage venues →</Link>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { clientIp } from "@/lib/ai-quota";
-import { isEventName, cleanPath, MAX_FIELD } from "@/lib/events";
+import { isEventName, cleanPath, cleanVisitId, cleanDuration, MAX_FIELD } from "@/lib/events";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     if (!ua || BOT_RE.test(ua)) return new NextResponse(null, { status: 204 });
     if (rateLimited(clientIp(req))) return new NextResponse(null, { status: 204 });
 
-    const body = (await req.json()) as { name?: unknown; path?: unknown; source?: unknown };
+    const body = (await req.json()) as { name?: unknown; path?: unknown; source?: unknown; visit_id?: unknown; duration_ms?: unknown };
     // Allowlisted, so a caller cannot invent event names and turn the table
     // into a junk drawer that quietly costs money to store.
     if (!isEventName(body.name)) return new NextResponse(null, { status: 204 });
@@ -93,11 +93,19 @@ export async function POST(req: Request) {
       return new NextResponse(null, { status: 204 });
     }
 
-    // No IP, no user id, no session id — see the migration for why. clientIp()
-    // above is used for the rate-limit window and then discarded.
-    const { error } = await admin
-      .from("page_events")
-      .insert({ name: body.name, path: path ?? null, source: source ?? null });
+    // No IP, no user id, no cookie. visit_id is the random per-tab id from
+    // lib/events.ts (one visit, never linked across visits); see
+    // 20261102120000_page_events_visits.sql. clientIp() above is used for the
+    // rate-limit window and then discarded.
+    const duration = body.name === "page_leave" ? cleanDuration(body.duration_ms) : undefined;
+    if (body.name === "page_leave" && duration === undefined) return new NextResponse(null, { status: 204 });
+    const { error } = await admin.from("page_events").insert({
+      name: body.name,
+      path: path ?? null,
+      source: source ?? null,
+      visit_id: cleanVisitId(body.visit_id) ?? null,
+      duration_ms: duration ?? null,
+    });
     if (error) console.error("track insert failed:", error.code, error.message);
   } catch (err) {
     console.error("track failed:", err);

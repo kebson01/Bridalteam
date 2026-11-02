@@ -169,10 +169,35 @@ describe("runOutreach", () => {
     expect(send).toHaveBeenCalledTimes(1);
   });
 
+  it("on a setup error (unverified domain) stops at once and leaves every vendor for the next run", async () => {
+    listing(1);
+    listing(2);
+    const refused = vi.fn(async () => ({ ok: false as const, error: "Resend 403: domain is not verified", scope: "setup" as const }));
+    const r = await runOutreach({ db: fakeDb(tables), config, send: refused, acceptsMail: async () => true }, false);
+    expect(refused).toHaveBeenCalledTimes(1);
+    expect(r.failures).toHaveLength(1);
+    expect(tables.vendor_outreach).toHaveLength(0);
+  });
+
+  it("skips an address Resend rejects for good, and carries on with the rest", async () => {
+    listing(1, { email: "bad@ex.com" });
+    listing(2);
+    const picky = vi.fn(async (req: SendRequest) =>
+      req.to === "bad@ex.com"
+        ? { ok: false as const, error: "Resend 422: invalid to", scope: "address" as const }
+        : { ok: true as const, messageId: "m-ok" },
+    );
+    const r = await runOutreach({ db: fakeDb(tables), config, send: picky, acceptsMail: async () => true }, false);
+    expect(picky).toHaveBeenCalledTimes(2);
+    expect(r.sent.firsts).toBe(1);
+    expect(r.skippedInvalid).toEqual(["bad@ex.com"]);
+    expect(tables.vendor_outreach.find((o) => o.email === "bad@ex.com")?.status).toBe("invalid");
+  });
+
   it("stops for the day on a rate limit instead of working through the list", async () => {
     listing(1);
     listing(2);
-    const failing = vi.fn(async () => ({ ok: false as const, error: "Resend 429", retryable: true }));
+    const failing = vi.fn(async () => ({ ok: false as const, error: "Resend 429", scope: "temporary" as const }));
     const r = await runOutreach({ db: fakeDb(tables), config, send: failing, acceptsMail: async () => true }, false);
     expect(failing).toHaveBeenCalledTimes(1);
     expect(r.failures).toHaveLength(1);

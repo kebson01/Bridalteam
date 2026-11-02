@@ -4,7 +4,7 @@ import { claimToken, tokenHash, verifyUnsubscribe, unsubscribeSignature, bearerM
 import { firstEmail, followUpEmail, type VendorForEmail } from "./templates";
 import { findTells } from "../../scripts/human-voice.mjs";
 import { planToday, pauseReason, warmupCap, type Candidate } from "./plan";
-import { classifyResendEvent, domainAcceptsMail, verifyResendWebhook } from "./delivery";
+import { classifyResendEvent, domainAcceptsMail, failureScope, verifyResendWebhook } from "./delivery";
 
 const SECRET = "x".repeat(40);
 const ORG = "11111111-1111-4111-8111-111111111111";
@@ -195,5 +195,15 @@ describe("MX check", () => {
     expect(await domainAcceptsMail("a@gone.example", fail("ENOTFOUND"))).toBe(false);
     expect(await domainAcceptsMail("a@ex.com", fail("ETIMEOUT"))).toBe(true);
     expect(await domainAcceptsMail("no-at-sign", async () => [])).toBe(false);
+  });
+});
+
+describe("send failures", () => {
+  it("tells setup problems, outages and bad addresses apart", () => {
+    expect(failureScope(403)).toBe("setup"); // unverified domain, wrong key
+    expect(failureScope(401)).toBe("setup");
+    expect(failureScope(429)).toBe("temporary");
+    expect(failureScope(503)).toBe("temporary");
+    expect(failureScope(422)).toBe("address");
   });
 });
