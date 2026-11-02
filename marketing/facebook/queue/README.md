@@ -32,6 +32,8 @@ One folder per post, named `YYYY-MM-DD-<noon|eve>-short-name`, holding a
   `tool`, `question`, `conversation`, `blog`, `seasonal`, `about`), for the
   monthly report.
 - **`message`** is the post text. `\n` is a line break.
+  It has to read as written by a person: `check` rejects emoji, em dashes,
+  stock AI phrases and Title Case headlines (see `scripts/human-voice.mjs`).
 - **`images`** (required): every post has at least one photo, since photo
   posts get more engagement. Up to 10 `.png` or `.jpg` files, each under 4 MB
   (ideally under 1 MB). Paths are relative to the post's folder, so an image

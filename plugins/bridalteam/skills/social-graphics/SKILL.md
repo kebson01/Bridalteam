@@ -66,6 +66,11 @@ time, and ships them.
   own PR. Squash-merge it yourself once CI is green, but only if it stays
   inside the paths above. Otherwise leave it for the owner and say why.
 - **Facebook stories** are drafted only; the owner posts them by hand.
+- **Sound like a person wrote it.** Before showing the user anything that
+  will be posted, sent or read aloud to the public, run the `human-voice`
+  pass: `node scripts/human-voice.mjs` on the draft, fix every `✗`, then
+  read it against that skill's `references/tells.md`. No emoji, em dashes,
+  stock AI phrases or Title Case headlines.
 
 ## Workflow
 

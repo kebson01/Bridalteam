@@ -12,6 +12,12 @@ One row per community. Check the rule before every post.
 
 | Community | Self-promo rule (quoted) | Rule checked | Last post | Notes |
 |---|---|---|---|---|
+| [South Florida Weddings (FB group)](https://www.facebook.com/sofloweds/) | rule to confirm | | | Best fit. Local group for couples and vendors, founded 2014, says it is one of the largest wedding groups on Facebook. Membership may be capped. Join from the companion Page, then ask the admin. Found 2026-11-02. |
+| [The Confident Bride Society](https://www.facebook.com/groups/theconfidentbridesociety) | rule to confirm | | | Brides' group run by a Miami planning coach (Verity Weddings). Unclear if it is local. The owner is a planner, so ask before mentioning the AI planner. Found 2026-11-02. |
+| [Best Destination Wedding](https://www.facebook.com/BDWForum/) | rule to confirm | | | National brides' forum, not local. Fits couples planning a destination wedding in South Florida. Found 2026-11-02. |
+| Florida Bridal & Wedding Expo (Broward County Convention Center; also West Palm Beach) | n/a (event) | | | Expo for engaged couples, about 5,000 attendees expected. Listings disagree on 2026 dates. Check American Consumer Shows for 2027 dates. Attend or sponsor; don't message attendees. |
+| Great Bridal Expo (Fort Lauderdale / Aventura, Miami) | n/a (event) | | | National touring show. 2026 dates have passed, so check Great Bridal Expo Group for 2027. Attend or sponsor. |
+| Our Dream Wedding Expo (Fort Lauderdale, West Palm Beach); My Shadi Bridal Expo (Coral Springs) | n/a (event) | | | Eventbrite shows Jan 24 and Feb 21 dates with no year, probably 2027. Confirm on Eventbrite. |
 
 ## Posts
 
@@ -221,3 +227,12 @@ One row per community. Check the rule before every post.
 - 2026-10-30: Posted feed post #15 ("4 Wedding Registry Rules") to the Facebook Page through Zapier ahead of the November queue, at the owner's request: https://www.facebook.com/671229889580227_1821166639512064. The queue starts as planned with the wedding checklist post on Nov 1 at 12:13 pm ET.
 - 2026-10-30: Gave every Facebook post a photo, at the owner's request (photo posts get more engagement). The 20 November evening posts (conversation, question, blog, seasonal, about) each got a free Unsplash photo chosen through the API, credited in `marketing/facebook/2026-11-photos.md`, with their links moved into the text. `facebook-queue.mjs check` now fails on any post without a photo, and the facebook-posting skill says how to pick one.
 - 2026-10-30: Planned December 2026 for the Facebook Page, 50 posts, every one with a photo: 15 guide posts from the ready-made feed images (#1–4, 11–14, 16–18, 20, 22, 23, 54), 8 tool spotlights (the AI planner feed post plus 7 new ones), 7 questions, 8 conversations, 5 blog posts, 4 seasonal and 3 about posts. The 34 posts without a feed image use Unsplash photos credited in `marketing/facebook/2026-12-photos.md`. Feed posts #19, 21, 24, 25 and 51–53, 55 are left for January. Evening slots on Dec 24, 25, 30 and 31 are dropped for the holidays.
+
+## Conversations
+
+People who commented on or messaged the Bridal Team Page and got a personal
+reply (the `bridalteam:facebook-couples-outreach` skill). Counts only, never
+names.
+
+| Date | Source (post or inbox) | Replies sent | Link clicks (if known) | Signups (if known) | Notes |
+|---|---|---|---|---|---|

@@ -12,6 +12,8 @@ Skills for running and growing Bridal Team. Each skill lives in
 | `find-vendor-emails` | Finding the contact email each vendor publishes (own site, own Facebook Page or listing), recording it with its source in `VENDOR-PROSPECTS.md`, and drafting the matching database update. |
 | `couples-acquisition` | Diagnosing the couples funnel from `page_events`, drafting Reddit answers, Facebook group posts, Pinterest pins and short videos that follow each community's rules, tagging links, keeping `COUPLES-TRACKER.md`, and weekly reports. |
 | `facebook-posting` | Running the Bridal Team Facebook Page at about 50 posts a month: planning and drafting each month's posts into `marketing/facebook/queue/`, publishing the due post through the Zapier connector, and the monthly report. |
+| `facebook-couples-outreach` | Reaching engaged couples on Facebook without spam: finding public wedding groups and events, admin asks and promo-day posts, "just engaged?" call-out posts for the Page, and personal replies inviting people who comment or message to host their occasion on Bridal Team. |
+| `human-voice` | The last read before anything goes to the public. Strips the habits that make text read as machine-written (emoji, em dashes, stock AI phrases, Title Case headlines) using `scripts/human-voice.mjs` plus a read for the tells a script can't see. Every skill above runs it before showing a draft. |
 
 ## Install
 

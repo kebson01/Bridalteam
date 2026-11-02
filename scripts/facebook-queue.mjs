@@ -15,6 +15,7 @@ import { readdir, readFile, writeFile, rename, mkdir, stat } from "node:fs/promi
 import { existsSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
+import { findTells, formatTells } from "./human-voice.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const QUEUE_DIR = path.join(root, "marketing", "facebook", "queue");
@@ -52,6 +53,12 @@ export async function parsePost(raw, postDir) {
   if (Number.isNaN(publishAt.getTime())) throw new Error(`publish_at is not a date: "${publish_at}"`);
 
   if (typeof message !== "string" || !message.trim()) throw new Error("message is required");
+
+  // Posts go to the public under Bridal Team's name, so they have to read as
+  // written by a person: no emoji, em dashes, stock AI phrases or Title Case
+  // headlines. See scripts/human-voice.mjs and the human-voice skill.
+  const tells = findTells(message).filter((t) => t.level === "fix");
+  if (tells.length) throw new Error(`message reads as machine-written (node scripts/human-voice.mjs):\n${formatTells(tells)}`);
 
   // Every post carries a photo: the owner's rule since 2026-10-30, because
   // photo posts get more engagement. Facebook drops the link preview from any
