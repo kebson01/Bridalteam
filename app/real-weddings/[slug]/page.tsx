@@ -3,7 +3,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabasePublic } from "@/lib/supabase";
 import { pageMetadata } from "@/lib/site";
-import { formatWeddingDate, getRealWedding, storyParagraphs } from "@/lib/real-weddings";
+import { formatWeddingDate, getRealWedding, photographerCredit, storyParagraphs, type RealWeddingVendor } from "@/lib/real-weddings";
+
+function VendorName({ vendor }: { vendor: RealWeddingVendor }) {
+  if (!vendor.url || !/^https?:\/\//i.test(vendor.url)) return <>{vendor.name}</>;
+  return (
+    <a href={vendor.url} className="text-brand-text hover:text-brand-deep" rel="noopener">
+      {vendor.name}
+    </a>
+  );
+}
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +36,7 @@ export default async function RealWeddingPage({ params }: { params: Promise<{ sl
   if (!story) notFound();
 
   const place = [story.venue, story.city].filter(Boolean).join(", ");
+  const { credit, otherVendors } = photographerCredit(story);
 
   return (
     <article className="mx-auto max-w-3xl px-5 py-12">
@@ -68,25 +78,18 @@ export default async function RealWeddingPage({ params }: { params: Promise<{ sl
         </div>
       )}
 
-      {(story.vendors.length > 0 || story.photographer) && (
+      {(otherVendors.length > 0 || credit) && (
         <section className="mt-12 rounded-3xl border border-stone-2 bg-white p-6">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft/60">The team behind the day</h2>
           <ul className="mt-3 space-y-1.5 text-ink-soft">
-            {story.photographer && (
+            {credit && (
               <li>
-                <span className="font-medium text-ink">Photography:</span> {story.photographer}
+                <span className="font-medium text-ink">Photography:</span> <VendorName vendor={credit} />
               </li>
             )}
-            {story.vendors.map((v) => (
+            {otherVendors.map((v) => (
               <li key={`${v.role}-${v.name}`}>
-                <span className="font-medium text-ink">{v.role}:</span>{" "}
-                {v.url ? (
-                  <a href={v.url} className="text-brand-text hover:text-brand-deep" rel="noopener">
-                    {v.name}
-                  </a>
-                ) : (
-                  v.name
-                )}
+                <span className="font-medium text-ink">{v.role}:</span> <VendorName vendor={v} />
               </li>
             ))}
           </ul>
@@ -94,7 +97,8 @@ export default async function RealWeddingPage({ params }: { params: Promise<{ sl
       )}
 
       <p className="mt-10 text-sm text-ink-soft/60">
-        Shared with the couple&apos;s permission. Photos by {story.photographer ?? "the couple's photographer"}.
+        Shared with the couple&apos;s permission. Photos by{" "}
+        {credit ? <VendorName vendor={credit} /> : "the couple's photographer"}.
       </p>
     </article>
   );

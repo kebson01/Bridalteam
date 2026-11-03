@@ -40,6 +40,9 @@ st-charles-2012/
   Plain text only.
 - `photos`: in the order they should appear. `alt` describes the photo for
   screen readers; don't put names in it unless the person agreed.
+- `photographer` and `vendors`: to link the photographer's name, also list
+  them in `vendors` with `"role": "Photography"`, the same name, and their
+  `url`. The page links the credit and doesn't list them twice.
 - `consent`: leave it out until it's true. Without it the story uploads as a
   draft and cannot be published.
 - Any `[bracketed text]` anywhere blocks the upload.
