@@ -1,6 +1,7 @@
 import { supabasePublic } from "@/lib/supabase";
 import { hasIndexableContent } from "@/lib/vendor-content";
-import { buildLlmsTxt, type LlmsVendor } from "@/lib/llms";
+import { buildLlmsTxt, type LlmsRealWedding, type LlmsVendor } from "@/lib/llms";
+import { mcpEnabled } from "@/lib/flags";
 
 /**
  * Serves /llms.txt — see lib/llms.ts for what it is and why.
@@ -30,8 +31,25 @@ async function publishedVendors(): Promise<LlmsVendor[]> {
   }
 }
 
+/** Published Real Weddings stories, the same set the sitemap lists. */
+async function publishedRealWeddings(): Promise<LlmsRealWedding[]> {
+  try {
+    const { data, error } = await supabasePublic()
+      .from("real_weddings")
+      .select("slug, title, city, summary")
+      .eq("status", "published")
+      .order("wedding_date", { ascending: false });
+    if (error) throw new Error(`${error.code}: ${error.message}`);
+    return data ?? [];
+  } catch (err) {
+    console.error("llms.txt: real weddings unavailable, omitting them:", err);
+    return [];
+  }
+}
+
 export async function GET() {
-  return new Response(buildLlmsTxt(await publishedVendors()), {
+  const [vendors, realWeddings] = await Promise.all([publishedVendors(), publishedRealWeddings()]);
+  return new Response(buildLlmsTxt({ vendors, realWeddings, mcpEnabled: mcpEnabled() }), {
     headers: { "Content-Type": "text/markdown; charset=utf-8" },
   });
 }

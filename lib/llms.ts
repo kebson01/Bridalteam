@@ -27,6 +27,20 @@ import { GUIDES } from "@/lib/guides";
 import { POSTS_BY_DATE } from "@/lib/blog";
 import { sortCategories } from "@/lib/categories";
 
+export interface LlmsRealWedding {
+  slug: string;
+  title: string;
+  city: string | null;
+  summary: string | null;
+}
+
+export interface LlmsInput {
+  vendors: LlmsVendor[];
+  realWeddings?: LlmsRealWedding[];
+  /** Whether the public MCP server at /api/mcp is switched on (lib/flags.ts). */
+  mcpEnabled?: boolean;
+}
+
 export interface LlmsVendor {
   org_id: string;
   business_name: string;
@@ -63,7 +77,7 @@ function vendorSection(vendors: LlmsVendor[]): string[] {
   const lines = [
     "## Wedding vendors",
     "",
-    `Published vendor listings, grouped by service. Each link is the vendor's profile on ${SITE_NAME}, with their contact details, photos and reviews. Couples can message vendors from the profile. Full directory: ${SITE_URL}/vendors`,
+    `Published vendor listings, grouped by service. Each link is the vendor's profile on ${SITE_NAME}, with their contact details, photos and reviews. Full directory: ${SITE_URL}/vendors`,
   ];
   const uncategorised = "Other services";
   const byCategory = new Map<string, LlmsVendor[]>();
@@ -85,7 +99,36 @@ function vendorSection(vendors: LlmsVendor[]): string[] {
   return lines;
 }
 
-export function buildLlmsTxt(vendors: LlmsVendor[]): string {
+function realWeddingSection(stories: LlmsRealWedding[]): string[] {
+  if (stories.length === 0) return [];
+  return [
+    "## Real weddings",
+    "",
+    `Stories of real couples' weddings, with the vendors they booked: ${SITE_URL}/real-weddings`,
+    "",
+    ...stories.map((r) => {
+      const detail = [r.city, r.summary ? oneLine(r.summary) : ""].filter(Boolean).join(" — ");
+      return `- [${oneLine(r.title, 120)}](${SITE_URL}/real-weddings/${r.slug})${detail ? `: ${detail}` : ""}`;
+    }),
+    "",
+  ];
+}
+
+/**
+ * Only when the endpoint is on: an assistant told to connect to a URL that
+ * 404s is worse off than one never told about it.
+ */
+function assistantSection(enabled: boolean): string[] {
+  if (!enabled) return [];
+  return [
+    "## Connect an AI assistant",
+    "",
+    `${SITE_NAME} runs a public, read-only Model Context Protocol (MCP) server at ${SITE_URL}/api/mcp. No sign-in. Add it as a custom connector in Claude, ChatGPT or any MCP client to search published vendors (search_vendors, get_vendor), read the planning guides (search_guides, get_guide), split a budget (estimate_budget), work out reception tables (plan_tables) and build a dated checklist (get_checklist). Every result links back to ${SITE_URL}.`,
+    "",
+  ];
+}
+
+export function buildLlmsTxt({ vendors, realWeddings = [], mcpEnabled = false }: LlmsInput): string {
   const tools = Object.values(TOOLS).map(
     (t) => `- [${t.name}](${SITE_URL}${t.href}): ${t.blurb}`,
   );
@@ -117,6 +160,8 @@ export function buildLlmsTxt(vendors: LlmsVendor[]): string {
     "",
     ...vendorSection(vendors),
     "",
+    ...realWeddingSection(realWeddings),
+    ...assistantSection(mcpEnabled),
     "## Wedding planning guides",
     "",
     ...guides,
