@@ -12,11 +12,15 @@ import { SIGNUP_URL } from "@/lib/config";
  *   camera.webp          Amrit Sangar      unsplash.com/photos/Vrwbwm-jvm0
  *   flowers.webp         Dan Edwards       unsplash.com/photos/8bhzvpM8PJ4
  *   long-table.webp      M F (@mfe1)       unsplash.com/photos/fb0_wj2MZk4
+ *   cake.webp            Mads Eneqvist     unsplash.com/photos/Xb5c2x6wJPc
+ *   candlelit-roses.webp Zane Persaud      unsplash.com/photos/r3XxZj-J4uQ
+ *   floral-arch.webp     David Goldman     unsplash.com/photos/kdlfXY9rvZA
  *
  * public/media/guides/planning-binder.webp is the owner's own photo.
  *
- * The Real weddings section uses public/media/real-weddings: the St. Charles
- * wedding (2012), photos shared by the couple (the site's owner).
+ * The Wedding moments section mixes those Unsplash details with photos from
+ * the St. Charles wedding (2012) in public/media/real-weddings, shared by
+ * the couple (the site's owner).
  */
 
 const SPARK = "M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z";
@@ -221,23 +225,28 @@ export function WholeTeam() {
 // ── Real weddings ────────────────────────────────────────────────────────
 
 /**
- * Kebson & Tricia St. Charles's wedding (2012), photos shared by the couple.
+ * A mix: four photos from Kebson & Tricia St. Charles's wedding (2012),
+ * shared by the couple, and three Unsplash detail shots (no people), so the
+ * section isn't all one couple. Each says which it is: the St. Charles ones
+ * name the wedding, the Unsplash ones say "Inspiration" and are never
+ * presented as a real Bridal Team wedding.
  *
  * Order and spans are chosen so grid-flow-dense fills every cell with no
  * gaps: on desktop a 4-column, 3-row mosaic (the three portraits span two
- * rows, the panorama and the Stonebridge sign span two columns); on phones
- * a 2-column grid where the wide ones take a full row. Changing the list
- * means re-checking that it still tiles.
+ * rows, the two wide shots span two columns); on phones a 2-column grid
+ * where the wide ones take a full row. Changing the list means re-checking
+ * that it still tiles.
  */
-const W = "St. Charles wedding · Boca Raton";
+const ST_CHARLES = "St. Charles wedding · Boca Raton";
+const IDEA = "Inspiration";
 const REAL = [
-  { src: "/media/real-weddings/st-charles-2012-getting-dressed.webp", caption: "Getting into the dress", cls: "row-span-2", pos: "object-center" },
-  { src: "/media/real-weddings/st-charles-2012-wedding-party.webp", caption: "The whole wedding party", cls: "col-span-2", pos: "object-center" },
-  { src: "/media/real-weddings/st-charles-2012-groom-ready.webp", caption: "Buttoning up", cls: "row-span-2", pos: "object-top" },
-  { src: "/media/real-weddings/st-charles-2012-bride-smile.webp", caption: "Before the aisle", cls: "", pos: "object-[50%_30%]" },
-  { src: "/media/real-weddings/st-charles-2012-groomsmen-gazebo.webp", caption: "The groomsmen", cls: "row-span-2", pos: "object-center" },
-  { src: "/media/real-weddings/st-charles-2012-stonebridge.jpg", caption: "Stonebridge Golf & Country Club", cls: "col-span-2", pos: "object-center" },
-  { src: "/media/real-weddings/st-charles-2012-rings.jpg", caption: "Rings in crystal heels", cls: "", pos: "object-center" },
+  { src: "/media/real-weddings/st-charles-2012-getting-dressed.webp", caption: "Getting into the dress", where: ST_CHARLES, cls: "row-span-2", pos: "object-center" },
+  { src: "/media/real-weddings/st-charles-2012-wedding-party.webp", caption: "The whole wedding party", where: ST_CHARLES, cls: "col-span-2", pos: "object-center" },
+  { src: "/media/home/cake.webp", caption: "Berries & blooms", where: IDEA, cls: "row-span-2", pos: "object-center" },
+  { src: "/media/real-weddings/st-charles-2012-bride-smile.webp", caption: "Before the aisle", where: ST_CHARLES, cls: "", pos: "object-[50%_30%]" },
+  { src: "/media/home/candlelit-roses.webp", caption: "Candlelit roses", where: IDEA, cls: "row-span-2", pos: "object-center" },
+  { src: "/media/home/floral-arch.webp", caption: "A ceremony arch in bloom", where: IDEA, cls: "col-span-2", pos: "object-center" },
+  { src: "/media/real-weddings/st-charles-2012-rings.jpg", caption: "Rings in crystal heels", where: ST_CHARLES, cls: "", pos: "object-center" },
 ];
 
 export function RealWeddings() {
@@ -245,12 +254,12 @@ export function RealWeddings() {
     <section className="mx-auto max-w-6xl px-5 pb-16">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <Eyebrow>Real Florida weddings</Eyebrow>
+          <Eyebrow>Wedding moments</Eyebrow>
           <h2 className="mt-2 text-3xl font-medium leading-tight text-ink sm:text-4xl">
-            Real weddings, <span className="text-brand-text">real moments</span>
+            Moments worth <span className="text-brand-text">planning for</span>
           </h2>
           <p className="mt-2 max-w-xl text-sm text-ink-soft/75">
-            From the St. Charles wedding in Boca Raton, shared with us by the couple.
+            Real moments from the St. Charles wedding in Boca Raton, shared by the couple, alongside ideas for your own day.
           </p>
         </div>
         <Link href="/inspiration" className="hidden shrink-0 text-sm font-semibold text-brand-text hover:text-brand-deep sm:inline">
@@ -260,14 +269,15 @@ export function RealWeddings() {
       <ul className="mt-6 grid grid-flow-dense auto-rows-[150px] grid-cols-2 gap-3 sm:auto-rows-[190px] md:grid-cols-4 md:auto-rows-[210px]">
         {REAL.map((r) => (
           <li key={r.src} className={`group relative overflow-hidden rounded-2xl shadow-card ${r.cls}`}>
-            <Image src={r.src} alt={`${r.caption}, ${W}`} fill
+            <Image src={r.src} alt={`${r.caption}, ${r.where}`} fill
               sizes={r.cls === "col-span-2" ? "(max-width: 768px) 100vw, 600px" : "(max-width: 768px) 50vw, 300px"}
               className={`object-cover ${r.pos} transition-transform duration-700 group-hover:scale-105`} />
             <span className="absolute inset-0 bg-gradient-to-t from-ink/75 via-transparent to-transparent" />
             <span className="absolute inset-x-0 bottom-0 p-3 text-white">
               <span className="block truncate text-sm font-medium">{r.caption}</span>
-              {/* The subtitle already names the wedding; on narrow phone tiles this line only truncated. */}
-              <span className="hidden truncate text-[11px] text-white/80 sm:block">{W}</span>
+              {/* Says whose photo it is, so stock is never mistaken for a real wedding. Phone tiles get the short form. */}
+              <span className="hidden truncate text-[11px] text-white/80 sm:block">{r.where}</span>
+              <span className="block truncate text-[11px] text-white/80 sm:hidden">{r.where === ST_CHARLES ? "St. Charles wedding" : r.where}</span>
             </span>
           </li>
         ))}
