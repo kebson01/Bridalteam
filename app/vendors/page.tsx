@@ -4,6 +4,9 @@ import RecommendVendor from "@/components/recommend-vendor";
 import VendorDirectoryList, { type DirectoryVendor } from "@/components/vendor-directory-list";
 import { supabaseServer } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/site";
+import JsonLd from "@/components/json-ld";
+import { vendorItemListSchema } from "@/lib/structured-data";
+import { hasIndexableContent } from "@/lib/vendor-content";
 import { effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 
 export const metadata = pageMetadata({
@@ -40,8 +43,12 @@ export default async function VendorsPage() {
     // Featured first, then alphabetical (already ordered by name).
     .sort((a, b) => Number(b.featured) - Number(a.featured)) as DirectoryVendor[];
 
+  const indexable = list.filter((v) => hasIndexableContent(v));
+
   return (
     <>
+      {/* Same listings the sitemap offers: an empty shell is noindex on its own page (lib/vendor-content.ts). */}
+      {indexable.length > 0 && <JsonLd data={vendorItemListSchema(indexable)} />}
       <PageHero
         eyebrow="Find your team"
         title="Find your dream team"
