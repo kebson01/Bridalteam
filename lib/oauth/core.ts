@@ -52,7 +52,7 @@ export function authorizationServerMetadata() {
     code_challenge_methods_supported: ["S256"],
     token_endpoint_auth_methods_supported: ["none"],
     scopes_supported: [SCOPE],
-    service_documentation: `${SITE_URL}/wedding-website`,
+    service_documentation: `${SITE_URL}/connect-your-ai`,
   };
 }
 
@@ -63,7 +63,9 @@ export function protectedResourceMetadata(resourcePath = MCP_RESOURCE_PATH) {
     authorization_servers: [SITE_URL],
     scopes_supported: [SCOPE],
     bearer_methods_supported: ["header"],
-    resource_name: "Bridal Team — Wedding Website",
+    // Shown by ChatGPT and Claude when connecting. The connection plans the
+    // whole wedding (lib/mcp/planner-tools.ts), not just the website.
+    resource_name: "Bridal Team — Wedding Planner",
   };
 }
 
