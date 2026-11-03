@@ -1,6 +1,7 @@
 import { supabasePublic } from "@/lib/supabase";
 import { effectivePlan, entitlements, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 import type { DirectoryVendor, VendorDetail, VendorReview, VendorSource } from "@/lib/mcp/tools";
+import { lowestPrice, readFaqs, readHighlights, readPackages } from "@/lib/vendor-extras";
 
 /**
  * The MCP server's view of the vendor directory: the same rows /vendors and
@@ -17,7 +18,7 @@ export function supabaseVendorSource(): VendorSource {
     async listPublished(): Promise<DirectoryVendor[]> {
       const { data, error } = await db
         .from("vendor_profiles")
-        .select(`org_id, business_name, category, description, city, region, organizations(${PLAN_COLUMNS})`)
+        .select(`org_id, business_name, category, description, city, region, price_tier, packages, organizations(${PLAN_COLUMNS})`)
         .eq("status", "published");
       if (error) {
         console.error("mcp listPublished failed:", error.code, error.message);
@@ -31,6 +32,8 @@ export function supabaseVendorSource(): VendorSource {
         city: v.city,
         region: v.region,
         featured: effectivePlan(v.organizations as unknown as PlanSource | null) === "featured",
+        price_tier: v.price_tier ?? null,
+        packages_from: lowestPrice(readPackages(v.packages)),
       }));
     },
 
@@ -38,7 +41,7 @@ export function supabaseVendorSource(): VendorSource {
       const { data: v, error } = await db
         .from("vendor_profiles")
         .select(
-          `org_id, business_name, category, description, city, region, website, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
+          `org_id, business_name, category, description, city, region, website, logo_url, cover_url, price_tier, packages, highlights, faqs, organizations(${PLAN_COLUMNS})`,
         )
         .eq("org_id", orgId)
         .eq("status", "published")
@@ -58,6 +61,11 @@ export function supabaseVendorSource(): VendorSource {
         website: entitlements(plan).canLinkSite ? v.website : null,
         logo_url: v.logo_url,
         cover_url: v.cover_url,
+        // Read the same way the profile page does: only well-formed entries.
+        price_tier: v.price_tier ?? null,
+        packages: readPackages(v.packages),
+        highlights: readHighlights(v.highlights),
+        faqs: readFaqs(v.faqs),
       };
     },
 

@@ -126,8 +126,8 @@ server, so an AI assistant can use Bridal Team directly. It is **off until
 
 | Tool | What it does | Built on |
 | --- | --- | --- |
-| `search_vendors` | Published vendors by category, metro, county, keywords | `/vendors` query |
-| `get_vendor` | One profile, rating and recent reviews | `/v/[id]` query |
+| `search_vendors` | Published vendors by category, metro, county, keywords, with price range and lowest package price | `/vendors` query |
+| `get_vendor` | One profile: price range, packages with starting prices and what's included, highlights, FAQs, rating and recent reviews | `/v/[id]` query |
 | `estimate_budget` | Split a total into categories, cost per guest | `lib/budget-calculator.ts` |
 | `plan_tables` | Tables needed for a guest count | `lib/seating-calculator.ts` |
 | `get_checklist` | Dated planning checklist from a wedding date | `lib/checklist.ts` |

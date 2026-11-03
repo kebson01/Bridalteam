@@ -127,6 +127,54 @@ describe("get_vendor", () => {
     expect((await call("get_vendor", { vendor_id: "'; drop table--" })).isError).toBe(true);
     expect((await call("get_vendor", { vendor_id: B })).isError).toBe(true);
   });
+  it("lists packages, price range, highlights and FAQs", async () => {
+    const withExtras: VendorSource = {
+      ...source,
+      listPublished: async () => [{ ...LIST[0], price_tier: 3, packages_from: 1200 }, LIST[1]],
+      getPublished: async () => ({
+        ...DETAIL,
+        price_tier: 3,
+        packages: [
+          { name: "Full day", price: 5200, description: "Ten hours", includes: ["Two shooters", "Album"], featured: true },
+          { name: "Custom", price: null, description: null, includes: [], featured: false },
+        ],
+        highlights: [
+          { icon: "language", title: "Bilingual", detail: "English & Spanish" },
+          { icon: "star", title: "Drone coverage", detail: null },
+        ],
+        faqs: [{ q: "Do you travel?", a: "Anywhere in Florida." }],
+      }),
+    };
+    const t = createTools(withExtras, () => "2026-10-31");
+    const run = async (name: string, args: Record<string, unknown>) =>
+      ((await handleMessage({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } }, t))!
+        .result as { structuredContent: Record<string, any> }).structuredContent;
+
+    const v = await run("get_vendor", { vendor_id: A });
+    expect(v.price_range).toEqual({ level: "$$$", label: "Premium" });
+    expect(v.packages).toEqual([
+      { name: "Full day", starting_price_usd: 5200, description: "Ten hours", includes: ["Two shooters", "Album"], most_requested: true },
+      { name: "Custom", starting_price_usd: null, price_note: "Ask the vendor for a quote.", description: null, includes: [], most_requested: false },
+    ]);
+    expect(v.highlights).toEqual(["Bilingual: English & Spanish", "Drone coverage"]);
+    expect(v.faqs).toEqual([{ question: "Do you travel?", answer: "Anywhere in Florida." }]);
+
+    const s = await run("search_vendors", {});
+    const sunrise = s.vendors.find((x: any) => x.id === A);
+    const bloom = s.vendors.find((x: any) => x.id === B);
+    expect(sunrise.price_range).toEqual({ level: "$$$", label: "Premium" });
+    expect(sunrise.packages_from_usd).toBe(1200);
+    expect(bloom.price_range).toBeNull();
+    expect(bloom.packages_from_usd).toBeNull();
+  });
+
+  it("returns empty lists for a vendor who hasn't added any", async () => {
+    const r = (await call("get_vendor", { vendor_id: A })).structuredContent!;
+    expect(r.packages).toEqual([]);
+    expect(r.highlights).toEqual([]);
+    expect(r.faqs).toEqual([]);
+    expect(r.price_range).toBeNull();
+  });
 });
 
 describe("calculators", () => {
