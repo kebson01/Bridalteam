@@ -19,8 +19,8 @@ import { SIGNUP_URL } from "@/lib/config";
  * public/media/guides/planning-binder.webp is the owner's own photo.
  *
  * The Wedding moments section mixes those Unsplash details with photos from
- * the St. Charles wedding (2012) in public/media/real-weddings, shared by
- * the couple (the site's owner).
+ * the St. Charles (2012) and Paul (2014) weddings in public/media/real-weddings,
+ * shared by the couples.
  */
 
 const SPARK = "M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z";
@@ -225,19 +225,21 @@ export function WholeTeam() {
 // ── Real weddings ────────────────────────────────────────────────────────
 
 /**
- * A mix: four photos from Kebson & Tricia St. Charles's wedding (2012),
- * shared by the couple, and three Unsplash detail shots (no people), so the
- * section isn't all one couple. Each says which it is: the St. Charles ones
- * name the wedding, the Unsplash ones say "Inspiration" and are never
- * presented as a real Bridal Team wedding.
+ * A mix: photos from two real weddings, Kebson & Tricia St. Charles's (2012)
+ * and the Paul wedding (2014), both shared by the couples and already in the
+ * Inspiration feed, plus three Unsplash detail shots (no people). Each says
+ * which it is: the real ones name the wedding, the Unsplash ones say
+ * "Inspiration" and are never presented as a real Bridal Team wedding. The
+ * Paul archway kiss is left out at the owner's request.
  *
  * Order and spans are chosen so grid-flow-dense fills every cell with no
- * gaps: on desktop a 4-column, 3-row mosaic (the three portraits span two
- * rows, the two wide shots span two columns); on phones a 2-column grid
+ * gaps: on desktop a 4-column, 4-row mosaic (the three portraits span two
+ * rows, the three wide shots span two columns); on phones a 2-column grid
  * where the wide ones take a full row. Changing the list means re-checking
  * that it still tiles.
  */
 const ST_CHARLES = "St. Charles wedding · Boca Raton";
+const PAUL = "Paul wedding · Parkland";
 const IDEA = "Inspiration";
 const REAL = [
   { src: "/media/real-weddings/st-charles-2012-getting-dressed.webp", caption: "Getting into the dress", where: ST_CHARLES, cls: "row-span-2", pos: "object-center" },
@@ -247,6 +249,9 @@ const REAL = [
   { src: "/media/home/candlelit-roses.webp", caption: "Candlelit roses", where: IDEA, cls: "row-span-2", pos: "object-center" },
   { src: "/media/home/floral-arch.webp", caption: "A ceremony arch in bloom", where: IDEA, cls: "col-span-2", pos: "object-center" },
   { src: "/media/real-weddings/st-charles-2012-rings.jpg", caption: "Rings in crystal heels", where: ST_CHARLES, cls: "", pos: "object-center" },
+  { src: "/media/real-weddings/paul-2014-bridal-party.jpg", caption: "Team Bride", where: PAUL, cls: "col-span-2", pos: "object-[50%_35%]" },
+  { src: "/media/real-weddings/paul-2014-blessing.jpg", caption: "A blessing at the altar", where: PAUL, cls: "", pos: "object-center" },
+  { src: "/media/real-weddings/paul-2014-groomsmen-lake.jpg", caption: "By the lake", where: PAUL, cls: "", pos: "object-center" },
 ];
 
 export function RealWeddings() {
@@ -259,7 +264,7 @@ export function RealWeddings() {
             Moments worth <span className="text-brand-text">planning for</span>
           </h2>
           <p className="mt-2 max-w-xl text-sm text-ink-soft/75">
-            Real moments from the St. Charles wedding in Boca Raton, shared by the couple, alongside ideas for your own day.
+            Real moments from the St. Charles and Paul weddings, shared by the couples, alongside ideas for your own day.
           </p>
         </div>
         <Link href="/inspiration" className="hidden shrink-0 text-sm font-semibold text-brand-text hover:text-brand-deep sm:inline">
@@ -277,7 +282,7 @@ export function RealWeddings() {
               <span className="block truncate text-sm font-medium">{r.caption}</span>
               {/* Says whose photo it is, so stock is never mistaken for a real wedding. Phone tiles get the short form. */}
               <span className="hidden truncate text-[11px] text-white/80 sm:block">{r.where}</span>
-              <span className="block truncate text-[11px] text-white/80 sm:hidden">{r.where === ST_CHARLES ? "St. Charles wedding" : r.where}</span>
+              <span className="block truncate text-[11px] text-white/80 sm:hidden">{r.where.split(" · ")[0]}</span>
             </span>
           </li>
         ))}
