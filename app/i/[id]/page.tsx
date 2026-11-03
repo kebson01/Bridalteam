@@ -14,7 +14,7 @@ async function getImage(id: string) {
   const [{ data: image }, { data: { user } }] = await Promise.all([
     supabase
       .from("inspiration_images")
-      .select("id, image_url, title, theme, colors, media_type, media_url, like_count, vendor_id, source")
+      .select("id, image_url, title, theme, colors, media_type, media_url, like_count, vendor_id, source, is_seed")
       .eq("id", id)
       .maybeSingle(),
     supabase.auth.getUser(),
@@ -89,7 +89,7 @@ export default async function SingleInspirationPage({
               <p className="mt-1 text-sm text-ink-soft/70">
                 {[image.theme, image.colors?.join(", ")].filter(Boolean).join(" · ")}
               </p>
-              {image.source === "curated" && (
+              {image.is_seed && (
                 <p className="mt-1 text-xs text-ink-soft/60">
                   Bridal Team Ideas: a look picked by the Bridal Team, not a couple&apos;s or vendor&apos;s own wedding.
                 </p>
