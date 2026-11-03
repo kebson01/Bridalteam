@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LAUNCH_CITY } from "@/lib/site";
 import { sortCategories } from "@/lib/categories";
 import {
@@ -72,25 +72,6 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
   const [area, setArea] = useState<AreaId | null>(null);
   const [limit, setLimit] = useState(DIRECTORY_PAGE);
 
-  // The type row scrolls sideways rather than wrapping, so it stays one line
-  // however many categories exist. Arrows appear only on the side with more.
-  const typeRow = useRef<HTMLDivElement>(null);
-  const [edges, setEdges] = useState({ left: false, right: false });
-  const updateEdges = () => {
-    const el = typeRow.current;
-    if (!el) return;
-    setEdges({
-      left: el.scrollLeft > 4,
-      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 4,
-    });
-  };
-  useEffect(() => {
-    updateEdges();
-    window.addEventListener("resize", updateEdges);
-    return () => window.removeEventListener("resize", updateEdges);
-  }, []);
-  const scrollTypes = (dir: 1 | -1) =>
-    typeRow.current?.scrollBy({ left: dir * typeRow.current.clientWidth * 0.7, behavior: "smooth" });
 
   const categories = useMemo(() => sortCategories(vendors.map((v) => v.category)), [vendors]);
 
@@ -201,8 +182,8 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
         </span>
       </Link>
 
-      {/* Search + location */}
-      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+      {/* Search, type and location */}
+      <div className="mt-5 flex flex-col gap-2 lg:flex-row lg:items-center">
         <label className="flex flex-1 items-center gap-3 rounded-full border border-stone-2 bg-white px-4 shadow-sm focus-within:border-brand">
           <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-stone-3">
             <circle cx="9" cy="9" r="6" />
@@ -224,13 +205,50 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
           field. Styled as a pill so it reads as one more filter. Native, so
           keyboard and screen-reader behaviour and the mobile picker come free.
         */}
+        <div className="grid grid-cols-2 gap-2 lg:flex lg:shrink-0">
+        {/*
+          Vendor type is a select too. With 30-odd types, from Venue to
+          Cigar roller, a chip row became a long sideways scroll that hid most
+          of them. Each option carries how many listings it would show, given
+          the location and search already chosen.
+        */}
+        {categories.length > 0 && (
+          <div className={`relative ${metroChips.length > 0 ? "" : "col-span-2"}`}>
+            <select
+              aria-label="Vendor type"
+              value={category ?? ""}
+              onChange={(e) => setCategory(e.target.value || null)}
+              className={`w-full cursor-pointer appearance-none truncate rounded-full border py-3 pl-4 pr-10 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-brand lg:w-56 ${
+                category ? "border-ink bg-ink text-white" : "border-stone-2 bg-white text-ink"
+              }`}
+            >
+              <option value="">All types ({categoryCounts.all})</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c} ({categoryCounts.counts.get(c) ?? 0})
+                </option>
+              ))}
+            </select>
+            <svg
+              aria-hidden
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className={`pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 ${category ? "text-white" : "text-stone-3"}`}
+            >
+              <path d="m6 8 4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        )}
+
         {metroChips.length > 0 && (
-          <div className="relative sm:shrink-0">
+          <div className={`relative ${categories.length > 0 ? "" : "col-span-2"}`}>
             <select
               aria-label="Metro"
               value={metro ?? ""}
               onChange={(e) => selectMetro((e.target.value || null) as MetroId | null)}
-              className={`w-full cursor-pointer appearance-none rounded-full border py-3 pl-4 pr-10 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-brand sm:w-auto ${
+              className={`w-full cursor-pointer appearance-none rounded-full border py-3 pl-4 pr-10 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-brand lg:w-52 ${
                 metro ? "border-ink bg-ink text-white" : "border-stone-2 bg-white text-ink"
               }`}
             >
@@ -253,6 +271,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
             </svg>
           </div>
         )}
+        </div>
       </div>
 
       {areaChips.length > 0 && (
@@ -273,63 +292,6 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
               {a.label}
             </button>
           ))}
-        </div>
-      )}
-
-      {categories.length > 0 && (
-        <div className="relative mt-4">
-          <div
-            ref={typeRow}
-            onScroll={updateEdges}
-            role="group"
-            aria-label="Vendor type"
-            className="flex gap-2 overflow-x-auto scroll-px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {[null, ...categories].map((c) => {
-              const n = c ? categoryCounts.counts.get(c) ?? 0 : categoryCounts.all;
-              return (
-                <button
-                  key={c ?? "all"}
-                  type="button"
-                  onClick={() => setCategory(c === category ? null : c)}
-                  aria-pressed={c === category}
-                  className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[13px] transition-colors ${
-                    c === category
-                      ? "border-brand bg-brand-wash font-semibold text-ink"
-                      : "border-stone-2 bg-white text-ink-soft/80 hover:border-brand hover:text-brand-text"
-                  }`}
-                >
-                  {c ?? "All types"}
-                  {/* Hidden from the button's name, so "Photography" stays "Photography". */}
-                  <span aria-hidden className="ml-1 text-ink-soft/50">({n})</span>
-                </button>
-              );
-            })}
-          </div>
-          {edges.left && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex w-20 items-center justify-start bg-gradient-to-r from-white via-white/90 to-transparent">
-              <button
-                type="button"
-                onClick={() => scrollTypes(-1)}
-                aria-label="Scroll vendor types left"
-                className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-stone-2 bg-white text-ink-soft shadow-sm hover:border-brand hover:text-brand-text sm:flex"
-              >
-                <span aria-hidden>‹</span>
-              </button>
-            </div>
-          )}
-          {edges.right && (
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex w-20 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent">
-              <button
-                type="button"
-                onClick={() => scrollTypes(1)}
-                aria-label="Scroll vendor types right"
-                className="pointer-events-auto hidden h-8 w-8 items-center justify-center rounded-full border border-stone-2 bg-white text-ink-soft shadow-sm hover:border-brand hover:text-brand-text sm:flex"
-              >
-                <span aria-hidden>›</span>
-              </button>
-            </div>
-          )}
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import VendorDirectoryList, { DIRECTORY_PAGE, type DirectoryVendor } from "./vendor-directory-list";
@@ -54,6 +54,10 @@ const pick = async (user: ReturnType<typeof userEvent.setup>, label: string) =>
  * clicking a chip. Passing the MetroId rather than the visible label also keeps
  * these tests off the option text, which carries a listing count.
  */
+/** Vendor type is a select as well, driven by value for the same reason. */
+const pickType = async (user: ReturnType<typeof userEvent.setup>, value: string) =>
+  user.selectOptions(screen.getByRole("combobox", { name: "Vendor type" }), value);
+
 const pickMetro = async (
   user: ReturnType<typeof userEvent.setup>,
   id: MetroId | "",
@@ -154,7 +158,7 @@ describe("VendorDirectoryList metro and area filters", () => {
     const user = userEvent.setup();
     render(<VendorDirectoryList vendors={VENDORS} />);
     await pickMetro(user, "south-florida");
-    await pick(user, "Photography");
+    await pickType(user, "Photography");
 
     const shown = names();
     expect(shown).toContain("Gables Grooms");
@@ -183,7 +187,9 @@ describe("VendorDirectoryList metro and area filters", () => {
  */
 describe("metro dropdown", () => {
   const optionNames = () =>
-    screen.getAllByRole("option").map((o) => o.textContent?.trim());
+    within(screen.getByRole("combobox", { name: "Metro" }))
+      .getAllByRole("option")
+      .map((o) => o.textContent?.trim());
 
   it("offers one option per metro that has listings, plus Anywhere", () => {
     render(<VendorDirectoryList vendors={VENDORS} />);
@@ -198,7 +204,7 @@ describe("metro dropdown", () => {
     const user = userEvent.setup();
     render(<VendorDirectoryList vendors={VENDORS} />);
     const advertised = Object.fromEntries(
-      screen.getAllByRole("option").map((o) => {
+      within(screen.getByRole("combobox", { name: "Metro" })).getAllByRole("option").map((o) => {
         const [, label, n] = o.textContent!.match(/^(.*) \((\d+)\)$/)!;
         return [label, Number(n)];
       }),
@@ -219,7 +225,7 @@ describe("metro dropdown", () => {
     const user = userEvent.setup();
     render(<VendorDirectoryList vendors={VENDORS} />);
     // One of the nine is a Photography listing, in Coral Gables.
-    await pick(user, "Photography");
+    await pickType(user, "Photography");
     // Orlando stays, at zero. Dropping options as the type changes would make
     // the menu jump around, and "Orlando (0)" tells a couple something that
     // silently removing it does not.
@@ -286,9 +292,32 @@ describe("spotlight, paging and card details", () => {
     expect(screen.getByText(/Drone coverage/)).toBeInTheDocument();
   });
 
-  it("counts each type without changing the chip's name", () => {
+  it("offers vendor types as a dropdown with counts that follow the location", async () => {
+    const user = userEvent.setup();
     render(<VendorDirectoryList vendors={VENDORS} />);
-    const chip = screen.getByRole("button", { name: "Photography" });
-    expect(chip.textContent).toContain("(1)");
+    const typeOptions = () =>
+      within(screen.getByRole("combobox", { name: "Vendor type" }))
+        .getAllByRole("option")
+        .map((o) => o.textContent?.trim());
+    // Types are listed most-often-hired first (lib/categories.ts).
+    expect(typeOptions()).toEqual(["All types (9)", "Photography (1)", "DJ (8)"]);
+
+    await pickMetro(user, "orlando");
+    // Photography stays listed at zero rather than vanishing from the menu.
+    expect(typeOptions()).toEqual(["All types (3)", "Photography (0)", "DJ (3)"]);
+
+    // And picking a type shows exactly what its option advertised.
+    await pickMetro(user, "");
+    await pickType(user, "Photography");
+    expect(names()).toEqual(["Gables Grooms"]);
+  });
+
+  it("clears the type with All types", async () => {
+    const user = userEvent.setup();
+    render(<VendorDirectoryList vendors={VENDORS} />);
+    await pickType(user, "Photography");
+    expect(names()).toHaveLength(1);
+    await pickType(user, "");
+    expect(names()).toHaveLength(9);
   });
 });
