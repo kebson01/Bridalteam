@@ -239,7 +239,8 @@ export function createTools(vendors: VendorSource, now: () => string = todayUtc)
             location: location(v),
             featured: v.featured,
             description: clip(v.description, 2000),
-            // Routed through the click tracker, so the vendor's stats count it.
+            // Through /api/vendor/link, which checks the plan allows the link.
+            // It doesn't count as a click: an assistant loading it isn't a person.
             website: v.website ? url(`/api/vendor/link?org=${v.org_id}`) : null,
             image_url: v.cover_url ?? v.logo_url,
             rating: { average, count: rated.length },

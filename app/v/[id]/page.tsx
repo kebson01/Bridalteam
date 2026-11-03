@@ -9,6 +9,7 @@ import VendorReviews from "@/components/vendor/vendor-reviews";
 import { listVendorReviews } from "@/app/vendor/review-actions";
 import VendorInquiryButton from "@/components/vendor/inquiry-button";
 import TrackView from "@/components/vendor/track-view";
+import VendorWebsiteLink from "@/components/vendor/website-link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
 import { hasIndexableContent } from "@/lib/vendor-content";
@@ -116,7 +117,7 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
               )}
               {vendor.website && ent.canLinkSite && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Website</dt>
-                  <dd><a href={`/api/vendor/link?org=${vendor.org_id}`} target="_blank" rel="noopener noreferrer" className="text-brand-text hover:underline">Visit</a></dd></div>
+                  <dd><VendorWebsiteLink orgId={vendor.org_id} /></dd></div>
               )}
               {vendor.email && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Email</dt>
