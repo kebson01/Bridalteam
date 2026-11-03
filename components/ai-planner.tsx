@@ -40,7 +40,7 @@ export default function AIPlanner() {
         </div>
 
         <div className="rounded-3xl bg-white/5 p-2">
-          <PlannerChat quickPrompts={QUICK_PROMPTS} />
+          <PlannerChat quickPrompts={QUICK_PROMPTS} onDark />
         </div>
       </div>
     </section>

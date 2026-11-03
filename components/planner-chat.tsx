@@ -93,9 +93,12 @@ export function renderMessage(text: string) {
 export default function PlannerChat({
   quickPrompts = [],
   heightClass = "h-[26rem]",
+  onDark = false,
 }: {
   quickPrompts?: string[];
   heightClass?: string;
+  /** Set where the chat sits on a dark background (the homepage), so the label above the prompts stays readable. */
+  onDark?: boolean;
 }) {
   const [messages, setMessages] = useState<Msg[]>([STARTER]);
   const [input, setInput] = useState("");
@@ -212,45 +215,64 @@ export default function PlannerChat({
   return (
     <div className="w-full">
       {quickPrompts.length > 0 && (
-        <ul className="mb-4 flex flex-wrap gap-2">
-          {quickPrompts.map((q) => (
-            <li key={q}>
-              <button
-                onClick={() => send(q)}
-                disabled={loading}
-                className="rounded-full border border-stone-2 bg-white px-4 py-2 text-sm text-ink-soft transition-colors hover:border-brand hover:text-brand-text disabled:opacity-50"
-              >
-                {q}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="mb-4">
+          <div className="flex items-center justify-between px-1 text-[11px] font-semibold uppercase tracking-[0.14em]">
+            <span className={onDark ? "text-white/75" : "text-ink-soft/70"}>Suggested questions</span>
+            <span className={`font-medium normal-case tracking-normal ${onDark ? "text-white/55" : "text-ink-soft/50"}`}>Tap to ask</span>
+          </div>
+          {/* One scrolling row on phones, wrapped on wider screens. */}
+          <ul className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] sm:flex-wrap">
+            {quickPrompts.map((q) => (
+              <li key={q} className="shrink-0">
+                <button
+                  onClick={() => send(q)}
+                  disabled={loading}
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-stone-2 bg-white px-4 py-2 text-sm text-ink-soft transition-colors hover:border-brand hover:text-brand-text disabled:opacity-50"
+                >
+                  <span className="text-brand"><svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z" /></svg></span>
+                  {q}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       <div className="rounded-3xl border border-stone-2 bg-white p-3 shadow-card">
-        <div className="flex items-center gap-2 px-3 py-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-brand" />
-          <span className="h-2.5 w-2.5 rounded-full bg-brand-amber" />
-          <span className="h-2.5 w-2.5 rounded-full bg-stone-5" />
-          <span className="ml-2 text-xs font-medium text-stone-1">
-            Bridal Team · AI Planner
+        <div className="flex items-center gap-2.5 px-3 py-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-deep text-white">
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z" /></svg>
+          </span>
+          <span className="leading-tight">
+            <span className="block text-sm font-semibold text-ink">Bridal Team AI planner</span>
+            <span className="flex items-center gap-1 text-[11px] text-ink-soft/60">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> Ready to help, any time
+            </span>
           </span>
         </div>
 
         <div
           ref={scrollRef}
-          className={`${heightClass} space-y-4 overflow-y-auto rounded-2xl bg-stone-4 p-4`}
+          className={`${heightClass} space-y-4 overflow-y-auto rounded-2xl bg-brand-wash/60 p-4`}
         >
           {messages.map((m, i) => (
             <div
               key={i}
-              className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
+              className={m.role === "user" ? "flex justify-end" : "flex flex-col items-start"}
             >
+              {m.role === "assistant" && (
+                <span className="mb-1 flex items-center gap-1.5 pl-1 text-[11px] font-semibold text-ink-soft/70">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-wash text-brand-text">
+                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor" aria-hidden="true"><path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z" /></svg>
+                  </span>
+                  Bridal Team AI
+                </span>
+              )}
               <div
                 className={
                   m.role === "user"
-                    ? "max-w-[85%] rounded-2xl rounded-br-sm bg-gradient-to-r from-brand to-brand-dark px-4 py-2.5 text-sm text-white"
-                    : "max-w-[90%] space-y-1 rounded-2xl rounded-bl-sm bg-white px-4 py-3 text-sm leading-relaxed text-ink-soft shadow-sm"
+                    ? "max-w-[85%] rounded-2xl rounded-br-sm bg-gradient-to-r from-brand-dark to-brand-deep px-4 py-2.5 text-sm text-white shadow-sm"
+                    : "max-w-[92%] space-y-1 rounded-2xl rounded-tl-sm bg-white px-4 py-3 text-sm leading-relaxed text-ink-soft shadow-sm"
                 }
               >
                 {m.role === "assistant" ? renderMessage(m.content) : m.content}
@@ -338,20 +360,24 @@ export default function PlannerChat({
               e.preventDefault();
               send(input);
             }}
-            className="mt-3 flex items-center gap-2"
+            className="mt-3 flex items-center gap-2 rounded-full border border-stone-2 bg-white p-1.5 pl-4 focus-within:border-brand"
           >
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about your wedding…"
-              className="flex-1 rounded-full border border-stone-2 bg-white px-4 py-3 text-sm text-ink outline-none focus:border-brand"
+              placeholder="Ask about your wedding: timelines, budgets, etiquette…"
+              aria-label="Ask the planner"
+              className="min-w-0 flex-1 bg-transparent py-2 text-sm text-ink outline-none placeholder:text-stone-3"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+              aria-label="Send"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-deep text-white shadow-sm transition-transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
             >
-              Send
+              <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="currentColor" aria-hidden="true">
+                <path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z" />
+              </svg>
             </button>
           </form>
         )}
