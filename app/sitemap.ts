@@ -77,6 +77,31 @@ async function vendorRoutes(): Promise<MetadataRoute.Sitemap> {
   }
 }
 
+/** Published Real Weddings stories. Like vendorRoutes, never fails the build. */
+async function realWeddingRoutes(): Promise<MetadataRoute.Sitemap> {
+  try {
+    const { data, error } = await supabasePublic()
+      .from("real_weddings")
+      .select("slug, updated_at")
+      .eq("status", "published");
+    if (error) throw new Error(`${error.code}: ${error.message}`);
+    const rows = data ?? [];
+    if (rows.length === 0) return [];
+    return [
+      { url: `${SITE_URL}/real-weddings`, changeFrequency: "weekly" as const, priority: 0.7 },
+      ...rows.map((r) => ({
+        url: `${SITE_URL}/real-weddings/${r.slug}`,
+        lastModified: r.updated_at ? new Date(r.updated_at) : undefined,
+        changeFrequency: "yearly" as const,
+        priority: 0.6,
+      })),
+    ];
+  } catch (err) {
+    console.error("sitemap: real weddings unavailable, omitting them:", err);
+    return [];
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes: Array<{ path: string; priority: number }> = [
     { path: "/", priority: 1 },
@@ -123,5 +148,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...guideRoutes, ...blogRoutes, ...(await vendorRoutes())];
+  return [...staticRoutes, ...guideRoutes, ...blogRoutes, ...(await vendorRoutes()), ...(await realWeddingRoutes())];
 }
