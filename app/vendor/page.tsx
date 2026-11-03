@@ -55,7 +55,7 @@ export default async function VendorDashboard({
 
   const { data: profile } = await supabase
     .from("vendor_profiles")
-    .select("org_id, business_name, category, description, city, region, website, email, phone, social_links, status")
+    .select("org_id, business_name, category, description, city, region, website, email, phone, social_links, price_tier, highlights, packages, faqs, status")
     .eq("org_id", org.id)
     .maybeSingle();
 

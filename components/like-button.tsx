@@ -15,12 +15,15 @@ export default function LikeButton({
   initialCount,
   signedIn,
   className = "",
+  onChange,
 }: {
   imageId: string;
   initialLiked: boolean;
   initialCount: number;
   signedIn: boolean;
   className?: string;
+  /** Told the new state after each click, so a parent list can stay in step. */
+  onChange?: (liked: boolean) => void;
 }) {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
@@ -35,6 +38,7 @@ export default function LikeButton({
     const next = !liked;
     setLiked(next);
     setCount((c) => c + (next ? 1 : -1));
+    onChange?.(next);
     startTransition(() => {
       void toggleLike(imageId, liked);
     });

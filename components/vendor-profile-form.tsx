@@ -3,8 +3,9 @@
 import { useActionState, useState, useTransition } from "react";
 import { updateVendorProfile, setVendorPublished, type ProfileState } from "@/app/vendor/actions";
 import { SOCIAL_PLATFORMS, type SocialLinks } from "@/lib/social";
+import ProfileExtrasEditor, { type ProfileExtras } from "@/components/vendor/profile-extras-editor";
 
-export interface VendorProfile {
+export interface VendorProfile extends ProfileExtras {
   org_id: string;
   business_name: string;
   category: string | null;
@@ -128,6 +129,8 @@ export default function VendorProfileForm({ profile }: { profile: VendorProfile 
             ))}
           </div>
         </fieldset>
+
+        <ProfileExtrasEditor initial={profile} disabled={pending} />
 
         {state.error && (
           <p role="alert" className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>

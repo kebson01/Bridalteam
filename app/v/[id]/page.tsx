@@ -1,19 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import PageHero from "@/components/page-hero";
-import JsonLd from "@/components/json-ld";
-import { localBusinessSchema, breadcrumbSchema } from "@/lib/structured-data";
-import { MediaBadge } from "@/components/inspiration-gallery";
-import VendorReviews from "@/components/vendor/vendor-reviews";
 import { listVendorReviews } from "@/app/vendor/review-actions";
-import VendorInquiryButton from "@/components/vendor/inquiry-button";
-import TrackView from "@/components/vendor/track-view";
-import VendorWebsiteLink from "@/components/vendor/website-link";
+import VendorProfileView from "@/components/vendor/profile-view";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
 import { hasIndexableContent } from "@/lib/vendor-content";
-import { readSocialLinks } from "@/lib/social";
 import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +14,7 @@ async function getVendor(id: string) {
   const { data: vendor } = await supabase
     .from("vendor_profiles")
     .select(
-      `org_id, business_name, category, description, city, region, website, email, phone, social_links, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
+      `org_id, business_name, category, description, city, region, website, email, phone, social_links, price_tier, highlights, packages, faqs, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
     )
     .eq("org_id", id)
     .eq("status", "published")
@@ -36,6 +27,25 @@ async function getVendor(id: string) {
     .eq("vendor_id", id)
     .order("created_at", { ascending: false });
   return { vendor, media: media ?? [], plan };
+}
+
+/**
+ * Published Real Weddings stories that credit this vendor with a link to
+ * their profile. Stories are few, so they are filtered here rather than with
+ * a JSON query.
+ */
+async function realWeddingsFeaturing(id: string) {
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase
+    .from("real_weddings")
+    .select("slug, title, city, venue, cover_url, vendors")
+    .eq("status", "published")
+    .order("wedding_date", { ascending: false });
+  if (error) return [];
+  return (data ?? []).filter((r) =>
+    Array.isArray(r.vendors) &&
+    (r.vendors as { url?: string }[]).some((v) => typeof v?.url === "string" && v.url.includes(`/v/${id}`)),
+  );
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -61,120 +71,22 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
   const ent = entitlements(plan);
 
   const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const reviews = await listVendorReviews(id);
-
-  const location = [vendor.city, vendor.region].filter(Boolean).join(", ");
-  const socials = readSocialLinks(vendor.social_links);
+  const [
+    {
+      data: { user },
+    },
+    reviews,
+    stories,
+  ] = await Promise.all([supabase.auth.getUser(), listVendorReviews(id), realWeddingsFeaturing(id)]);
 
   return (
-    <>
-      <JsonLd
-        data={localBusinessSchema({
-          orgId: vendor.org_id,
-          name: vendor.business_name,
-          description: vendor.description,
-          category: vendor.category,
-          city: vendor.city,
-          region: vendor.region,
-          // Only claim the outbound link the page itself is willing to show.
-          website: ent.canLinkSite ? vendor.website : null,
-          email: vendor.email,
-          phone: vendor.phone,
-          image: vendor.cover_url ?? vendor.logo_url,
-          socials: socials.map((s) => s.url),
-          reviews,
-        })}
-      />
-      <JsonLd
-        data={breadcrumbSchema([
-          { name: "Home", path: "/" },
-          { name: "Vendors", path: "/vendors" },
-          { name: vendor.business_name, path: `/v/${vendor.org_id}` },
-        ])}
-      />
-      <TrackView orgId={vendor.org_id} />
-      <PageHero eyebrow={vendor.category ?? "Vendor"} title={vendor.business_name} />
-
-      <section className="mx-auto max-w-5xl px-5 py-12">
-        <Link href="/vendors" className="text-sm font-semibold text-brand-text hover:text-brand-deep">
-          ← All vendors
-        </Link>
-
-        <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_2fr]">
-          {/* Info */}
-          <aside className="space-y-4">
-            {ent.badge && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-brand px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                ★ Featured
-              </span>
-            )}
-            {vendor.description && (
-              <p className="text-sm leading-relaxed text-ink-soft/85">{vendor.description}</p>
-            )}
-            <dl className="space-y-2 text-sm">
-              {location && (
-                <div className="flex gap-2"><dt className="text-ink-soft/50">Location</dt><dd className="text-ink">{location}</dd></div>
-              )}
-              {vendor.website && ent.canLinkSite && (
-                <div className="flex gap-2"><dt className="text-ink-soft/50">Website</dt>
-                  <dd><VendorWebsiteLink orgId={vendor.org_id} /></dd></div>
-              )}
-              {vendor.email && (
-                <div className="flex gap-2"><dt className="text-ink-soft/50">Email</dt>
-                  <dd><a href={`mailto:${vendor.email}`} className="text-brand-text hover:underline">{vendor.email}</a></dd></div>
-              )}
-              {vendor.phone && (
-                <div className="flex gap-2"><dt className="text-ink-soft/50">Phone</dt><dd className="text-ink">{vendor.phone}</dd></div>
-              )}
-              {socials.length > 0 && (
-                <div className="flex gap-2"><dt className="text-ink-soft/50">Follow</dt>
-                  <dd className="flex flex-wrap gap-x-3 gap-y-1">
-                    {socials.map((s) => (
-                      <a key={s.platform} href={s.url} target="_blank" rel="noopener noreferrer nofollow"
-                        className="text-brand-text hover:underline">{s.label}</a>
-                    ))}
-                  </dd></div>
-              )}
-            </dl>
-            {ent.canReceiveInquiries && (
-              <VendorInquiryButton
-                vendorOrgId={vendor.org_id}
-                signedIn={Boolean(user)}
-                defaultName={(user?.user_metadata?.full_name as string | undefined) ?? ""}
-                defaultEmail={user?.email ?? ""}
-                loginHref={`/auth/login?next=/v/${vendor.org_id}`}
-              />
-            )}
-          </aside>
-
-          {/* Their work */}
-          <div>
-            <h2 className="text-lg font-medium text-ink">Their work</h2>
-            {media.length === 0 ? (
-              <p className="mt-4 rounded-2xl border border-dashed border-stone-2 bg-stone-4 p-8 text-center text-sm text-ink-soft/70">
-                No media yet.
-              </p>
-            ) : (
-              <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {media.map((m) => (
-                  <Link key={m.id} href={`/i/${m.id}`} className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-card">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={m.image_url} alt={m.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink/70 to-transparent" />
-                    <MediaBadge type={m.media_type} />
-                    <span className="absolute inset-x-0 bottom-0 p-3 text-sm font-medium text-white">{m.title}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <VendorReviews vendorOrgId={id} viewerId={user?.id ?? null} initialReviews={reviews} />
-      </section>
-    </>
+    <VendorProfileView
+      vendor={vendor}
+      media={media}
+      stories={stories}
+      reviews={reviews}
+      ent={ent}
+      user={user}
+    />
   );
 }

@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
-import { saveInspiration, reportImage } from "@/app/inspiration/actions";
+import { Fragment, useMemo, useState, useTransition } from "react";
+import { saveInspiration, reportImage, toggleLike } from "@/app/inspiration/actions";
 import LikeButton from "@/components/like-button";
 import ShareButton from "@/components/share-button";
 import { SIGNUP_URL } from "@/lib/config";
@@ -140,23 +140,47 @@ const SWATCH: Record<string, string> = {
   Navy: "#2f3b52", Champagne: "#e6d3ac", Burgundy: "#6e2233",
 };
 
-const chipBase = "rounded-full border px-4 py-2 text-sm transition-colors";
+const chip =
+  "inline-flex flex-none items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors";
+const chipOn = "border-ink bg-ink text-white";
+const chipOff = "border-stone-2 bg-white text-ink-soft hover:border-brand";
+
+/** How many looks show before "Load more", and how many each click adds. */
+export const PAGE_SIZE = 12;
+/** The mood board card goes in after this many tiles (when there are more). */
+const PROMO_AFTER = 6;
+
+function Heart({ filled, className = "h-[18px] w-[18px]" }: { filled: boolean; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true"
+      fill={filled ? "#e0245e" : "none"} stroke={filled ? "#e0245e" : "currentColor"} strokeWidth="2">
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+    </svg>
+  );
+}
 
 export default function InspirationGallery({
   images,
   signedIn,
   likedIds = [],
   userId = null,
+  promo = null,
 }: {
   images: InspirationImage[];
   signedIn: boolean;
   likedIds?: string[];
   userId?: string | null;
+  /** A full-width card placed inside the grid, e.g. the mood board call to action. */
+  promo?: React.ReactNode;
 }) {
   const [theme, setTheme] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
   const [open, setOpen] = useState<InspirationImage | null>(null);
-  const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const [liked, setLiked] = useState<Set<string>>(() => new Set(likedIds));
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [nudge, setNudge] = useState(false);
+  const [, startTransition] = useTransition();
 
   const themes = useMemo(
     () => [...new Set(images.map((i) => i.theme).filter(Boolean))] as string[],
@@ -175,69 +199,201 @@ export default function InspirationGallery({
       ),
     [images, theme, color],
   );
+  const visible = shown.slice(0, limit);
+
+  function pickTheme(t: string | null) {
+    setTheme(t);
+    setLimit(PAGE_SIZE);
+  }
+  function pickColor(c: string | null) {
+    setColor(c);
+    setLimit(PAGE_SIZE);
+  }
+
+  /** The heart on a tile: the same like as in the detail view. */
+  function toggle(it: InspirationImage) {
+    if (!signedIn) {
+      setNudge(true);
+      return;
+    }
+    const was = liked.has(it.id);
+    setLiked((prev) => {
+      const next = new Set(prev);
+      if (was) next.delete(it.id);
+      else next.add(it.id);
+      return next;
+    });
+    setCounts((c) => ({ ...c, [it.id]: (c[it.id] ?? it.like_count ?? 0) + (was ? -1 : 1) }));
+    startTransition(() => {
+      void toggleLike(it.id, was);
+    });
+  }
 
   return (
     <>
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => setTheme(null)} aria-pressed={theme === null}
-          className={`${chipBase} ${theme === null ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
-          All themes
-        </button>
-        {themes.map((t) => (
-          <button key={t} type="button" onClick={() => setTheme(t === theme ? null : t)} aria-pressed={t === theme}
-            className={`${chipBase} ${t === theme ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
-            {t}
+      {/* Filters: one scrolling row each, so a phone isn't half chips */}
+      <div className="-mx-5 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
+        <div className="flex gap-2 sm:flex-wrap sm:justify-center">
+          <button type="button" onClick={() => pickTheme(null)} aria-pressed={theme === null}
+            className={`${chip} ${theme === null ? chipOn : chipOff}`}>
+            All themes
           </button>
-        ))}
+          {themes.map((t) => (
+            <button key={t} type="button" onClick={() => pickTheme(t === theme ? null : t)} aria-pressed={t === theme}
+              className={`${chip} ${t === theme ? chipOn : chipOff}`}>
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => setColor(null)} aria-pressed={color === null}
-          className={`${chipBase} ${color === null ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
-          All colors
-        </button>
-        {colors.map((c) => (
-          <button key={c} type="button" onClick={() => setColor(c === color ? null : c)} aria-pressed={c === color}
-            className={`${chipBase} inline-flex items-center gap-2 ${c === color ? "border-brand bg-brand text-white" : "border-stone-2 bg-white text-ink-soft hover:border-brand"}`}>
-            <span className="h-3 w-3 rounded-full ring-1 ring-black/10" style={{ backgroundColor: SWATCH[c] ?? "#ccc" }} />
-            {c}
-          </button>
-        ))}
+      {colors.length > 0 && (
+        <div className="-mx-5 mt-2.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
+          <div className="flex gap-2 sm:flex-wrap sm:justify-center">
+            <button type="button" onClick={() => pickColor(null)} aria-pressed={color === null}
+              className={`${chip} py-1.5 text-[13px] ${color === null ? "border-brand bg-brand-wash text-ink" : chipOff}`}>
+              <span className="h-3 w-3 rounded-full bg-[conic-gradient(#e8b4b8,#e6d3ac,#9caf88,#2f3b52,#6e2233,#f28f6b,#e8b4b8)]" />
+              All colors
+            </button>
+            {colors.map((c) => (
+              <button key={c} type="button" onClick={() => pickColor(c === color ? null : c)} aria-pressed={c === color}
+                className={`${chip} py-1.5 text-[13px] ${c === color ? "border-brand bg-brand-wash text-ink" : chipOff}`}>
+                <span className="h-3 w-3 rounded-full ring-1 ring-black/10" style={{ backgroundColor: SWATCH[c] ?? "#ccc" }} />
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {shown.length !== images.length && (
+        <p className="mt-5 text-center text-sm text-ink-soft/60">
+          {shown.length} of {images.length} looks
+        </p>
+      )}
+
+      {/* Grid: tiles open a detail view; the heart likes without opening */}
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+        {visible.map((it, i) => {
+          const isLiked = liked.has(it.id);
+          const tag = [it.theme, it.colors[0]].filter(Boolean).join(" · ");
+          return (
+            <Fragment key={it.id}>
+              {promo && i === PROMO_AFTER && <div className="col-span-full">{promo}</div>}
+              <div className="group relative aspect-[3/4] overflow-hidden rounded-2xl shadow-card">
+                <button
+                  type="button"
+                  onClick={() => setOpen(it)}
+                  aria-label={`Open ${it.title}`}
+                  className="absolute inset-0 text-left"
+                >
+                  <TileVisual item={it} />
+                  <span className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/5 to-transparent" />
+                  {tag && (
+                    <span className="absolute left-2.5 top-2.5 max-w-[70%] truncate rounded-full bg-white/90 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-ink sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[10px]">
+                      {tag}
+                    </span>
+                  )}
+                  <span className="absolute inset-x-0 bottom-0 p-3 text-white sm:p-4">
+                    <span className="block truncate font-display text-[15px] font-medium leading-snug sm:text-lg">{it.title}</span>
+                    <span className="block truncate text-[11px] text-white/75 sm:text-xs">
+                      {it.is_seed ? SEED_LABEL : it.colors.join(", ") || it.theme}
+                    </span>
+                  </span>
+                </button>
+                {it.media_type !== "photo" && (
+                  <span className="pointer-events-none absolute inset-0 [&>span]:left-auto [&>span]:right-14 [&>span]:top-2.5">
+                    <MediaBadge type={it.media_type} />
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => toggle(it)}
+                  aria-pressed={isLiked}
+                  aria-label={isLiked ? `Unsave ${it.title}` : `Save ${it.title}`}
+                  className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ink shadow-sm backdrop-blur transition-transform hover:scale-105 sm:right-2.5 sm:top-2.5"
+                >
+                  <Heart filled={isLiked} />
+                </button>
+              </div>
+            </Fragment>
+          );
+        })}
+        {promo && visible.length > 0 && visible.length <= PROMO_AFTER && (
+          <div className="col-span-full">{promo}</div>
+        )}
       </div>
 
-      <p className="mt-6 text-sm text-ink-soft/60">
-        {shown.length === images.length ? `${images.length} looks` : `${shown.length} of ${images.length} looks`}
-      </p>
+      {shown.length === 0 && (
+        <p className="mt-10 text-center text-sm text-ink-soft/70">
+          No looks match that combination yet.{" "}
+          <button type="button" onClick={() => { pickTheme(null); pickColor(null); }} className="font-semibold text-brand-text">
+            Clear filters
+          </button>
+        </p>
+      )}
 
-      {/* Grid — tiles open a detail view */}
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {shown.map((it) => (
+      {shown.length > visible.length && (
+        <div className="mt-8 text-center">
           <button
-            key={it.id}
             type="button"
-            onClick={() => setOpen(it)}
-            className="group relative aspect-[4/5] overflow-hidden rounded-2xl text-left shadow-card"
+            onClick={() => setLimit((l) => l + PAGE_SIZE)}
+            className="inline-flex items-center gap-2 rounded-full border border-stone-2 bg-white px-6 py-3 text-sm font-semibold text-ink shadow-sm hover:border-brand"
           >
-            <TileVisual item={it} />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
-            <MediaBadge type={it.media_type} />
-            {it.is_seed && <SeedBadge />}
-            <figcaption className="absolute inset-x-0 bottom-0 p-5 text-white">
-              <p className="text-lg font-medium">{it.title}</p>
-              <p className="text-sm text-white/75">
-                {[it.theme, it.colors.join(", ")].filter(Boolean).join(" · ")}
-              </p>
-            </figcaption>
+            Load more looks
           </button>
-        ))}
-      </div>
+          <p className="mt-3 text-xs text-ink-soft/60">
+            Showing {visible.length} of {shown.length} looks
+          </p>
+        </div>
+      )}
+
+      {/* Saved looks, always in reach */}
+      {(liked.size > 0 || nudge) && (
+        <div className="fixed bottom-4 right-4 z-40 print:hidden">
+          {nudge && !signedIn ? (
+            <div className="flex items-center gap-3 rounded-full bg-ink py-2 pl-4 pr-2 text-sm text-white shadow-lg">
+              <span>Sign up free to save looks</span>
+              <Link href={SIGNUP_URL} className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-4 py-1.5 font-semibold">
+                Sign up
+              </Link>
+              <button type="button" onClick={() => setNudge(false)} aria-label="Dismiss" className="px-1 text-white/60 hover:text-white">
+                ✕
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/planner"
+              className="flex items-center gap-2.5 rounded-full bg-ink py-2.5 pl-3 pr-4 text-white shadow-lg"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10">
+                <Heart filled className="h-4 w-4" />
+              </span>
+              <span className="leading-tight">
+                <span className="block text-sm font-semibold">
+                  {liked.size} {liked.size === 1 ? "look" : "looks"} saved
+                </span>
+                <span className="block text-[11px] text-white/70">Build a mood board</span>
+              </span>
+            </Link>
+          )}
+        </div>
+      )}
 
       {open && (
         <Lightbox
-          image={open}
+          image={{ ...open, like_count: counts[open.id] ?? open.like_count }}
           signedIn={signedIn}
           userId={userId}
-          liked={likedSet.has(open.id)}
+          liked={liked.has(open.id)}
+          onLikeChange={(on) => {
+            setLiked((prev) => {
+              const next = new Set(prev);
+              if (on) next.add(open.id);
+              else next.delete(open.id);
+              return next;
+            });
+            setCounts((c) => ({ ...c, [open.id]: (c[open.id] ?? open.like_count ?? 0) + (on ? 1 : -1) }));
+          }}
           onClose={() => setOpen(null)}
         />
       )}
@@ -250,12 +406,14 @@ function Lightbox({
   signedIn,
   userId,
   liked,
+  onLikeChange,
   onClose,
 }: {
   image: InspirationImage;
   signedIn: boolean;
   userId: string | null;
   liked: boolean;
+  onLikeChange?: (liked: boolean) => void;
   onClose: () => void;
 }) {
   const [pending, startTransition] = useTransition();
@@ -325,6 +483,7 @@ function Lightbox({
               initialLiked={liked}
               initialCount={image.like_count ?? 0}
               signedIn={signedIn}
+              onChange={onLikeChange}
             />
             <ShareButton
               url={typeof window !== "undefined" ? `${window.location.origin}/i/${image.id}` : `/i/${image.id}`}
