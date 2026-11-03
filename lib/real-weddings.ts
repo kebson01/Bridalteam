@@ -83,6 +83,26 @@ export function formatWeddingDate(isoDate: string): string {
   });
 }
 
+const isPhotography = (role: string) => /^photo(graph(y|er))?s?$/i.test(role.trim());
+
+/**
+ * Who took the photos, and their website if known. The link comes from a
+ * vendors entry whose role is Photography; that entry is then left out of the
+ * vendor list so the photographer isn't credited twice.
+ */
+export function photographerCredit(story: Pick<RealWedding, "photographer" | "vendors">): {
+  credit: RealWeddingVendor | null;
+  otherVendors: RealWeddingVendor[];
+} {
+  const photoVendor = story.vendors.find((v) => isPhotography(v.role));
+  const otherVendors = story.vendors.filter((v) => v !== photoVendor);
+  const name = story.photographer?.trim() || photoVendor?.name;
+  if (!name) return { credit: null, otherVendors };
+  const sameBusiness = photoVendor && (!story.photographer || photoVendor.name.toLowerCase() === name.toLowerCase());
+  if (photoVendor && !sameBusiness) return { credit: { role: "Photography", name }, otherVendors: story.vendors };
+  return { credit: { role: "Photography", name, url: photoVendor?.url }, otherVendors };
+}
+
 /** Story text to paragraphs: blank lines separate them. */
 export function storyParagraphs(story: string): string[] {
   return story
