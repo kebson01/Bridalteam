@@ -8,7 +8,6 @@ import { SIGNUP_URL } from "@/lib/config";
  * rule is no recognisable faces, checked at full size), self-hosted in
  * public/media/home:
  *
- *   ceremony-aisle.webp  Jonathan Borba    unsplash.com/photos/ckNjKI5cH_E
  *   camera.webp          Amrit Sangar      unsplash.com/photos/Vrwbwm-jvm0
  *   flowers.webp         Dan Edwards       unsplash.com/photos/8bhzvpM8PJ4
  *   long-table.webp      M F (@mfe1)       unsplash.com/photos/fb0_wj2MZk4
@@ -16,7 +15,9 @@ import { SIGNUP_URL } from "@/lib/config";
  *   candlelit-roses.webp Zane Persaud      unsplash.com/photos/r3XxZj-J4uQ
  *   floral-arch.webp     David Goldman     unsplash.com/photos/kdlfXY9rvZA
  *
- * public/media/guides/planning-binder.webp is the owner's own photo.
+ * public/media/guides/planning-binder.webp is the owner's own photo. The hero
+ * uses the original site's beach-aisle banner, public/brand/hero.jpg, at the
+ * owner's request.
  *
  * The Wedding moments section mixes those Unsplash details with photos from
  * the St. Charles (2012) and Paul (2014) weddings in public/media/real-weddings,
@@ -73,14 +74,15 @@ export function HomeHero({ vendorCount, showVendors }: { vendorCount: number; sh
         </div>
 
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] shadow-card sm:aspect-[5/4] lg:aspect-[4/5]">
+          {/* The banner is wide (1280x560); keep the frame landscape and centre the bouquet. */}
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] shadow-card sm:aspect-[16/9] lg:aspect-[4/3]">
             <Image
-              src="/media/home/ceremony-aisle.webp"
-              alt="An outdoor wedding ceremony aisle lined with white flowers and chairs"
+              src="/brand/hero.jpg"
+              alt="A beach wedding aisle with bouquets and pink ribbons on the chairs"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 560px"
-              className="object-cover"
+              className="object-cover object-[72%_50%]"
             />
           </div>
           {/* A real count, linked to the directory. No rating and no "vetted":
