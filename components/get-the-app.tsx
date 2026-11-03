@@ -24,17 +24,16 @@ export default function GetTheApp() {
   if (standalone) return null;
 
   return (
-    <section className="border-y border-stone-2 bg-white text-ink">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-5 py-16 md:flex-row md:justify-between">
+    <section className="mx-auto max-w-6xl px-5 pb-16">
+      <div className="flex flex-col items-center gap-8 rounded-[2rem] bg-gradient-to-br from-brand-wash to-white p-8 text-ink ring-1 ring-brand/15 sm:p-10 md:flex-row md:justify-between">
         <div className="max-w-xl text-center md:text-left">
-          <p className="font-display text-xs font-semibold tracking-[0.28em] text-brand-text">NO APP STORE NEEDED</p>
-          <h2 className="mt-3 font-display text-3xl font-semibold tracking-wide text-balance sm:text-4xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-text">No app store needed</p>
+          <h2 className="mt-2 text-3xl font-medium leading-tight text-balance sm:text-4xl">
             Plan from your pocket
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-ink-soft/80 md:mx-0">
-            Install Bridal Team on your phone for one-tap access to your timeline, budget, community
-            and RSVPs. It installs straight from your browser &mdash; no app store, no download
-            &mdash; and pages you have already opened stay readable if you lose signal.
+          <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-ink-soft/80 md:mx-0">
+            Add Bridal Team to your home screen for one-tap access to your timeline, budget and RSVPs. It installs
+            straight from your browser, and pages you have already opened stay readable if you lose signal.
           </p>
           {isMobile ? (
             <button
@@ -42,10 +41,10 @@ export default function GetTheApp() {
               onClick={() => window.dispatchEvent(new Event(INSTALL_EVENT))}
               className="mt-6 inline-flex rounded-full bg-gradient-to-r from-brand to-brand-dark px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(243,103,5,0.8)] transition-transform hover:-translate-y-0.5"
             >
-              Install the app
+              Add to home screen
             </button>
           ) : (
-            <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-stone-2 px-5 py-2.5 text-sm text-ink-soft">
+            <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-stone-2 bg-white px-5 py-2.5 text-sm text-ink-soft">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <rect x="7" y="2" width="10" height="20" rx="2" />
                 <path d="M11 18h2" />
@@ -62,7 +61,7 @@ export default function GetTheApp() {
             alt="Bridal Team app icon"
             width={112}
             height={112}
-            className="h-28 w-28 rounded-[28px] shadow-card ring-1 ring-stone-2"
+            className="h-20 w-20 rounded-[22px] bg-white shadow-card ring-1 ring-stone-2 md:h-28 md:w-28 md:rounded-[28px]"
           />
         </div>
       </div>
