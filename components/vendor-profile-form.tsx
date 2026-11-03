@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react";
 import { updateVendorProfile, setVendorPublished, type ProfileState } from "@/app/vendor/actions";
+import { SOCIAL_PLATFORMS, type SocialLinks } from "@/lib/social";
 
 export interface VendorProfile {
   org_id: string;
@@ -13,6 +14,7 @@ export interface VendorProfile {
   website: string | null;
   email: string | null;
   phone: string | null;
+  social_links?: SocialLinks | null;
   status: string;
 }
 
@@ -104,6 +106,28 @@ export default function VendorProfileForm({ profile }: { profile: VendorProfile 
             <input name="phone" defaultValue={profile.phone ?? ""} disabled={pending} className={INPUT} />
           </label>
         </div>
+
+        <fieldset className="mt-6">
+          <legend className="text-sm font-medium text-ink">Social media</legend>
+          <p className="mt-0.5 text-xs text-ink-soft/60">
+            Your handle (like @yourbusiness) or a link to your profile. Leave blank any you don&apos;t use.
+          </p>
+          <div className="mt-2 grid gap-4 sm:grid-cols-2">
+            {SOCIAL_PLATFORMS.map((p) => (
+              <label key={p.key} className="block">
+                <span className="text-sm font-medium text-ink-soft">{p.label}</span>
+                <input
+                  name={`social_${p.key}`}
+                  defaultValue={profile.social_links?.[p.key] ?? ""}
+                  disabled={pending}
+                  placeholder={p.placeholder}
+                  autoComplete="off"
+                  className={INPUT}
+                />
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
         {state.error && (
           <p role="alert" className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>
