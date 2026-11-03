@@ -1,6 +1,6 @@
 import AIPlanner from "@/components/ai-planner";
 import GetTheApp from "@/components/get-the-app";
-import { HomeHero, HomeVendors, HowItWorks, WholeTeam } from "@/components/home-sections";
+import { HomeHero, HomeVendors, HowItWorks, RealWeddings, WholeTeam } from "@/components/home-sections";
 import { summarizeVendors, type HomeVendorSummary } from "@/lib/home-vendors";
 import { supabasePublic } from "@/lib/supabase";
 import { effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
@@ -67,6 +67,7 @@ export default async function Home() {
       <HowItWorks />
       <AIPlanner />
       <WholeTeam />
+      <RealWeddings />
       {SHOW_VENDOR_DIRECTORY && <HomeVendors summary={vendors} />}
       <div className="pt-16">
         <GetTheApp />

@@ -14,6 +14,10 @@ import { SIGNUP_URL } from "@/lib/config";
  *   long-table.webp      M F (@mfe1)       unsplash.com/photos/fb0_wj2MZk4
  *
  * public/media/guides/planning-binder.webp is the owner's own photo.
+ *
+ * The Real weddings mosaic uses public/media/real-weddings: the St. Charles
+ * (2012) and Paul (2014) weddings, shared by the couples and already
+ * published in the Inspiration feed with the same captions.
  */
 
 const SPARK = "M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z";
@@ -211,6 +215,87 @@ export function WholeTeam() {
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+// ── Real weddings ────────────────────────────────────────────────────────
+
+/**
+ * Five photos fill a 4-column, 2-row mosaic on desktop exactly; on phones
+ * the wide ones take the full width.
+ */
+const REAL = [
+  {
+    src: "/media/real-weddings/paul-2014-archway-kiss.jpg",
+    caption: "Kiss in the stone archway",
+    where: "Paul wedding · Parkland",
+    cls: "row-span-2",
+    sizes: "(max-width: 768px) 50vw, 300px",
+  },
+  {
+    src: "/media/real-weddings/st-charles-2012-stonebridge.jpg",
+    caption: "Stonebridge Golf & Country Club",
+    where: "St. Charles wedding · Boca Raton",
+    cls: "md:col-span-2",
+    sizes: "(max-width: 768px) 50vw, 600px",
+  },
+  {
+    src: "/media/real-weddings/st-charles-2012-rings.jpg",
+    caption: "Rings in crystal heels",
+    where: "St. Charles wedding · Boca Raton",
+    cls: "",
+    sizes: "(max-width: 768px) 50vw, 300px",
+  },
+  {
+    src: "/media/real-weddings/paul-2014-bridal-party.jpg",
+    caption: "Team Bride",
+    where: "Paul wedding · Parkland",
+    cls: "col-span-2",
+    sizes: "(max-width: 768px) 100vw, 600px",
+  },
+  {
+    src: "/media/real-weddings/paul-2014-blessing.jpg",
+    caption: "A blessing at the altar",
+    where: "Paul wedding · Parkland",
+    cls: "col-span-2 md:col-span-1",
+    sizes: "(max-width: 768px) 100vw, 300px",
+  },
+];
+
+export function RealWeddings() {
+  return (
+    <section className="mx-auto max-w-6xl px-5 pb-16">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <Eyebrow>Real Florida weddings</Eyebrow>
+          <h2 className="mt-2 text-3xl font-medium leading-tight text-ink sm:text-4xl">
+            Real couples, <span className="text-brand-text">real moments</span>
+          </h2>
+          <p className="mt-2 max-w-xl text-sm text-ink-soft/75">
+            Real South Florida weddings, shared with us by the couples.
+          </p>
+        </div>
+        <Link href="/inspiration" className="hidden shrink-0 text-sm font-semibold text-brand-text hover:text-brand-deep sm:inline">
+          See more ideas <span aria-hidden>→</span>
+        </Link>
+      </div>
+      <ul className="mt-6 grid auto-rows-[150px] grid-cols-2 gap-3 sm:auto-rows-[190px] md:grid-cols-4 md:auto-rows-[210px]">
+        {REAL.map((r) => (
+          <li key={r.src} className={`group relative overflow-hidden rounded-2xl shadow-card ${r.cls}`}>
+            <Image src={r.src} alt={`${r.caption}, ${r.where}`} fill sizes={r.sizes}
+              className="object-cover transition-transform duration-700 group-hover:scale-105" />
+            <span className="absolute inset-0 bg-gradient-to-t from-ink/75 via-transparent to-transparent" />
+            <span className="absolute inset-x-0 bottom-0 p-3 text-white">
+              <span className="block truncate text-sm font-medium">{r.caption}</span>
+              <span className="block truncate text-[11px] text-white/80">{r.where}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <Link href="/inspiration" className="mt-5 inline-flex text-sm font-semibold text-brand-text sm:hidden">
+        See more ideas <span aria-hidden className="ml-1">→</span>
+      </Link>
     </section>
   );
 }
