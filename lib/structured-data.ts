@@ -72,6 +72,8 @@ export function localBusinessSchema(vendor: {
   email?: string | null;
   phone?: string | null;
   image?: string | null;
+  /** Social profile URLs, already checked by lib/social.ts. */
+  socials?: string[];
   reviews?: { rating: number }[];
 }) {
   const url = `${SITE_URL}/v/${vendor.orgId}`;
@@ -100,6 +102,8 @@ export function localBusinessSchema(vendor: {
       }
     : undefined;
 
+  const sameAs = [...(vendor.website ? [vendor.website] : []), ...(vendor.socials ?? [])];
+
   return {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -112,7 +116,7 @@ export function localBusinessSchema(vendor: {
     ...(vendor.phone ? { telephone: vendor.phone } : {}),
     ...(vendor.email ? { email: vendor.email } : {}),
     ...(vendor.image ? { image: vendor.image } : {}),
-    ...(vendor.website ? { sameAs: [vendor.website] } : {}),
+    ...(sameAs.length ? { sameAs } : {}),
     ...(aggregateRating ? { aggregateRating } : {}),
     isPartOf: { "@id": `${SITE_URL}/#website` },
   };

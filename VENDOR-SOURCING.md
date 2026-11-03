@@ -201,4 +201,4 @@ venue's region, and `lib/areas.ts` renders those values as "Serves all of …".
 
 | Date | Business | Category | City | Phone | Notes |
 |---|---|---|---|---|---|
-| 2026-11-03 | DJ Mike Cooley | DJ | Miami | (786) 413-4864 | From the DJ's contact card. Website djmikecooley.com. Claim email info@djmikecooley.com. Instagram and TikTok @DJMikeCooley. City inferred from the 786 area code. Imported through `vendor_leads` and published. |
+| 2026-11-03 | DJ Mike Cooley | DJ | Miami | (786) 413-4864 | From the DJ's contact card. Website djmikecooley.com. Claim email info@djmikecooley.com. Instagram and TikTok @DJMikeCooley, shown on the listing since social links were added the same day. City inferred from the 786 area code. Imported through `vendor_leads` and published. |

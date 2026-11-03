@@ -8,6 +8,7 @@ import { stripe } from "@/lib/stripe";
 import { youtubePoster } from "@/lib/media";
 import { moderateImage } from "@/lib/moderation";
 import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
+import { SOCIAL_PLATFORMS, normalizeSocial, type SocialLinks } from "@/lib/social";
 
 // RLS ("Vendor team edits its profile") enforces that the caller belongs to the
 // vendor org, so we update by org_id without an extra permission check.
@@ -28,6 +29,13 @@ export async function updateVendorProfile(
   if (!orgId) return { error: "Missing account.", saved: false };
   if (!businessName) return { error: "A business name is required.", saved: false };
 
+  const socialLinks: SocialLinks = {};
+  for (const p of SOCIAL_PLATFORMS) {
+    const result = normalizeSocial(p.key, str(formData.get(`social_${p.key}`), 300));
+    if (result.error) return { error: result.error, saved: false };
+    if (result.url) socialLinks[p.key] = result.url;
+  }
+
   const supabase = await supabaseServer();
   const { error } = await supabase
     .from("vendor_profiles")
@@ -40,6 +48,7 @@ export async function updateVendorProfile(
       website: str(formData.get("website"), 200),
       email: str(formData.get("email"), 200),
       phone: str(formData.get("phone"), 40),
+      social_links: socialLinks,
     })
     .eq("org_id", orgId);
 

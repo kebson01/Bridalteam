@@ -13,6 +13,7 @@ import VendorWebsiteLink from "@/components/vendor/website-link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
 import { hasIndexableContent } from "@/lib/vendor-content";
+import { readSocialLinks } from "@/lib/social";
 import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,7 @@ async function getVendor(id: string) {
   const { data: vendor } = await supabase
     .from("vendor_profiles")
     .select(
-      `org_id, business_name, category, description, city, region, website, email, phone, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
+      `org_id, business_name, category, description, city, region, website, email, phone, social_links, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
     )
     .eq("org_id", id)
     .eq("status", "published")
@@ -66,6 +67,7 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
   const reviews = await listVendorReviews(id);
 
   const location = [vendor.city, vendor.region].filter(Boolean).join(", ");
+  const socials = readSocialLinks(vendor.social_links);
 
   return (
     <>
@@ -82,6 +84,7 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
           email: vendor.email,
           phone: vendor.phone,
           image: vendor.cover_url ?? vendor.logo_url,
+          socials: socials.map((s) => s.url),
           reviews,
         })}
       />
@@ -125,6 +128,15 @@ export default async function VendorPublicPage({ params }: { params: Promise<{ i
               )}
               {vendor.phone && (
                 <div className="flex gap-2"><dt className="text-ink-soft/50">Phone</dt><dd className="text-ink">{vendor.phone}</dd></div>
+              )}
+              {socials.length > 0 && (
+                <div className="flex gap-2"><dt className="text-ink-soft/50">Follow</dt>
+                  <dd className="flex flex-wrap gap-x-3 gap-y-1">
+                    {socials.map((s) => (
+                      <a key={s.platform} href={s.url} target="_blank" rel="noopener noreferrer nofollow"
+                        className="text-brand-text hover:underline">{s.label}</a>
+                    ))}
+                  </dd></div>
               )}
             </dl>
             {ent.canReceiveInquiries && (
