@@ -9,6 +9,7 @@ import { youtubePoster } from "@/lib/media";
 import { moderateImage } from "@/lib/moderation";
 import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 import { SOCIAL_PLATFORMS, normalizeSocial, type SocialLinks } from "@/lib/social";
+import { parseFaqs, parseHighlights, parsePackages, parsePriceTier } from "@/lib/vendor-extras";
 
 // RLS ("Vendor team edits its profile") enforces that the caller belongs to the
 // vendor org, so we update by org_id without an extra permission check.
@@ -36,6 +37,13 @@ export async function updateVendorProfile(
     if (result.url) socialLinks[p.key] = result.url;
   }
 
+  const highlights = parseHighlights(formData.get("highlights"));
+  if (highlights.error) return { error: highlights.error, saved: false };
+  const packages = parsePackages(formData.get("packages"));
+  if (packages.error) return { error: packages.error, saved: false };
+  const faqs = parseFaqs(formData.get("faqs"));
+  if (faqs.error) return { error: faqs.error, saved: false };
+
   const supabase = await supabaseServer();
   const { error } = await supabase
     .from("vendor_profiles")
@@ -49,6 +57,10 @@ export async function updateVendorProfile(
       email: str(formData.get("email"), 200),
       phone: str(formData.get("phone"), 40),
       social_links: socialLinks,
+      price_tier: parsePriceTier(formData.get("price_tier")),
+      highlights: highlights.value,
+      packages: packages.value,
+      faqs: faqs.value,
     })
     .eq("org_id", orgId);
 

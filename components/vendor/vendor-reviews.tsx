@@ -25,10 +25,17 @@ export default function VendorReviews({
   vendorOrgId,
   viewerId,
   initialReviews,
+  heading = "Reviews",
+  className = "mt-12",
+  summaryCard = false,
 }: {
   vendorOrgId: string;
   viewerId: string | null;
   initialReviews: VendorReview[];
+  heading?: string;
+  className?: string;
+  /** Show the average as a large card under the heading instead of inline. */
+  summaryCard?: boolean;
 }) {
   const [reviews, setReviews] = useState<VendorReview[]>(initialReviews);
   const mine = viewerId ? reviews.find((r) => r.reviewer_id === viewerId) : undefined;
@@ -72,10 +79,15 @@ export default function VendorReviews({
   }
 
   return (
-    <div className="mt-12">
-      <div className="flex items-center gap-3">
-        <h2 className="text-lg font-medium text-ink">Reviews</h2>
-        {count > 0 && (
+    <div className={className}>
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className="text-2xl font-medium text-ink">{heading}</h2>
+        {count > 0 && summaryCard && (
+          <span className="text-sm text-ink-soft/70">
+            {count} {count === 1 ? "review" : "reviews"}
+          </span>
+        )}
+        {count > 0 && !summaryCard && (
           <span className="flex items-center gap-1.5 text-sm text-ink-soft/70">
             <Stars value={avg} />
             <b className="text-ink">{avg.toFixed(1)}</b>
@@ -83,6 +95,20 @@ export default function VendorReviews({
           </span>
         )}
       </div>
+
+      {count > 0 && summaryCard && (
+        <div className="mt-4 flex items-center gap-5 rounded-3xl bg-brand-wash p-5">
+          <div className="text-center">
+            <p className="font-display text-5xl font-medium leading-none text-ink">{avg.toFixed(1)}</p>
+            <p className="mt-1.5 flex justify-center">
+              <Stars value={avg} size={14} />
+            </p>
+          </div>
+          <p className="text-sm leading-relaxed text-ink-soft">
+            Average from {count} {count === 1 ? "couple" : "couples"} on Bridal Team.
+          </p>
+        </div>
+      )}
 
       {/* Write / edit form */}
       {viewerId ? (

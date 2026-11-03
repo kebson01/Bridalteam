@@ -149,6 +149,8 @@ export function localBusinessSchema(vendor: {
   image?: string | null;
   /** Social profile URLs, already checked by lib/social.ts. */
   socials?: string[];
+  /** "$" to "$$$$", from the vendor's price tier. */
+  priceRange?: string | null;
   reviews?: { rating: number }[];
 }) {
   const url = `${SITE_URL}/v/${vendor.orgId}`;
@@ -192,6 +194,7 @@ export function localBusinessSchema(vendor: {
     ...(vendor.email ? { email: vendor.email } : {}),
     ...(vendor.image ? { image: vendor.image } : {}),
     ...(sameAs.length ? { sameAs } : {}),
+    ...(vendor.priceRange ? { priceRange: vendor.priceRange } : {}),
     ...(aggregateRating ? { aggregateRating } : {}),
     isPartOf: { "@id": `${SITE_URL}/#website` },
   };
