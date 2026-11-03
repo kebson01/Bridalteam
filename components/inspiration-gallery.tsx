@@ -19,6 +19,20 @@ export interface InspirationImage {
   media_type: string;
   media_url: string | null;
   like_count?: number;
+  source?: string;
+  is_seed?: boolean | null;
+  retired_at?: string | null;
+}
+
+/** Label for Bridal Team's own starter content (see lib/seed-content.ts). */
+export const SEED_LABEL = "Bridal Team Ideas";
+
+export function SeedBadge() {
+  return (
+    <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink shadow">
+      {SEED_LABEL}
+    </span>
+  );
 }
 
 /** Small badge shown on non-photo tiles. */
@@ -207,6 +221,7 @@ export default function InspirationGallery({
             <TileVisual item={it} />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
             <MediaBadge type={it.media_type} />
+            {it.is_seed && <SeedBadge />}
             <figcaption className="absolute inset-x-0 bottom-0 p-5 text-white">
               <p className="text-lg font-medium">{it.title}</p>
               <p className="text-sm text-white/75">
@@ -298,6 +313,11 @@ function Lightbox({
         <div className="flex w-full flex-col p-6 sm:w-1/3">
           <h2 className="text-xl font-medium text-ink">{image.title}</h2>
           {image.theme && <p className="mt-1 text-sm text-ink-soft/70">{image.theme}</p>}
+          {image.is_seed && (
+            <p className="mt-2 text-xs text-ink-soft/60">
+              {SEED_LABEL}: a look picked by the Bridal Team, not a couple&apos;s or vendor&apos;s own wedding.
+            </p>
+          )}
 
           <div className="mt-3 flex items-center gap-2">
             <LikeButton
