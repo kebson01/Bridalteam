@@ -197,3 +197,8 @@ venue's region, and `lib/areas.ts` renders those values as "Serves all of …".
 | Valiant Air Command Warbird Museum | Venue | Titusville | 321-268-1941 | Web search |
 | Always In Bloom Florist | Florist | Vero Beach | 772-770-9204 | Web search |
 | Costa d'Este Beach Resort & Spa | Venue | Vero Beach | 772-562-9919 | Web search |
+## Added on request
+
+| Date | Business | Category | City | Phone | Notes |
+|---|---|---|---|---|---|
+| 2026-11-03 | DJ Mike Cooley | DJ | Miami | (786) 413-4864 | From the DJ's contact card. Website djmikecooley.com. Claim email info@djmikecooley.com. Instagram and TikTok @DJMikeCooley. City inferred from the 786 area code. Imported through `vendor_leads` and published. |
