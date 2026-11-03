@@ -125,6 +125,8 @@ function assistantSection(enabled: boolean): string[] {
     "",
     `${SITE_NAME} runs a public, read-only Model Context Protocol (MCP) server at ${SITE_URL}/api/mcp. No sign-in. Add it as a custom connector in Claude, ChatGPT or any MCP client to search published vendors (search_vendors, get_vendor), read the planning guides (search_guides, get_guide), split a budget (estimate_budget), work out reception tables (plan_tables) and build a dated checklist (get_checklist). Every result links back to ${SITE_URL}.`,
     "",
+    `Couples can also connect their own assistant to their wedding at ${SITE_URL}/api/mcp/site with OAuth sign-in, after approving one wedding, so it can manage their checklist, budget, guests, seating, vendors and wedding website. How to connect: ${SITE_URL}/connect-your-ai`,
+    "",
   ];
 }
 

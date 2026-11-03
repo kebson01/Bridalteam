@@ -33,6 +33,24 @@ export default function AIPlanner() {
           >
             Open the full planner <span aria-hidden>→</span>
           </Link>
+          {/* Couples can also plan with their own assistant over MCP: /connect-your-ai. */}
+          <Link
+            href="/connect-your-ai"
+            className="mt-6 flex max-w-md items-start gap-3 rounded-2xl border border-stone-2 bg-white p-4 text-left shadow-sm transition-colors hover:border-brand/50"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-wash text-brand-text" aria-hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+                <path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0V7zM12 16v5" />
+              </svg>
+            </span>
+            <span>
+              <span className="block text-sm font-semibold text-ink">Prefer ChatGPT or Claude?</span>
+              <span className="mt-0.5 block text-sm leading-relaxed text-ink-soft/80">
+                Connect your favorite AI to your wedding and plan by asking it.{" "}
+                <span className="font-semibold text-brand-text">See how →</span>
+              </span>
+            </span>
+          </Link>
         </div>
 
         {/* min-w-0: a grid item won't shrink below its content otherwise, and the

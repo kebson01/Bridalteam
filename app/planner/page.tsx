@@ -1,3 +1,4 @@
+import Link from "next/link";
 import PlannerChat from "@/components/planner-chat";
 import PlannerFeatures, { PlannerHeader } from "@/components/planner-features";
 import PlannerWeddingCard, { type PlannerWedding } from "@/components/planner-wedding-card";
@@ -69,6 +70,12 @@ export default async function PlannerPage({ searchParams }: { searchParams: Prom
         <div className="mt-6">
           <PlannerChat quickPrompts={PROMPTS} heightClass="h-[32rem]" />
         </div>
+        <p className="mt-4 text-center text-sm text-ink-soft/75">
+          Rather use ChatGPT or Claude?{" "}
+          <Link href="/connect-your-ai" className="font-semibold text-brand-text hover:text-brand-deep">
+            Connect your own AI to your wedding →
+          </Link>
+        </p>
       </section>
       <PlannerFeatures />
     </>

@@ -71,5 +71,6 @@ describe("buildLlmsTxt", () => {
     const txt = buildLlmsTxt({ vendors: [], mcpEnabled: true });
     expect(txt).toContain("## Connect an AI assistant");
     expect(txt).toContain(`${SITE_URL}/api/mcp`);
+    expect(txt).toContain(`${SITE_URL}/connect-your-ai`);
   });
 });

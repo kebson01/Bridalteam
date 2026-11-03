@@ -8,6 +8,7 @@ import InstallAppLink from "@/components/install-app-link";
 const LINKS = [
   { label: "How it works", href: "/#how" },
   { label: "AI Planner", href: "/planner" },
+  { label: "Use ChatGPT or Claude", href: "/connect-your-ai" },
   { label: "Wedding Website", href: "/wedding-website" },
   { label: "Budget Calculator", href: "/wedding-budget-calculator" },
   { label: "Guest List & RSVP", href: "/wedding-rsvp" },
