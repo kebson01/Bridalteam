@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import VendorDirectoryList, { type DirectoryVendor } from "./vendor-directory-list";
+import VendorDirectoryList, { DIRECTORY_PAGE, type DirectoryVendor } from "./vendor-directory-list";
 import type { MetroId } from "@/lib/areas";
 
 /**
@@ -245,5 +245,50 @@ describe("metro dropdown", () => {
     expect(names()).toHaveLength(3);
     await pickMetro(user, "");
     expect(names()).toHaveLength(9);
+  });
+});
+
+describe("spotlight, paging and card details", () => {
+  it("puts Featured vendors in the spotlight once, not in both places", () => {
+    const featured = { ...v("f", "Featured Florals", "Miami", "Florist"), featured: true };
+    render(<VendorDirectoryList vendors={[featured, ...VENDORS]} />);
+    expect(screen.getByRole("heading", { name: /Spotlight/ })).toBeInTheDocument();
+    const shown = names();
+    expect(shown.filter((n) => n === "Featured Florals")).toHaveLength(1);
+    expect(shown).toHaveLength(10);
+  });
+
+  it("has no spotlight when nobody is Featured", () => {
+    render(<VendorDirectoryList vendors={VENDORS} />);
+    expect(screen.queryByRole("heading", { name: /Spotlight/ })).toBeNull();
+  });
+
+  it("shows a page of vendors, then the rest on request", async () => {
+    const user = userEvent.setup();
+    const many = Array.from({ length: DIRECTORY_PAGE + 5 }, (_, i) => v(`m${i}`, `Vendor ${String(i).padStart(2, "0")}`, "Miami"));
+    render(<VendorDirectoryList vendors={many} />);
+    expect(names()).toHaveLength(DIRECTORY_PAGE);
+    // The total still counts everything, not just the page shown.
+    expect(screen.getByText(`${DIRECTORY_PAGE + 5} vendors`)).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Load more (5)" }));
+    expect(names()).toHaveLength(DIRECTORY_PAGE + 5);
+  });
+
+  it("shows price range, starting price, rating and a highlight", () => {
+    render(
+      <VendorDirectoryList
+        vendors={[{ ...v("p", "Priced Photo", "Miami", "Photography"), price_tier: 3, packages_from: 2800, rating: { average: 4.86, count: 12 }, highlight: "Drone coverage" }]}
+      />,
+    );
+    expect(screen.getByText("$$$")).toBeInTheDocument();
+    expect(screen.getByText("From $2,800")).toBeInTheDocument();
+    expect(screen.getByText("4.9")).toBeInTheDocument();
+    expect(screen.getByText(/Drone coverage/)).toBeInTheDocument();
+  });
+
+  it("counts each type without changing the chip's name", () => {
+    render(<VendorDirectoryList vendors={VENDORS} />);
+    const chip = screen.getByRole("button", { name: "Photography" });
+    expect(chip.textContent).toContain("(1)");
   });
 });

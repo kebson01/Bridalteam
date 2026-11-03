@@ -27,6 +27,42 @@ export interface DirectoryVendor {
   logo_url: string | null;
   cover_url: string | null;
   featured?: boolean;
+  /** 1-4 ($ to $$$$), from the vendor's profile. */
+  price_tier?: number | null;
+  /** Lowest package starting price in USD. */
+  packages_from?: number | null;
+  /** The vendor's first highlight, e.g. "Bilingual". */
+  highlight?: string | null;
+  rating?: { average: number; count: number } | null;
+}
+
+/** Cards shown before "Load more", and how many each click adds. */
+export const DIRECTORY_PAGE = 24;
+/** Featured vendors shown as large spotlight cards above the list. */
+const SPOTLIGHT_MAX = 3;
+
+const TIER_LABEL: Record<number, string> = { 1: "$", 2: "$$", 3: "$$$", 4: "$$$$" };
+
+function where(v: DirectoryVendor) {
+  return isRegionWide(v.city)
+    ? `Serves all of ${METROS.find((m) => m.id === regionScope(v.city))?.label ?? "Florida"}`
+    : [v.city, v.region].filter(Boolean).join(", ");
+}
+
+function initials(name: string) {
+  return name.replace(/[^A-Za-z0-9 ]/g, " ").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("");
+}
+
+function Star({ className = "h-3.5 w-3.5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={`${className} text-brand`} aria-hidden="true">
+      <path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9L12 2.5z" />
+    </svg>
+  );
+}
+
+function money(n: number) {
+  return `$${n.toLocaleString("en-US")}`;
 }
 
 export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVendor[] }) {
@@ -34,6 +70,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
   const [category, setCategory] = useState<string | null>(null);
   const [metro, setMetro] = useState<MetroId | null>(null);
   const [area, setArea] = useState<AreaId | null>(null);
+  const [limit, setLimit] = useState(DIRECTORY_PAGE);
 
   // The type row scrolls sideways rather than wrapping, so it stays one line
   // however many categories exist. Arrows appear only on the side with more.
@@ -94,6 +131,21 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
     };
   }, [query, category]);
 
+  /** How many listings each type would show, given location and search. */
+  const categoryCounts = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const counts = new Map<string, number>();
+    let all = 0;
+    for (const v of vendors) {
+      if (metro && !matchesMetro(v.city, metro)) continue;
+      if (area && !matchesArea(v.city, area)) continue;
+      if (q && ![v.business_name, v.category, v.city, v.region, v.description].filter(Boolean).some((f) => String(f).toLowerCase().includes(q))) continue;
+      all++;
+      if (v.category) counts.set(v.category, (counts.get(v.category) ?? 0) + 1);
+    }
+    return { all, counts };
+  }, [vendors, query, metro, area]);
+
   const filtered = useMemo(
     () =>
       vendors.filter((v) => {
@@ -120,10 +172,38 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
     return counts;
   }, [vendors, matchesSearch]);
 
+  const spotlight = filtered.filter((v) => v.featured).slice(0, SPOTLIGHT_MAX);
+  const spotIds = new Set(spotlight.map((v) => v.org_id));
+  const rest = filtered.filter((v) => !spotIds.has(v.org_id));
+  const visible = rest.slice(0, limit);
+  const anyFilter = Boolean(query || category || metro || area);
+
+  // A new filter starts the list from the top again.
+  useEffect(() => setLimit(DIRECTORY_PAGE), [query, category, metro, area]);
+
   return (
     <>
-      <div className="rounded-2xl border border-stone-2 bg-white p-2 shadow-card lg:flex lg:items-center lg:gap-2">
-        <label className="flex flex-1 items-center gap-3 px-4">
+      {/* AI matchmaker */}
+      <Link
+        href="/planner"
+        className="group flex flex-col gap-3 rounded-3xl border border-brand/20 bg-brand-wash p-5 transition-colors hover:border-brand/50 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <span>
+          <span className="flex items-center gap-2 text-sm font-semibold text-brand-text">
+            <span aria-hidden>✦</span> Not sure who to book first?
+          </span>
+          <span className="mt-1 block text-sm leading-relaxed text-ink-soft">
+            Tell the AI planner your style, guest count and venue, and it will suggest which vendors to book and when.
+          </span>
+        </span>
+        <span className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white sm:self-auto">
+          ✦ Match me with AI
+        </span>
+      </Link>
+
+      {/* Search + location */}
+      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <label className="flex flex-1 items-center gap-3 rounded-full border border-stone-2 bg-white px-4 shadow-sm focus-within:border-brand">
           <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0 text-stone-3">
             <circle cx="9" cy="9" r="6" />
             <path d="m17 17-3.5-3.5" strokeLinecap="round" />
@@ -132,7 +212,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={`Search vendors, e.g. 'photographer in ${LAUNCH_CITY}'`}
+            placeholder={`Search vendor name, style or specialty, e.g. 'photographer in ${LAUNCH_CITY}'`}
             aria-label="Search vendors"
             className="w-full bg-transparent py-3 text-sm text-ink outline-none placeholder:text-stone-3"
           />
@@ -140,19 +220,19 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
 
         {/*
           A select rather than a row of chips. With three metros the chips fit;
-          with seven they overflowed a container that has no scrollbar and no
-          arrows, so the extra metros would have been invisible rather than
-          merely out of reach -- and every chip added narrowed the search field
-          beside them. Native, so keyboard and screen-reader behaviour and the
-          mobile picker come for free.
+          with seven they overflowed, and every chip added narrowed the search
+          field. Styled as a pill so it reads as one more filter. Native, so
+          keyboard and screen-reader behaviour and the mobile picker come free.
         */}
         {metroChips.length > 0 && (
-          <div className="relative mt-2 lg:mt-0 lg:shrink-0">
+          <div className="relative sm:shrink-0">
             <select
               aria-label="Metro"
               value={metro ?? ""}
               onChange={(e) => selectMetro((e.target.value || null) as MetroId | null)}
-              className="w-full cursor-pointer appearance-none rounded-xl bg-stone-4 py-3 pl-4 pr-10 text-sm font-medium text-ink outline-none focus-visible:ring-2 focus-visible:ring-brand lg:w-auto"
+              className={`w-full cursor-pointer appearance-none rounded-full border py-3 pl-4 pr-10 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-brand sm:w-auto ${
+                metro ? "border-ink bg-ink text-white" : "border-stone-2 bg-white text-ink"
+              }`}
             >
               <option value="">Anywhere ({metroCounts.get("any") ?? 0})</option>
               {metroChips.map((m) => (
@@ -167,7 +247,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
               fill="none"
               stroke="currentColor"
               strokeWidth="1.8"
-              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-3"
+              className={`pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 ${metro ? "text-white" : "text-stone-3"}`}
             >
               <path d="m6 8 4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -186,7 +266,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
               aria-pressed={a.id === area}
               className={`whitespace-nowrap rounded-full border px-3 py-1 text-[13px] transition-colors ${
                 a.id === area
-                  ? "border-brand bg-brand text-white"
+                  ? "border-ink bg-ink text-white"
                   : "border-stone-2 bg-white text-ink-soft/80 hover:border-brand hover:text-brand-text"
               }`}
             >
@@ -197,7 +277,7 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
       )}
 
       {categories.length > 0 && (
-        <div className="relative mt-5">
+        <div className="relative mt-4">
           <div
             ref={typeRow}
             onScroll={updateEdges}
@@ -205,21 +285,26 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
             aria-label="Vendor type"
             className="flex gap-2 overflow-x-auto scroll-px-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {[null, ...categories].map((c) => (
-              <button
-                key={c ?? "all"}
-                type="button"
-                onClick={() => setCategory(c === category ? null : c)}
-                aria-pressed={c === category}
-                className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[13px] transition-colors ${
-                  c === category
-                    ? "border-brand bg-brand text-white"
-                    : "border-stone-2 bg-white text-ink-soft/80 hover:border-brand hover:text-brand-text"
-                }`}
-              >
-                {c ?? "All types"}
-              </button>
-            ))}
+            {[null, ...categories].map((c) => {
+              const n = c ? categoryCounts.counts.get(c) ?? 0 : categoryCounts.all;
+              return (
+                <button
+                  key={c ?? "all"}
+                  type="button"
+                  onClick={() => setCategory(c === category ? null : c)}
+                  aria-pressed={c === category}
+                  className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[13px] transition-colors ${
+                    c === category
+                      ? "border-brand bg-brand-wash font-semibold text-ink"
+                      : "border-stone-2 bg-white text-ink-soft/80 hover:border-brand hover:text-brand-text"
+                  }`}
+                >
+                  {c ?? "All types"}
+                  {/* Hidden from the button's name, so "Photography" stays "Photography". */}
+                  <span aria-hidden className="ml-1 text-ink-soft/50">({n})</span>
+                </button>
+              );
+            })}
           </div>
           {edges.left && (
             <div className="pointer-events-none absolute inset-y-0 left-0 flex w-20 items-center justify-start bg-gradient-to-r from-white via-white/90 to-transparent">
@@ -248,33 +333,92 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
         </div>
       )}
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-stone-2 pt-5">
-        <p className="text-sm text-ink-soft/60">
-          {filtered.length === vendors.length ? `${vendors.length} vendors` : `${filtered.length} of ${vendors.length} vendors`}
-          {(metro || area) && filtered.some((v) => isRegionWide(v.city)) && (
-            <span> &middot; includes vendors who cover the whole area</span>
-          )}
-          {(query || category || metro || area) && (
-            <button
-              type="button"
-              onClick={() => {
-                setQuery("");
-                setCategory(null);
-                setMetro(null);
-                setArea(null);
-              }}
-              className="ml-3 font-medium text-brand-text hover:text-brand-deep"
-            >
-              Clear filters
-            </button>
-          )}
-        </p>
-        <Link
-          href="/planner"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-text hover:text-brand-deep"
-        >
-          <span aria-hidden>✦</span> Not sure who you need? Match me with AI
-        </Link>
+      {/* Spotlight: Featured vendors, as large cards */}
+      {spotlight.length > 0 && (
+        <section className="mt-10" aria-labelledby="spotlight-heading">
+          <div className="flex items-end justify-between gap-3">
+            <h2 id="spotlight-heading" className="flex items-center gap-2.5 text-2xl font-medium text-ink">
+              <span className="h-6 w-1 rounded-full bg-brand" aria-hidden /> Spotlight
+            </h2>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft/60">Featured vendors</span>
+          </div>
+          <div className="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {spotlight.map((v) => (
+              <article key={v.org_id} className="overflow-hidden rounded-3xl border border-stone-2 bg-white shadow-card">
+                <Link href={`/v/${v.org_id}`} className="group relative block aspect-[4/3] overflow-hidden bg-brand-soft">
+                  {v.cover_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={v.cover_url} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-wash via-white to-brand-wash font-display text-5xl font-light tracking-widest text-brand-text/70">
+                      {initials(v.business_name)}
+                    </span>
+                  )}
+                  <span className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
+                  <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-ink">
+                    {[v.category ?? "Vendor", v.price_tier ? TIER_LABEL[v.price_tier] : null].filter(Boolean).join(" · ")}
+                  </span>
+                  <span className="absolute inset-x-0 bottom-0 p-4 text-white">
+                    <span className="block text-xs text-white/80">{where(v)}</span>
+                    <h3 className="mt-0.5 text-2xl font-medium leading-tight">{v.business_name}</h3>
+                  </span>
+                </Link>
+                <div className="p-4">
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    {v.rating ? (
+                      <span className="inline-flex items-center gap-1 text-ink-soft">
+                        <Star /> <b className="text-ink">{v.rating.average.toFixed(1)}</b> ({v.rating.count})
+                      </span>
+                    ) : (
+                      <span className="text-ink-soft/60">New on Bridal Team</span>
+                    )}
+                    {v.packages_from != null && (
+                      <span className="text-ink-soft">
+                        From <b className="text-ink">{money(v.packages_from)}</b>
+                      </span>
+                    )}
+                  </div>
+                  {v.description && <p className="mt-2 line-clamp-2 text-sm text-ink-soft/80">{v.description}</p>}
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <Link href={`/v/${v.org_id}`} className="rounded-full border border-stone-2 py-2.5 text-center text-sm font-semibold text-ink hover:border-brand">
+                      View profile
+                    </Link>
+                    <Link href={`/v/${v.org_id}#contact`} className="rounded-full bg-gradient-to-r from-brand to-brand-dark py-2.5 text-center text-sm font-semibold text-white">
+                      Contact
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Everyone else */}
+      <div className="mt-10 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-medium text-ink">{spotlight.length > 0 ? "All Florida wedding pros" : "Florida wedding pros"}</h2>
+          <p className="mt-1 text-sm text-ink-soft/60">
+            {filtered.length === vendors.length ? `${vendors.length} vendors` : `${filtered.length} of ${vendors.length} vendors`}
+            {(metro || area) && filtered.some((v) => isRegionWide(v.city)) && (
+              <span> &middot; includes vendors who cover the whole area</span>
+            )}
+            {anyFilter && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setCategory(null);
+                  setMetro(null);
+                  setArea(null);
+                }}
+                className="ml-3 font-medium text-brand-text hover:text-brand-deep"
+              >
+                Clear filters
+              </button>
+            )}
+          </p>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
@@ -282,53 +426,68 @@ export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVen
           No vendors match that search.
         </p>
       ) : (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((v) => (
-            <Link
-              key={v.org_id}
-              href={`/v/${v.org_id}`}
-              className="overflow-hidden rounded-2xl border border-stone-2 bg-white shadow-card transition-transform hover:-translate-y-1"
-            >
-              <div className="relative flex h-36 items-center justify-center bg-gradient-to-br from-brand/15 via-stone-4 to-brand-dark/10">
-                {v.cover_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={v.cover_url} alt={v.business_name} className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-text">
-                    {v.category ?? "Vendor"}
+        <ul className="mt-5 grid gap-3 md:grid-cols-2">
+          {visible.map((v) => {
+            const thumb = v.cover_url ?? v.logo_url;
+            return (
+              <li key={v.org_id}>
+                <Link
+                  href={`/v/${v.org_id}`}
+                  className="flex h-full gap-4 rounded-2xl border border-stone-2 bg-white p-4 shadow-sm transition-colors hover:border-brand/50"
+                >
+                  <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-brand-wash">
+                    {thumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={thumb} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="flex h-full w-full items-center justify-center font-display text-lg tracking-wider text-brand-text/70">
+                        {initials(v.business_name)}
+                      </span>
+                    )}
                   </span>
-                )}
-                {v.featured && (
-                  <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
-                    Featured
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-brand-wash px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-text">
+                        {v.category ?? "Vendor"}
+                      </span>
+                      {v.price_tier ? (
+                        <span className="text-[11px] font-semibold text-ink-soft/60">{TIER_LABEL[v.price_tier]}</span>
+                      ) : null}
+                    </span>
+                    <h3 className="mt-1 truncate text-lg font-medium leading-snug text-ink">{v.business_name}</h3>
+                    {(v.city || v.region) && <span className="block truncate text-xs text-ink-soft/60">{where(v)}</span>}
+                    <span className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
+                      <span className="inline-flex min-w-0 items-center gap-1 text-ink-soft">
+                        {v.rating ? (
+                          <>
+                            <Star /> <b className="text-ink">{v.rating.average.toFixed(1)}</b>
+                            {v.highlight && <span className="truncate">· {v.highlight}</span>}
+                          </>
+                        ) : (
+                          v.highlight && <span className="truncate">{v.highlight}</span>
+                        )}
+                      </span>
+                      {v.packages_from != null && (
+                        <span className="font-semibold text-brand-text">From {money(v.packages_from)}</span>
+                      )}
+                    </span>
                   </span>
-                )}
-              </div>
-              <div className="p-5">
-                <h3 className="text-lg font-medium text-ink">{v.business_name}</h3>
-                {(v.category || v.city) && (
-                  <p className="mt-1 text-sm text-ink-soft/70">
-                    {[
-                      v.category,
-                      isRegionWide(v.city)
-                        ? `Serves all of ${
-                            METROS.find((m) => m.id === regionScope(v.city))?.label ?? "Florida"
-                          }`
-                        : [v.city, v.region].filter(Boolean).join(", "),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                )}
-                {v.description && (
-                  <p className="mt-3 line-clamp-2 text-sm text-ink-soft/80">{v.description}</p>
-                )}
-                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-text">
-                  View profile <span aria-hidden>→</span>
-                </span>
-              </div>
-            </Link>
-          ))}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {rest.length > visible.length && (
+        <div className="mt-8 text-center">
+          <button
+            type="button"
+            onClick={() => setLimit((l) => l + DIRECTORY_PAGE)}
+            className="inline-flex items-center gap-2 rounded-full border border-stone-2 bg-white px-6 py-3 text-sm font-semibold text-ink shadow-sm hover:border-brand"
+          >
+            Load more ({rest.length - visible.length})
+          </button>
         </div>
       )}
     </>
