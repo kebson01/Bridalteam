@@ -321,3 +321,16 @@ describe("spotlight, paging and card details", () => {
     expect(names()).toHaveLength(9);
   });
 });
+
+describe("starting filtered", () => {
+  it("opens on the type from the link", () => {
+    render(<VendorDirectoryList vendors={VENDORS} initialCategory="Photography" />);
+    expect(names()).toEqual(["Gables Grooms"]);
+    expect(screen.getByRole("combobox", { name: "Vendor type" })).toHaveValue("Photography");
+  });
+
+  it("ignores a type no listing has", () => {
+    render(<VendorDirectoryList vendors={VENDORS} initialCategory="Unicorn wrangler" />);
+    expect(names()).toHaveLength(9);
+  });
+});

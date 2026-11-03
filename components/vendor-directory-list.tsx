@@ -65,9 +65,18 @@ function money(n: number) {
   return `$${n.toLocaleString("en-US")}`;
 }
 
-export default function VendorDirectoryList({ vendors }: { vendors: DirectoryVendor[] }) {
+export default function VendorDirectoryList({
+  vendors,
+  initialCategory = null,
+}: {
+  vendors: DirectoryVendor[];
+  /** From /vendors?type=..., e.g. the homepage's type chips. Ignored unless some listing has it. */
+  initialCategory?: string | null;
+}) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<string | null>(null);
+  const [category, setCategory] = useState<string | null>(() =>
+    initialCategory && vendors.some((v) => v.category === initialCategory) ? initialCategory : null,
+  );
   const [metro, setMetro] = useState<MetroId | null>(null);
   const [area, setArea] = useState<AreaId | null>(null);
   const [limit, setLimit] = useState(DIRECTORY_PAGE);

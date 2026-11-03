@@ -19,7 +19,8 @@ export const metadata = pageMetadata({
 
 export const dynamic = "force-dynamic";
 
-export default async function VendorsPage() {
+export default async function VendorsPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
+  const { type } = await searchParams;
   const supabase = await supabaseServer();
 
   // Only published vendor profiles are visible (RLS enforces this too). We pull
@@ -87,7 +88,7 @@ export default async function VendorsPage() {
               </div>
             </div>
           ) : (
-            <VendorDirectoryList vendors={list} />
+            <VendorDirectoryList vendors={list} initialCategory={typeof type === "string" ? type : null} />
           )}
         </div>
 
