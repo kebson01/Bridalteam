@@ -232,11 +232,12 @@ export function WholeTeam() {
  * Inspiration feed, plus three Unsplash detail shots (no people). Each says
  * which it is: the real ones name the wedding, the Unsplash ones say
  * "Inspiration" and are never presented as a real Bridal Team wedding. The
- * Paul archway kiss is left out at the owner's request.
+ * Paul archway kiss is left out at the owner's request, and the owner swapped
+ * the Paul blessing and lake photos for more of the St. Charles wedding.
  *
  * Order and spans are chosen so grid-flow-dense fills every cell with no
- * gaps: on desktop a 4-column, 4-row mosaic (the three portraits span two
- * rows, the three wide shots span two columns); on phones a 2-column grid
+ * gaps: on desktop a 4-column, 5-row mosaic (the five portraits span two
+ * rows, the four wide shots span two columns); on phones a 2-column grid
  * where the wide ones take a full row. Changing the list means re-checking
  * that it still tiles.
  */
@@ -252,8 +253,9 @@ const REAL = [
   { src: "/media/home/floral-arch.webp", caption: "A ceremony arch in bloom", where: IDEA, cls: "col-span-2", pos: "object-center" },
   { src: "/media/real-weddings/st-charles-2012-rings.jpg", caption: "Rings in crystal heels", where: ST_CHARLES, cls: "", pos: "object-center" },
   { src: "/media/real-weddings/paul-2014-bridal-party.jpg", caption: "Team Bride", where: PAUL, cls: "col-span-2", pos: "object-[50%_35%]" },
-  { src: "/media/real-weddings/paul-2014-blessing.jpg", caption: "A blessing at the altar", where: PAUL, cls: "", pos: "object-center" },
-  { src: "/media/real-weddings/paul-2014-groomsmen-lake.jpg", caption: "By the lake", where: PAUL, cls: "", pos: "object-center" },
+  { src: "/media/real-weddings/st-charles-2012-aisle-walk.webp", caption: "Down the aisle", where: ST_CHARLES, cls: "row-span-2", pos: "object-[50%_60%]" },
+  { src: "/media/real-weddings/st-charles-2012-groom-ready.webp", caption: "Buttoning up", where: ST_CHARLES, cls: "row-span-2", pos: "object-top" },
+  { src: "/media/real-weddings/st-charles-2012-just-married.webp", caption: "Just married", where: ST_CHARLES, cls: "col-span-2", pos: "object-[50%_45%]" },
 ];
 
 export function RealWeddings() {
