@@ -1,7 +1,9 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { budgetBreakdown, parseAmount, perGuest, OFTEN_FORGOTTEN } from "@/lib/budget-calculator";
+import { budgetQuery, readBudgetShare, replaceQuery } from "@/lib/tool-share";
+import ShareLink from "@/components/share-link";
 
 const money = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
@@ -12,7 +14,8 @@ const INPUT =
 
 /**
  * The interactive part of /wedding-budget-calculator. Everything runs in the
- * browser; nothing typed here is sent anywhere.
+ * browser; nothing typed here is sent anywhere. The inputs are mirrored into
+ * the page URL so the result can be shared as a link.
  */
 export default function BudgetCalculator() {
   const id = useId();
@@ -23,6 +26,18 @@ export default function BudgetCalculator() {
   const guests = Number.parseInt(rawGuests.replace(/[^0-9]/g, ""), 10);
   const result = budgetBreakdown(total);
   const each = perGuest(total, guests);
+
+  // Read a shared link once, then keep the URL in step with the inputs.
+  const loaded = useRef(false);
+  useEffect(() => {
+    const shared = readBudgetShare(new URLSearchParams(window.location.search));
+    if (shared.total) setRawTotal(shared.total.toLocaleString("en-US"));
+    if (shared.guests) setRawGuests(String(shared.guests));
+    loaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (loaded.current) replaceQuery(budgetQuery(total, Number.isFinite(guests) ? guests : null));
+  }, [total, guests]);
 
   return (
     <div className="rounded-3xl border border-stone-2 bg-white p-6 shadow-card sm:p-8">
@@ -115,6 +130,11 @@ export default function BudgetCalculator() {
                 </li>
               ))}
             </ul>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <ShareLink title="Our wedding budget" text={`Our wedding budget split for ${money(total)}`} />
+            <p className="text-xs text-ink-soft/70">Sends this breakdown as a link. Only the total and guest count are in it.</p>
           </div>
         </div>
       )}

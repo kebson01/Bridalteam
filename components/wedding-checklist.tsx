@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { datedChecklist, parseIsoDate } from "@/lib/checklist";
+import { checklistQuery, readChecklistShare, replaceQuery } from "@/lib/tool-share";
+import ShareLink from "@/components/share-link";
 
 // Ticks are a per-visitor convenience, so they live in this browser only.
 const STORAGE_KEY = "bt_checklist_done";
@@ -32,8 +34,13 @@ export default function WeddingChecklist() {
   const [today, setToday] = useState("");
   const [done, setDone] = useState<Set<string>>(new Set());
 
+  const loaded = useRef(false);
   useEffect(() => {
     setToday(localToday());
+    // A shared link carries the date (?date=2027-05-08), never the ticks.
+    const shared = readChecklistShare(new URLSearchParams(window.location.search));
+    if (shared) setDate(shared);
+    loaded.current = true;
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
       if (Array.isArray(saved)) setDone(new Set(saved.filter((s) => typeof s === "string")));
@@ -41,6 +48,9 @@ export default function WeddingChecklist() {
       // Private mode or blocked storage: ticks just won't be remembered.
     }
   }, []);
+  useEffect(() => {
+    if (loaded.current) replaceQuery(checklistQuery(date));
+  }, [date]);
 
   function toggle(title: string) {
     setDone((prev) => {
@@ -82,6 +92,13 @@ export default function WeddingChecklist() {
             ? `${ticked} of ${all.length} done. ${overdue} ${overdue === 1 ? "task is" : "tasks are"} already past due, so start there.`
             : `${ticked} of ${all.length} done. You're on schedule.`}
       </p>
+
+      {valid && (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <ShareLink title="Our wedding checklist" text={`Our wedding checklist, dated for ${fmt(date)}`} label="Share this checklist" />
+          <p className="text-xs text-ink-soft/70">The link carries your date, not your ticks.</p>
+        </div>
+      )}
 
       <div className="mt-6 space-y-8">
         {phases.map((p) => (
