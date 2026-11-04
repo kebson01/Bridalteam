@@ -1,7 +1,9 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { tablePlan, COMMON_TABLE_SIZES } from "@/lib/seating-calculator";
+import { readTablesShare, replaceQuery, tablesQuery } from "@/lib/tool-share";
+import ShareLink from "@/components/share-link";
 
 const INPUT =
   "mt-1 w-full rounded-xl border border-stone-2 bg-white px-4 py-3 text-lg text-ink outline-none focus:border-brand";
@@ -23,6 +25,19 @@ export default function TableCalculator() {
   const size = num(rawSize);
   const head = num(rawHead);
   const plan = guests > 0 ? tablePlan(guests, size, head) : null;
+
+  // Read a shared link once, then keep the URL in step with the inputs.
+  const loaded = useRef(false);
+  useEffect(() => {
+    const shared = readTablesShare(new URLSearchParams(window.location.search));
+    if (shared.guests) setRawGuests(String(shared.guests));
+    if (shared.seats) setRawSize(String(shared.seats));
+    if (shared.head !== null) setRawHead(String(shared.head));
+    loaded.current = true;
+  }, []);
+  useEffect(() => {
+    if (loaded.current) replaceQuery(tablesQuery(guests, size, head || 0));
+  }, [guests, size, head]);
 
   return (
     <div className="rounded-3xl border border-stone-2 bg-white p-6 shadow-card sm:p-8">
@@ -109,6 +124,13 @@ export default function TableCalculator() {
               </tbody>
             </table>
           )}
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <ShareLink
+              title="Our reception tables"
+              text={`${plural(guests, "guest")} at tables of ${size}: ${plural(plan.tables, "table")}`}
+            />
+          </div>
         </div>
       )}
     </div>
