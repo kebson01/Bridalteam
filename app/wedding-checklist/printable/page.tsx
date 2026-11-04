@@ -52,7 +52,10 @@ export default function PrintableChecklistPage() {
             >
               Download the PDF
             </a>
-            <PrintButton />
+            <PrintButton
+              label="Print this checklist"
+              className="inline-flex items-center justify-center rounded-full border border-stone-2 bg-white px-5 py-3 text-sm font-semibold text-ink hover:border-brand"
+            />
             <Link
               href="/wedding-checklist"
               className="inline-flex items-center justify-center rounded-full border border-stone-2 bg-white px-5 py-3 text-sm font-semibold text-ink hover:border-brand"
