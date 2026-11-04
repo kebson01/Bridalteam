@@ -90,6 +90,24 @@ export default async function GuidePage({
         <p className="text-sm text-ink-soft/60">{guide.readMinutes} min read</p>
         <p className="mt-6 text-lg leading-relaxed text-ink-soft/90">{guide.intro}</p>
 
+        {guide.downloads && guide.downloads.length > 0 && (
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+            {guide.downloads.map((d, i) => (
+              <Link
+                key={d.href}
+                href={d.href}
+                className={`inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold ${
+                  i === 0
+                    ? "bg-gradient-to-r from-brand to-brand-dark text-white"
+                    : "border border-stone-2 bg-white text-ink hover:border-brand"
+                }`}
+              >
+                {d.label}
+              </Link>
+            ))}
+          </div>
+        )}
+
         <div className="mt-2">
           {guide.body.map((block, i) => (
             <BlockView key={i} block={block} />

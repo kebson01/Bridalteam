@@ -11,6 +11,7 @@
  */
 import type { Block } from "@/lib/blog";
 import type { ToolKey } from "@/lib/tools";
+import { TEMPLATE_TASK_COUNT } from "@/lib/plan-template";
 
 export interface FAQ {
   q: string;
@@ -30,76 +31,161 @@ export interface Guide {
   keywords: string[];
   /** Free tool pages this guide points readers to, most relevant first. */
   tools?: ToolKey[];
+  /** Shown as buttons right under the intro, e.g. the dated tool and a printable PDF. */
+  downloads?: { label: string; href: string }[];
 }
 
 export const GUIDES: Guide[] = [
   {
     slug: "wedding-planning-checklist",
-    title: "The complete wedding planning checklist",
+    title: "The complete wedding planning checklist (month by month)",
     category: "Planning",
-    updated: "2026-07-22",
-    readMinutes: 9,
+    updated: "2026-11-04",
+    readMinutes: 12,
     excerpt:
-      "Every task from engagement to the honeymoon, grouped by when it actually needs to happen — so nothing important slips.",
+      "A month-by-month wedding checklist from engagement to thank-you notes, with what to book when, a free printable PDF, and a version that dates every task for you.",
     intro:
-      "A good checklist isn't just a long list of tasks — it's the right tasks in the right order. This one is grouped by timeframe so you always know what deserves your attention now and what can wait. Work top to bottom and the overwhelming becomes a sequence of small, doable steps.",
+      `A good checklist isn't just a long list of tasks. It's the right tasks in the right order. This one is grouped month by month, starting about 14 months before the wedding, so you always know what deserves your attention now and what can wait. It's the same ${TEMPLATE_TASK_COUNT}-step checklist Bridal Team builds for couples, so you can print it, or enter your date and get a due date for every task.`,
+    downloads: [
+      { label: "Get this checklist with your dates", href: "/wedding-checklist" },
+      { label: "Printable checklist (PDF)", href: "/downloads/bridal-team-wedding-checklist.pdf" },
+    ],
     body: [
-      { h2: "12+ months before: the foundation" },
-      { p: "Three decisions unlock everything else — your budget, a rough guest count, and your date and venue. Settle these first, because almost every later choice depends on them. You can't price catering without a headcount or book vendors without a date." },
+      { h2: "How to use this checklist" },
+      { p: "Work top to bottom. The timings assume about 14 months of planning, which is comfortable for most weddings and leaves room to book the venue and the vendors that sell out first. Engaged for less time than that? Start at the top anyway and move faster: anything that would already be past due is your catch-up list." },
+      { p: "Three decisions unlock almost everything else: your budget, a rough guest count, and your date and venue. You can't price catering without a headcount or book vendors without a date, so settle those before anything else." },
+
+      { h2: "14 to 12 months before: just engaged" },
+      { p: "Before you tour a single venue, agree on what kind of wedding you're planning. This is the cheapest stage to change your mind." },
       { ul: [
-        "Agree on a total budget and who is contributing.",
-        "Draft a guest list — even a rough one shapes venue size and cost.",
-        "Choose a season or date range, then tour and book your venue.",
-        "Decide the overall vibe: formal or relaxed, big or intimate.",
+        "Talk through the wedding you each picture: size, formality and vibe.",
+        "Agree on your top three priorities, the things you'll spend and splurge on.",
+        "Pick a rough season or a few candidate dates.",
+        "Set a total budget you're genuinely comfortable with, and confirm who is contributing and how much.",
+        "Set aside a 5 to 8% buffer for the costs that always appear: overtime, alterations, tips and delivery fees.",
+        "Draft a rough guest count, even a range, and decide whether children and plus-ones are invited.",
       ] },
-      { h2: "9–11 months before: book vendors that sell out" },
-      { p: "The best photographers, caterers, and bands are reserved a year ahead in busy markets. Once your date is fixed, secure these next — waiting usually means losing your first choice, not saving money." },
+
+      { h2: "12 to 9 months before: venue and the vendors that sell out" },
+      { p: "Your venue sets the date, and the date sets everything else. Once it's booked, go straight to the vendors who can only work one wedding a day. In busy markets the best photographers, caterers and bands are reserved a year ahead, and waiting usually means losing your first choice, not saving money." },
       { ul: [
-        "Photographer and videographer.",
-        "Caterer (if not included with the venue).",
-        "Band or DJ.",
-        "Wedding planner or day-of coordinator, if you want one.",
+        "Tour venues that fit your guest count and budget.",
+        "Book your venue and lock your date. Ask what's included and what's extra: tables, chairs, linens and staff.",
+        "Book your photographer, and your videographer if you want one.",
+        "Book your caterer, if catering isn't included with the venue.",
+        "Book your band or DJ.",
+        "Choose your wedding party and ask them.",
       ] },
-      { h2: "6–8 months before: the details take shape" },
-      { p: "With the big pieces booked, move to the choices that make the day feel like yours." },
+
+      { h2: "9 to 6 months before: the look and the people" },
+      { p: "With the big pieces booked, move to the choices that make the day feel like yours, and to the bookings that need lead time." },
       { ul: [
-        "Order your dress or suit — alterations take longer than people expect.",
-        "Book florist, cake, and any rentals.",
-        "Reserve room blocks for out-of-town guests.",
-        "Send save-the-dates, especially for a destination or holiday weekend.",
+        "Start shopping for wedding attire. Dresses can take months to arrive.",
+        "Lock your color palette and overall style.",
+        "Book your florist and your officiant.",
+        "Reserve a hotel room block for out-of-town guests.",
+        "Book hair and makeup, and schedule a trial.",
+        "Choose wedding party attire.",
+        "For a destination wedding: confirm travel, the local marriage license rules and a local coordinator.",
       ] },
-      { h2: "2–4 months before: confirm and communicate" },
-      { p: "This is the stretch where a shared plan pays off. Keep vendors, family, and your wedding party on the same page." },
+
+      { h2: "6 to 3 months before: guests, invitations and the extras" },
+      { p: "This is when guests start hearing from you, so the guest list has to be real." },
       { ul: [
-        "Mail invitations (about 8 weeks out; 12 for destinations).",
-        "Finalize the menu and do a tasting.",
-        "Buy rings and plan the honeymoon.",
-        "Confirm timeline and shot list with your photographer.",
+        "Send save-the-dates, about six months out (earlier for a destination or holiday weekend).",
+        "Build your wedding website and registry.",
+        "Finalize the guest list, collect addresses, and order invitations.",
+        "Order the cake or dessert and schedule a tasting.",
+        "Plan décor, rentals and lighting.",
+        "Book alterations, and arrange transportation for the couple and the wedding party.",
+        "Book the rehearsal dinner, and consider a day-after brunch for out-of-town guests.",
+        "Coordinate the shower and the bachelor or bachelorette plans with whoever is hosting.",
+        "Decide on favors, signage and stationery extras.",
       ] },
-      { h2: "The final month: tie it together" },
-      { p: "Chase the last RSVPs, give the caterer a final headcount, build the seating chart, and confirm arrival times with every vendor. Then delegate day-of logistics so you're not fielding questions in your dress." },
+
+      { h2: "3 to 1 months before: confirm everything" },
+      { p: "This stretch is less about new decisions and more about making sure every vendor, family member and member of the wedding party has the same plan." },
+      { ul: [
+        "Mail your invitations about 8 weeks out, or 12 weeks for a destination wedding.",
+        "Buy wedding rings and allow time for sizing.",
+        "Review every vendor contract and payment schedule.",
+        "Finalize the menu and any dietary needs with your caterer.",
+        "Apply for your marriage license, and check your local waiting period.",
+        "Confirm the day-of timeline with every vendor, and set aside cash for gratuities.",
+      ] },
+
+      { h2: "The final month" },
+      { ul: [
+        "Chase any missing RSVPs and give the final headcount to your caterer.",
+        "Build the seating chart.",
+        "Send a detailed day-of schedule to your wedding party and vendors.",
+        "Make final payments and prepare tip envelopes.",
+        "Confirm hair and makeup, transportation and delivery times.",
+        "Pack for the wedding night and honeymoon.",
+      ] },
+
+      { h2: "The week of, and the day itself" },
+      { p: "Hand off the day before you get to it. Pick one person, a coordinator, planner or a calm friend, to answer vendor questions and hand over final payments, so you're not doing it in your dress. Then go to the rehearsal, eat the dinner, and get married." },
+
+      { h2: "After the wedding" },
+      { ul: [
+        "Return any rentals and attire within the first few days.",
+        "Leave reviews for the vendors you loved, while the details are fresh.",
+        "Handle name changes and update documents, if either of you is changing names.",
+        "Write thank-you notes. Aim to finish within about a month.",
+      ] },
+
+      { h2: "Planning a Florida wedding? Add these" },
+      { p: "Florida has a few things that catch couples out, especially for outdoor and beach weddings." },
+      { ul: [
+        "Hurricane season runs from June 1 to November 30. If your date falls in it, read your venue's and vendors' weather and rescheduling terms before you sign, and consider wedding insurance.",
+        "Winter and spring are the busiest months for weddings in South Florida, so book popular venues and vendors further ahead for those dates.",
+        "Plan for heat and rain: a shaded or indoor backup for the ceremony, an earlier or later ceremony time in summer, and water for guests.",
+        "Many Florida beaches and parks require a permit for a ceremony. Check with the city or county before you choose the spot.",
+        "A Florida marriage license is valid for 60 days. If both of you are Florida residents there's a 3-day waiting period, which a state-approved premarital course waives (and the course lowers the fee). Check the details with your county clerk.",
+      ] },
+
+      { h2: "Get a printable copy, or let us date it for you" },
+      { p: "Download the free printable checklist (PDF) to tick off by hand, or enter your wedding date on our free wedding checklist and every task gets a real due date. With a free Bridal Team account the same checklist lives on your phone and computer, and you can share it with your partner and wedding party." },
+
       { h2: "Make it yours, not a template" },
-      { p: "No two weddings share the same priorities. Skip what doesn't matter to you and spend your energy on what does — the checklist is a map, not a mandate." },
+      { p: "No two weddings share the same priorities. Skip what doesn't matter to you and spend your energy on what does. The checklist is a map, not a mandate." },
     ],
     faqs: [
       {
         q: "How far in advance should you start planning a wedding?",
-        a: "Twelve months is comfortable for most weddings, and it's when the best venues and vendors are still available. You can absolutely plan in 6 months or fewer — you'll just make decisions faster and have fewer date options.",
+        a: "About 12 to 14 months is comfortable for most weddings, and it's when the best venues and vendors are still available. You can plan in 6 months or fewer; you'll just make decisions faster and have fewer date options.",
+      },
+      {
+        q: "What should you do first after getting engaged?",
+        a: "Agree on the kind of wedding you want and your top priorities, then set your budget and a rough guest count. Those decide which venues fit, and the venue sets the date.",
       },
       {
         q: "What should you book first when planning a wedding?",
-        a: "Lock your budget, a rough guest count, and your date and venue before anything else. Nearly every other decision — catering, vendors, invitations — depends on those three anchors.",
+        a: "The venue, because it sets your date. Then the vendors who can only work one wedding a day and sell out first: photographer, caterer, and band or DJ.",
       },
       {
         q: "When should wedding invitations be sent?",
-        a: "Mail invitations about 8 weeks before the wedding, or 12 weeks for a destination wedding, and send save-the-dates 6–8 months out.",
+        a: "Mail invitations about 8 weeks before the wedding, or 12 weeks for a destination wedding, and send save-the-dates about 6 months out.",
+      },
+      {
+        q: "Is there a printable wedding checklist?",
+        a: "Yes. Download the free printable wedding checklist (PDF) from this page. It has every task grouped by month with a box to tick. Or use our free wedding checklist tool to get a due date for every task.",
+      },
+      {
+        q: "When should you get your marriage license?",
+        a: "About a month before the wedding. Licenses expire (in Florida after 60 days) and some states have a waiting period, so check your county clerk's rules for timing.",
       },
     ],
     tools: ["checklist", "budget"],
     keywords: [
       "wedding planning checklist",
-      "wedding to do list",
+      "wedding checklist by month",
+      "printable wedding checklist",
+      "wedding checklist with dates",
       "wedding planning timeline",
+      "Florida wedding checklist",
+      "wedding to do list",
       "how to plan a wedding",
     ],
   },
