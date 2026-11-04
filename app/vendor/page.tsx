@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import PageHero from "@/components/page-hero";
+import VendorBadgeCard from "@/components/vendor/badge-card";
 import VendorProfileForm, { type VendorProfile } from "@/components/vendor-profile-form";
 import VendorMediaManager, { type VendorMedia } from "@/components/vendor-media-manager";
 import VendorBilling from "@/components/vendor-billing";
@@ -90,6 +91,11 @@ export default async function VendorDashboard({
           cancelAtPeriodEnd={Boolean(org.cancel_at_period_end)}
         />
         <VendorProfileForm profile={profile as VendorProfile} />
+        <VendorBadgeCard
+          orgId={org.id}
+          businessName={profile.business_name}
+          published={profile.status === "published"}
+        />
         {stats && <VendorStats stats={stats} />}
         {ent.canReceiveInquiries && <VendorInquiries initial={inquiries} />}
         <VendorMediaManager orgId={org.id} media={(media ?? []) as VendorMedia[]} />
