@@ -53,6 +53,15 @@ function describe(v: VendorForEmail): string {
 
 const pageUrl = (v: VendorForEmail) => `${SITE_URL}/v/${v.orgId}`;
 
+/**
+ * The "Find us on Bridal Team" badge (lib/vendor-badge.ts) is on the vendor
+ * dashboard, so it's only theirs once the page is claimed. Described in words:
+ * these emails carry no images.
+ */
+const BADGE_LINE =
+  `Once it's claimed, your dashboard also has a small "Find us on Bridal Team" badge you can paste ` +
+  `onto your own website, so couples who find you there can see your page and reach you.`;
+
 function proOffer(s: EmailSettings): string | null {
   if (!s.offerPro) return null;
   return (
@@ -111,6 +120,7 @@ export function firstEmail(v: VendorForEmail, l: EmailLinks, s: EmailSettings): 
     intro,
     listingText,
     `${claimText}\n${l.claimUrl}`,
+    BADGE_LINE,
     honest,
     ...(offer ? [offer] : []),
     out,
@@ -126,6 +136,7 @@ export function firstEmail(v: VendorForEmail, l: EmailLinks, s: EmailSettings): 
         ? `Here's your page as couples see it: ${link(pageUrl(v), pageUrl(v).replace(/^https?:\/\//, ""))}`
         : esc(listingText),
       `${esc(claimText)}<br>${link(l.claimUrl, `Claim ${name}'s page`)}`,
+      esc(BADGE_LINE),
       esc(honest),
       ...(offer ? [esc(offer)] : []),
       esc(out),
@@ -142,7 +153,8 @@ export function followUpEmail(v: VendorForEmail, l: EmailLinks, s: EmailSettings
   const foot = footer(v, l, s);
   const body1 = `Just following up once on my note last week. Your free page on Bridal Team is still waiting for you:`;
   const body2 =
-    `Claiming it lets you correct your details and add photos. It's free and needs no card.` +
+    `Claiming it lets you correct your details, add photos and get a "Find us on Bridal Team" badge ` +
+    `for your own website. It's free and needs no card.` +
     (s.offerPro ? ` The free year of Pro I mentioned still stands.` : "");
   const body3 = `If it's not for you, no problem. This is the last email you'll get from me about it.`;
 

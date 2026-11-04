@@ -80,6 +80,13 @@ describe("emails", () => {
     expect(firstEmail(v, links, { ...settings, offerPro: true }).text).toMatch(/Pro plan free for a year/);
   });
 
+  it("mentions the website badge, in words rather than an image", () => {
+    for (const e of [firstEmail(v, links, settings), followUpEmail(v, links, settings)]) {
+      expect(e.text).toContain("Find us on Bridal Team");
+      expect(e.html).not.toContain("<img");
+    }
+  });
+
   it("doesn't point a draft listing at a page that isn't public", () => {
     const e = firstEmail({ ...v, published: false }, links, settings);
     expect(e.text).not.toContain(`/v/${ORG}`);
