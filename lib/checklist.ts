@@ -26,6 +26,27 @@ export interface ChecklistPhase {
   tasks: ChecklistTask[];
 }
 
+/** The printable PDF of PLAN_TEMPLATE, made by scripts/checklist-pdf.mjs. */
+export const CHECKLIST_PDF_PATH = "/downloads/bridal-team-wedding-checklist.pdf";
+
+/**
+ * A fingerprint of the checklist's printed content (phase names and task
+ * titles, in order). Stored next to the PDF when it's generated, so a test
+ * can tell when the template changed and the PDF is stale.
+ */
+export function checklistFingerprint(): string {
+  const text = PLAN_TEMPLATE.map(
+    (m) => `${m.name}\n${m.deliverables.flatMap((d) => d.tasks.map((t) => `- ${t.title}`)).join("\n")}`,
+  ).join("\n\n");
+  // FNV-1a, 32-bit: enough to notice a change, and needs no Node crypto in the browser bundle.
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
 const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 /** Parses "YYYY-MM-DD" to a UTC timestamp, or null if it isn't a real date. */

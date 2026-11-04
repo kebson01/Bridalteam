@@ -112,6 +112,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/wedding-rsvp", priority: 0.9 },
     { path: "/wedding-seating-chart", priority: 0.9 },
     { path: "/wedding-checklist", priority: 0.9 },
+    { path: "/wedding-checklist/printable", priority: 0.7 },
     { path: "/guides", priority: 0.8 },
     ...(SHOW_VENDOR_DIRECTORY ? [{ path: "/vendors", priority: 0.8 }] : []),
     { path: "/inspiration", priority: 0.7 },

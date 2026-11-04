@@ -6,6 +6,7 @@ import { pageMetadata } from "@/lib/site";
 import { SIGNUP_URL } from "@/lib/config";
 import { TEMPLATE_TASK_COUNT } from "@/lib/plan-template";
 import { faqSchema, breadcrumbSchema } from "@/lib/structured-data";
+import { CHECKLIST_PDF_PATH } from "@/lib/checklist";
 
 /**
  * Public wedding checklist with real dates.
@@ -18,9 +19,9 @@ import { faqSchema, breadcrumbSchema } from "@/lib/structured-data";
 
 export const metadata = pageMetadata({
   path: "/wedding-checklist",
-  title: "Wedding Checklist with Dates",
-  ogTitle: "Free Wedding Checklist with Dates — Bridal Team",
-  description: `Enter your wedding date and get a ${TEMPLATE_TASK_COUNT}-step wedding checklist with a due date for every task, from just engaged to thank-you notes. Free.`,
+  title: "Wedding Checklist with Dates, Month by Month",
+  ogTitle: "Free Wedding Checklist with Due Dates, Month by Month — Bridal Team",
+  description: `Enter your wedding date and get a free ${TEMPLATE_TASK_COUNT}-step wedding checklist with a due date for every task, grouped month by month. Print it or download the PDF.`,
 });
 
 const CTA_LABEL = "Save my checklist free";
@@ -37,6 +38,14 @@ const FAQS = [
   {
     q: "Is this the same checklist as in the app?",
     a: `Yes. It's the ${TEMPLATE_TASK_COUNT}-step expert checklist Bridal Team builds for you after you sign up, with the same due dates. In your account you can tick tasks off on any device, edit and add tasks, and invite your partner and wedding party to the plan.`,
+  },
+  {
+    q: "What should I do first after getting engaged?",
+    a: "Talk through the wedding you each picture and agree on your top priorities, then set a budget and a rough guest count. Those decide which venues fit, and the venue sets your date. They're the first steps on this checklist.",
+  },
+  {
+    q: "Is there a printable version?",
+    a: "Yes. Download the free printable wedding checklist as a PDF, or open the printable page and print it. It has every task grouped by month with a box to tick.",
   },
   {
     q: "Is my checklist saved?",
@@ -62,8 +71,30 @@ export default function WeddingChecklistPage() {
       <PageHero
         eyebrow="Free tool"
         title="Wedding Checklist with Dates"
-        subtitle={`Add your wedding date and every one of these ${TEMPLATE_TASK_COUNT} steps gets a due date, so you always know what to do next.`}
+        subtitle={`Add your wedding date and every one of these ${TEMPLATE_TASK_COUNT} steps gets a due date, grouped month by month, so you always know what to do next.`}
       />
+
+      <div className="mx-auto -mb-8 mt-8 flex max-w-3xl flex-col justify-center gap-2 px-5 sm:flex-row">
+        <a
+          href={CHECKLIST_PDF_PATH}
+          download
+          className="inline-flex items-center justify-center rounded-full border border-stone-2 bg-white px-5 py-2.5 text-sm font-semibold text-ink hover:border-brand"
+        >
+          Download the printable PDF
+        </a>
+        <Link
+          href="/wedding-checklist/printable"
+          className="inline-flex items-center justify-center rounded-full border border-stone-2 bg-white px-5 py-2.5 text-sm font-semibold text-ink hover:border-brand"
+        >
+          Printable version
+        </Link>
+        <Link
+          href="/guides/wedding-planning-checklist"
+          className="inline-flex items-center justify-center rounded-full border border-stone-2 bg-white px-5 py-2.5 text-sm font-semibold text-ink hover:border-brand"
+        >
+          Read the month-by-month guide
+        </Link>
+      </div>
 
       <section className="mx-auto max-w-3xl px-5 py-16">
         <WeddingChecklist />
@@ -99,7 +130,11 @@ export default function WeddingChecklistPage() {
         <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-ink-soft/80">
           Read{" "}
           <Link href="/guides/wedding-planning-checklist" className="text-brand-text underline">
-            the complete wedding planning checklist
+            the complete wedding planning checklist, month by month
+          </Link>
+          , print the{" "}
+          <Link href="/wedding-checklist/printable" className="text-brand-text underline">
+            printable wedding checklist
           </Link>
           ,{" "}
           <Link href="/guides/when-to-book-wedding-vendors" className="text-brand-text underline">
