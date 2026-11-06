@@ -96,7 +96,10 @@ There are **two vendor tables**, and they are not interchangeable:
   `featured`). It still holds ~29 seeded sample rows and is reachable **only**
   through `/admin/venues` — no public page renders it.
 
-So the way a vendor gets listed today is by signing up and publishing a profile.
+Most listings are not self-made. Bridal Team creates a claimable listing from a
+business's public facts (`create_claimable_listing`; sourcing is in
+`VENDOR-SOURCING.md`) and publishes it, and the vendor claims it by email to take
+it over. A vendor can still sign up and publish a profile from scratch.
 `/admin/venues` remains for curating the legacy table.
 
 ### Managing vendors from `/admin/venues`
@@ -205,20 +208,27 @@ permanent red X on `main` would just train everyone to ignore the checks.
 
 ## Next steps
 
-The rebuild's engineering backlog is drained. All nine findings in
-`SECURITY-AUDIT-MAIN.md` are closed, and CI typechecks, tests and builds every
-pull request (`.github/workflows/ci.yml`). What's left is mostly not code:
+All nine findings in `SECURITY-AUDIT-MAIN.md` are closed, and CI typechecks,
+tests and builds every pull request (`.github/workflows/ci.yml`). Done since the
+September version of this list: the vendor directory has real listings (about
+710 published across seven Florida metros, see `VENDOR-PROSPECTS.md`), visits
+and drop-off are counted in `page_events` and shown on `/admin/analytics`, and
+the AI planner looks vendors up in the directory (`lib/planner-vendor-tools.ts`).
 
-- **Vendor supply.** `vendor_profiles` has no published rows, so `/vendors`
-  renders its empty state and stays hidden behind
-  `NEXT_PUBLIC_SHOW_VENDOR_DIRECTORY`. Two follow-ons wait on real listings
-  existing rather than on anything being built: surfacing the non-venue
-  categories in the directory UI (the data already has them), and wiring the
-  matching AI to query real vendor data.
-- **A funnel you can see.** `lib/attribution.ts` records which ad brought a
-  signup, but only at the moment of signup — nothing counts visits or drop-off,
-  so paid traffic would arrive unmeasured.
+What's left:
+
+- **Couple ↔ vendor message threads.** `app/vendor/inquiry-actions.ts` is a
+  one-way inbox: a couple sends an inquiry and the vendor marks it read. There
+  is no thread and no reply path.
+- **The directory's front door.** The footer link and homepage teaser for
+  `/vendors` only appear with `NEXT_PUBLIC_SHOW_VENDOR_DIRECTORY=true`, which is
+  read at build time. Check production sets it now that the listings exist.
 - **One signed-in CSP glance.** See remediation item 1 in
   `SECURITY-AUDIT-MAIN.md`: the enforcing policy has been walked across 38
   route loads with zero violations, but the pages behind the login gate could
-  only be reached as redirects.
+  only be reached as redirects. Sign in once and watch the console.
+- **Auth rate limits before any public announcement.** Remediation item 2 in
+  the same file. The one to look at is *sending emails*, the only project-wide
+  limit.
+- **Couples.** The rest is not code: getting couples to the site
+  (`COUPLES-ACQUISITION.md`, `COUPLES-TRACKER.md`) and a beta with real ones.
