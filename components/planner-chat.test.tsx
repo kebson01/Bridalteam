@@ -62,4 +62,26 @@ describe("renderMessage", () => {
     expect(container.querySelectorAll("p")).toHaveLength(2);
     expect(container.querySelector("div.h-2")).not.toBeNull();
   });
+  it("links an on-site path", () => {
+    const { container } = draw("Try [Sunrise Photo](/v/11111111-1111-4111-8111-111111111111) for beach shoots");
+    const a = container.querySelector("a");
+    expect(a).toHaveTextContent("Sunrise Photo");
+    expect(a?.getAttribute("href")).toBe("/v/11111111-1111-4111-8111-111111111111");
+  });
+
+  it("keeps a query string intact in a link", () => {
+    const { container } = draw("[Browse](/vendors?category=Florist&metro=south-florida)");
+    expect(container.querySelector("a")?.getAttribute("href")).toBe("/vendors?category=Florist&metro=south-florida");
+  });
+
+  it.each([
+    "[x](https://evil.example)",
+    "[x](//evil.example)",
+    "[x](/\\evil.example)",
+    "[x](javascript:alert(1))",
+    '[x](/v/a" onmouseover="alert(1))',
+  ])("does not link %s", (text) => {
+    const { container } = draw(text);
+    expect(container.querySelector("a")).toBeNull();
+  });
 });

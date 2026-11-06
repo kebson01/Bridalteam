@@ -105,7 +105,7 @@ export const PLANNER_TOOLS = [
   {
     name: "propose_vendors",
     description:
-      "Offer vendors to add to the couple's vendor tracker with one tap. Use when they ask which vendors they need or name businesses they're considering. Never invent business names: use a name the couple gave you, or a placeholder like 'Photographer (to find)'. Nothing is saved until they confirm.",
+      "Offer vendors to add to the couple's vendor tracker with one tap. Use when they ask which vendors they need or name businesses they're considering. Never invent business names: use a name the couple gave you, a vendor search_vendors returned (with its profile path in notes), or a placeholder like 'Photographer (to find)'. Nothing is saved until they confirm.",
     input_schema: {
       type: "object",
       properties: {

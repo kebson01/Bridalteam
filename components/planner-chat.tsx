@@ -74,6 +74,14 @@ export function renderMessage(text: string) {
   return lines.map((line, i) => {
     const bolded = escapeHtml(line)
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      // [text](/path) links, on-site only. The path must start with a single
+      // "/" and use a narrow character set: no "//" or "/\" (both of which a
+      // browser reads as another host), no quotes, no scheme. After
+      // escapeHtml() "&" is "&amp;", which is what an href attribute wants.
+      .replace(
+        /\[([^\]]+)\]\((\/(?![/\\])[A-Za-z0-9\-._~/?#=%;&]*)\)/g,
+        '<a href="$2" class="font-semibold text-brand-text underline">$1</a>',
+      )
       .replace(/^#{1,3}\s*(.+)$/, '<span class="font-semibold text-ink">$1</span>');
     const isBullet = /^\s*[-*•]\s+/.test(line);
     if (isBullet) {
