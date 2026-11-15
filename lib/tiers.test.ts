@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { effectivePlan, entitlements } from "./tiers";
+import { effectivePlan, entitlements, planGrant } from "./tiers";
 
 /**
  * `effectivePlan` decides what a vendor can do, so every bug in it is either a
@@ -98,5 +98,38 @@ describe("effectivePlan", () => {
     // Still not Featured: no badge, no top placement.
     expect(ent.badge).toBe(false);
     expect(ent.featuredPlacement).toBe(false);
+  });
+});
+
+describe("promotions", () => {
+  it("lifts a free vendor to the promoted plan", () => {
+    expect(effectivePlan({ plan: "free", promo_plan: "pro", promo_expires_at: future }, NOW)).toBe("pro");
+  });
+
+  it("never lowers a paid or comped vendor", () => {
+    expect(effectivePlan({ plan: "featured", promo_plan: "pro" }, NOW)).toBe("featured");
+    expect(effectivePlan({ plan: "free", comp_plan: "featured", promo_plan: "pro" }, NOW)).toBe("featured");
+  });
+
+  it("takes the better of comp and promotion", () => {
+    expect(effectivePlan({ plan: "free", comp_plan: "pro", promo_plan: "featured" }, NOW)).toBe("featured");
+  });
+
+  it("ignores an unknown promoted plan", () => {
+    expect(effectivePlan({ plan: "free", promo_plan: "platinum" }, NOW)).toBe("free");
+  });
+
+  it("reports where the plan comes from and when it ends", () => {
+    expect(planGrant({ plan: "free", promo_plan: "pro", promo_expires_at: future }, NOW)).toEqual({
+      plan: "pro",
+      source: "promotion",
+      expiresAt: future,
+    });
+    expect(planGrant({ plan: "free", comp_plan: "pro", comp_expires_at: future, promo_plan: "pro" }, NOW)).toEqual({
+      plan: "pro",
+      source: "comp",
+      expiresAt: future,
+    });
+    expect(planGrant({ plan: "pro", promo_plan: "pro" }, NOW)).toEqual({ plan: "pro", source: "paid", expiresAt: null });
   });
 });

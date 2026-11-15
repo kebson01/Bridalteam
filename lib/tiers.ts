@@ -128,6 +128,14 @@ export type PlanSource = {
   comp_plan?: string | null;
   /** When the comp lapses. null = open-ended. */
   comp_expires_at?: string | null;
+  /**
+   * The best plan a running admin promotion gives this org (migration
+   * 20261115160000_plan_promotions.sql). Computed live by the database, so it
+   * is already null once the promotion has ended.
+   */
+  promo_plan?: string | null;
+  /** When that promotion ends. */
+  promo_expires_at?: string | null;
 };
 
 /**
@@ -155,6 +163,19 @@ export type PlanSource = {
  * leftover Pro comp.
  */
 export function effectivePlan(org: PlanSource | null | undefined, now: Date = new Date()): Plan {
+  return planGrant(org, now).plan;
+}
+
+/**
+ * The effective plan and where it comes from: what the vendor pays for, a
+ * comp, or an admin promotion (/admin/promotions). Ties go to what they pay
+ * for, then the comp. `expiresAt` is when a granted plan lapses (null for
+ * paid, or an open-ended comp).
+ */
+export function planGrant(
+  org: PlanSource | null | undefined,
+  now: Date = new Date(),
+): { plan: Plan; source: "paid" | "comp" | "promotion"; expiresAt: string | null } {
   const paid = normalizePlan(org?.plan);
   const expiry = org?.comp_expires_at ? new Date(org.comp_expires_at) : null;
   // An unparseable expiry is treated as expired: failing toward the *lower*
@@ -162,8 +183,21 @@ export function effectivePlan(org: PlanSource | null | undefined, now: Date = ne
   // not silently hand out a paid feature forever.
   const compLive = !expiry || (!Number.isNaN(expiry.getTime()) && expiry > now);
   const comp = compLive ? normalizePlan(org?.comp_plan) : "free";
-  return PLAN_RANK[comp] > PLAN_RANK[paid] ? comp : paid;
+  const promo = normalizePlan(org?.promo_plan);
+
+  let best: ReturnType<typeof planGrant> = { plan: paid, source: "paid", expiresAt: null };
+  if (PLAN_RANK[comp] > PLAN_RANK[best.plan]) {
+    best = { plan: comp, source: "comp", expiresAt: org?.comp_expires_at ?? null };
+  }
+  if (PLAN_RANK[promo] > PLAN_RANK[best.plan]) {
+    best = { plan: promo, source: "promotion", expiresAt: org?.promo_expires_at ?? null };
+  }
+  return best;
 }
 
-/** The columns `effectivePlan` needs, for a PostgREST `select`. */
-export const PLAN_COLUMNS = "plan, comp_plan, comp_expires_at";
+/**
+ * The columns `effectivePlan` needs, for a PostgREST `select`. promo_plan and
+ * promo_expires_at are computed columns (database functions), so the
+ * plan_promotions migration must be applied before code selecting them ships.
+ */
+export const PLAN_COLUMNS = "plan, comp_plan, comp_expires_at, promo_plan, promo_expires_at";

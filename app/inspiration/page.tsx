@@ -17,12 +17,15 @@ export const dynamic = "force-dynamic";
 
 export default async function InspirationPage() {
   const supabase = await supabaseServer();
-  const feedQuery = (columns: string) =>
+  // Only curated media and the media of vendors on Pro or Featured (paid,
+  // comped or through a running promotion) appear in the public feed.
+  // feed_visible is computed live from the vendor's plan (migration
+  // 20261115160000_plan_promotions.sql); in_feed is the older stamped flag.
+  const feedQuery = (columns: string, visibility: "feed_visible" | "in_feed" = "feed_visible") =>
     supabase
       .from("inspiration_images")
       .select(columns)
-      // Only curated media and paid vendors' media appear in the public feed.
-      .eq("in_feed", true)
+      .eq(visibility, true)
       .order("created_at", { ascending: false });
   const BASE = "id, image_url, title, theme, colors, media_type, media_url, like_count, source";
 
@@ -31,11 +34,11 @@ export default async function InspirationPage() {
     supabase.auth.getUser(),
     hasPublishedRealWeddings(supabase),
   ]);
-  // Until the seed-content migration is applied, is_seed/retired_at don't
-  // exist; fall back to the old columns rather than showing an empty feed.
+  // If a migration isn't applied yet (feed_visible, or is_seed/retired_at),
+  // fall back to the old columns rather than showing an empty feed.
   let rows = feed.data as unknown as InspirationImage[] | null;
   if (feed.error) {
-    const fallback = await feedQuery(BASE);
+    const fallback = await feedQuery(BASE, "in_feed");
     rows = ((fallback.data ?? []) as unknown as InspirationImage[]).map((r) => ({ ...r, is_seed: r.source === "curated" }));
   }
   const images = arrangeFeed(rows ?? []).items;
