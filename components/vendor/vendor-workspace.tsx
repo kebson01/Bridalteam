@@ -6,7 +6,7 @@ import { setVendorPublished } from "@/app/vendor/actions";
 import VendorProfileForm, { type VendorProfile } from "@/components/vendor-profile-form";
 import { Icon, type IconName } from "@/components/vendor/workspace-ui";
 
-export type WorkspaceTab = "profile" | "pricing" | "media" | "insights" | "marketing" | "plan";
+export type WorkspaceTab = "profile" | "pricing" | "media" | "insights" | "marketing" | "website" | "plan";
 
 type TabInfo = { key: WorkspaceTab; label: string; icon: IconName; title: string; subtitle: string; step?: number };
 
@@ -49,6 +49,13 @@ const TABS: TabInfo[] = [
     title: "Marketing & Badge",
     subtitle: "Send couples from your own website to your Bridal Team listing.",
     step: 4,
+  },
+  {
+    key: "website",
+    label: "Website",
+    icon: "globe",
+    title: "Your Website",
+    subtitle: "A website for your business at bridalteam.com/biz, filled from your listing and always up to date.",
   },
   {
     key: "plan",
@@ -109,6 +116,7 @@ export default function VendorWorkspace({
     media: React.ReactNode;
     insights: React.ReactNode | null;
     marketing: React.ReactNode;
+    website: React.ReactNode;
     plan: React.ReactNode;
   };
 }) {
@@ -311,6 +319,7 @@ export default function VendorWorkspace({
           <div hidden={tab !== "media"}>{panels.media}</div>
           {panels.insights && <div hidden={tab !== "insights"} className="space-y-6">{panels.insights}</div>}
           <div hidden={tab !== "marketing"}>{panels.marketing}</div>
+          <div hidden={tab !== "website"}>{panels.website}</div>
           <div hidden={tab !== "plan"} className="space-y-6">{panels.plan}</div>
         </div>
 
