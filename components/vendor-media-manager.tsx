@@ -20,9 +20,15 @@ const INPUT =
 export default function VendorMediaManager({
   orgId,
   media,
+  inFeed,
+  galleryLimit,
 }: {
   orgId: string;
   media: VendorMedia[];
+  /** Whether this plan's media also appears on the public Inspiration page. */
+  inFeed: boolean;
+  /** Max gallery items on this plan; null = unlimited. */
+  galleryLimit: number | null;
 }) {
   const [type, setType] = useState<"photo" | "video" | "audio">("photo");
   const [state, action, pending] = useActionState<MediaState, FormData>(addVendorMedia, {
@@ -73,10 +79,28 @@ export default function VendorMediaManager({
     <div className="space-y-6">
       <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
         <h2 className="text-lg font-medium text-ink">Showcase your work</h2>
-        <p className="mt-1 text-sm text-ink-soft/75">
-          Add photos, performance videos or audio to the inspiration gallery.
-          Couples can like, save and share them — and find their way back to you.
-        </p>
+        {inFeed ? (
+          <p className="mt-1 text-sm text-ink-soft/75">
+            Add photos, performance videos or audio. They show on your listing and on the
+            Inspiration page, where couples can like, save and share them — and find their way
+            back to you.
+          </p>
+        ) : (
+          <>
+            <p className="mt-1 text-sm text-ink-soft/75">
+              Add photos, performance videos or audio to show on your listing
+              {galleryLimit !== null && <> (up to {galleryLimit} on the Free plan)</>}.
+            </p>
+            <p className="mt-3 rounded-lg bg-brand-wash px-4 py-3 text-sm text-ink-soft">
+              Want couples to discover your work on the Inspiration page too?{" "}
+              {/* A full page load, so the workspace opens on the Plan tab. */}
+              <a href="/vendor?tab=plan" className="font-semibold text-brand-text hover:underline">
+                Upgrade to Pro
+              </a>{" "}
+              and everything in your gallery is added there automatically.
+            </p>
+          </>
+        )}
 
         <form action={action} className="mt-4 space-y-3">
           <input type="hidden" name="org_id" value={orgId} />

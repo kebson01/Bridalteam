@@ -12,7 +12,7 @@ import { listVendorInquiries } from "@/app/vendor/inquiry-actions";
 import { getVendorStats } from "@/app/vendor/stats-actions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { proConfigured, featuredConfigured } from "@/lib/stripe";
-import { entitlements, effectivePlan, PLAN_COLUMNS } from "@/lib/tiers";
+import { entitlements, planGrant, normalizePlan, PLAN_COLUMNS } from "@/lib/tiers";
 
 export const metadata: Metadata = {
   title: "Your Vendor Account",
@@ -68,7 +68,8 @@ export default async function VendorDashboard({
     .eq("vendor_id", org.id)
     .order("created_at", { ascending: false });
 
-  const ent = entitlements(effectivePlan(org));
+  const grant = planGrant(org);
+  const ent = entitlements(grant.plan);
   const inquiries = ent.canReceiveInquiries ? await listVendorInquiries(org.id) : [];
   const stats = ent.hasStats ? await getVendorStats(org.id) : null;
 
@@ -89,7 +90,14 @@ export default async function VendorDashboard({
         ) : null
       }
       panels={{
-        media: <VendorMediaManager orgId={org.id} media={(media ?? []) as VendorMedia[]} />,
+        media: (
+          <VendorMediaManager
+            orgId={org.id}
+            media={(media ?? []) as VendorMedia[]}
+            inFeed={ent.canPostInspiration}
+            galleryLimit={ent.galleryLimit}
+          />
+        ),
         insights:
           stats || ent.canReceiveInquiries ? (
             <>
@@ -113,6 +121,11 @@ export default async function VendorDashboard({
               featuredConfigured={featuredConfigured()}
               flash={billing ?? null}
               cancelAtPeriodEnd={Boolean(org.cancel_at_period_end)}
+              granted={
+                grant.source !== "paid" && grant.plan !== normalizePlan(org.plan)
+                  ? { plan: grant.plan, source: grant.source, expiresAt: grant.expiresAt }
+                  : null
+              }
             />
             <VendorAccountActions orgId={org.id} />
           </>

@@ -205,6 +205,7 @@ export default function AdminDashboardPage() {
           <Link href="/admin/sites" className="font-semibold text-brand-text">Guest websites →</Link>
           <Link href="/admin/leads" className="font-semibold text-brand-text">Vendor leads →</Link>
           <Link href="/admin/venues" className="font-semibold text-brand-text">Manage venues →</Link>
+          <Link href="/admin/promotions" className="font-semibold text-brand-text">Promotions →</Link>
           <button onClick={logout} className="text-ink-soft/60 hover:text-ink">Lock</button>
         </div>
       </div>

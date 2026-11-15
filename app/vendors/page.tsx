@@ -7,7 +7,7 @@ import { pageMetadata } from "@/lib/site";
 import JsonLd from "@/components/json-ld";
 import { vendorItemListSchema } from "@/lib/structured-data";
 import { hasIndexableContent } from "@/lib/vendor-content";
-import { effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
+import { publicPlan, PUBLIC_PLAN_COLUMN } from "@/lib/tiers";
 import { lowestPrice, readHighlights, readPackages } from "@/lib/vendor-extras";
 
 export const metadata = pageMetadata({
@@ -29,7 +29,7 @@ export default async function VendorsPage({ searchParams }: { searchParams: Prom
     supabase
       .from("vendor_profiles")
       .select(
-        `org_id, business_name, category, description, city, region, logo_url, cover_url, price_tier, packages, highlights, organizations(${PLAN_COLUMNS})`,
+        `org_id, business_name, category, description, city, region, logo_url, cover_url, price_tier, packages, highlights, ${PUBLIC_PLAN_COLUMN}`,
       )
       .eq("status", "published")
       .order("business_name"),
@@ -48,12 +48,12 @@ export default async function VendorsPage({ searchParams }: { searchParams: Prom
   }
 
   const list: DirectoryVendor[] = (vendors ?? [])
-    .map(({ packages, highlights, organizations, ...v }) => {
+    .map(({ packages, highlights, vendor_plan, ...v }) => {
       const r = ratings.get(v.org_id);
       const top = readHighlights(highlights)[0];
       return {
         ...v,
-        featured: effectivePlan(organizations as unknown as PlanSource | null) === "featured",
+        featured: publicPlan({ vendor_plan }) === "featured",
         packages_from: lowestPrice(readPackages(packages)),
         highlight: top ? top.title : null,
         rating: r ? { average: r.sum / r.count, count: r.count } : null,

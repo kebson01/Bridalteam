@@ -7,7 +7,7 @@ import {
   cancelSubscription,
   resumeSubscription,
 } from "@/app/vendor/billing/actions";
-import { normalizePlan, TIERS } from "@/lib/tiers";
+import { normalizePlan, TIERS, type Plan } from "@/lib/tiers";
 
 /**
  * Vendor billing panel. Server component: upgrade/manage buttons are plain
@@ -21,8 +21,14 @@ export default function VendorBilling({
   featuredConfigured,
   flash,
   cancelAtPeriodEnd = false,
+  granted = null,
 }: {
   plan: string;
+  /**
+   * A better plan given free (a promotion or comp), from planGrant() in
+   * lib/tiers.ts. null when the vendor's features come from what they pay for.
+   */
+  granted?: { plan: Plan; source: "comp" | "promotion"; expiresAt: string | null } | null;
   status: string | null;
   proConfigured: boolean;
   featuredConfigured: boolean;
@@ -31,6 +37,15 @@ export default function VendorBilling({
 }) {
   const current = normalizePlan(plan);
   const anyPaidConfigured = proConfigured || featuredConfigured;
+  const grantedUntil = granted?.expiresAt
+    ? // expiresAt is the instant after the last day, so step back to that day.
+      new Date(new Date(granted.expiresAt).getTime() - 1).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "America/New_York",
+      })
+    : null;
 
   return (
     <div className="rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
@@ -58,6 +73,20 @@ export default function VendorBilling({
         </p>
       )}
 
+      {granted && (
+        <div className="mb-5 rounded-xl border border-brand/30 bg-brand-wash px-4 py-3">
+          <p className="text-sm font-semibold text-ink">
+            You have {TIERS[granted.plan].name} free{grantedUntil ? ` through ${grantedUntil}` : ""} — on us.
+          </p>
+          <p className="mt-0.5 text-xs text-ink-soft/70">
+            All {TIERS[granted.plan].name} features are switched on, with no card needed.
+            {grantedUntil
+              ? ` After that you go back to the ${TIERS[current].name} plan unless you subscribe.`
+              : ""}
+          </p>
+        </div>
+      )}
+
       {current === "free" ? (
         <div>
           <h2 className="text-lg font-medium text-ink">Grow your business</h2>
@@ -74,6 +103,7 @@ export default function VendorBilling({
                   price={TIERS.free.priceMonthly}
                   blurb={`Your listing, website link and up to ${TIERS.free.entitlements.galleryLimit} photos.`}
                   current
+                  currentLabel={granted ? "Your plan after the free period" : undefined}
                 />
                 <TierCard
                   name={TIERS.pro.name}
@@ -177,6 +207,7 @@ function TierCard({
   disabled,
   highlight = false,
   current = false,
+  currentLabel = "Current plan",
 }: {
   name: string;
   price: number;
@@ -187,6 +218,7 @@ function TierCard({
   highlight?: boolean;
   /** The vendor's current plan: shown with a "Current plan" label, no button. */
   current?: boolean;
+  currentLabel?: string;
 }) {
   return (
     <div
@@ -209,7 +241,7 @@ function TierCard({
       <p className="mt-1 flex-1 text-xs text-ink-soft/70">{blurb}</p>
       {current ? (
         <p className="mt-3 rounded-full border border-stone-2 bg-white px-4 py-2 text-center text-sm font-semibold text-ink-soft">
-          Current plan
+          {currentLabel}
         </p>
       ) : disabled || !action ? (
         <p className="mt-3 rounded-lg bg-stone-4 px-3 py-2 text-xs text-ink-soft/60">Opening soon</p>
