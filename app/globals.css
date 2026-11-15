@@ -55,6 +55,16 @@
 }
 
 /*
+  Serif headings in the vendor workspace. --font-playfair is only loaded there
+  (components/vendor/vendor-workspace.tsx), so the variable is read on the
+  element rather than through @theme, where it would resolve at :root and be
+  undefined. Needs the ! modifier on h1-h4, which the base rule below sets.
+*/
+@utility font-heading-serif {
+  font-family: var(--font-playfair), Georgia, "Times New Roman", serif;
+}
+
+/*
   The soft brand band: a light warm cream behind page banners and feature
   sections, so they stand apart from white content without the weight of
   near-black or a full orange block. Orange stays an accent on top of it.
