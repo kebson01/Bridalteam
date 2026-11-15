@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import PageHero from "@/components/page-hero";
 import VendorBadgeCard from "@/components/vendor/badge-card";
-import VendorProfileForm, { type VendorProfile } from "@/components/vendor-profile-form";
+import { type VendorProfile } from "@/components/vendor-profile-form";
+import VendorWorkspace, { type WorkspaceTab } from "@/components/vendor/vendor-workspace";
 import VendorMediaManager, { type VendorMedia } from "@/components/vendor-media-manager";
 import VendorBilling from "@/components/vendor-billing";
 import VendorAccountActions from "@/components/vendor-account-actions";
@@ -24,9 +24,9 @@ export const dynamic = "force-dynamic";
 export default async function VendorDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ billing?: string; account?: string }>;
+  searchParams: Promise<{ billing?: string; account?: string; tab?: string }>;
 }) {
-  const { billing, account } = await searchParams;
+  const { billing, account, tab } = await searchParams;
 
   const supabase = await supabaseServer();
   const {
@@ -72,35 +72,52 @@ export default async function VendorDashboard({
   const inquiries = ent.canReceiveInquiries ? await listVendorInquiries(org.id) : [];
   const stats = ent.hasStats ? await getVendorStats(org.id) : null;
 
+  // Coming back from Stripe (?billing=...) lands on the plan tab, where the result is shown.
+  const initialTab = (billing ? "plan" : tab ?? "profile") as WorkspaceTab;
+
   return (
-    <>
-      <PageHero eyebrow="Vendor account" title={profile.business_name} />
-      <section className="mx-auto max-w-3xl space-y-10 px-5 py-12">
-        {account === "deactivated" && (
-          <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+    <VendorWorkspace
+      profile={profile as VendorProfile}
+      mediaCount={media?.length ?? 0}
+      initialTab={initialTab}
+      notice={
+        account === "deactivated" ? (
+          <p className="mb-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
             Your account is deactivated — your listing is hidden and your subscription
             won&rsquo;t renew. Publish your listing again to reactivate.
           </p>
-        )}
-        <VendorBilling
-          plan={org.plan}
-          status={org.subscription_status}
-          proConfigured={proConfigured()}
-          featuredConfigured={featuredConfigured()}
-          flash={billing ?? null}
-          cancelAtPeriodEnd={Boolean(org.cancel_at_period_end)}
-        />
-        <VendorProfileForm profile={profile as VendorProfile} />
-        <VendorBadgeCard
-          orgId={org.id}
-          businessName={profile.business_name}
-          published={profile.status === "published"}
-        />
-        {stats && <VendorStats stats={stats} />}
-        {ent.canReceiveInquiries && <VendorInquiries initial={inquiries} />}
-        <VendorMediaManager orgId={org.id} media={(media ?? []) as VendorMedia[]} />
-        <VendorAccountActions orgId={org.id} />
-      </section>
-    </>
+        ) : null
+      }
+      panels={{
+        media: <VendorMediaManager orgId={org.id} media={(media ?? []) as VendorMedia[]} />,
+        insights:
+          stats || ent.canReceiveInquiries ? (
+            <>
+              {stats && <VendorStats stats={stats} />}
+              {ent.canReceiveInquiries && <VendorInquiries initial={inquiries} />}
+            </>
+          ) : null,
+        marketing: (
+          <VendorBadgeCard
+            orgId={org.id}
+            businessName={profile.business_name}
+            published={profile.status === "published"}
+          />
+        ),
+        plan: (
+          <>
+            <VendorBilling
+              plan={org.plan}
+              status={org.subscription_status}
+              proConfigured={proConfigured()}
+              featuredConfigured={featuredConfigured()}
+              flash={billing ?? null}
+              cancelAtPeriodEnd={Boolean(org.cancel_at_period_end)}
+            />
+            <VendorAccountActions orgId={org.id} />
+          </>
+        ),
+      }}
+    />
   );
 }

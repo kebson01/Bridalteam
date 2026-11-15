@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { SectionCard, type IconName } from "@/components/vendor/workspace-ui";
 import {
   HIGHLIGHT_ICONS,
   LIMITS,
@@ -34,18 +35,37 @@ export interface ProfileExtras {
   faqs?: Faq[] | null;
 }
 
-function Section({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
+function Section({
+  title,
+  hint,
+  icon,
+  children,
+}: {
+  title: string;
+  hint: string;
+  icon: IconName;
+  children: React.ReactNode;
+}) {
   return (
-    <fieldset className="mt-8 border-t border-stone-2 pt-6">
-      <legend className="sr-only">{title}</legend>
-      <p className="text-sm font-semibold text-ink">{title}</p>
-      <p className="mt-0.5 text-xs text-ink-soft/60">{hint}</p>
-      <div className="mt-3">{children}</div>
-    </fieldset>
+    <SectionCard icon={icon} title={title} subtitle={hint}>
+      <fieldset>
+        <legend className="sr-only">{title}</legend>
+        {children}
+      </fieldset>
+    </SectionCard>
   );
 }
 
-export default function ProfileExtrasEditor({ initial, disabled }: { initial: ProfileExtras; disabled?: boolean }) {
+export default function ProfileExtrasEditor({
+  initial,
+  disabled,
+  onDirtyChange,
+}: {
+  initial: ProfileExtras;
+  disabled?: boolean;
+  /** Told whether the lists differ from `initial`, for the unsaved-changes bar. */
+  onDirtyChange?: (dirty: boolean) => void;
+}) {
   const [tier, setTier] = useState<string>(initial.price_tier ? String(initial.price_tier) : "");
   const [highlights, setHighlights] = useState<Highlight[]>(initial.highlights ?? []);
   const [packages, setPackages] = useState<PackageDraft[]>(
@@ -56,6 +76,12 @@ export default function ProfileExtrasEditor({ initial, disabled }: { initial: Pr
     })),
   );
   const [faqs, setFaqs] = useState<Faq[]>(initial.faqs ?? []);
+
+  const [initialSnapshot] = useState(() => JSON.stringify({ tier, highlights, packages, faqs }));
+  const dirty = JSON.stringify({ tier, highlights, packages, faqs }) !== initialSnapshot;
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
 
   const setAt = <T,>(set: React.Dispatch<React.SetStateAction<T[]>>, i: number, patch: Partial<T>) =>
     set((list) => list.map((item, j) => (j === i ? { ...item, ...patch } : item)));
@@ -69,7 +95,7 @@ export default function ProfileExtrasEditor({ initial, disabled }: { initial: Pr
       <input type="hidden" name="packages" value={JSON.stringify(packages)} />
       <input type="hidden" name="faqs" value={JSON.stringify(faqs)} />
 
-      <Section title="Price range" hint="Shown next to your category, so couples know what to expect.">
+      <Section icon="tag" title="Price range" hint="Shown next to your category, so couples know what to expect.">
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Price range">
           {[{ value: 0, label: "Not shown", hint: "" }, ...PRICE_TIERS].map((t) => {
             const v = t.value ? String(t.value) : "";
@@ -95,6 +121,7 @@ export default function ProfileExtrasEditor({ initial, disabled }: { initial: Pr
       </Section>
 
       <Section
+        icon="star"
         title="Highlights"
         hint={`Up to ${LIMITS.highlights} quick facts that set you apart, like "Bilingual · English & Spanish" or "Setup & strike included".`}
       >
@@ -141,6 +168,7 @@ export default function ProfileExtrasEditor({ initial, disabled }: { initial: Pr
       </Section>
 
       <Section
+        icon="briefcase"
         title="Packages"
         hint={`Up to ${LIMITS.packages}. A starting price helps couples shortlist you; leave it blank to show "Ask for a quote".`}
       >
@@ -204,7 +232,7 @@ export default function ProfileExtrasEditor({ initial, disabled }: { initial: Pr
         </button>
       </Section>
 
-      <Section title="FAQs" hint={`Up to ${LIMITS.faqs}. Answer what couples ask you most, like how far ahead to book.`}>
+      <Section icon="question" title="FAQs (optional)" hint={`Up to ${LIMITS.faqs}. Answer what couples ask you most, like how far ahead to book.`}>
         <div className="space-y-3">
           {faqs.map((f, i) => (
             <div key={i} className="rounded-xl border border-stone-2 p-3">
