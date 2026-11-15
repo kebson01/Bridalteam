@@ -249,7 +249,7 @@ export default function VendorProfileForm({
               <button
                 type="submit"
                 disabled={pending}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-text px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#a84503] disabled:opacity-70"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-70"
               >
                 <Icon name="save" className="h-4 w-4" />
                 {pending ? "Saving…" : "Save changes"}

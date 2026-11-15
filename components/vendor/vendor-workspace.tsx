@@ -2,14 +2,9 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { Playfair_Display } from "next/font/google";
 import { setVendorPublished } from "@/app/vendor/actions";
 import VendorProfileForm, { type VendorProfile } from "@/components/vendor-profile-form";
 import { Icon, type IconName } from "@/components/vendor/workspace-ui";
-
-// The design's serif headings. Loaded here, not in the root layout, so only
-// this page downloads it.
-const playfair = Playfair_Display({ variable: "--font-playfair", subsets: ["latin"] });
 
 export type WorkspaceTab = "profile" | "pricing" | "media" | "insights" | "marketing" | "plan";
 
@@ -147,7 +142,7 @@ export default function VendorWorkspace({
   }
 
   return (
-    <div className={`${playfair.variable} bg-[#fdfaf7]`}>
+    <div className="bg-white">
       {/* Header band */}
       <section className="relative overflow-hidden bg-brand-soft">
         <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand/10 blur-3xl" />
@@ -168,12 +163,12 @@ export default function VendorWorkspace({
 
           <div className="mt-5 flex flex-wrap items-start justify-between gap-6">
             <div className="flex min-w-[min(100%,20rem)] flex-1 items-start gap-4">
-              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-stone-2 bg-white font-heading-serif text-xl font-semibold text-[#b34a04] shadow-sm">
+              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-stone-2 bg-white font-display text-xl font-medium text-[#b34a04] shadow-sm">
                 {initials(profile.business_name)}
               </span>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <h1 className="font-heading-serif! text-3xl font-normal text-ink sm:text-4xl">{profile.business_name}</h1>
+                  <h1 className="text-3xl font-light uppercase tracking-wide text-ink sm:text-4xl">{profile.business_name}</h1>
                   {profile.category && (
                     <span className="rounded-full bg-brand-wash px-2.5 py-0.5 text-xs font-medium text-[#b34a04] ring-1 ring-brand/20">
                       {profile.category}
@@ -198,7 +193,7 @@ export default function VendorWorkspace({
               className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold shadow-sm transition-colors disabled:opacity-60 ${
                 published
                   ? "border border-stone-2 bg-white text-ink-soft hover:border-brand"
-                  : "bg-brand-text text-white hover:bg-[#a84503]"
+                  : "bg-gradient-to-r from-brand to-brand-dark text-white"
               }`}
             >
               <Icon name="rocket" className="h-4 w-4" />
@@ -300,7 +295,7 @@ export default function VendorWorkspace({
         {notice}
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-stone-2 pb-5">
           <div>
-            <h2 className="font-heading-serif! text-2xl font-normal text-ink">{info.title}</h2>
+            <h2 className="text-2xl font-light text-ink">{info.title}</h2>
             <p className="mt-1 text-sm text-ink-soft/70">{info.subtitle}</p>
           </div>
           {info.step && (
@@ -324,7 +319,7 @@ export default function VendorWorkspace({
             <button
               type="button"
               onClick={() => go(nextStep.key, true)}
-              className="inline-flex items-center gap-2 rounded-full border border-brand/40 bg-white px-6 py-3 text-sm font-semibold text-[#b34a04] hover:border-brand"
+              className="inline-flex items-center gap-2 rounded-full border border-stone-2 bg-white px-6 py-3 text-sm font-semibold text-ink hover:border-brand"
             >
               Next: {nextStep.label}
               <Icon name="arrow" className="h-4 w-4" />
