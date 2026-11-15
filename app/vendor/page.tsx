@@ -89,7 +89,14 @@ export default async function VendorDashboard({
         ) : null
       }
       panels={{
-        media: <VendorMediaManager orgId={org.id} media={(media ?? []) as VendorMedia[]} />,
+        media: (
+          <VendorMediaManager
+            orgId={org.id}
+            media={(media ?? []) as VendorMedia[]}
+            inFeed={ent.canPostInspiration}
+            galleryLimit={ent.galleryLimit}
+          />
+        ),
         insights:
           stats || ent.canReceiveInquiries ? (
             <>
