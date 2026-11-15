@@ -62,16 +62,23 @@ export default function VendorBilling({
         <div>
           <h2 className="text-lg font-medium text-ink">Grow your business</h2>
           <p className="mt-1 text-sm text-ink-soft/75">
-            Your basic listing is free. Upgrade for an unlimited gallery, direct inquiries,
+            You&rsquo;re on the Free plan &mdash; your listing stays live at no cost, for as
+            long as you like. Upgrade any time for an unlimited gallery, direct inquiries,
             stats and more.
           </p>
           {anyPaidConfigured ? (
             <>
-              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <div className="mt-5 grid gap-4 md:grid-cols-3">
+                <TierCard
+                  name={TIERS.free.name}
+                  price={TIERS.free.priceMonthly}
+                  blurb={`Your listing, website link and up to ${TIERS.free.entitlements.galleryLimit} photos.`}
+                  current
+                />
                 <TierCard
                   name={TIERS.pro.name}
                   price={TIERS.pro.priceMonthly}
-                  blurb="Unlimited gallery, inquiries, links and stats."
+                  blurb="Unlimited gallery, inquiries and stats."
                   action={startProCheckout}
                   cta="Upgrade to Pro"
                   disabled={!proConfigured}
@@ -90,7 +97,7 @@ export default function VendorBilling({
                   similar): plan price, monthly interval, renewal terms and how
                   to cancel, stated before the pay button. */}
               <p className="mt-4 text-xs leading-relaxed text-ink-soft/60">
-                Plans are billed monthly and renew automatically until cancelled.
+                Staying on Free costs nothing and needs no card. Paid plans are billed monthly and renew automatically until cancelled.
                 Cancel anytime from this page — you keep your features through the
                 period you&rsquo;ve paid for. By subscribing you agree to our{" "}
                 <Link href="/terms" className="font-semibold text-brand-text">
@@ -169,25 +176,42 @@ function TierCard({
   cta,
   disabled,
   highlight = false,
+  current = false,
 }: {
   name: string;
   price: number;
   blurb: string;
-  action: () => void | Promise<void>;
-  cta: string;
+  action?: () => void | Promise<void>;
+  cta?: string;
   disabled?: boolean;
   highlight?: boolean;
+  /** The vendor's current plan: shown with a "Current plan" label, no button. */
+  current?: boolean;
 }) {
   return (
-    <div className={`rounded-xl border p-4 ${highlight ? "border-brand" : "border-stone-2"}`}>
+    <div
+      className={`flex flex-col rounded-xl border p-4 ${
+        highlight ? "border-brand" : current ? "border-stone-2 bg-stone-4/40" : "border-stone-2"
+      }`}
+    >
       <div className="flex items-baseline justify-between">
         <span className="text-sm font-semibold text-ink">{name}</span>
         <span className="text-sm text-ink-soft/70">
-          <strong className="text-ink">${price}</strong>/mo
+          {price === 0 ? (
+            <strong className="text-ink">$0</strong>
+          ) : (
+            <>
+              <strong className="text-ink">${price}</strong>/mo
+            </>
+          )}
         </span>
       </div>
-      <p className="mt-1 text-xs text-ink-soft/70">{blurb}</p>
-      {disabled ? (
+      <p className="mt-1 flex-1 text-xs text-ink-soft/70">{blurb}</p>
+      {current ? (
+        <p className="mt-3 rounded-full border border-stone-2 bg-white px-4 py-2 text-center text-sm font-semibold text-ink-soft">
+          Current plan
+        </p>
+      ) : disabled || !action ? (
         <p className="mt-3 rounded-lg bg-stone-4 px-3 py-2 text-xs text-ink-soft/60">Opening soon</p>
       ) : (
         <form action={action} className="mt-3">
