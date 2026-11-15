@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { stripe, planForPrice, type PaidPlan } from "@/lib/stripe";
+import { stripe, stripeMode, planForPrice, type PaidPlan } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { SITE_URL } from "@/lib/site";
@@ -80,6 +80,13 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("stripe webhook signature failed:", err);
     return NextResponse.json({ error: "bad signature" }, { status: 400 });
+  }
+
+  // Never let a test-mode event change a plan when we're running on live keys
+  // (or vice versa). Acknowledge it so Stripe stops retrying, but do nothing.
+  if (event.livemode !== (stripeMode === "live")) {
+    console.warn(`stripe webhook: ignoring ${event.livemode ? "live" : "test"}-mode event ${event.id} (key is ${stripeMode})`);
+    return NextResponse.json({ received: true, ignored: "mode mismatch" });
   }
 
   async function applyByCustomer(customerId: string, patch: Record<string, unknown>) {

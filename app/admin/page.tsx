@@ -36,6 +36,13 @@ interface ReportRow {
   image_id: string;
   inspiration_images: { title: string; image_url: string } | null;
 }
+interface StripeStatus {
+  keyMode: "live" | "test" | null;
+  enabled: boolean;
+  production: boolean;
+  webhookSecretSet: boolean;
+  prices: { plan: string; id: string; ok: boolean; livemode?: boolean; amount?: string; error?: string }[];
+}
 interface Dashboard {
   stats: Stats;
   vendors: VendorRow[];
@@ -52,6 +59,17 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [stripeInfo, setStripeInfo] = useState<StripeStatus | null>(null);
+
+  // Stripe readiness is fetched separately: it calls the Stripe API, and a slow
+  // or failing lookup shouldn't hold up the rest of the dashboard.
+  useEffect(() => {
+    if (!unlocked) return;
+    fetch("/api/admin/stripe")
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setStripeInfo)
+      .catch(() => setStripeInfo(null));
+  }, [unlocked]);
 
   // Fetch dashboard data using the httpOnly admin session cookie (set at login).
   // Same-origin fetches send the cookie automatically — no password in the browser.
@@ -221,6 +239,33 @@ export default function AdminDashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Stripe readiness */}
+      {stripeInfo && (() => {
+        const allOk =
+          stripeInfo.enabled &&
+          stripeInfo.keyMode === "live" &&
+          stripeInfo.webhookSecretSet &&
+          stripeInfo.prices.every((p) => p.ok);
+        return (
+          <div className={`mt-6 rounded-2xl border p-5 text-sm ${allOk ? "border-green-200 bg-green-50" : "border-amber-300 bg-amber-50"}`}>
+            <div className="font-semibold text-ink">
+              Stripe: {stripeInfo.keyMode ? `${stripeInfo.keyMode.toUpperCase()} key` : "no key"}
+              {!stripeInfo.enabled && stripeInfo.keyMode && " (refused — billing disabled)"}
+              {allOk && " ✓ ready for real payments"}
+            </div>
+            <ul className="mt-2 space-y-0.5 text-ink-soft">
+              <li>Webhook secret: {stripeInfo.webhookSecretSet ? "set" : "MISSING"}</li>
+              {stripeInfo.prices.map((p) => (
+                <li key={p.plan}>
+                  {p.plan} price: {p.id || "—"} {p.amount && `· ${p.amount}`}{" "}
+                  {p.ok ? "✓" : `— ${p.error}`}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })()}
 
       {/* Reported images (priority) */}
       {reports.length > 0 && (
