@@ -3,7 +3,7 @@ import GetTheApp from "@/components/get-the-app";
 import { HomeHero, HomeVendors, HowItWorks, RealWeddings, WholeTeam } from "@/components/home-sections";
 import { summarizeVendors, type HomeVendorSummary } from "@/lib/home-vendors";
 import { supabasePublic } from "@/lib/supabase";
-import { effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
+import { publicPlan, PUBLIC_PLAN_COLUMN } from "@/lib/tiers";
 import { lowestPrice, readPackages } from "@/lib/vendor-extras";
 import type { Metadata } from "next";
 import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
@@ -41,14 +41,14 @@ async function homeVendors(): Promise<HomeVendorSummary> {
   try {
     const { data, error } = await supabasePublic()
       .from("vendor_profiles")
-      .select(`org_id, business_name, category, city, region, description, logo_url, cover_url, packages, organizations(${PLAN_COLUMNS})`)
+      .select(`org_id, business_name, category, city, region, description, logo_url, cover_url, packages, ${PUBLIC_PLAN_COLUMN}`)
       .eq("status", "published")
       .order("business_name");
     if (error) throw new Error(`${error.code}: ${error.message}`);
     return summarizeVendors(
-      (data ?? []).map(({ packages, organizations, ...v }) => ({
+      (data ?? []).map(({ packages, vendor_plan, ...v }) => ({
         ...v,
-        featured: effectivePlan(organizations as unknown as PlanSource | null) === "featured",
+        featured: publicPlan({ vendor_plan }) === "featured",
         packages_from: lowestPrice(readPackages(packages)),
       })),
     );

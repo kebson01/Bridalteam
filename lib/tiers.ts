@@ -201,3 +201,20 @@ export function planGrant(
  * plan_promotions migration must be applied before code selecting them ships.
  */
 export const PLAN_COLUMNS = "plan, comp_plan, comp_expires_at, promo_plan, promo_expires_at";
+
+/**
+ * For PUBLIC pages (directory, homepage, /v/[id], the AI tools): select this
+ * column on vendor_profiles and read it with publicPlan().
+ *
+ * PLAN_COLUMNS lives on organizations, which only the vendor's own members can
+ * read, so an organizations(...) embed comes back null for couples and every
+ * vendor looked Free. vendor_plan is a computed column (migration
+ * 20261115170000_vendor_public_plan.sql) that answers just the plan name,
+ * resolved the same way as effectivePlan().
+ */
+export const PUBLIC_PLAN_COLUMN = "vendor_plan";
+
+/** The plan a public listing shows, from a row selected with PUBLIC_PLAN_COLUMN. */
+export function publicPlan(row: { vendor_plan?: string | null } | null | undefined): Plan {
+  return normalizePlan(row?.vendor_plan);
+}

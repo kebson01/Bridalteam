@@ -5,7 +5,7 @@ import VendorProfileView from "@/components/vendor/profile-view";
 import { supabaseServer } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
 import { hasIndexableContent } from "@/lib/vendor-content";
-import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
+import { entitlements, publicPlan, PUBLIC_PLAN_COLUMN } from "@/lib/tiers";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +14,13 @@ async function getVendor(id: string) {
   const { data: vendor } = await supabase
     .from("vendor_profiles")
     .select(
-      `org_id, business_name, category, description, city, region, website, email, phone, social_links, price_tier, highlights, packages, faqs, logo_url, cover_url, organizations(${PLAN_COLUMNS})`,
+      `org_id, business_name, category, description, city, region, website, email, phone, social_links, price_tier, highlights, packages, faqs, logo_url, cover_url, ${PUBLIC_PLAN_COLUMN}`,
     )
     .eq("org_id", id)
     .eq("status", "published")
     .maybeSingle();
   if (!vendor) return { vendor: null, media: [], plan: "free" as string };
-  const plan = effectivePlan(vendor.organizations as unknown as PlanSource | null);
+  const plan = publicPlan(vendor);
   const { data: media } = await supabase
     .from("inspiration_images")
     .select("id, image_url, title, media_type")
