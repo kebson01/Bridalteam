@@ -1,4 +1,4 @@
-import { reviewSite, siteHash, UNAVAILABLE_MESSAGE, type PolicyVerdict } from "@/lib/custom-site/policy";
+import { reviewSite, siteHash, UNAVAILABLE_MESSAGE, type PolicyVerdict, type SiteKind } from "@/lib/custom-site/policy";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 /**
@@ -15,6 +15,24 @@ export async function approveForPublish(
   draft: { html: string; approvedHash: string | null },
   review: (html: string) => Promise<PolicyVerdict> = reviewSite,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  return approve("approve_custom_site_draft", { p_wid: weddingId }, draft, review);
+}
+
+/** The same gate for a vendor's business website (lib/vendor-site). */
+export async function approveVendorSiteForPublish(
+  orgId: string,
+  draft: { html: string; approvedHash: string | null },
+  review: (html: string) => Promise<PolicyVerdict> = (html) => reviewSite(html, undefined, "business" satisfies SiteKind),
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  return approve("approve_vendor_site_draft", { p_org: orgId }, draft, review);
+}
+
+async function approve(
+  rpc: "approve_custom_site_draft" | "approve_vendor_site_draft",
+  idArg: Record<string, string>,
+  draft: { html: string; approvedHash: string | null },
+  review: (html: string) => Promise<PolicyVerdict>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const hash = siteHash(draft.html);
   if (draft.approvedHash === hash) return { ok: true };
 
@@ -29,9 +47,9 @@ export async function approveForPublish(
     console.error("approveForPublish: SUPABASE_SERVICE_ROLE_KEY is not set");
     return { ok: false, error: UNAVAILABLE_MESSAGE };
   }
-  const { data, error } = await admin.rpc("approve_custom_site_draft", { p_wid: weddingId, p_hash: hash });
+  const { data, error } = await admin.rpc(rpc, { ...idArg, p_hash: hash });
   if (error) {
-    console.error("approve_custom_site_draft failed:", error.code, error.message);
+    console.error(`${rpc} failed:`, error.code, error.message);
     return { ok: false, error: UNAVAILABLE_MESSAGE };
   }
   if (data !== true) return { ok: false, error: "Your draft changed while we were checking it. Please publish again." };

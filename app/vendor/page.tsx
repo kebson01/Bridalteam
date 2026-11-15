@@ -8,6 +8,10 @@ import VendorBilling from "@/components/vendor-billing";
 import VendorAccountActions from "@/components/vendor-account-actions";
 import VendorInquiries from "@/components/vendor/vendor-inquiries";
 import VendorStats from "@/components/vendor/vendor-stats";
+import VendorSiteBuilder from "@/components/vendor/vendor-site-builder";
+import { listVendorSiteKeys, listVendorSiteVersions } from "@/app/vendor/site-actions";
+import { mcpEnabled } from "@/lib/flags";
+import { SITE_URL } from "@/lib/site";
 import { listVendorInquiries } from "@/app/vendor/inquiry-actions";
 import { getVendorStats } from "@/app/vendor/stats-actions";
 import { supabaseServer } from "@/lib/supabase/server";
@@ -20,6 +24,9 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
+// The Website tab's AI designer and content check run in server actions,
+// which run under the page that calls them: give them room.
+export const maxDuration = 180;
 
 export default async function VendorDashboard({
   searchParams,
@@ -68,6 +75,17 @@ export default async function VendorDashboard({
     .eq("vendor_id", org.id)
     .order("created_at", { ascending: false });
 
+  // The Website tab: the vendor's business site (migration 20261115190000_vendor_websites.sql).
+  const [{ data: site }, siteVersions, siteKeys] = await Promise.all([
+    supabase
+      .from("vendor_sites")
+      .select("slug, published, draft_html, draft_source, draft_updated_at, live_updated_at, block_reason")
+      .eq("org_id", org.id)
+      .maybeSingle(),
+    listVendorSiteVersions(org.id),
+    listVendorSiteKeys(org.id),
+  ]);
+
   const grant = planGrant(org);
   const ent = entitlements(grant.plan);
   const inquiries = ent.canReceiveInquiries ? await listVendorInquiries(org.id) : [];
@@ -105,6 +123,25 @@ export default async function VendorDashboard({
               {ent.canReceiveInquiries && <VendorInquiries initial={inquiries} />}
             </>
           ) : null,
+        website: (
+          <VendorSiteBuilder
+            orgId={org.id}
+            siteUrl={SITE_URL}
+            businessName={profile.business_name}
+            planOk={grant.plan === "pro" || grant.plan === "featured"}
+            aiOn={Boolean(process.env.ANTHROPIC_API_KEY)}
+            mcpOn={mcpEnabled()}
+            slug={site?.slug ?? null}
+            published={Boolean(site?.published)}
+            blockedReason={site?.block_reason ?? null}
+            initialDraft={site?.draft_html ?? null}
+            initialDraftSource={site?.draft_source ?? null}
+            initialDraftAt={site?.draft_updated_at ?? null}
+            initialLiveAt={site?.live_updated_at ?? null}
+            initialVersions={siteVersions}
+            initialKeys={siteKeys}
+          />
+        ),
         marketing: (
           <VendorBadgeCard
             orgId={org.id}
