@@ -46,6 +46,10 @@ Answer what they said first. Invite them only where it fits.
 > or city>. If it helps, you can set up a free wedding page with RSVPs on
 > Bridal Team whenever you're ready: <tagged /wedding-website link>
 
+More congratulations lines, by season and with optional tips, are in
+`congratulations.md`. That file also has link-free notes the owner can post
+personally in groups.
+
 **Someone asks a planning question:** answer it properly from
 `lib/guides.ts`, with no link unless the matching guide adds something. Then
 optionally: "We wrote more on this here: <tagged /guides/<slug> link>".
