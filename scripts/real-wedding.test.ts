@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { imageSize, publishProblems, storyText, validateStory } from "./real-wedding.mjs";
+import { cleanVideoUrl, imageSize, publishProblems, storyText, validateStory } from "./real-wedding.mjs";
 
 const good = {
   slug: "sample-couple-2015",
@@ -69,5 +69,24 @@ describe("imageSize", () => {
 
   it("returns null for something it can't read", () => {
     expect(imageSize(new Uint8Array([1, 2, 3, 4]))).toBeNull();
+  });
+});
+
+describe("cleanVideoUrl", () => {
+  it("strips playlist and autoplay parameters from a YouTube link", () => {
+    expect(cleanVideoUrl("https://www.youtube.com/watch?v=bf1IosW7FV8&list=RDbf1IosW7FV8&start_radio=1")).toBe(
+      "https://www.youtube.com/watch?v=bf1IosW7FV8",
+    );
+    expect(cleanVideoUrl("https://youtu.be/bf1IosW7FV8?t=30")).toBe("https://www.youtube.com/watch?v=bf1IosW7FV8");
+  });
+
+  it("keeps Vimeo links and refuses other hosts", () => {
+    expect(cleanVideoUrl("https://vimeo.com/123456789")).toBe("https://vimeo.com/123456789");
+    expect(cleanVideoUrl("https://example.com/video.mp4")).toBeNull();
+  });
+
+  it("is checked when a story has a video", () => {
+    expect(validateStory({ ...good, video: "https://example.com/v" })).toContain('"video" must be a YouTube or Vimeo link');
+    expect(validateStory({ ...good, video: "https://youtu.be/bf1IosW7FV8" })).toEqual([]);
   });
 });

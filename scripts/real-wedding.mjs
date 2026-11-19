@@ -30,6 +30,21 @@ const TYPES = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"
  * @param {any} s
  * @returns {string[]}
  */
+/**
+ * A YouTube or Vimeo link in a clean form (no playlist or autoplay
+ * parameters), or null if it's neither. Only these two can be embedded.
+ *
+ * @param {string} url
+ * @returns {string | null}
+ */
+export function cleanVideoUrl(url) {
+  if (typeof url !== "string") return null;
+  const yt = url.match(/^https:\/\/(?:www\.|m\.)?(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (yt) return `https://www.youtube.com/watch?v=${yt[1]}`;
+  const vimeo = url.match(/^https:\/\/(?:www\.)?vimeo\.com\/(\d+)/);
+  return vimeo ? `https://vimeo.com/${vimeo[1]}` : null;
+}
+
 export function validateStory(s) {
   const problems = [];
   if (!s || typeof s !== "object") return ["story.json must be an object"];
@@ -53,6 +68,7 @@ export function validateStory(s) {
   const text = JSON.stringify(s);
   for (const m of text.matchAll(/\[[^\]"]{2,}\]/g)) problems.push(`placeholder still in the story: ${m[0]}`);
 
+  if (s.video && !cleanVideoUrl(s.video)) problems.push(`"video" must be a YouTube or Vimeo link`);
   if (!s.photographer) problems.push(`"photographer" is empty: credit whoever took the photos`);
   return problems;
 }
@@ -183,6 +199,7 @@ async function upload(folder) {
     summary: story.summary ?? null,
     story: storyText(story),
     cover_url: urls.get(story.cover).url,
+    video_url: story.video ? cleanVideoUrl(story.video) : null,
     photos: (story.photos ?? []).map((p) => ({ url: urls.get(p.file).url, alt: p.alt, ...urls.get(p.file).size })),
     vendors: story.vendors ?? [],
     photographer: story.photographer,

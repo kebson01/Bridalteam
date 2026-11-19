@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabasePublic } from "@/lib/supabase";
 import { pageMetadata } from "@/lib/site";
+import { videoEmbedUrl } from "@/lib/media";
 import {
   formatWeddingDate,
   getRealWedding,
@@ -45,6 +46,7 @@ export default async function RealWeddingPage({ params }: { params: Promise<{ sl
 
   const place = [story.venue, story.city].filter(Boolean).join(", ");
   const { credit, otherVendors } = photographerCredit(story);
+  const video = videoEmbedUrl(story.video_url);
 
   return (
     <article className="mx-auto max-w-3xl px-5 py-12">
@@ -70,6 +72,20 @@ export default async function RealWeddingPage({ params }: { params: Promise<{ sl
           <p key={i}>{p}</p>
         ))}
       </div>
+
+      {video && (
+        <div className="mt-10 aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-card">
+          <iframe
+            src={video}
+            title={`Wedding video: ${story.couple_names}`}
+            loading="lazy"
+            allow="accelerometer; encrypted-media; fullscreen; gyroscope; picture-in-picture"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            className="h-full w-full"
+          />
+        </div>
+      )}
 
       {story.photos.length > 0 && (
         <div className="mt-10 space-y-4">

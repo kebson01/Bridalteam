@@ -63,6 +63,8 @@ export interface RealWedding {
   summary: string | null;
   story: string;
   cover_url: string | null;
+  /** YouTube or Vimeo link, embedded as a player on the story page. */
+  video_url: string | null;
   photos: RealWeddingPhoto[];
   vendors: RealWeddingVendor[];
   photographer: string | null;
@@ -70,7 +72,7 @@ export interface RealWedding {
 }
 
 export const REAL_WEDDING_COLUMNS =
-  "id, slug, couple_names, wedding_date, city, venue, title, summary, story, cover_url, photos, vendors, photographer, published_at";
+  "id, slug, couple_names, wedding_date, city, venue, title, summary, story, cover_url, video_url, photos, vendors, photographer, published_at";
 
 /** Published stories, most recent wedding first. Never throws. */
 export async function listRealWeddings(supabase: SupabaseClient): Promise<RealWedding[]> {

@@ -28,6 +28,7 @@ st-charles-2012/
     { "role": "Venue", "name": "Stonebridge Golf & Country Club", "url": "https://..." }
   ],
   "photographer": "Studio name",
+  "video": "https://www.youtube.com/watch?v=...",
   "consent": {
     "confirmed_at": "2026-11-03",
     "note": "Kebson and Tricia agreed in person; groomsmen agreed by text."
@@ -43,6 +44,8 @@ st-charles-2012/
 - `photographer` and `vendors`: to link the photographer's name, also list
   them in `vendors` with `"role": "Photography"`, the same name, and their
   `url`. The page links the credit and doesn't list them twice.
+- `video`: optional. A YouTube or Vimeo link to the couple's wedding video,
+  shown as a player between the story and the photos. Other hosts are refused.
 - `consent`: leave it out until it's true. Without it the story uploads as a
   draft and cannot be published.
 - Any `[bracketed text]` anywhere blocks the upload.

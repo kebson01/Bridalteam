@@ -48,3 +48,15 @@ export function posterFor(item: {
   if (isLikelyImage(item.image_url)) return item.image_url ?? null;
   return youtubePoster(item.media_url) ?? youtubePoster(item.image_url);
 }
+
+/**
+ * The player URL to put in an <iframe> for a YouTube or Vimeo link, or null
+ * for anything else. Only these two hosts are allowed in frames by the
+ * site's Content-Security-Policy (next.config.ts).
+ */
+export function videoEmbedUrl(url: string | null | undefined): string | null {
+  const yt = youtubeId(url);
+  if (yt) return `https://www.youtube.com/embed/${yt}`;
+  const vimeo = url?.match(/^https:\/\/(?:www\.)?vimeo\.com\/(\d+)/);
+  return vimeo ? `https://player.vimeo.com/video/${vimeo[1]}` : null;
+}
