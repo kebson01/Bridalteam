@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import VendorDirectoryList, { DIRECTORY_PAGE, type DirectoryVendor } from "./vendor-directory-list";
+import VendorDirectoryList, { type DirectoryVendor } from "./vendor-directory-list";
 import type { MetroId } from "@/lib/areas";
 
 /**
@@ -269,15 +269,12 @@ describe("spotlight, paging and card details", () => {
     expect(screen.queryByRole("heading", { name: /Spotlight/ })).toBeNull();
   });
 
-  it("shows a page of vendors, then the rest on request", async () => {
-    const user = userEvent.setup();
-    const many = Array.from({ length: DIRECTORY_PAGE + 5 }, (_, i) => v(`m${i}`, `Vendor ${String(i).padStart(2, "0")}`, "Miami"));
+  it("shows every vendor at once, with no Load more button", () => {
+    const many = Array.from({ length: 60 }, (_, i) => v(`m${i}`, `Vendor ${String(i).padStart(2, "0")}`, "Miami"));
     render(<VendorDirectoryList vendors={many} />);
-    expect(names()).toHaveLength(DIRECTORY_PAGE);
-    // The total still counts everything, not just the page shown.
-    expect(screen.getByText(`${DIRECTORY_PAGE + 5} vendors`)).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Load more (5)" }));
-    expect(names()).toHaveLength(DIRECTORY_PAGE + 5);
+    expect(names()).toHaveLength(60);
+    expect(screen.getByText("60 vendors")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Load more/ })).toBeNull();
   });
 
   it("shows price range, starting price, rating and a highlight", () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { LAUNCH_CITY } from "@/lib/site";
 import { sortCategories } from "@/lib/categories";
 import {
@@ -36,8 +36,6 @@ export interface DirectoryVendor {
   rating?: { average: number; count: number } | null;
 }
 
-/** Cards shown before "Load more", and how many each click adds. */
-export const DIRECTORY_PAGE = 24;
 /** Featured vendors shown as large spotlight cards above the list. */
 const SPOTLIGHT_MAX = 3;
 
@@ -79,7 +77,6 @@ export default function VendorDirectoryList({
   );
   const [metro, setMetro] = useState<MetroId | null>(null);
   const [area, setArea] = useState<AreaId | null>(null);
-  const [limit, setLimit] = useState(DIRECTORY_PAGE);
 
 
   const categories = useMemo(() => sortCategories(vendors.map((v) => v.category)), [vendors]);
@@ -165,11 +162,9 @@ export default function VendorDirectoryList({
   const spotlight = filtered.filter((v) => v.featured).slice(0, SPOTLIGHT_MAX);
   const spotIds = new Set(spotlight.map((v) => v.org_id));
   const rest = filtered.filter((v) => !spotIds.has(v.org_id));
-  const visible = rest.slice(0, limit);
+  // Every matching vendor shows at once; people just scroll.
+  const visible = rest;
   const anyFilter = Boolean(query || category || metro || area);
-
-  // A new filter starts the list from the top again.
-  useEffect(() => setLimit(DIRECTORY_PAGE), [query, category, metro, area]);
 
   return (
     <>
@@ -409,7 +404,7 @@ export default function VendorDirectoryList({
                   <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-brand-wash">
                     {thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={thumb} alt="" className="h-full w-full object-cover" />
+                      <img src={thumb} alt="" loading="lazy" className="h-full w-full object-cover" />
                     ) : (
                       <span className="flex h-full w-full items-center justify-center font-display text-lg tracking-wider text-brand-text/70">
                         {initials(v.business_name)}
@@ -448,18 +443,6 @@ export default function VendorDirectoryList({
             );
           })}
         </ul>
-      )}
-
-      {rest.length > visible.length && (
-        <div className="mt-8 text-center">
-          <button
-            type="button"
-            onClick={() => setLimit((l) => l + DIRECTORY_PAGE)}
-            className="inline-flex items-center gap-2 rounded-full border border-stone-2 bg-white px-6 py-3 text-sm font-semibold text-ink shadow-sm hover:border-brand"
-          >
-            Load more ({rest.length - visible.length})
-          </button>
-        </div>
       )}
     </>
   );
