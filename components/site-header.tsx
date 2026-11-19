@@ -29,6 +29,7 @@ const NAV = [
   ...(SHOW_COMMUNITY ? [{ label: "Community", href: "/community" }] : []),
   { label: "AI Planner", href: "/planner" },
   { label: "Inspiration", href: "/inspiration" },
+  { label: "Real Weddings", href: "/real-weddings" },
   ...(SHOW_VENDOR_DIRECTORY ? [{ label: "Find Vendors", href: "/vendors" }] : []),
   { label: "Guides", href: "/guides" },
   // Couples use everything free, so a Pricing tab only ever answered a
@@ -289,7 +290,7 @@ export default function SiteHeader() {
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+              className={`whitespace-nowrap rounded-full px-2.5 py-2 text-sm font-medium transition-colors xl:px-3.5 ${
                 isActive(item.href)
                   ? "bg-brand/10 text-brand-text"
                   : "text-ink-soft/80 hover:text-brand-text"
@@ -300,7 +301,7 @@ export default function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden shrink-0 items-center gap-3 whitespace-nowrap lg:flex">
           {signedIn ? (
             <>
               <Link
