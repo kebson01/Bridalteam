@@ -3,7 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabasePublic } from "@/lib/supabase";
 import { pageMetadata } from "@/lib/site";
-import { formatWeddingDate, getRealWedding, photographerCredit, storyParagraphs, type RealWeddingVendor } from "@/lib/real-weddings";
+import {
+  formatWeddingDate,
+  getRealWedding,
+  photographerCredit,
+  photoRatio,
+  photoRows,
+  storyParagraphs,
+  type RealWeddingVendor,
+} from "@/lib/real-weddings";
 
 function VendorName({ vendor }: { vendor: RealWeddingVendor }) {
   if (!vendor.url || !/^https?:\/\//i.test(vendor.url)) return <>{vendor.name}</>;
@@ -64,16 +72,28 @@ export default async function RealWeddingPage({ params }: { params: Promise<{ sl
       </div>
 
       {story.photos.length > 0 && (
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {story.photos.map((photo) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={photo.url}
-              src={photo.url}
-              alt={photo.alt}
-              loading="lazy"
-              className="w-full rounded-2xl object-cover shadow-card"
-            />
+        <div className="mt-10 space-y-4">
+          {photoRows(story.photos).map((row) => (
+            <div key={row[0].url} className="flex flex-col gap-4 sm:flex-row">
+              {row.map((photo) => (
+                <div
+                  key={photo.url}
+                  // Width in proportion to shape, so both photos in a row end up the same height.
+                  style={{ flex: `${photoRatio(photo)} 1 0%` }}
+                  className={row.length === 1 && photoRatio(photo) < 1 ? "sm:mx-auto sm:max-w-[50%]" : undefined}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.url}
+                    alt={photo.alt}
+                    width={photo.width}
+                    height={photo.height}
+                    loading="lazy"
+                    className="h-auto w-full rounded-2xl shadow-card"
+                  />
+                </div>
+              ))}
+            </div>
           ))}
         </div>
       )}

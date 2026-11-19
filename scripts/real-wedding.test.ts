@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishProblems, storyText, validateStory } from "./real-wedding.mjs";
+import { imageSize, publishProblems, storyText, validateStory } from "./real-wedding.mjs";
 
 const good = {
   slug: "sample-couple-2015",
@@ -46,5 +46,28 @@ describe("publishProblems", () => {
 describe("storyText", () => {
   it("joins paragraph lists with blank lines", () => {
     expect(storyText(good)).toBe("First paragraph.\n\nSecond paragraph.");
+  });
+});
+
+describe("imageSize", () => {
+  it("reads the width and height of a PNG", () => {
+    const png = new Uint8Array(24);
+    png.set([0x89, 0x50, 0x4e, 0x47], 0);
+    png.set([0, 0, 0x07, 0xd0, 0, 0, 0x04, 0x38], 16); // 2000 x 1080
+    expect(imageSize(png)).toEqual({ width: 2000, height: 1080 });
+  });
+
+  it("finds the frame size of a JPEG after its other segments", () => {
+    const jpeg = new Uint8Array([
+      0xff, 0xd8, // start of image
+      0xff, 0xe0, 0x00, 0x04, 0x00, 0x00, // an APP0 segment to skip
+      0xff, 0xc0, 0x00, 0x11, 0x08, 0x08, 0x00, 0x05, 0x56, 0x03, // SOF0: 2048 high, 1366 wide
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ]);
+    expect(imageSize(jpeg)).toEqual({ width: 1366, height: 2048 });
+  });
+
+  it("returns null for something it can't read", () => {
+    expect(imageSize(new Uint8Array([1, 2, 3, 4]))).toBeNull();
   });
 });

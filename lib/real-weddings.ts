@@ -13,6 +13,37 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export interface RealWeddingPhoto {
   url: string;
   alt: string;
+  /** Pixel size, recorded by scripts/real-wedding.mjs so rows lay out before the photo loads. */
+  width?: number;
+  height?: number;
+}
+
+/** Width over height. Stories uploaded before sizes were recorded count as 3:2. */
+export function photoRatio(photo: RealWeddingPhoto): number {
+  return photo.width && photo.height ? photo.width / photo.height : 1.5;
+}
+
+/** Wider than this (a panorama) gets a row to itself. */
+const WIDE = 1.7;
+
+/**
+ * Groups photos into rows of two, keeping their order. Both photos in a row
+ * are shown at the same height, so nothing is cropped and there are no gaps.
+ * A panorama gets its own row.
+ */
+export function photoRows(photos: RealWeddingPhoto[]): RealWeddingPhoto[][] {
+  const rows: RealWeddingPhoto[][] = [];
+  for (let i = 0; i < photos.length; i++) {
+    const p = photos[i];
+    const next = photos[i + 1];
+    if (photoRatio(p) < WIDE && next && photoRatio(next) < WIDE) {
+      rows.push([p, next]);
+      i++;
+    } else {
+      rows.push([p]);
+    }
+  }
+  return rows;
 }
 
 export interface RealWeddingVendor {

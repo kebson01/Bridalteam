@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatWeddingDate, photographerCredit, storyParagraphs } from "./real-weddings";
+import { formatWeddingDate, photoRows, photographerCredit, storyParagraphs } from "./real-weddings";
 
 describe("formatWeddingDate", () => {
   it("formats the calendar day without shifting it", () => {
@@ -37,5 +37,25 @@ describe("photographerCredit", () => {
   it("credits an unknown photographer without a link", () => {
     const out = photographerCredit({ photographer: "the couple's wedding photographer", vendors: [venue] });
     expect(out.credit).toEqual({ role: "Photography", name: "the couple's wedding photographer", url: undefined });
+  });
+});
+
+describe("photoRows", () => {
+  const photo = (url: string, width?: number, height?: number) => ({ url, alt: url, width, height });
+  const urls = (rows: { url: string }[][]) => rows.map((r) => r.map((p) => p.url));
+
+  it("pairs photos in order and gives a panorama its own row", () => {
+    const rows = photoRows([
+      photo("a", 2048, 1366),
+      photo("b", 1366, 2048),
+      photo("c", 1366, 2048),
+      photo("pano", 2048, 1080),
+      photo("d", 2048, 1366),
+    ]);
+    expect(urls(rows)).toEqual([["a", "b"], ["c"], ["pano"], ["d"]]);
+  });
+
+  it("treats photos without a recorded size as ordinary landscape shots", () => {
+    expect(urls(photoRows([photo("a"), photo("b"), photo("c")]))).toEqual([["a", "b"], ["c"]]);
   });
 });

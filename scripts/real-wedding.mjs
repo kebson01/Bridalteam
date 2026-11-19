@@ -110,6 +110,46 @@ async function api(method, url, body, headers = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+/**
+ * Pixel size of a JPEG, PNG or WebP from its header, or null if it can't tell.
+ * The story page uses it to lay photos out in rows before they load.
+ *
+ * @param {Uint8Array} b
+ * @returns {{ width: number, height: number } | null}
+ */
+export function imageSize(b) {
+  const u16 = (i) => (b[i] << 8) | b[i + 1];
+  const u32 = (i) => ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0;
+  const le16 = (i) => b[i] | (b[i + 1] << 8);
+  const le24 = (i) => b[i] | (b[i + 1] << 8) | (b[i + 2] << 16);
+  const ascii = (i, n) => String.fromCharCode(...b.slice(i, i + n));
+  if (b[0] === 0x89 && ascii(1, 3) === "PNG") return { width: u32(16), height: u32(20) };
+  if (b[0] === 0xff && b[1] === 0xd8) {
+    let i = 2;
+    while (i + 9 < b.length) {
+      if (b[i] !== 0xff) return null;
+      const marker = b[i + 1];
+      // Start-of-frame markers carry the size; C4, C8 and CC are other tables.
+      if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
+        return { width: u16(i + 7), height: u16(i + 5) };
+      }
+      i += 2 + u16(i + 2);
+    }
+    return null;
+  }
+  if (ascii(0, 4) === "RIFF" && ascii(8, 4) === "WEBP") {
+    const kind = ascii(12, 4);
+    if (kind === "VP8X") return { width: le24(24) + 1, height: le24(27) + 1 };
+    if (kind === "VP8 ") return { width: le16(26) & 0x3fff, height: le16(28) & 0x3fff };
+    if (kind === "VP8L") {
+      // After the 0x2f signature: 14 bits of width - 1, then 14 bits of height - 1.
+      const v = b[21] | (b[22] << 8) | (b[23] << 16) | (b[24] << 24);
+      return { width: (v & 0x3fff) + 1, height: ((v >>> 14) & 0x3fff) + 1 };
+    }
+  }
+  return null;
+}
+
 async function uploadPhoto(folder, slug, file) {
   const bytes = await readFile(path.join(folder, file));
   const name = path.basename(file).toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
@@ -119,7 +159,7 @@ async function uploadPhoto(folder, slug, file) {
     "x-upsert": "true",
     "cache-control": "3600",
   });
-  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${objectPath}`;
+  return { url: `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${objectPath}`, size: imageSize(bytes) };
 }
 
 async function upload(folder) {
@@ -142,8 +182,8 @@ async function upload(folder) {
     title: story.title,
     summary: story.summary ?? null,
     story: storyText(story),
-    cover_url: urls.get(story.cover),
-    photos: (story.photos ?? []).map((p) => ({ url: urls.get(p.file), alt: p.alt })),
+    cover_url: urls.get(story.cover).url,
+    photos: (story.photos ?? []).map((p) => ({ url: urls.get(p.file).url, alt: p.alt, ...urls.get(p.file).size })),
     vendors: story.vendors ?? [],
     photographer: story.photographer,
     consent_confirmed_at: story.consent?.confirmed_at ?? null,
