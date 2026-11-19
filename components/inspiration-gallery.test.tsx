@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/app/inspiration/actions", () => ({ saveInspiration: vi.fn(), reportImage: vi.fn(), toggleLike: vi.fn() }));
 vi.mock("@/components/inspiration-comments", () => ({ default: () => null }));
 
-import InspirationGallery, { PAGE_SIZE, type InspirationImage } from "./inspiration-gallery";
+import InspirationGallery, { type InspirationImage } from "./inspiration-gallery";
 
 const item = (id: string, is_seed: boolean): InspirationImage => ({
   id,
@@ -25,12 +25,10 @@ describe("InspirationGallery", () => {
     expect(badge.closest("button")?.textContent).toContain("Look seed");
   });
 
-  it("shows a page of looks, then more on request", () => {
-    const many = Array.from({ length: PAGE_SIZE + 3 }, (_, i) => item(`n${i}`, false));
+  it("shows every look at once, with no Load more button", () => {
+    const many = Array.from({ length: 40 }, (_, i) => item(`n${i}`, false));
     render(<InspirationGallery images={many} signedIn={false} userId={null} likedIds={[]} />);
-    expect(screen.getAllByRole("button", { name: /^Open Look/ })).toHaveLength(PAGE_SIZE);
-    fireEvent.click(screen.getByRole("button", { name: "Load more looks" }));
-    expect(screen.getAllByRole("button", { name: /^Open Look/ })).toHaveLength(PAGE_SIZE + 3);
+    expect(screen.getAllByRole("button", { name: /^Open Look/ })).toHaveLength(40);
     expect(screen.queryByRole("button", { name: "Load more looks" })).toBeNull();
   });
 

@@ -145,8 +145,6 @@ const chip =
 const chipOn = "border-ink bg-ink text-white";
 const chipOff = "border-stone-2 bg-white text-ink-soft hover:border-brand";
 
-/** How many looks show before "Load more", and how many each click adds. */
-export const PAGE_SIZE = 12;
 /** The mood board card goes in after this many tiles (when there are more). */
 const PROMO_AFTER = 6;
 
@@ -176,7 +174,6 @@ export default function InspirationGallery({
   const [theme, setTheme] = useState<string | null>(null);
   const [color, setColor] = useState<string | null>(null);
   const [open, setOpen] = useState<InspirationImage | null>(null);
-  const [limit, setLimit] = useState(PAGE_SIZE);
   const [liked, setLiked] = useState<Set<string>>(() => new Set(likedIds));
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [nudge, setNudge] = useState(false);
@@ -199,15 +196,14 @@ export default function InspirationGallery({
       ),
     [images, theme, color],
   );
-  const visible = shown.slice(0, limit);
+  // Every matching look shows at once; tiles lazy-load as you scroll.
+  const visible = shown;
 
   function pickTheme(t: string | null) {
     setTheme(t);
-    setLimit(PAGE_SIZE);
   }
   function pickColor(c: string | null) {
     setColor(c);
-    setLimit(PAGE_SIZE);
   }
 
   /** The heart on a tile: the same like as in the detail view. */
@@ -330,21 +326,6 @@ export default function InspirationGallery({
             Clear filters
           </button>
         </p>
-      )}
-
-      {shown.length > visible.length && (
-        <div className="mt-8 text-center">
-          <button
-            type="button"
-            onClick={() => setLimit((l) => l + PAGE_SIZE)}
-            className="inline-flex items-center gap-2 rounded-full border border-stone-2 bg-white px-6 py-3 text-sm font-semibold text-ink shadow-sm hover:border-brand"
-          >
-            Load more looks
-          </button>
-          <p className="mt-3 text-xs text-ink-soft/60">
-            Showing {visible.length} of {shown.length} looks
-          </p>
-        </div>
       )}
 
       {/* Saved looks, always in reach */}
