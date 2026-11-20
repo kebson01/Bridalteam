@@ -10,8 +10,8 @@ import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 import JsonLd from "@/components/json-ld";
 import { webApplicationSchema } from "@/lib/structured-data";
-import { arrangeFeed } from "@/lib/seed-content";
-import { momentsPool, type Moment } from "@/lib/home-moments";
+import { arrangeFeed, type FeedItem } from "@/lib/seed-content";
+import { momentsPool, type FeedPhotoRow, type Moment } from "@/lib/home-moments";
 
 // Self-canonical for the homepage. og:url has to be stated here rather than
 // inherited: the root layout deliberately no longer carries a page-specific url
@@ -67,15 +67,23 @@ async function homeVendors(): Promise<HomeVendorSummary> {
  * set rather than failing the page.
  */
 async function homeMoments(): Promise<Moment[]> {
-  try {
-    const { data, error } = await supabasePublic()
+  const feed = (columns: string) =>
+    supabasePublic()
       .from("inspiration_images")
-      .select("id, image_url, title, media_type, like_count, is_seed, retired_at")
+      .select(columns)
       .eq("feed_visible", true)
       .eq("media_type", "photo")
       .order("created_at", { ascending: false });
+  const BASE = "id, image_url, title, media_type, like_count, is_seed, retired_at";
+  try {
+    // Photos marked people-free. If has_people isn't in the database yet
+    // (its migration not applied), fall back to every feed photo and let
+    // momentsPool's hand-checked list decide.
+    let { data, error } = await feed(`${BASE}, has_people`).eq("has_people", false);
+    if (error) ({ data, error } = await feed(BASE));
     if (error) throw new Error(`${error.code}: ${error.message}`);
-    return momentsPool(arrangeFeed(data ?? []).items);
+    const rows = (data ?? []) as unknown as (FeedPhotoRow & FeedItem)[];
+    return momentsPool(arrangeFeed(rows).items);
   } catch (err) {
     console.error("home: inspiration photos unavailable, mosaic stays static:", err);
     return [];

@@ -1,12 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
 import { youtubePoster } from "@/lib/media";
 import { moderateImage } from "@/lib/moderation";
+import { recordPeopleCheck } from "@/lib/people-check";
 import { entitlements, effectivePlan, PLAN_COLUMNS, type PlanSource } from "@/lib/tiers";
 import { SOCIAL_PLATFORMS, normalizeSocial, type SocialLinks } from "@/lib/social";
 import { parseFaqs, parseHighlights, parsePackages, parsePriceTier } from "@/lib/vendor-extras";
@@ -160,22 +162,36 @@ export async function addVendorMedia(
     };
   }
 
-  const { error } = await supabase.from("inspiration_images").insert({
-    image_url: imageUrl,
-    title,
-    theme,
-    colors: [],
-    source: "vendor",
-    vendor_id: orgId,
-    media_type: mediaType,
-    media_url: mediaUrl,
-    // Free vendors keep a gallery but don't appear in the public feed.
-    in_feed: ent.canPostInspiration,
-  });
+  const { data: inserted, error } = await supabase
+    .from("inspiration_images")
+    .insert({
+      image_url: imageUrl,
+      title,
+      theme,
+      colors: [],
+      source: "vendor",
+      vendor_id: orgId,
+      media_type: mediaType,
+      media_url: mediaUrl,
+      // Free vendors keep a gallery but don't appear in the public feed.
+      in_feed: ent.canPostInspiration,
+    })
+    .select("id")
+    .single();
 
   if (error) {
     console.error("addVendorMedia failed:", error.code, error.message);
     return { error: "Couldn't add that. Please try again.", added: false };
+  }
+
+  // Does it show people? Decides whether it may rotate onto the homepage
+  // (lib/home-moments.ts). Run after the response so the vendor isn't kept
+  // waiting on a second AI call; a miss is picked up by the daily
+  // people-check job. Photos only: videos never go on the homepage.
+  const admin = supabaseAdmin();
+  if (mediaType === "photo" && inserted?.id && admin) {
+    const id = inserted.id as string;
+    after(() => recordPeopleCheck(admin, id, imageUrl));
   }
 
   revalidatePath("/vendor");
