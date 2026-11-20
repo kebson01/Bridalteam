@@ -11,12 +11,14 @@ const INPUT =
 // nothing on the form said so, so every field read as obligatory.
 const OPTIONAL = "ml-1 text-xs font-normal text-ink-soft/55";
 
+export type OnboardingType = "couple" | "planner_company" | "vendor" | "explorer";
+
 export default function OnboardingForm({
   initialType = "couple",
 }: {
-  initialType?: "couple" | "planner_company" | "vendor";
+  initialType?: OnboardingType;
 }) {
-  const [accountType, setAccountType] = useState<"couple" | "planner_company" | "vendor">(initialType);
+  const [accountType, setAccountType] = useState<OnboardingType>(initialType);
   const [state, formAction, pending] = useActionState<OnboardingState, FormData>(
     createWorkspace,
     { error: null },
@@ -24,6 +26,9 @@ export default function OnboardingForm({
 
   const isCompany = accountType === "planner_company";
   const isVendor = accountType === "vendor";
+  // Wedding party, family, guests, or someone just looking around: no wedding
+  // or business to create, so the form asks for nothing but an optional name.
+  const isExplorer = accountType === "explorer";
 
   return (
     <form action={formAction} className="rounded-2xl border border-stone-2 bg-white p-8 shadow-card">
@@ -33,12 +38,13 @@ export default function OnboardingForm({
         <legend className="text-sm font-medium text-ink-soft">
           What brings you here?
         </legend>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {(
             [
               ["couple", "I'm planning my wedding", "You and your wedding party"],
               ["planner_company", "I'm a wedding planner", "Manage weddings for clients"],
               ["vendor", "I'm a vendor", "List my business & showcase my work"],
+              ["explorer", "I'm a guest or just exploring", "Wedding party, family, or browsing for ideas"],
             ] as const
           ).map(([value, title, sub]) => (
             <button
@@ -59,7 +65,22 @@ export default function OnboardingForm({
         </div>
       </fieldset>
 
-      {isVendor ? (
+      {isExplorer ? (
+        <>
+          <label className="mb-4 block">
+            <span className="text-sm font-medium text-ink-soft">
+              Your name <span className={OPTIONAL}>optional</span>
+            </span>
+            <input name="display_name" disabled={pending} placeholder="Jordan" className={INPUT} />
+          </label>
+          <p className="mb-6 text-xs leading-relaxed text-ink-soft/70">
+            You&rsquo;ll get the free planning tools, guides and vendor directory.
+            Invited to someone&rsquo;s wedding? Open the invite link from your email
+            and you&rsquo;ll join it. Planning your own later? You can set it up
+            any time.
+          </p>
+        </>
+      ) : isVendor ? (
         <div className="mb-4 grid gap-4 sm:grid-cols-2">
           <label className="block">
             <span className="text-sm font-medium text-ink-soft">Business name</span>
@@ -179,7 +200,9 @@ export default function OnboardingForm({
       >
         {pending
           ? "Setting things up…"
-          : isVendor
+          : isExplorer
+            ? "Continue"
+            : isVendor
             ? "Create my vendor account"
             : isCompany
               ? "Create my company workspace"

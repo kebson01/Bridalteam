@@ -75,4 +75,14 @@ describe("OnboardingForm (couple)", () => {
       expect.objectContaining({ account_type: "vendor", business_name: "Bloom & Vine" }),
     );
   });
+
+  it("lets a guest continue with nothing but an optional name", async () => {
+    const user = userEvent.setup();
+    render(<OnboardingForm initialType="couple" />);
+    await user.click(screen.getByRole("button", { name: /guest or just exploring/i }));
+    expect(screen.queryByLabelText(/wedding date/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/your name/i)).not.toBeRequired();
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+    expect(submitted).toHaveBeenCalledWith(expect.objectContaining({ account_type: "explorer" }));
+  });
 });

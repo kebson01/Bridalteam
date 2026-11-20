@@ -26,6 +26,89 @@ function daysUntil(date: string | null) {
   return Math.ceil((new Date(`${date}T00:00:00`).getTime() - Date.now()) / 86_400_000);
 }
 
+type WeddingRow = {
+  id: string;
+  partner_one: string | null;
+  partner_two: string | null;
+  event_date: string | null;
+  city: string | null;
+  enabled_tools: unknown;
+};
+
+const EXPLORE_LINKS: [string, string, string][] = [
+  ["/vendors", "Find vendors", "Venues, photographers, florists and more"],
+  ["/guides", "Planning guides", "How-tos for every step of the day"],
+  ["/inspiration", "Inspiration", "Ideas and looks to save"],
+  ["/real-weddings", "Real weddings", "Stories from real couples"],
+  ["/wedding-checklist", "Checklist", "A dated plan from now to the day"],
+  ["/wedding-budget-calculator", "Budget calculator", "Split a budget across vendors"],
+];
+
+/**
+ * Home for a signed-in person with no couple, planner or vendor org: wedding
+ * party and family who joined by invite (more than one wedding), and people
+ * who chose "guest or just exploring" at onboarding.
+ */
+function GuestHome({ weddings }: { weddings: WeddingRow[] }) {
+  return (
+    <>
+      <PageHero eyebrow="Welcome" title={weddings.length ? "Your weddings" : "Explore Bridal Team"} />
+
+      {weddings.length > 0 && (
+        <section className="mx-auto max-w-5xl px-5 pt-12">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {weddings.map((w) => (
+              <Link
+                key={w.id}
+                href={`/w/${w.id}`}
+                className="block rounded-2xl border border-stone-2 bg-white p-6 shadow-card transition-transform hover:-translate-y-1"
+              >
+                <h2 className="text-lg font-medium text-ink">
+                  {[w.partner_one, w.partner_two].filter(Boolean).join(" & ") || "Untitled wedding"}
+                </h2>
+                <p className="mt-1 text-sm text-ink-soft/70">{formatDate(w.event_date)}</p>
+                {w.city && <p className="mt-1 text-sm text-ink-soft/70">{w.city}</p>}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="mx-auto max-w-5xl px-5 py-12">
+        {weddings.length === 0 && (
+          <p className="mb-6 max-w-2xl text-sm leading-relaxed text-ink-soft/75">
+            Invited to someone&rsquo;s wedding? Open the invite link from your
+            email and you&rsquo;ll join it. In the meantime, everything below is
+            free to use.
+          </p>
+        )}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {EXPLORE_LINKS.map(([href, title, sub]) => (
+            <Link
+              key={href}
+              href={href}
+              className="block rounded-2xl border border-stone-2 bg-white p-6 shadow-card transition-transform hover:-translate-y-0.5"
+            >
+              <h2 className="font-medium text-ink">{title}</h2>
+              <p className="mt-1 text-sm text-ink-soft/70">{sub}</p>
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-stone-2 bg-stone-4 px-6 py-5">
+          <p className="text-sm text-ink-soft/80">Planning a wedding of your own?</p>
+          <Link
+            href="/onboarding"
+            className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2 text-sm font-semibold text-white"
+          >
+            Set up my wedding
+          </Link>
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default async function DashboardPage() {
   const supabase = await supabaseServer();
   const {
@@ -46,17 +129,30 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
-  if (!org) {
-    // Vendors have their own home; someone with no org at all needs onboarding.
-    const { data: anyOrg } = await supabase.from("org_members").select("org_id").limit(1);
-    redirect(anyOrg?.length ? "/vendor" : "/onboarding");
-  }
-
   // RLS already limits this to weddings this user can reach, so no filter here.
+  // That includes weddings they joined by invite (wedding_members), which is
+  // what the no-org branch below relies on.
   const { data: weddings } = await supabase
     .from("weddings")
     .select("id, partner_one, partner_two, event_date, city, status, enabled_tools")
     .order("event_date", { ascending: true, nullsFirst: false });
+
+  if (!org) {
+    // Vendors have their own home.
+    const { data: anyOrg } = await supabase.from("org_members").select("org_id").limit(1);
+    if (anyOrg?.length) redirect("/vendor");
+
+    // Bridesmaids, family and other invited helpers belong to a wedding but
+    // have no org of their own. Sending them to /onboarding asked them to set
+    // up a wedding they aren't planning, with no way back to the one they
+    // joined — so take them to it instead.
+    if (weddings?.length === 1) redirect(`/w/${weddings[0].id}`);
+
+    const isExplorer = user.user_metadata?.account_type === "explorer";
+    if (!weddings?.length && !isExplorer) redirect("/onboarding");
+
+    return <GuestHome weddings={weddings ?? []} />;
+  }
 
   const isCompany = org.type === "planner_company";
 

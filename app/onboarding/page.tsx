@@ -21,7 +21,13 @@ export default async function OnboardingPage({
 }) {
   const { type } = await searchParams;
   const initialType =
-    type === "vendor" ? "vendor" : type === "planner" ? "planner_company" : "couple";
+    type === "vendor"
+      ? "vendor"
+      : type === "planner"
+        ? "planner_company"
+        : type === "guest"
+          ? "explorer"
+          : "couple";
 
   const supabase = await supabaseServer();
   const {
