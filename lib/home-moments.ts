@@ -57,19 +57,19 @@ const HOME_ALLOWED = [
   "pexels.com/photos/19351606/", // Gold cutlery place settings
   "pexels.com/photos/5310588/", // Orchids and roses bouquet
   "pexels.com/photos/15679210/", // Resort altar by the sea
-  "pexels.com/photos/10744427/", // Gulf Coast beach ceremony
+  "pexels.com/photos/10744427/", // Beach table set beside the arch
   "pexels.com/photos/10733603/", // Wooden signs on the beach
-  "pexels.com/photos/9470486/", // Beach neutrals
-  "pexels.com/photos/37828118/", // Greenhouse ceremony
-  "pexels.com/photos/4403775/", // Vineyard warmth
-  "pexels.com/photos/9816194/", // Barn & candlelight
-  "pexels.com/photos/16625608/", // Dried florals
-  "pexels.com/photos/12689009/", // Grand & formal
-  "pexels.com/photos/29624022/", // Timeless elegance
+  "pexels.com/photos/9470486/", // Sandbar arch with a sailboat
+  "pexels.com/photos/37828118/", // White pavilion on the lawn
+  "pexels.com/photos/4403775/", // Mr & Mrs sign in the trees
+  "pexels.com/photos/9816194/", // Vow books tied with ribbon
+  "pexels.com/photos/16625608/", // Hillside ceremony with a triangle arch
+  "pexels.com/photos/12689009/", // Crystal candelabras and stage lights
+  "pexels.com/photos/29624022/", // Chandelier banquet hall
   "pexels.com/photos/13834493/", // Black-tie ballroom
-  "pexels.com/photos/10619761/", // Free-spirited florals
+  "pexels.com/photos/10619761/", // Pampas arch in the woods
   "pexels.com/photos/29774686/", // Macramé & pampas
-  "pexels.com/photos/9816190/", // Desert bohemian
+  "pexels.com/photos/9816190/", // Boho dessert table with dried flowers
 ];
 
 /**
