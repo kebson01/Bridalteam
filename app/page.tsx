@@ -10,6 +10,8 @@ import { SHOW_VENDOR_DIRECTORY } from "@/lib/flags";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 import JsonLd from "@/components/json-ld";
 import { webApplicationSchema } from "@/lib/structured-data";
+import { arrangeFeed } from "@/lib/seed-content";
+import { momentsPool, type Moment } from "@/lib/home-moments";
 
 // Self-canonical for the homepage. og:url has to be stated here rather than
 // inherited: the root layout deliberately no longer carries a page-specific url
@@ -58,8 +60,30 @@ async function homeVendors(): Promise<HomeVendorSummary> {
   }
 }
 
+/**
+ * Photos for the "Moments worth planning for" mosaic to rotate through: the
+ * same public feed /inspiration shows (same visibility rule, same retirement
+ * of seed pieces), photos only. A failure leaves the mosaic on its hand-picked
+ * set rather than failing the page.
+ */
+async function homeMoments(): Promise<Moment[]> {
+  try {
+    const { data, error } = await supabasePublic()
+      .from("inspiration_images")
+      .select("id, image_url, title, media_type, like_count, is_seed, retired_at")
+      .eq("feed_visible", true)
+      .eq("media_type", "photo")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(`${error.code}: ${error.message}`);
+    return momentsPool(arrangeFeed(data ?? []).items);
+  } catch (err) {
+    console.error("home: inspiration photos unavailable, mosaic stays static:", err);
+    return [];
+  }
+}
+
 export default async function Home() {
-  const vendors = await homeVendors();
+  const [vendors, moments] = await Promise.all([homeVendors(), homeMoments()]);
   return (
     <>
       <JsonLd data={webApplicationSchema()} />
@@ -67,7 +91,7 @@ export default async function Home() {
       <HowItWorks />
       <AIPlanner />
       <WholeTeam />
-      <RealWeddings />
+      <RealWeddings pool={moments} />
       {SHOW_VENDOR_DIRECTORY && <HomeVendors summary={vendors} />}
       <div className="pt-16">
         <GetTheApp />
