@@ -9,21 +9,30 @@ export type FeedPhotoRow = {
   image_url: string;
   title: string | null;
   media_type: string | null;
+  /**
+   * From the database (supabase/migrations/20261120230000_inspiration_has_people.sql):
+   * only false may rotate in. Absent when the column isn't there yet, in which
+   * case HOME_ALLOWED decides.
+   */
+  has_people?: boolean | null;
 };
 
 export const IDEA = "Inspiration";
 
 /**
- * The only feed photos that may rotate onto the homepage: ones with no people
- * in them (décor, florals, cakes, stationery, venues, empty ceremony sites).
- * The owner's homepage rule is no recognisable faces, and the feed's vendor and
- * stock photos are full of couples and guests, so this is an allowlist
- * checked by eye, photo by photo, rather than a filter that could guess wrong.
+ * Only photos without people may rotate onto the homepage (décor, florals,
+ * cakes, stationery, venues, empty ceremony sites): the owner's homepage rule
+ * is no recognisable faces, and the feed's vendor and stock photos are full of
+ * couples and guests. That's recorded per photo in inspiration_images.has_people,
+ * which new photos get from an AI check (lib/people-check.ts).
  *
- * It also keeps out the Paul archway kiss, blessing and lake photos, which the
- * owner took off the homepage. Each entry is matched against the photo's URL:
- * a Pexels photo id, a vendor-media file name, or one of our own file names.
- * A new feed photo stays off the homepage until it's added here.
+ * This list is the fallback for when that column isn't in the database yet:
+ * the feed's people-free photos as of 2026-11-20, checked by eye, and the same
+ * ones the migration marks has_people = false. It also keeps out the Paul
+ * archway kiss, blessing and lake photos the owner took off the homepage (all
+ * have people). Each entry is matched against the photo's URL: a Pexels photo
+ * id, a vendor-media file name, or one of our own file names. Once the
+ * migration is applied everywhere, this can go.
  */
 const HOME_ALLOWED = [
   // Vendor photos
@@ -87,7 +96,8 @@ function captionOf(title: string): Pick<Moment, "caption" | "where"> {
 }
 
 /**
- * Feed rows → rotation pool. Keeps only photos on HOME_ALLOWED, and drops
+ * Feed rows → rotation pool. Keeps only people-free photos (has_people =
+ * false, or on HOME_ALLOWED when the column is missing), and drops
  * videos (their posters are YouTube/Pexels stills from hosts next/image may
  * not allow, and a still of a video reads oddly in a photo mosaic), untitled
  * rows, and anything
@@ -101,7 +111,9 @@ export function momentsPool(rows: FeedPhotoRow[], shown: Moment[] = []): Moment[
     if (r.media_type && r.media_type !== "photo") continue;
     if (!r.image_url || !r.title?.trim()) continue;
     const src = localise(r.image_url);
-    if (!HOME_ALLOWED.some((key) => src.includes(key))) continue;
+    const peopleFree =
+      r.has_people !== undefined ? r.has_people === false : HOME_ALLOWED.some((key) => src.includes(key));
+    if (!peopleFree) continue;
     if (seen.has(src)) continue;
     seen.add(src);
     pool.push({ src, ...captionOf(r.title) });

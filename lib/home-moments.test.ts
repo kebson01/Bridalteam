@@ -46,4 +46,17 @@ describe("momentsPool", () => {
     );
     expect(pool.map((m) => m.caption)).toEqual(["White flowers and greenery cake"]);
   });
+
+  it("goes by the database's has_people when it's there", () => {
+    const NEW = "https://yubcwyfhgxjnqydhgjit.supabase.co/storage/v1/object/public/vendor-media/x/new.jpg";
+    const pool = momentsPool([
+      // A new photo the AI check found people-free: in, though no list names it.
+      { ...row(NEW, "New florals"), has_people: false },
+      // On the fallback list, but the database says people (or hasn't checked): out.
+      { ...row(CAKE, "White flowers and greenery cake"), has_people: true },
+      { ...row(STONEBRIDGE, "Stonebridge · St. Charles wedding, Boca Raton"), has_people: null },
+    ]);
+    expect(pool.map((m) => m.caption)).toEqual(["New florals"]);
+  });
 });
+
