@@ -32,6 +32,27 @@ export async function createWorkspace(
 
   const rawType = formData.get("account_type");
 
+  // Guests, wedding party, family, or someone browsing. Nothing to create —
+  // no org, no wedding — so all that's recorded is that they chose this, which
+  // is what lets /dashboard give them a home instead of sending them back
+  // here. User metadata is writable by the account holder; that's fine because
+  // this only steers routing and grants nothing (access still comes from
+  // org_members and wedding_members under RLS).
+  if (rawType === "explorer") {
+    const displayName = str(formData.get("display_name"), 100);
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        account_type: "explorer",
+        ...(displayName && !user.user_metadata?.full_name ? { full_name: displayName } : {}),
+      },
+    });
+    if (error) {
+      console.error("explorer updateUser failed:", error.code, error.message);
+      return { error: "We couldn't save that. Please try again." };
+    }
+    redirect("/dashboard");
+  }
+
   // Vendors take a separate path: a vendor org + profile, no wedding.
   if (rawType === "vendor") {
     const businessName = str(formData.get("business_name"), 160);
