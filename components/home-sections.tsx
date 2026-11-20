@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { HomeVendorSummary } from "@/lib/home-vendors";
 import { SIGNUP_URL } from "@/lib/config";
+import HomeMoments, { type MomentTile } from "@/components/home-moments";
+import { IDEA, type Moment } from "@/lib/home-moments";
 
 /**
  * The homepage sections. Photos are from Unsplash (free license; the owner's
@@ -240,11 +242,14 @@ export function WholeTeam() {
  * rows, the four wide shots span two columns); on phones a 2-column grid
  * where the wide ones take a full row. Changing the list means re-checking
  * that it still tiles.
+ *
+ * These are the opening set. After load, HomeMoments swaps one tile at a time
+ * for a photo from the Inspiration feed (see lib/home-moments.ts); the spans
+ * stay with the tile, so the mosaic keeps tiling whatever photo is in it.
  */
 const ST_CHARLES = "St. Charles wedding · Boca Raton";
 const PAUL = "Paul wedding · Parkland";
-const IDEA = "Inspiration";
-const REAL = [
+const REAL: MomentTile[] = [
   { src: "/media/real-weddings/st-charles-2012-getting-dressed.webp", caption: "Getting into the dress", where: ST_CHARLES, cls: "row-span-2", pos: "object-center" },
   { src: "/media/real-weddings/st-charles-2012-wedding-party.webp", caption: "The whole wedding party", where: ST_CHARLES, cls: "col-span-2", pos: "object-center" },
   { src: "/media/home/cake.webp", caption: "Berries & blooms", where: IDEA, cls: "row-span-2", pos: "object-center" },
@@ -258,7 +263,7 @@ const REAL = [
   { src: "/media/real-weddings/st-charles-2012-just-married.webp", caption: "Just married", where: ST_CHARLES, cls: "col-span-2", pos: "object-[50%_45%]" },
 ];
 
-export function RealWeddings() {
+export function RealWeddings({ pool = [] }: { pool?: Moment[] }) {
   return (
     <section className="mx-auto max-w-6xl px-5 pb-16">
       <div className="flex items-end justify-between gap-4">
@@ -268,29 +273,14 @@ export function RealWeddings() {
             Moments worth <span className="text-brand-text">planning for</span>
           </h2>
           <p className="mt-2 max-w-xl text-sm text-ink-soft/75">
-            Real moments from the St. Charles and Paul weddings, shared by the couples, alongside ideas for your own day.
+            Real moments from the St. Charles and Paul weddings, shared by the couples, alongside ideas from our Inspiration feed.
           </p>
         </div>
         <Link href="/inspiration" className="hidden shrink-0 text-sm font-semibold text-brand-text hover:text-brand-deep sm:inline">
           See more ideas <span aria-hidden>→</span>
         </Link>
       </div>
-      <ul className="mt-6 grid grid-flow-dense auto-rows-[150px] grid-cols-2 gap-3 sm:auto-rows-[190px] md:grid-cols-4 md:auto-rows-[210px]">
-        {REAL.map((r) => (
-          <li key={r.src} className={`group relative overflow-hidden rounded-2xl shadow-card ${r.cls}`}>
-            <Image src={r.src} alt={`${r.caption}, ${r.where}`} fill
-              sizes={r.cls === "col-span-2" ? "(max-width: 768px) 100vw, 600px" : "(max-width: 768px) 50vw, 300px"}
-              className={`object-cover ${r.pos} transition-transform duration-700 group-hover:scale-105`} />
-            <span className="absolute inset-0 bg-gradient-to-t from-ink/75 via-transparent to-transparent" />
-            <span className="absolute inset-x-0 bottom-0 p-3 text-white">
-              <span className="block truncate text-sm font-medium">{r.caption}</span>
-              {/* Says whose photo it is, so stock is never mistaken for a real wedding. Phone tiles get the short form. */}
-              <span className="hidden truncate text-[11px] text-white/80 sm:block">{r.where}</span>
-              <span className="block truncate text-[11px] text-white/80 sm:hidden">{r.where.split(" · ")[0]}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
+      <HomeMoments tiles={REAL} pool={pool} />
       <Link href="/inspiration" className="mt-5 inline-flex text-sm font-semibold text-brand-text sm:hidden">
         See more ideas <span aria-hidden className="ml-1">→</span>
       </Link>
