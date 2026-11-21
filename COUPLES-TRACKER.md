@@ -188,6 +188,10 @@ One row per community. Check the rule before every post.
 | Week ending | page_view | planner_message | planner_limit | signup_success | Top source | Notes |
 |---|---|---|---|---|---|---|
 | 2026-10-23 | 46 | 0 | 0 | 0 | (none) | Baseline. 30 days: 261 views, 1 planner message, 1 signup (untracked). auth.users holds 2 accounts in all. Every source is `(none)`: untagged visits never record a referrer (see Log). |
+| 2026-10-30 | 143 | 4 | 0 | 0 | google.com (7) | Facebook Page posting starts (5 views). Pinterest batches 1–2 live: 0 views. |
+| 2026-11-06 | 192 | 0 | 0 | 2 | facebook (21) | Both signups were vendors (vendor email campaign began Nov 2). ChatGPT 4. |
+| 2026-11-13 | 110 | 0 | 0 | 3 | facebook (18) | All 3 signups vendors. Google 5, ChatGPT 2. |
+| 2026-11-20 | 218 | 0 | 0 | 6 | facebook (16) | First couple signup (Nov 19, from chatgpt.com); the rest vendors. Gmail app 7, ChatGPT 6. |
 
 ## Log
 
@@ -227,6 +231,11 @@ One row per community. Check the rule before every post.
 - 2026-10-30: Posted feed post #15 ("4 Wedding Registry Rules") to the Facebook Page through Zapier ahead of the November queue, at the owner's request: https://www.facebook.com/671229889580227_1821166639512064. The queue starts as planned with the wedding checklist post on Nov 1 at 12:13 pm ET.
 - 2026-10-30: Gave every Facebook post a photo, at the owner's request (photo posts get more engagement). The 20 November evening posts (conversation, question, blog, seasonal, about) each got a free Unsplash photo chosen through the API, credited in `marketing/facebook/2026-11-photos.md`, with their links moved into the text. `facebook-queue.mjs check` now fails on any post without a photo, and the facebook-posting skill says how to pick one.
 - 2026-10-30: Planned December 2026 for the Facebook Page, 50 posts, every one with a photo: 15 guide posts from the ready-made feed images (#1–4, 11–14, 16–18, 20, 22, 23, 54), 8 tool spotlights (the AI planner feed post plus 7 new ones), 7 questions, 8 conversations, 5 blog posts, 4 seasonal and 3 about posts. The 34 posts without a feed image use Unsplash photos credited in `marketing/facebook/2026-12-photos.md`. Feed posts #19, 21, 24, 25 and 51–53, 55 are left for January. Evening slots on Dec 24, 25, 30 and 31 are dropped for the holidays.
+- 2026-11-21: Weekly numbers filled in for the four weeks to Nov 20 (weeks end Friday, Eastern; counts from `page_events`, "Top source" is the top referrer other than `(none)`). Most views are still untagged `(none)`.
+- 2026-11-21: Couples result so far: **1 couple signup** in four weeks (Nov 19, referred by chatgpt.com). Of the 11 accounts created since Nov 1, 9 are vendors (the vendor email campaign), 1 couple, 1 never finished onboarding. The site holds 1 couple organization in all. Planner use is near zero: 4 messages, all in the week to Oct 30.
+- 2026-11-21: Facebook is the only campaign channel sending visitors: 60 tagged views in four weeks, about 15–20 a week since November posting began. No couple signup from it yet.
+- 2026-11-21: **Pinterest has sent 0 visits** since the first pins went up on Oct 24, across batches 1–6 published so far. Either the pins aren't being shown or nobody clicks through; check pin impressions and outbound clicks in Pinterest analytics before scheduling more batches. 28 pins remain scheduled through Dec 18; the `kebsaint` account is healthy, token now valid to Dec 17 (it renewed itself on Nov 17).
+- 2026-11-21: Still not started: the South Florida Facebook groups (no self-promo rule confirmed, nothing posted) and the 2027 bridal expos.
 
 ## Conversations
 
