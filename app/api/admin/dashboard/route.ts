@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { adminGuard } from "@/lib/admin-auth";
 import { PLAN_COLUMNS, TIERS, planGrant, type PlanSource } from "@/lib/tiers";
+import { findListingsByName } from "@/lib/listing-match";
+import { readOutreachConfig } from "@/lib/outreach/config";
+import { claimToken, claimUrl, tokenHash } from "@/lib/outreach/tokens";
+import { isPlausibleEmail } from "@/lib/outreach/plan";
+import { SITE_URL } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -146,8 +152,9 @@ export async function POST(req: Request) {
   const admin = await adminGuard(req);
   if (admin instanceof NextResponse) return admin;
 
-  const body = (await req.json().catch(() => ({}))) as { action?: string; id?: string };
+  const body = (await req.json().catch(() => ({}))) as { action?: string; id?: string; vendor?: NewVendor; force?: boolean };
   const { action, id } = body;
+  if (action === "create_vendor") return createVendor(admin, body.vendor ?? {}, body.force === true);
   if (!id) return NextResponse.json({ error: "id is required." }, { status: 400 });
 
   const fail = (message: string) => NextResponse.json({ error: message }, { status: 500 });
@@ -179,4 +186,97 @@ export async function POST(req: Request) {
     default:
       return NextResponse.json({ error: "Unknown action." }, { status: 400 });
   }
+}
+
+type SupabaseAdmin = SupabaseClient;
+
+type NewVendor = Partial<Record<"business_name" | "category" | "city" | "region" | "website" | "email" | "phone" | "contact_email" | "description" | "note", string>>;
+
+const DAY_MS = 86_400_000;
+/** How long the claim link for a listing added here works. */
+const CLAIM_DAYS = 60;
+
+const clean = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "") || null;
+
+/**
+ * Adds a vendor listing by hand (the dashboard's "Add vendor").
+ *
+ * Uses create_claimable_listing, the same function the lead importer uses: a
+ * vendor organization, a DRAFT profile (publishing a business's details before
+ * they've seen them is theirs to decide; the dashboard can publish it after),
+ * and a claim record. A listing with the same business name blocks it unless
+ * `force`, so the same business isn't added twice by accident.
+ *
+ * The claim link returned is the campaign's derived one when OUTREACH_SECRET is
+ * set, so the link shown here and any campaign email are the same link.
+ */
+async function createVendor(admin: SupabaseAdmin, input: NewVendor, force: boolean) {
+  const v = {
+    business_name: clean(input.business_name, 160),
+    category: clean(input.category, 80),
+    city: clean(input.city, 100),
+    region: clean(input.region, 40),
+    website: clean(input.website, 300),
+    email: clean(input.email, 254)?.toLowerCase() ?? null,
+    phone: clean(input.phone, 40),
+    contact_email: clean(input.contact_email, 254)?.toLowerCase() ?? null,
+    description: clean(input.description, 4000),
+    note: clean(input.note, 500),
+  };
+  if (!v.business_name) return NextResponse.json({ error: "A business name is required." }, { status: 400 });
+  for (const [field, value] of [["Email", v.email], ["Claim email", v.contact_email]] as const) {
+    if (value && !isPlausibleEmail(value)) return NextResponse.json({ error: `${field} doesn't look like an email address.` }, { status: 400 });
+  }
+  if (v.website && !/^https?:\/\//i.test(v.website)) v.website = `https://${v.website}`;
+
+  if (!force) {
+    const existing = await findListingsByName(admin, v.business_name);
+    if (existing.length) {
+      return NextResponse.json(
+        { error: "A listing with this business name already exists.", duplicates: existing.map((e) => ({ ...e, url: `${SITE_URL}/v/${e.orgId}` })) },
+        { status: 409 },
+      );
+    }
+  }
+
+  const { data, error } = await admin.rpc("create_claimable_listing", {
+    p_business_name: v.business_name,
+    p_category: v.category,
+    p_city: v.city,
+    p_region: v.region,
+    p_website: v.website,
+    p_email: v.email,
+    p_phone: v.phone,
+    p_description: v.description,
+    p_contact_email: v.contact_email,
+    p_note: v.note ?? "Added from the admin dashboard",
+  });
+  if (error) {
+    console.error("create_claimable_listing failed:", error.code, error.message);
+    return NextResponse.json({ error: "Couldn't create the listing." }, { status: 500 });
+  }
+  const row = (Array.isArray(data) ? data[0] : data) as { org_id: string; token: string } | null;
+  if (!row?.org_id) return NextResponse.json({ error: "Couldn't create the listing." }, { status: 500 });
+
+  // One stable claim link: the campaign's derived token if it's configured,
+  // else the random one the function minted. Valid for CLAIM_DAYS either way.
+  const { config } = readOutreachConfig();
+  const derived = config.secret.length >= 32;
+  const { error: claimErr } = await admin
+    .from("vendor_claims")
+    .update({
+      ...(derived ? { token_hash: tokenHash(claimToken(config.secret, row.org_id)) } : {}),
+      expires_at: new Date(Date.now() + CLAIM_DAYS * DAY_MS).toISOString(),
+    })
+    .eq("org_id", row.org_id)
+    .is("claimed_at", null);
+  if (claimErr) console.error("create vendor: claim link update failed:", claimErr.message);
+
+  return NextResponse.json({
+    ok: true,
+    orgId: row.org_id,
+    pageUrl: `${SITE_URL}/v/${row.org_id}`,
+    claimUrl: claimErr ? null : derived ? claimUrl(config.secret, row.org_id) : `${SITE_URL}/claim/${row.token}`,
+    claimEmail: v.contact_email ?? v.email,
+  });
 }
