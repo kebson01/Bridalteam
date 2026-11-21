@@ -151,10 +151,13 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               {username && <span className="hidden text-xs text-ink-soft/60 md:inline">Signed in as {username}</span>}
-              <a href="/" target="_blank" rel="noreferrer" className={`${btn.secondary} hidden px-3.5 py-2 sm:inline-flex`}>
-                <Icon name="external" className="size-4 text-ink-soft/60" />
-                View site
-              </a>
+              {/* Wrapped: btn's own display would override "hidden" on the link itself. */}
+              <span className="hidden sm:block">
+                <a href="/" target="_blank" rel="noreferrer" className={`${btn.secondary} px-3.5 py-2`}>
+                  <Icon name="external" className="size-4 text-ink-soft/60" />
+                  View site
+                </a>
+              </span>
               <button type="button" onClick={lock} className={`${btn.secondary} px-3.5 py-2`}>
                 <Icon name="lock" className="size-4 text-ink-soft/60" />
                 Lock
