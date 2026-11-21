@@ -62,7 +62,7 @@ const where = (v: VendorRow) => [v.city, v.region].filter(Boolean).join(", ");
 
 // ── Icons: small inline strokes, so the page loads no icon font ─────────────
 
-type IconName = "store" | "badge" | "heart" | "send" | "check" | "flag" | "download" | "lock" | "search" | "chevron" | "left" | "right";
+type IconName = "store" | "badge" | "heart" | "send" | "check" | "flag" | "download" | "lock" | "search" | "chevron" | "left" | "right" | "plus" | "close";
 const PATHS: Record<IconName, string> = {
   store: "M3 9.5 4.5 4h15L21 9.5M3 9.5h18M3 9.5a2.5 2.5 0 0 0 4.5 1.5 2.5 2.5 0 0 0 4.5 0 2.5 2.5 0 0 0 4.5 0A2.5 2.5 0 0 0 21 9.5M5 12v8h14v-8M10 20v-5h4v5",
   badge: "m12 3 2.4 1.7 2.9-.1.9 2.8 2.3 1.8-1 2.8 1 2.8-2.3 1.8-.9 2.8-2.9-.1L12 21l-2.4-1.7-2.9.1-.9-2.8-2.3-1.8 1-2.8-1-2.8 2.3-1.8.9-2.8 2.9.1L12 3Zm-3 9 2 2 4-4",
@@ -76,6 +76,8 @@ const PATHS: Record<IconName, string> = {
   chevron: "m6 9 6 6 6-6",
   left: "m15 6-6 6 6 6",
   right: "m9 6 6 6-6 6",
+  plus: "M12 5v14M5 12h14",
+  close: "M6 6l12 12M18 6 6 18",
 };
 function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
   return (
@@ -167,6 +169,219 @@ function toCsv(rows: VendorRow[]): string {
   return [head.join(","), ...lines].join("\n");
 }
 
+// ── Add vendor ──────────────────────────────────────────────────────────────
+
+const FIELD = "w-full rounded-xl border border-stone-2 bg-stone-4/60 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-brand";
+const OPT = "ml-1 text-[11px] font-normal text-ink-soft/50";
+
+interface Duplicate {
+  orgId: string;
+  businessName: string;
+  city: string | null;
+  status: string;
+  url: string;
+}
+interface Created {
+  businessName: string;
+  pageUrl: string;
+  claimUrl: string | null;
+  claimEmail: string | null;
+}
+
+/**
+ * The "Add vendor" form. Listings are created as drafts with a claim link
+ * (app/api/admin/dashboard, create_vendor); the table's Publish button puts
+ * one live.
+ */
+function AddVendorPanel({ categories, onClose, onCreated }: { categories: string[]; onClose: () => void; onCreated: () => void }) {
+  const empty = { business_name: "", category: "", city: "", region: "FL", website: "", email: "", phone: "", contact_email: "", description: "", note: "" };
+  const [form, setForm] = useState(empty);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [duplicates, setDuplicates] = useState<Duplicate[] | null>(null);
+  const [created, setCreated] = useState<Created | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const set = (k: keyof typeof empty) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+    if (k === "business_name") setDuplicates(null); // a new name needs a new check
+  };
+
+  async function submit(force: boolean) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/dashboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create_vendor", vendor: form, force }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.status === 409 && json.duplicates) {
+        setDuplicates(json.duplicates);
+        return;
+      }
+      if (!res.ok) {
+        setError(json.error ?? "Couldn't add the vendor.");
+        return;
+      }
+      setCreated({ businessName: form.business_name.trim(), pageUrl: json.pageUrl, claimUrl: json.claimUrl, claimEmail: json.claimEmail });
+      setForm(empty);
+      setDuplicates(null);
+      onCreated();
+    } catch {
+      setError("Couldn't reach the server.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard blocked: the link is on screen to select by hand.
+    }
+  }
+
+  return (
+    <section aria-labelledby="add-vendor-title" className="rounded-3xl border border-brand/30 bg-white p-4 shadow-card sm:p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="add-vendor-title" className="font-display text-xl font-medium text-ink">Add a vendor</h2>
+          <p className="mt-1 text-sm text-ink-soft/70">
+            Creates a draft listing with a claim link. Publish it from the table when it&rsquo;s ready.
+          </p>
+        </div>
+        <button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-2 text-ink-soft/60 hover:bg-stone-4 hover:text-ink">
+          <Icon name="close" className="size-5" />
+        </button>
+      </div>
+
+      {created && (
+        <div role="status" className="mt-5 rounded-2xl bg-green-50 p-4 text-sm text-green-900">
+          <p className="font-medium">{created.businessName} was added as a draft.</p>
+          <p className="mt-1">
+            <a href={created.pageUrl} target="_blank" rel="noreferrer" className="font-semibold underline-offset-2 hover:underline">
+              View the listing
+            </a>
+          </p>
+          {created.claimUrl && (
+            <div className="mt-3">
+              <p className="text-xs text-green-900/80">
+                Claim link{created.claimEmail ? `, for ${created.claimEmail}` : ""}. It works for 60 days; the vendor signs in, opens it and the page is theirs.
+              </p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <code className="min-w-0 max-w-full break-all rounded-lg bg-white px-2.5 py-1.5 text-xs text-ink">{created.claimUrl}</code>
+                <button type="button" onClick={() => copy(created.claimUrl!)} className="rounded-full border border-green-700/30 px-3 py-1 text-xs font-semibold text-green-900 hover:bg-white">
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            </div>
+          )}
+          {created.claimEmail && (
+            <p className="mt-3 text-xs text-green-900/80">
+              The vendor email campaign will also invite this address to claim it, in its usual order.
+            </p>
+          )}
+        </div>
+      )}
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit(false);
+        }}
+        className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2"
+      >
+        <label className="block sm:col-span-2">
+          <span className="text-xs font-semibold text-ink-soft">Business name</span>
+          <input required value={form.business_name} onChange={set("business_name")} maxLength={160} className={`mt-1 ${FIELD}`} placeholder="Bloom & Vine Florals" />
+        </label>
+        <label className="block">
+          <span className="text-xs font-semibold text-ink-soft">Category <span className={OPT}>optional</span></span>
+          <input value={form.category} onChange={set("category")} list="vendor-categories" className={`mt-1 ${FIELD}`} placeholder="Photography" />
+          <datalist id="vendor-categories">
+            {categories.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
+        </label>
+        <div className="grid grid-cols-[1fr_5rem] gap-3">
+          <label className="block">
+            <span className="text-xs font-semibold text-ink-soft">City <span className={OPT}>optional</span></span>
+            <input value={form.city} onChange={set("city")} className={`mt-1 ${FIELD}`} placeholder="Fort Lauderdale" />
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold text-ink-soft">State</span>
+            <input value={form.region} onChange={set("region")} maxLength={40} className={`mt-1 ${FIELD}`} />
+          </label>
+        </div>
+        <label className="block">
+          <span className="text-xs font-semibold text-ink-soft">Website <span className={OPT}>optional</span></span>
+          <input value={form.website} onChange={set("website")} inputMode="url" className={`mt-1 ${FIELD}`} placeholder="bloomandvine.com" />
+        </label>
+        <label className="block">
+          <span className="text-xs font-semibold text-ink-soft">Phone <span className={OPT}>optional</span></span>
+          <input value={form.phone} onChange={set("phone")} type="tel" className={`mt-1 ${FIELD}`} placeholder="(954) 555-0100" />
+        </label>
+        <label className="block">
+          <span className="text-xs font-semibold text-ink-soft">Public email <span className={OPT}>optional, shown on the listing</span></span>
+          <input value={form.email} onChange={set("email")} type="email" className={`mt-1 ${FIELD}`} placeholder="hello@bloomandvine.com" />
+        </label>
+        <label className="block">
+          <span className="text-xs font-semibold text-ink-soft">Claim email <span className={OPT}>optional, defaults to the public email</span></span>
+          <input value={form.contact_email} onChange={set("contact_email")} type="email" className={`mt-1 ${FIELD}`} placeholder="owner@bloomandvine.com" />
+        </label>
+        <label className="block sm:col-span-2">
+          <span className="text-xs font-semibold text-ink-soft">Description <span className={OPT}>optional</span></span>
+          <textarea value={form.description} onChange={set("description")} rows={3} maxLength={4000} className={`mt-1 ${FIELD}`} />
+        </label>
+        <label className="block sm:col-span-2">
+          <span className="text-xs font-semibold text-ink-soft">Internal note <span className={OPT}>optional, admins only</span></span>
+          <input value={form.note} onChange={set("note")} maxLength={500} className={`mt-1 ${FIELD}`} placeholder="Met at the Broward bridal expo" />
+        </label>
+
+        {duplicates && (
+          <div role="alert" className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 sm:col-span-2">
+            <p className="font-medium">We already have {duplicates.length === 1 ? "a listing" : "listings"} with this name:</p>
+            <ul className="mt-2 space-y-1">
+              {duplicates.map((d) => (
+                <li key={d.orgId}>
+                  <a href={d.url} target="_blank" rel="noreferrer" className="font-semibold underline-offset-2 hover:underline">
+                    {d.businessName}
+                  </a>
+                  <span className="text-amber-900/70"> · {[d.city, d.status === "published" ? "published" : "draft"].filter(Boolean).join(" · ")}</span>
+                </li>
+              ))}
+            </ul>
+            <button type="button" onClick={() => submit(true)} disabled={busy} className="mt-3 text-xs font-semibold text-amber-900 underline underline-offset-2 disabled:opacity-50">
+              It&rsquo;s a different business. Add it anyway
+            </button>
+          </div>
+        )}
+        {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 sm:col-span-2">{error}</p>}
+
+        <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
+          <button
+            type="submit"
+            disabled={busy}
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          >
+            <Icon name="plus" className="size-4" />
+            {busy ? "Adding…" : "Add vendor"}
+          </button>
+          <button type="button" onClick={onClose} className="rounded-full px-4 py-2.5 text-sm font-medium text-ink-soft/70 hover:text-ink">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
 // ── Page ────────────────────────────────────────────────────────────────────
 
 export default function AdminDashboardPage() {
@@ -182,6 +397,7 @@ export default function AdminDashboardPage() {
   const [plan, setPlan] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
+  const [adding, setAdding] = useState(false);
 
   // Fetch dashboard data using the httpOnly admin session cookie (set at login).
   // Same-origin fetches send the cookie automatically — no password in the browser.
@@ -397,13 +613,24 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={logout}
+              className="inline-flex items-center gap-2 rounded-full border border-stone-2 bg-white px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-brand"
+            >
+              <Icon name="lock" className="size-4 text-ink-soft/60" />
+              Lock
+            </button>
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              aria-expanded={adding}
               className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white transition-shadow hover:shadow-glow"
             >
-              <Icon name="lock" className="size-4" />
-              Lock
+              <Icon name="plus" className="size-4" />
+              Add vendor
             </button>
           </div>
         </div>
+
+        {adding && <AddVendorPanel categories={categories.map(([c]) => c)} onClose={() => setAdding(false)} onCreated={loadDashboard} />}
 
         {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 

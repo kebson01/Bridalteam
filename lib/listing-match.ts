@@ -34,6 +34,36 @@ export interface ListingMatch {
   maskedEmail: string;
 }
 
+export interface NamedListing {
+  orgId: string;
+  businessName: string;
+  city: string | null;
+  status: string;
+}
+
+/**
+ * Every listing whose business name normalizes to the same thing, claimed or
+ * not. Service-role client: drafts aren't readable otherwise.
+ */
+export async function findListingsByName(admin: SupabaseClient, businessName: string): Promise<NamedListing[]> {
+  const key = normalizeBusinessName(businessName);
+  if (key.length < 4) return []; // too short to mean anything
+
+  // Characters in order with anything between: a superset of the exact
+  // normalized match, narrowed below. Only [a-z0-9] reach the pattern, so
+  // there's nothing to escape.
+  const pattern = `%${key.split("").join("%")}%`;
+  const { data: profiles, error } = await admin
+    .from("vendor_profiles")
+    .select("org_id, business_name, city, status")
+    .ilike("business_name", pattern)
+    .limit(50);
+  if (error || !profiles?.length) return [];
+  return profiles
+    .filter((p) => normalizeBusinessName(p.business_name as string) === key)
+    .map((p) => ({ orgId: p.org_id as string, businessName: p.business_name as string, city: (p.city as string | null) ?? null, status: p.status as string }));
+}
+
 /**
  * An unclaimed listing with the same business name and a contact address to
  * send the claim link to, or null. Needs the service-role client: draft
