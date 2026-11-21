@@ -5,6 +5,7 @@ import { finalEmail, firstEmail, followUpEmail, type VendorForEmail } from "@/li
 import { planToday, pauseReason, warmupCap, type Candidate, type FinalDue, type FollowUpDue } from "@/lib/outreach/plan";
 import { domainAcceptsMail, sendViaResend, type SendResult } from "@/lib/outreach/delivery";
 import { sendEmail } from "@/lib/email";
+import { normalizeBusinessName } from "@/lib/listing-match";
 
 /**
  * One day of the campaign. Called by /api/outreach/run, which the scheduled
@@ -115,8 +116,16 @@ export async function runOutreach({ db, config, now = new Date(), send = sendVia
     complained: recent.filter((e) => e.kind === "complained").length,
   });
 
-  // 2. Claimed since last run.
+  // 2. Claimed since last run. A listing also counts as taken when the vendor
+  // signed up separately under the same business name instead of claiming it
+  // (lib/listing-match.ts): they already have a page, so no more "please
+  // claim" emails for this one.
   const claimed = new Set(members.map((m) => m.org_id));
+  const ownedNames = new Set(profiles.filter((p) => claimed.has(p.org_id)).map((p) => normalizeBusinessName(p.business_name)));
+  ownedNames.delete("");
+  for (const p of profiles) {
+    if (!claimed.has(p.org_id) && ownedNames.has(normalizeBusinessName(p.business_name))) claimed.add(p.org_id);
+  }
   const justClaimed = outreach.filter((o) => ["sent", "followed_up", "final_sent"].includes(o.status) && claimed.has(o.org_id));
   report.newlyClaimed = justClaimed.length;
   if (!dryRun && justClaimed.length) {
