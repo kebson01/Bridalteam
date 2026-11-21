@@ -269,6 +269,9 @@ export default function SiteHeader() {
     router.refresh();
   }
 
+  // The admin app has its own top bar (components/admin/admin-shell.tsx).
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <header className="sticky top-0 z-50 border-b border-stone-2/70 bg-white/85 backdrop-blur-md print:hidden">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-3">

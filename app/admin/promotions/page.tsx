@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { dayOf, lastDayOf } from "@/lib/promotions";
 import { TIERS } from "@/lib/tiers";
+import { useAdmin } from "@/components/admin/admin-shell";
+import { Badge, Card, CardTitle, Empty, Field, Icon, Kpi, Notice, PageHeader, SearchBox, btn, field, table } from "@/components/admin/ui";
 
 /**
  * Plan promotions: give vendors Pro or Featured for a set time, without
@@ -36,9 +37,16 @@ type Promotion = {
   vendors: Vendor[];
 };
 
-const field =
-  "w-full rounded-lg border border-stone-2 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-brand disabled:opacity-60";
-const label = "text-xs font-semibold uppercase tracking-[0.12em] text-ink-soft";
+/** Labels that sit over a group of controls rather than one input (so not a kit <Field>). */
+const label = "text-xs font-semibold text-ink-soft";
+const checkbox = "size-4 accent-[var(--color-brand)]";
+/** A selectable pill: the audience mode and the category/city chips. */
+const choice = (on: boolean) =>
+  `inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+    on ? "border-brand bg-brand-wash font-semibold text-brand-text" : "border-stone-2 bg-white text-ink-soft hover:border-brand"
+  }`;
+const STATUS_TONE = { running: "green", scheduled: "amber", ended: "grey" } as const;
+const STATUS_LABEL = { running: "Running", scheduled: "Scheduled", ended: "Ended" } as const;
 
 const fmtDay = (day: string) =>
   new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
@@ -71,21 +79,12 @@ function Chips({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex max-h-44 flex-wrap gap-2 overflow-y-auto rounded-lg border border-stone-2 p-3">
+    <div className="flex max-h-44 flex-wrap gap-2 overflow-y-auto rounded-2xl border border-stone-2 bg-stone-4/40 p-3">
       {options.length === 0 && <p className="text-xs text-ink-soft/60">Nothing matches.</p>}
       {options.map((o) => {
         const on = selected.includes(o);
         return (
-          <button
-            key={o}
-            type="button"
-            disabled={disabled}
-            onClick={() => onToggle(o)}
-            aria-pressed={on}
-            className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-              on ? "border-brand bg-brand-wash font-semibold text-ink" : "border-stone-2 text-ink-soft hover:border-brand"
-            }`}
-          >
+          <button key={o} type="button" disabled={disabled} onClick={() => onToggle(o)} aria-pressed={on} className={choice(on)}>
             {on && "✓ "}
             {o}
           </button>
@@ -96,6 +95,7 @@ function Chips({
 }
 
 export default function AdminPromotionsPage() {
+  const { expired } = useAdmin();
   const [promotions, setPromotions] = useState<Promotion[] | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [cities, setCities] = useState<string[]>([]);
@@ -141,9 +141,11 @@ export default function AdminPromotionsPage() {
   const load = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/promotions");
+      // A 401 means the admin session ran out: the shell shows sign-in again.
+      if (res.status === 401) return expired();
       const body = await res.json();
       if (!res.ok) {
-        setError(res.status === 401 ? "Sign in on the admin dashboard first." : (body.error ?? "Couldn't load promotions."));
+        setError(body.error ?? "Couldn't load promotions.");
         return;
       }
       setPromotions(body.promotions);
@@ -152,7 +154,7 @@ export default function AdminPromotionsPage() {
     } catch {
       setError("Couldn't load promotions.");
     }
-  }, []);
+  }, [expired]);
 
   useEffect(() => {
     void load();
@@ -207,6 +209,10 @@ export default function AdminPromotionsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (res.status === 401) {
+        expired();
+        return false;
+      }
       const body = await res.json();
       if (!res.ok) {
         setError(body.error ?? "That didn't work.");
@@ -262,294 +268,328 @@ export default function AdminPromotionsPage() {
     set((list) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]));
   const shownCities = cities.filter((c) => c.toLowerCase().includes(cityFilter.trim().toLowerCase()));
 
+  const count = (s: Promotion["status"]) => (promotions ?? []).filter((p) => p.status === s).length;
+
   return (
-    <main className="mx-auto max-w-3xl px-5 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-medium text-ink">Promotions</h1>
-        <Link href="/admin" className="text-sm text-ink-soft hover:text-brand-text">
-          ← Admin
-        </Link>
-      </div>
-      <p className="mt-1 text-sm text-ink-soft/70">
-        Give vendors a paid plan free for a set time. They get its features right away, including vendors who join
-        while it runs, and go back to their own plan when it ends. Nobody is charged.
-      </p>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Vendors"
+        title="Promotions"
+        subtitle="Give vendors a paid plan free for a set time. They get its features right away, including vendors who join while it runs, and go back to their own plan when it ends. Nobody is charged."
+        actions={
+          <>
+            <a href="#all-promotions" className={btn.secondary}>
+              All promotions
+            </a>
+            <a href="#new-promotion" className={btn.primary}>
+              <Icon name="plus" className="size-4" />
+              New promotion
+            </a>
+          </>
+        }
+      />
 
-      {error && <p role="alert" className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-      {notice && <p className="mt-5 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">{notice}</p>}
+      {error && <Notice tone="error">{error}</Notice>}
+      {notice && <Notice tone="success">{notice}</Notice>}
 
-      <form onSubmit={create} className="mt-6 space-y-6 rounded-2xl border border-stone-2 bg-white p-6 shadow-card">
-        <h2 className="text-lg font-medium text-ink">New promotion</h2>
-
-        <label className="block">
-          <span className={label}>Name</span>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={120}
-            required
-            placeholder="Holiday 2026: Pro for everyone"
-            className={`${field} mt-2`}
-          />
-        </label>
-
-        <fieldset>
-          <legend className={label}>Plan to give</legend>
-          <div className="mt-2 grid gap-3 sm:grid-cols-2">
-            {(["pro", "featured"] as const).map((p) => (
-              <label
-                key={p}
-                className={`cursor-pointer rounded-xl border p-4 ${plan === p ? "border-brand bg-brand-wash" : "border-stone-2"}`}
-              >
-                <input type="radio" name="plan" className="sr-only" checked={plan === p} onChange={() => setPlan(p)} />
-                <span className="flex items-baseline justify-between">
-                  <span className="text-sm font-semibold text-ink">{TIERS[p].name}</span>
-                  <span className="text-xs text-ink-soft/60">normally ${TIERS[p].priceMonthly}/mo</span>
-                </span>
-                <span className="mt-1 block text-xs text-ink-soft/70">
-                  {p === "pro"
-                    ? "Unlimited gallery, Inspiration page, inquiries and stats."
-                    : "Everything in Pro, plus top placement and a badge."}
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <span className={label}>Starts</span>
-            <div className="mt-2 flex items-center gap-3">
-              <label className="inline-flex items-center gap-2 text-sm text-ink-soft">
-                <input type="checkbox" checked={startNow} onChange={(e) => setStartNow(e.target.checked)} className="h-4 w-4 accent-[var(--color-brand)]" />
-                Right away
-              </label>
-              {!startNow && (
-                <input type="date" value={startDay} min={today} onChange={(e) => setStartDay(e.target.value)} required className={field} />
-              )}
-            </div>
-          </div>
-          <label className="block">
-            <span className={label}>Last day</span>
-            <input type="date" value={endDay} min={today} onChange={(e) => setEndDay(e.target.value)} required className={`${field} mt-2`} />
-            <span className="mt-1 block text-xs text-ink-soft/60">Runs through the end of this day, Florida time.</span>
-          </label>
+      {promotions && (
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+          <Kpi label="Running" value={String(count("running"))} sub="Vendors on a free plan now" icon="tag" />
+          <Kpi label="Scheduled" value={String(count("scheduled"))} sub="Starting on a later day" icon="send" />
+          <Kpi label="Ended" value={String(count("ended"))} sub="Finished or ended early" icon="check" className="col-span-2 lg:col-span-1" />
         </div>
+      )}
 
-        <fieldset>
-          <legend className={label}>Who gets it</legend>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {(
-              [
-                ["all", "All vendors"],
-                ["groups", "By category or city"],
-                ["picked", "Hand-picked vendors"],
-              ] as const
-            ).map(([m, text]) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMode(m)}
-                aria-pressed={mode === m}
-                className={`rounded-full border px-4 py-2 text-sm ${
-                  mode === m ? "border-brand bg-brand-wash font-semibold text-ink" : "border-stone-2 text-ink-soft hover:border-brand"
-                }`}
-              >
-                {text}
-              </button>
-            ))}
+      <Card>
+        <form id="new-promotion" onSubmit={create} className="scroll-mt-24 space-y-6">
+          <div>
+            <h2 className="font-display text-xl font-medium text-ink">New promotion</h2>
+            <p className="mt-1 text-sm text-ink-soft/70">Pick a plan, the dates, and who gets it.</p>
           </div>
 
-          {mode === "groups" && (
-            <div className="mt-4 space-y-4">
-              <div>
-                <p className="text-sm font-medium text-ink">Categories</p>
-                <p className="text-xs text-ink-soft/60">Leave empty for every category.</p>
-                <div className="mt-2">
-                  <Chips options={categories} selected={pickedCategories} onToggle={toggle(setPickedCategories)} />
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-ink">Cities</p>
-                <p className="text-xs text-ink-soft/60">Leave empty for every city. Vendors must match both lists.</p>
-                <input
-                  value={cityFilter}
-                  onChange={(e) => setCityFilter(e.target.value)}
-                  placeholder="Filter cities…"
-                  className={`${field} mt-2`}
-                />
-                <div className="mt-2">
-                  <Chips options={shownCities} selected={pickedCities} onToggle={toggle(setPickedCities)} />
-                </div>
+          <Field label="Name">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={120}
+              required
+              placeholder="Holiday 2026: Pro for everyone"
+              className={field}
+            />
+          </Field>
+
+          <fieldset>
+            <legend className={label}>Plan to give</legend>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2">
+              {(["pro", "featured"] as const).map((p) => (
+                <label
+                  key={p}
+                  className={`cursor-pointer rounded-2xl border p-4 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand ${
+                    plan === p ? "border-brand bg-brand-wash" : "border-stone-2 bg-white hover:border-brand/50"
+                  }`}
+                >
+                  <input type="radio" name="plan" className="sr-only" checked={plan === p} onChange={() => setPlan(p)} />
+                  <span className="flex items-baseline justify-between gap-2">
+                    <span className="font-display text-base font-medium text-ink">{TIERS[p].name}</span>
+                    <span className="text-xs text-ink-soft/60">normally ${TIERS[p].priceMonthly}/mo</span>
+                  </span>
+                  <span className="mt-1 block text-xs text-ink-soft/70">
+                    {p === "pro"
+                      ? "Unlimited gallery, Inspiration page, inquiries and stats."
+                      : "Everything in Pro, plus top placement and a badge."}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <span className={label}>Starts</span>
+              <div className="mt-1 flex min-h-[2.75rem] flex-wrap items-center gap-3">
+                <label className="inline-flex items-center gap-2 text-sm text-ink-soft">
+                  <input type="checkbox" checked={startNow} onChange={(e) => setStartNow(e.target.checked)} className={checkbox} />
+                  Right away
+                </label>
+                {!startNow && (
+                  <input
+                    type="date"
+                    aria-label="Start day"
+                    value={startDay}
+                    min={today}
+                    onChange={(e) => setStartDay(e.target.value)}
+                    required
+                    className={`${field} min-w-0 flex-1`}
+                  />
+                )}
               </div>
             </div>
-          )}
+            <div>
+              <Field label="Last day">
+                <input type="date" value={endDay} min={today} onChange={(e) => setEndDay(e.target.value)} required className={field} />
+              </Field>
+              <span className="mt-1 block text-xs text-ink-soft/60">Runs through the end of this day, Florida time.</span>
+            </div>
+          </div>
 
-          {mode === "picked" && (
-            <div className="mt-4">
-              <input
-                value={vendorQuery}
-                onChange={(e) => setVendorQuery(e.target.value)}
-                placeholder="Search vendors by name…"
-                className={field}
-              />
-              {vendorResults.length > 0 && (
-                <ul className="mt-2 divide-y divide-stone-2 rounded-lg border border-stone-2">
-                  {vendorResults.map((v) => {
-                    const added = picked.some((p) => p.org_id === v.org_id);
-                    return (
-                      <li key={v.org_id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-                        <span className="min-w-0">
-                          <span className="font-medium text-ink">{v.business_name}</span>
-                          <span className="ml-2 text-xs text-ink-soft/60">
-                            {[v.category, v.city, v.status === "published" ? null : "draft"].filter(Boolean).join(" · ")}
+          <fieldset className="space-y-4 rounded-2xl border border-stone-2 p-4">
+            <legend className={`${label} px-1`}>Who gets it</legend>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  ["all", "All vendors"],
+                  ["groups", "By category or city"],
+                  ["picked", "Hand-picked vendors"],
+                ] as const
+              ).map(([m, text]) => (
+                <button key={m} type="button" onClick={() => setMode(m)} aria-pressed={mode === m} className={`${choice(mode === m)} px-4 py-2 text-sm`}>
+                  {text}
+                </button>
+              ))}
+            </div>
+
+            {mode === "groups" && (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-ink">Categories</p>
+                  <p className="text-xs text-ink-soft/60">Leave empty for every category.</p>
+                  <div className="mt-2">
+                    <Chips options={categories} selected={pickedCategories} onToggle={toggle(setPickedCategories)} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-ink">Cities</p>
+                  <p className="text-xs text-ink-soft/60">Leave empty for every city. Vendors must match both lists.</p>
+                  <div className="mt-2">
+                    <SearchBox value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} aria-label="Filter cities" placeholder="Filter cities…" />
+                  </div>
+                  <div className="mt-2">
+                    <Chips options={shownCities} selected={pickedCities} onToggle={toggle(setPickedCities)} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {mode === "picked" && (
+              <div className="space-y-3">
+                <SearchBox
+                  value={vendorQuery}
+                  onChange={(e) => setVendorQuery(e.target.value)}
+                  aria-label="Search vendors"
+                  placeholder="Search vendors by name…"
+                />
+                {vendorResults.length > 0 && (
+                  <ul className="divide-y divide-stone-2/70 overflow-hidden rounded-2xl border border-stone-2">
+                    {vendorResults.map((v) => {
+                      const added = picked.some((p) => p.org_id === v.org_id);
+                      return (
+                        <li key={v.org_id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-stone-4/70">
+                          <span className="min-w-0">
+                            <span className="font-medium text-ink">{v.business_name}</span>
+                            <span className="ml-2 text-xs text-ink-soft/60">
+                              {[v.category, v.city, v.status === "published" ? null : "draft"].filter(Boolean).join(" · ")}
+                            </span>
                           </span>
-                        </span>
+                          <button type="button" disabled={added} onClick={() => setPicked((l) => [...l, v])} className={`${btn.small} shrink-0`}>
+                            {added ? "Added" : "+ Add"}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                {picked.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {picked.map((v) => (
+                      <span
+                        key={v.org_id}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-brand/25 bg-brand-wash py-1 pl-3 pr-1.5 text-xs text-ink"
+                      >
+                        {v.business_name}
                         <button
                           type="button"
-                          disabled={added}
-                          onClick={() => setPicked((l) => [...l, v])}
-                          className="shrink-0 text-xs font-semibold text-brand-text disabled:text-ink-soft/40"
+                          aria-label={`Remove ${v.business_name}`}
+                          onClick={() => setPicked((l) => l.filter((p) => p.org_id !== v.org_id))}
+                          className="rounded-full p-0.5 text-ink-soft/60 hover:text-red-700"
                         >
-                          {added ? "Added" : "+ Add"}
+                          <Icon name="close" className="size-3.5" />
                         </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-              {picked.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {picked.map((v) => (
-                    <span key={v.org_id} className="inline-flex items-center gap-1.5 rounded-full bg-brand-wash px-3 py-1 text-xs text-ink">
-                      {v.business_name}
-                      <button
-                        type="button"
-                        aria-label={`Remove ${v.business_name}`}
-                        onClick={() => setPicked((l) => l.filter((p) => p.org_id !== v.org_id))}
-                        className="text-ink-soft/60 hover:text-red-700"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              <label className="inline-flex items-center gap-2 text-sm text-ink-soft">
+                <input type="checkbox" checked={publishedOnly} onChange={(e) => setPublishedOnly(e.target.checked)} className={checkbox} />
+                Only published listings
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-ink-soft">
+                <input type="checkbox" checked={claimedOnly} onChange={(e) => setClaimedOnly(e.target.checked)} className={checkbox} />
+                Only claimed listings
+              </label>
+            </div>
+            <div className="rounded-xl bg-brand-wash px-4 py-3 text-sm text-ink" role="status">
+              {reach === null ? (
+                <span className="text-ink-soft/70">Counting vendors…</span>
+              ) : (
+                <>
+                  Reaches <strong>{reach}</strong> vendor{reach === 1 ? "" : "s"} today.
+                  {mode !== "picked" && <span className="text-ink-soft/70"> Vendors who join later and match are included too.</span>}
+                </>
               )}
             </div>
-          )}
+          </fieldset>
 
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-            <label className="inline-flex items-center gap-2 text-sm text-ink-soft">
-              <input type="checkbox" checked={publishedOnly} onChange={(e) => setPublishedOnly(e.target.checked)} className="h-4 w-4 accent-[var(--color-brand)]" />
-              Only published listings
-            </label>
-            <label className="inline-flex items-center gap-2 text-sm text-ink-soft">
-              <input type="checkbox" checked={claimedOnly} onChange={(e) => setClaimedOnly(e.target.checked)} className="h-4 w-4 accent-[var(--color-brand)]" />
-              Only claimed listings
-            </label>
+          <Field label="Note" hint="(only admins see this)">
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} rows={2} className={field} />
+          </Field>
+
+          <div className="flex justify-end border-t border-stone-2 pt-5">
+            <button type="submit" disabled={busy} className={btn.primary}>
+              {busy ? "Saving…" : "Start promotion"}
+            </button>
           </div>
-          <p className="mt-3 text-sm text-ink">
-            {reach === null ? (
-              <span className="text-ink-soft/60">Counting vendors…</span>
-            ) : (
-              <>
-                Reaches <strong>{reach}</strong> vendor{reach === 1 ? "" : "s"} today.
-                {mode !== "picked" && <span className="text-ink-soft/60"> Vendors who join later and match are included too.</span>}
-              </>
-            )}
-          </p>
-        </fieldset>
+        </form>
+      </Card>
 
-        <label className="block">
-          <span className={label}>Note (only admins see this)</span>
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} rows={2} className={`${field} mt-2`} />
-        </label>
-
-        <button
-          type="submit"
-          disabled={busy}
-          className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-7 py-3 text-sm font-semibold text-white disabled:opacity-70"
-        >
-          {busy ? "Saving…" : "Start promotion"}
-        </button>
-      </form>
-
-      <h2 className="mt-10 text-lg font-medium text-ink">All promotions</h2>
-      {promotions === null && !error && <p className="mt-3 text-sm text-ink-soft/60">Loading…</p>}
-      {promotions?.length === 0 && <p className="mt-3 text-sm text-ink-soft/60">No promotions yet.</p>}
-      <ul className="mt-4 space-y-3">
-        {promotions?.map((p) => (
-          <li key={p.id} className="rounded-2xl border border-stone-2 bg-white p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
-                  {p.name}
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase ${
-                      p.status === "running"
-                        ? "bg-green-50 text-green-800"
-                        : p.status === "scheduled"
-                          ? "bg-amber-50 text-amber-800"
-                          : "bg-stone-4 text-ink-soft/60"
-                    }`}
-                  >
-                    {p.status}
-                  </span>
-                  <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-semibold uppercase text-white">
-                    {TIERS[p.plan].name}
-                  </span>
-                </p>
-                <p className="mt-1 text-xs text-ink-soft/70">
-                  {fmtDay(dayOf(p.starts_at))} – {fmtDay(lastDayOf(p.ends_at))}
-                  {p.ended_at && <> · ended early on {fmtDay(dayOf(p.ended_at))}{p.ended_by && ` by ${p.ended_by}`}</>}
-                </p>
-                <p className="mt-1 text-sm text-ink-soft">
-                  {audienceSummary(p)} · <strong>{p.reach}</strong> vendor{p.reach === 1 ? "" : "s"}
-                  {p.status === "ended" && " match today"}
-                </p>
-                {p.note && <p className="mt-1 text-xs italic text-ink-soft/60">{p.note}</p>}
-                {p.created_by && <p className="mt-1 text-xs text-ink-soft/50">Set up by {p.created_by}</p>}
-              </div>
-              {p.status !== "ended" && (
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => {
-                      setEditing(editing === p.id ? null : p.id);
-                      setEditDay(lastDayOf(p.ends_at));
-                    }}
-                    className="rounded-full border border-stone-2 px-4 py-1.5 text-xs font-semibold text-ink-soft hover:border-brand"
-                  >
-                    Change last day
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => end(p)}
-                    className="rounded-full border border-red-200 px-4 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50"
-                  >
-                    End now
-                  </button>
-                </div>
-              )}
-            </div>
-            {editing === p.id && (
-              <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-stone-2 pt-4">
-                <input type="date" value={editDay} min={today} onChange={(e) => setEditDay(e.target.value)} className={`${field} max-w-[12rem]`} />
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => saveEnd(p)}
-                  className="rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2 text-xs font-semibold text-white"
-                >
-                  Save
-                </button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-    </main>
+      <Card className="space-y-5">
+        <div id="all-promotions" className="scroll-mt-24">
+          <CardTitle count={promotions?.length}>All promotions</CardTitle>
+        </div>
+        {promotions === null && !error && <Empty>Loading…</Empty>}
+        {promotions?.length === 0 && <Empty>No promotions yet.</Empty>}
+        {promotions && promotions.length > 0 && (
+          <div className={table.wrap}>
+            <table className={table.table}>
+              <thead>
+                <tr className={table.headRow}>
+                  <th className={table.th}>Promotion</th>
+                  <th className={table.th}>Dates</th>
+                  <th className={table.th}>Who gets it</th>
+                  <th className={`${table.th} text-right`}>Action</th>
+                </tr>
+              </thead>
+              <tbody className={table.body}>
+                {promotions.map((p) => (
+                  <Fragment key={p.id}>
+                    <tr className={`${table.row} ${p.status === "ended" ? "bg-stone-4/30" : ""}`}>
+                      <td className={table.td}>
+                        <p className="font-medium text-ink">{p.name}</p>
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                          <Badge tone={STATUS_TONE[p.status]} dot>
+                            {STATUS_LABEL[p.status]}
+                          </Badge>
+                          <Badge tone={p.plan === "featured" ? "brandSolid" : "brand"}>{TIERS[p.plan].name}</Badge>
+                        </div>
+                        {p.note && <p className="mt-1.5 text-xs italic text-ink-soft/60">{p.note}</p>}
+                        {p.created_by && <p className="mt-1 text-xs text-ink-soft/50">Set up by {p.created_by}</p>}
+                      </td>
+                      <td className={`${table.td} whitespace-nowrap text-ink-soft/85`}>
+                        {fmtDay(dayOf(p.starts_at))} – {fmtDay(lastDayOf(p.ends_at))}
+                        {p.ended_at && (
+                          <p className="mt-1 whitespace-normal text-xs text-ink-soft/60">
+                            Ended early on {fmtDay(dayOf(p.ended_at))}
+                            {p.ended_by && ` by ${p.ended_by}`}
+                          </p>
+                        )}
+                      </td>
+                      <td className={`${table.td} text-ink-soft/85`}>
+                        {audienceSummary(p)}
+                        <p className="mt-1 text-xs text-ink-soft/60">
+                          <strong className="font-semibold text-ink">{p.reach}</strong> vendor{p.reach === 1 ? "" : "s"}
+                          {p.status === "ended" && " match today"}
+                        </p>
+                      </td>
+                      <td className={`${table.td} text-right`}>
+                        {p.status !== "ended" && (
+                          <div className="flex flex-wrap justify-end gap-1">
+                            <button
+                              type="button"
+                              disabled={busy}
+                              aria-expanded={editing === p.id}
+                              onClick={() => {
+                                setEditing(editing === p.id ? null : p.id);
+                                setEditDay(lastDayOf(p.ends_at));
+                              }}
+                              className={btn.small}
+                            >
+                              Change last day
+                            </button>
+                            <button type="button" disabled={busy} onClick={() => end(p)} className={btn.dangerQuiet}>
+                              End now
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                    {editing === p.id && (
+                      <tr className="bg-stone-4/50">
+                        <td colSpan={4} className="px-4 py-4">
+                          <div className="flex flex-wrap items-end gap-3">
+                            <Field label="New last day" className="w-48">
+                              <input type="date" value={editDay} min={today} onChange={(e) => setEditDay(e.target.value)} className={field} />
+                            </Field>
+                            <button type="button" disabled={busy} onClick={() => saveEnd(p)} className={btn.primary}>
+                              Save
+                            </button>
+                            <button type="button" onClick={() => setEditing(null)} className={btn.quiet}>
+                              Cancel
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }
+
