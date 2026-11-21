@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createHash, createHmac } from "node:crypto";
 import { claimToken, tokenHash, verifyUnsubscribe, unsubscribeSignature, bearerMatches } from "./tokens";
-import { firstEmail, followUpEmail, type VendorForEmail } from "./templates";
+import { finalEmail, firstEmail, followUpEmail, type VendorForEmail } from "./templates";
 import { findTells } from "../../scripts/human-voice.mjs";
 import { planToday, pauseReason, warmupCap, type Candidate } from "./plan";
 import { classifyResendEvent, domainAcceptsMail, failureScope, verifyResendWebhook } from "./delivery";
@@ -47,7 +47,7 @@ describe("emails", () => {
   const settings = { senderName: "Kebson", mailingAddress: "123 Main St #4, Fort Lauderdale, FL 33301", offerPro: false };
 
   it("carries everything CAN-SPAM requires, in both parts", () => {
-    for (const e of [firstEmail(v, links, settings), followUpEmail(v, links, settings)]) {
+    for (const e of [firstEmail(v, links, settings), followUpEmail(v, links, settings), finalEmail(v, links, settings)]) {
       for (const part of [e.text, e.html]) {
         expect(part).toContain("123 Main St #4");
         expect(part).toContain(links.unsubscribeUrl.replace(/&/g, part === e.html ? "&amp;" : "&"));
@@ -59,10 +59,16 @@ describe("emails", () => {
 
   it("reads as written by a person: no emoji, em dashes or stock AI phrases", () => {
     for (const offerPro of [false, true]) {
-      for (const e of [firstEmail(v, links, { ...settings, offerPro }), followUpEmail(v, links, { ...settings, offerPro })]) {
+      for (const e of [firstEmail(v, links, { ...settings, offerPro }), followUpEmail(v, links, { ...settings, offerPro }), finalEmail(v, links, { ...settings, offerPro })]) {
         expect(findTells(`${e.subject}\n\n${e.text}`).filter((t) => t.level === "fix")).toEqual([]);
       }
     }
+  });
+
+  it("only the final note says it's the last email, and the footer counts both follow-ups", () => {
+    expect(followUpEmail(v, links, settings).text).not.toMatch(/last email/i);
+    expect(finalEmail(v, links, settings).text).toMatch(/last email you'll get/);
+    expect(firstEmail(v, links, settings).text).toContain("at most two follow-ups");
   });
 
   it("is honest about reach and escapes vendor-supplied text in HTML", () => {
@@ -85,6 +91,8 @@ describe("emails", () => {
       expect(e.text).toContain("Find us on Bridal Team");
       expect(e.html).not.toContain("<img");
     }
+    // The final note is kept short and leaves the badge out, but still no images.
+    expect(finalEmail(v, links, settings).html).not.toContain("<img");
   });
 
   it("doesn't point a draft listing at a page that isn't public", () => {
@@ -155,6 +163,26 @@ describe("planning a day", () => {
     });
     expect(plan.followUps.map((f) => f.orgId)).toEqual(["a"]);
     expect(plan.firsts).toHaveLength(2);
+  });
+
+  it("sends final notes 15 days after the follow-up, after follow-ups and before first emails", () => {
+    const followUps = [{ orgId: "a", email: "a@ex.com", firstSentAt: "2026-11-02T15:00:00Z" }];
+    const finals = [
+      { orgId: "f1", email: "f1@ex.com", followupSentAt: "2026-10-25T15:00:00Z" }, // 16 days
+      { orgId: "f2", email: "f2@ex.com", followupSentAt: "2026-10-30T15:00:00Z" }, // 11 days: not yet
+      { orgId: "f3", email: "f3@ex.com", followupSentAt: "2026-10-20T15:00:00Z" }, // suppressed
+    ];
+    const plan = planToday({
+      ...base,
+      candidates: [c({}), c({}), c({})],
+      followUps,
+      finals,
+      suppressed: new Set(["f3@ex.com"]),
+      cap: 3,
+    });
+    expect(plan.followUps.map((f) => f.orgId)).toEqual(["a"]);
+    expect(plan.finals.map((f) => f.orgId)).toEqual(["f1"]);
+    expect(plan.firsts).toHaveLength(1);
   });
 
   it("pauses on bounces or complaints", () => {

@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     .from("outreach_events")
     .select("org_id, email")
     .eq("message_id", messageId)
-    .in("kind", ["sent_first", "sent_followup"])
+    .in("kind", ["sent_first", "sent_followup", "sent_final"])
     .limit(1)
     .maybeSingle();
   if (!sent) return NextResponse.json({ ignored: true }); // not a campaign email

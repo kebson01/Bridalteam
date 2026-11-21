@@ -2,7 +2,8 @@ import { SITE_URL } from "@/lib/site";
 import { TIERS } from "@/lib/tiers";
 
 /**
- * The two campaign emails: the first message and the one follow-up.
+ * The three campaign emails: the first message, a follow-up a week later,
+ * and a final note 15 days after that. Nothing is sent after the final note.
  *
  * Written to VENDOR-OUTREACH.md's rules: honest about reach (no promised
  * bookings), short, one clear action, and an easy way out. Plain text is the
@@ -74,7 +75,7 @@ function proOffer(s: EmailSettings): string | null {
 function footer(v: VendorForEmail, l: EmailLinks, s: EmailSettings): { text: string; html: string } {
   const why =
     `You're getting this because ${v.email} is the public contact address for ${v.businessName}. ` +
-    `We send one email and at most one follow-up.`;
+    `We send one email and at most two follow-ups.`;
   return {
     text: `--\n${why}\nUnsubscribe or remove your listing: ${l.unsubscribeUrl}\nBridal Team, ${s.mailingAddress}`,
     html:
@@ -151,12 +152,15 @@ export function firstEmail(v: VendorForEmail, l: EmailLinks, s: EmailSettings): 
 export function followUpEmail(v: VendorForEmail, l: EmailLinks, s: EmailSettings): RenderedEmail {
   const name = v.businessName;
   const foot = footer(v, l, s);
-  const body1 = `Just following up once on my note last week. Your free page on Bridal Team is still waiting for you:`;
+  // Not "the last email": a final note follows 15 days later for anyone who
+  // hasn't claimed. Vendors who were told this one was the last (before the
+  // final note existed) never get it; see run.ts.
+  const body1 = `Just following up on my note last week. Your free page on Bridal Team is still waiting for you:`;
   const body2 =
     `Claiming it lets you correct your details, add photos and get a "Find us on Bridal Team" badge ` +
     `for your own website. It's free and needs no card.` +
     (s.offerPro ? ` The free year of Pro I mentioned still stands.` : "");
-  const body3 = `If it's not for you, no problem. This is the last email you'll get from me about it.`;
+  const body3 = `If it's not for you, no problem. Use the link at the bottom and you won't hear from us again.`;
 
   const text = [
     `Hi ${name} team,`,
@@ -179,4 +183,38 @@ export function followUpEmail(v: VendorForEmail, l: EmailLinks, s: EmailSettings
   );
 
   return { subject: `Following up: ${name} on Bridal Team`, text, html };
+}
+
+/** The final note, 15 days after the follow-up. Short, and the last email this vendor gets. */
+export function finalEmail(v: VendorForEmail, l: EmailLinks, s: EmailSettings): RenderedEmail {
+  const name = v.businessName;
+  const foot = footer(v, l, s);
+  const body1 = `One last note about ${name}'s free page on Bridal Team, in case my earlier emails got buried. You can still claim it here:`;
+  const body2 =
+    `It takes a couple of minutes and needs no card. Once it's yours you can fix your details and add ` +
+    `photos and a description.` +
+    (s.offerPro ? ` The free year of Pro comes with it.` : "");
+  const body3 = `Either way, this is the last email you'll get from me about it. Thanks for reading.`;
+
+  const text = [
+    `Hi ${name} team,`,
+    `${body1}\n${l.claimUrl}`,
+    body2,
+    body3,
+    `${s.senderName}\nBridal Team · bridalteam.com`,
+    foot.text,
+  ].join("\n\n");
+
+  const html = wrap(
+    [
+      `Hi ${esc(name)} team,`,
+      `${esc(body1)}<br>${link(l.claimUrl, `Claim ${name}'s page`)}`,
+      esc(body2),
+      esc(body3),
+      `${esc(s.senderName)}<br>Bridal Team · ${link(SITE_URL, "bridalteam.com")}`,
+    ],
+    foot.html,
+  );
+
+  return { subject: `Last note: ${name} on Bridal Team`, text, html };
 }

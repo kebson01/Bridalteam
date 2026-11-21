@@ -85,7 +85,7 @@ describe("runOutreach", () => {
     for (let i = 1; i <= 30; i++) listing(i);
     const r = await runOutreach({ db: fakeDb(tables), config, send, acceptsMail: async () => true }, true);
     expect(r.cap).toBe(20);
-    expect(r.planned).toEqual({ followUps: 0, firsts: 20 });
+    expect(r.planned).toEqual({ followUps: 0, finals: 0, firsts: 20 });
     expect(r.remaining).toBe(10);
     expect(send).not.toHaveBeenCalled();
     expect(tables.vendor_outreach).toHaveLength(0);
@@ -110,22 +110,58 @@ describe("runOutreach", () => {
     expect(tables.outreach_events.map((e) => e.kind)).toEqual(["sent_first"]);
   });
 
-  it("follows up once after a week, then never again", async () => {
+  it("follows up after a week, sends a final note 15 days later, then never again", async () => {
     listing(1);
     const db = fakeDb(tables);
-    await runOutreach({ db, config, now: new Date("2026-11-02T15:00:00Z"), send, acceptsMail: async () => true }, false);
+    const run = (day: string) => runOutreach({ db, config, now: new Date(`${day}T15:00:00Z`), send, acceptsMail: async () => true }, false);
+    await run("2026-11-02");
     // Day 5: too early.
-    let r = await runOutreach({ db, config, now: new Date("2026-11-07T15:00:00Z"), send, acceptsMail: async () => true }, false);
-    expect(r.sent).toEqual({ followUps: 0, firsts: 0 });
-    // Day 8: the follow-up, with the same claim link.
-    r = await runOutreach({ db, config, now: new Date("2026-11-10T15:00:00Z"), send, acceptsMail: async () => true }, false);
+    let r = await run("2026-11-07");
+    expect(r.sent).toEqual({ followUps: 0, finals: 0, firsts: 0 });
+    // Day 8: the follow-up, with the same claim link, and it doesn't call itself the last email.
+    r = await run("2026-11-10");
     expect(r.sent.followUps).toBe(1);
     expect(sent[1].email.subject).toMatch(/Following up/);
     expect(sent[1].email.text).toContain(`/claim/${claimToken(config.secret, org(1))}`);
-    // Day 20: nothing left.
-    r = await runOutreach({ db, config, now: new Date("2026-11-20T15:00:00Z"), send, acceptsMail: async () => true }, false);
-    expect(r.sent).toEqual({ followUps: 0, firsts: 0 });
-    expect(send).toHaveBeenCalledTimes(2);
+    expect(sent[1].email.text).not.toMatch(/last email/i);
+    expect(tables.vendor_outreach[0]).toMatchObject({ status: "followed_up", final_allowed: true });
+    // 14 days after the follow-up: not yet.
+    r = await run("2026-11-24");
+    expect(r.sent).toEqual({ followUps: 0, finals: 0, firsts: 0 });
+    // 15 days after: the final note, same link, which still works for 30+ days.
+    r = await run("2026-11-25");
+    expect(r.sent.finals).toBe(1);
+    expect(sent[2].email.subject).toMatch(/^Last note/);
+    expect(sent[2].email.text).toMatch(/last email you'll get/);
+    expect(sent[2].email.text).toContain(`/claim/${claimToken(config.secret, org(1))}`);
+    expect(sent[2].idempotencyKey).toBe(`vendor-claim-final-${org(1)}`);
+    expect(tables.vendor_outreach[0]).toMatchObject({ status: "final_sent" });
+    expect(tables.outreach_events.map((e) => e.kind)).toEqual(["sent_first", "sent_followup", "sent_final"]);
+    expect(new Date(String(tables.vendor_claims[0].expires_at)).getTime()).toBeGreaterThanOrEqual(new Date("2026-12-25T15:00:00Z").getTime());
+    // Later: nothing left.
+    r = await run("2026-12-20");
+    expect(r.sent).toEqual({ followUps: 0, finals: 0, firsts: 0 });
+    expect(send).toHaveBeenCalledTimes(3);
+  });
+
+  it("never sends a final note to a vendor whose follow-up said it was the last email", async () => {
+    listing(1);
+    // A follow-up sent before the final note existed: final_allowed stays false.
+    tables.vendor_outreach.push({ org_id: org(1), email: "v1@ex.com", status: "followed_up", first_sent_at: "2026-11-02T15:00:00Z", followup_sent_at: "2026-11-10T15:00:00Z", final_allowed: false });
+    tables.outreach_events.push({ kind: "sent_first", created_at: "2026-11-02T15:00:00Z" }, { kind: "sent_followup", created_at: "2026-11-10T15:00:00Z" });
+    const r = await runOutreach({ db: fakeDb(tables), config, now: new Date("2026-12-01T15:00:00Z"), send, acceptsMail: async () => true }, false);
+    expect(r.planned.finals).toBe(0);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("sends no final note once a vendor claims", async () => {
+    listing(1);
+    tables.vendor_outreach.push({ org_id: org(1), email: "v1@ex.com", status: "followed_up", first_sent_at: "2026-11-02T15:00:00Z", followup_sent_at: "2026-11-10T15:00:00Z", final_allowed: true });
+    tables.org_members.push({ org_id: org(1) });
+    const r = await runOutreach({ db: fakeDb(tables), config, now: new Date("2026-12-01T15:00:00Z"), send, acceptsMail: async () => true }, false);
+    expect(r.newlyClaimed).toBe(1);
+    expect(send).not.toHaveBeenCalled();
+    expect(tables.vendor_outreach[0].status).toBe("claimed");
   });
 
   it("skips claimed listings, suppressed addresses and domains that take no mail", async () => {
