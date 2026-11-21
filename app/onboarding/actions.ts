@@ -2,8 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { findUnclaimedListing, type ListingMatch } from "@/lib/listing-match";
 
-export type OnboardingState = { error: string | null };
+export type OnboardingState = {
+  error: string | null;
+  /** An unclaimed listing with the same business name: offer it before creating a duplicate. */
+  match?: ListingMatch | null;
+};
 
 function str(v: FormDataEntryValue | null, max = 200) {
   const s = typeof v === "string" ? v.trim() : "";
@@ -58,6 +64,15 @@ export async function createWorkspace(
     const businessName = str(formData.get("business_name"), 160);
     const category = str(formData.get("vendor_category"), 80);
     if (!businessName) return { error: "What's your business called?" };
+
+    // Already listed? Show that listing instead of quietly making a second one
+    // (lib/listing-match.ts). The vendor can still go ahead with a new page
+    // ("not my business"), which posts skip_match.
+    if (formData.get("skip_match") !== "1") {
+      const admin = supabaseAdmin();
+      const match = admin ? await findUnclaimedListing(admin, businessName).catch(() => null) : null;
+      if (match) return { error: null, match };
+    }
 
     const { error } = await supabase.rpc("create_vendor_account", {
       p_business_name: businessName,

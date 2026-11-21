@@ -187,6 +187,25 @@ describe("runOutreach", () => {
     expect(tables.vendor_outreach[0].status).toBe("claimed");
   });
 
+  it("treats a listing as taken when the vendor signed up separately under the same name", async () => {
+    listing(1);
+    listing(2);
+    // Listing 1 was emailed; then the vendor made their own account instead of claiming.
+    tables.vendor_outreach.push({ org_id: org(1), email: "v1@ex.com", status: "sent", first_sent_at: "2026-11-02T15:00:00Z", final_allowed: false });
+    tables.outreach_events.push({ kind: "sent_first", created_at: "2026-11-02T15:00:00Z" });
+    tables.vendor_profiles.push({ org_id: org(91), business_name: "VENDOR-1", category: "Photography", city: "Miami", status: "published" });
+    tables.org_members.push({ org_id: org(91) });
+    // Listing 2 was never emailed; its owner also signed up separately.
+    tables.vendor_profiles.push({ org_id: org(92), business_name: "vendor 2", category: "Photography", city: "Miami", status: "draft" });
+    tables.org_members.push({ org_id: org(92) });
+
+    const r = await runOutreach({ db: fakeDb(tables), config, now: new Date("2026-11-10T15:00:00Z"), send, acceptsMail: async () => true }, false);
+    expect(send).not.toHaveBeenCalled();
+    expect(r.newlyClaimed).toBe(1);
+    expect(tables.vendor_outreach.find((o) => o.org_id === org(1))?.status).toBe("claimed");
+    expect(r.planned).toEqual({ followUps: 0, finals: 0, firsts: 0 });
+  });
+
   it("pauses on complaints and sends nothing until resumed", async () => {
     listing(1);
     tables.outreach_events.push(

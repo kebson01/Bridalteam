@@ -243,6 +243,23 @@ sent before then, ended "This is the last email you'll get from me about it",
 so those vendors never get one. Vendors emailed before then were also told
 "at most one follow-up" in the first email's footer, which now says two.
 
+**Vendors who sign up instead of claiming.** Some vendors make a new account
+with a different email than the one on their listing, so the claim prompt
+never appears and they end up with a second listing (four did in November
+2026; the duplicates were merged by hand on 2026-11-21). Two guards now:
+
+- `/onboarding`: a vendor typing a business name we already list, unclaimed,
+  is shown that listing and can have a claim link emailed to the listing's own
+  contact address (masked on screen; at most once a day per listing, never to
+  a suppressed address; logged as `claim_link_sent`). They can still choose
+  "Create a new page instead". Code: `lib/listing-match.ts`,
+  `app/onboarding/claim-actions.ts`.
+- The daily run treats a listing as taken when a vendor account with the same
+  business name (letters and digits only, any case) has an owner, so it is
+  never sent "please claim" emails. Two different businesses with exactly the
+  same name would lose the unowned one's emails; rare, and safer than the
+  reverse.
+
 ## Setting it up (once)
 
 1. **Mailing address.** Done: `Bridal Team, 2139 N University Dr #2055, Coral Springs, FL 33071, United States`.

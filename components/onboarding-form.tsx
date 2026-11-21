@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { createWorkspace, type OnboardingState } from "@/app/onboarding/actions";
+import { sendClaimLinkToListing, type ClaimLinkState } from "@/app/onboarding/claim-actions";
 import { LAUNCH_CITY, LAUNCH_REGION } from "@/lib/site";
 
 const INPUT =
@@ -23,6 +24,17 @@ export default function OnboardingForm({
     createWorkspace,
     { error: null },
   );
+
+  const [link, linkAction, linkPending] = useActionState<ClaimLinkState, FormData>(sendClaimLinkToListing, {
+    error: null,
+    sentTo: null,
+  });
+  const match = accountType === "vendor" ? state.match : null;
+  // Held here rather than left to the inputs: React clears a form's fields
+  // after each action, and when the action answers "we already have a page
+  // for this name" the vendor's next step resubmits the same form.
+  const [businessName, setBusinessName] = useState("");
+  const [vendorCategory, setVendorCategory] = useState("");
 
   const isCompany = accountType === "planner_company";
   const isVendor = accountType === "vendor";
@@ -84,13 +96,28 @@ export default function OnboardingForm({
         <div className="mb-4 grid gap-4 sm:grid-cols-2">
           <label className="block">
             <span className="text-sm font-medium text-ink-soft">Business name</span>
-            <input required name="business_name" disabled={pending} placeholder="Bloom & Vine Florals" className={INPUT} />
+            <input
+              required
+              name="business_name"
+              value={businessName}
+              onChange={(e) => setBusinessName(e.target.value)}
+              disabled={pending}
+              placeholder="Bloom & Vine Florals"
+              className={INPUT}
+            />
           </label>
           <label className="block">
             <span className="text-sm font-medium text-ink-soft">
               Category <span className={OPTIONAL}>optional</span>
             </span>
-            <input name="vendor_category" disabled={pending} placeholder="Florist, Photographer, Venue…" className={INPUT} />
+            <input
+              name="vendor_category"
+              value={vendorCategory}
+              onChange={(e) => setVendorCategory(e.target.value)}
+              disabled={pending}
+              placeholder="Florist, Photographer, Venue…"
+              className={INPUT}
+            />
           </label>
         </div>
       ) : isCompany ? (
@@ -187,6 +214,57 @@ export default function OnboardingForm({
         </>
       )}
 
+      {match && (
+        <div role="status" className="mb-6 rounded-xl border border-brand/30 bg-brand-wash/60 p-5">
+          <input type="hidden" name="org_id" value={match.orgId} />
+          <p className="text-sm font-medium text-ink">
+            We already have a page for {match.businessName}
+            {[match.category, match.city].filter(Boolean).length > 0 && (
+              <span className="font-normal text-ink-soft/75"> ({[match.category, match.city].filter(Boolean).join(" · ")})</span>
+            )}
+          </p>
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-soft/80">
+            Claim it instead of starting over. We&rsquo;ll email a claim link to the address on that
+            listing, <span className="font-medium text-ink">{match.maskedEmail}</span>. Open it while
+            signed in to this account and the page is yours.
+          </p>
+
+          {link.sentTo ? (
+            <p className="mt-3 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
+              Sent to {link.sentTo}. Check that inbox (and spam) for the link.
+            </p>
+          ) : (
+            <button
+              type="submit"
+              formAction={linkAction}
+              formNoValidate
+              disabled={linkPending || pending}
+              className="mt-3 rounded-full bg-gradient-to-r from-brand to-brand-dark px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-70"
+            >
+              {linkPending ? "Sending…" : "Email me the claim link"}
+            </button>
+          )}
+          {link.error && (
+            <p role="alert" className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              {link.error}
+            </p>
+          )}
+
+          <p className="mt-4 text-xs text-ink-soft/70">
+            Not your business, or no access to that inbox?{" "}
+            <button
+              type="submit"
+              name="skip_match"
+              value="1"
+              disabled={pending}
+              className="font-semibold text-brand-text underline-offset-2 hover:underline"
+            >
+              Create a new page instead
+            </button>
+          </p>
+        </div>
+      )}
+
       {state.error && (
         <p role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
           {state.error}
@@ -203,7 +281,9 @@ export default function OnboardingForm({
           : isExplorer
             ? "Continue"
             : isVendor
-            ? "Create my vendor account"
+            ? match
+              ? "Check the name again"
+              : "Create my vendor account"
             : isCompany
               ? "Create my company workspace"
               : "Create my plan"}
