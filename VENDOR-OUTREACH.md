@@ -205,8 +205,9 @@ complaints.
 # Automated email campaign
 
 Emails every listing that has a business contact address (705 at launch), one
-metro and one category tier at a time, with one follow-up a week later. No
-calls, no hand-written batches. Code: `lib/outreach/`; daily trigger:
+metro and one category tier at a time, with a follow-up a week later and a
+final note 15 days after that (about day 22). No calls, no hand-written
+batches. Code: `lib/outreach/`; daily trigger:
 `.github/workflows/vendor-outreach.yml`; tables: `vendor_outreach`,
 `outreach_suppressions`, `outreach_events`
 (`supabase/migrations/20261101090000_vendor_outreach.sql`).
@@ -216,7 +217,8 @@ calls, no hand-written batches. Code: `lib/outreach/`; daily trigger:
 1. Stops if the last batches drew too many bounces (over 5%) or 2+ spam
    complaints, and emails `OUTREACH_ALERT_TO`. Nothing sends until it is resumed.
 2. Marks any listing claimed since yesterday so it gets no follow-up.
-3. Sends the follow-ups that are 7+ days old, then first emails, within the
+3. Sends the follow-ups that are 7+ days old, then final notes 15+ days after
+   the follow-up, then first emails, within the
    warm-up limit: 20 a day for the first 5 sending days, 35 for the next 5,
    then 50. South Florida first, photographers and videographers, then
    florists and cakes, then music and officiants, then beauty and planners,
@@ -232,7 +234,14 @@ An unsubscribe, a hard bounce or a spam complaint blocks the address forever.
 delete it for good with the SQL in the templates section above.
 
 The wording lives in `lib/outreach/templates.ts`. Same honesty rules as the
-hand-written templates: no promised bookings, one follow-up, an easy way out.
+hand-written templates: no promised bookings, an easy way out, and nothing
+after the final note.
+
+**The final note** (added 2026-11-21) goes only to vendors whose follow-up
+left room for it (`vendor_outreach.final_allowed`). The first 137 follow-ups,
+sent before then, ended "This is the last email you'll get from me about it",
+so those vendors never get one. Vendors emailed before then were also told
+"at most one follow-up" in the first email's footer, which now says two.
 
 ## Setting it up (once)
 
@@ -284,7 +293,7 @@ select p.category, count(*) as emailed, count(*) filter (where o.status = 'claim
 
 -- Bounces and complaints so far
 select kind, count(*) from outreach_events
- where kind in ('sent_first','sent_followup','delivered','bounced','complained','unsubscribed')
+ where kind in ('sent_first','sent_followup','sent_final','delivered','bounced','complained','unsubscribed')
  group by 1;
 
 -- Removal requests to delete for good

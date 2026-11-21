@@ -7,9 +7,10 @@ import { METROS, metroOf } from "@/lib/areas";
  *  - Warm-up. A brand-new sending domain that jumps straight to volume lands
  *    in spam, so the daily total starts at 20 and rises to 35, then 50, as
  *    days of sending accumulate (weekdays only; the schedule runs Mon-Fri).
- *  - Follow-ups first. Each one is due 7 days after the first email and is
- *    the last message that vendor will ever get, so it is not left waiting
- *    behind new sends.
+ *  - Follow-ups first. The follow-up is due 7 days after the first email and
+ *    the final note 15 days after the follow-up; both go before new first
+ *    emails so a vendor's sequence isn't left waiting behind new sends. The
+ *    final note is the last message that vendor will ever get.
  *  - One metro at a time, best categories first. VENDOR-OUTREACH.md: work a
  *    metro before moving on, and start with the vendors who say yes fastest
  *    (photographers, florists) and leave venues and caterers for last.
@@ -34,7 +35,15 @@ export interface FollowUpDue {
   firstSentAt: string;
 }
 
+export interface FinalDue {
+  orgId: string;
+  email: string;
+  followupSentAt: string;
+}
+
 export const FOLLOWUP_AFTER_DAYS = 7;
+/** The final note: this many days after the follow-up (so about day 22). */
+export const FINAL_AFTER_DAYS = 15;
 
 /** Lower goes first. Anything unlisted sits in the middle. */
 const CATEGORY_TIER: Record<string, number> = {
@@ -85,6 +94,8 @@ export const isPlausibleEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.t
 export interface PlanInput {
   candidates: Candidate[];
   followUps: FollowUpDue[];
+  /** Vendors whose follow-up allows one final note (see run.ts), due or not. */
+  finals?: FinalDue[];
   /** Lowercased addresses that must not get a first email: suppressions plus every address already emailed. */
   blocked: Set<string>;
   /** Lowercased addresses that must not get anything, follow-ups included. */
@@ -95,15 +106,23 @@ export interface PlanInput {
 
 export interface Plan {
   followUps: FollowUpDue[];
+  finals: FinalDue[];
   firsts: Candidate[];
 }
 
-export function planToday({ candidates, followUps, blocked, suppressed, cap, now }: PlanInput): Plan {
+export function planToday({ candidates, followUps, finals = [], blocked, suppressed, cap, now }: PlanInput): Plan {
   const cutoff = now.getTime() - FOLLOWUP_AFTER_DAYS * 86_400_000;
   const due = followUps
     .filter((f) => new Date(f.firstSentAt).getTime() <= cutoff && !suppressed.has(f.email.toLowerCase()))
     .sort((a, b) => a.firstSentAt.localeCompare(b.firstSentAt))
     .slice(0, cap);
+
+  const finalCutoff = now.getTime() - FINAL_AFTER_DAYS * 86_400_000;
+  const finalsDue = finals
+    .filter((f) => new Date(f.followupSentAt).getTime() <= finalCutoff && !suppressed.has(f.email.toLowerCase()))
+    .sort((a, b) => a.followupSentAt.localeCompare(b.followupSentAt))
+    .slice(0, Math.max(0, cap - due.length));
+  const used = due.length + finalsDue.length;
 
   const rank = (c: Candidate) => {
     const metro = metroOf(c.city);
@@ -124,11 +143,11 @@ export function planToday({ candidates, followUps, blocked, suppressed, cap, now
   const seen = new Set<string>();
   const firsts: Candidate[] = [];
   for (const c of [...candidates].sort(byPriority)) {
-    if (firsts.length >= cap - due.length) break;
+    if (firsts.length >= cap - used) break;
     const key = c.email.trim().toLowerCase();
     if (!isPlausibleEmail(key) || blocked.has(key) || seen.has(key)) continue;
     seen.add(key);
     firsts.push(c);
   }
-  return { followUps: due, firsts };
+  return { followUps: due, finals: finalsDue, firsts };
 }

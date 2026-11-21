@@ -19,7 +19,7 @@ export async function unsubscribeListing(db: SupabaseClient, orgId: string, remo
 
   await db.from("outreach_suppressions").upsert({ email, reason: "unsubscribed" }, { onConflict: "email", ignoreDuplicates: true });
   if (row) {
-    await db.from("vendor_outreach").update({ status: "unsubscribed", updated_at: new Date().toISOString() }).eq("org_id", orgId).in("status", ["sent", "followed_up"]);
+    await db.from("vendor_outreach").update({ status: "unsubscribed", updated_at: new Date().toISOString() }).eq("org_id", orgId).in("status", ["sent", "followed_up", "final_sent"]);
   }
   await db.from("outreach_events").insert({ org_id: orgId, email, kind: "unsubscribed" });
 
