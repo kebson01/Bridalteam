@@ -85,7 +85,6 @@ export default function AdminVendorSitesPage() {
 
   useEffect(() => {
     void load("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function act(site: Site, action: "takedown" | "restore") {
