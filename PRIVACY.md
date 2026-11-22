@@ -82,13 +82,21 @@ data region and processing terms before publishing; update as your stack changes
 | DigitalOcean | Application hosting | Usage/request data |
 | Cloudflare | CDN, security, DNS | Request metadata, IP |
 | Pexels | Inspiration imagery | Image requests |
+| Google (Analytics) | Website traffic statistics | Pages viewed, device/browser, approximate location, cookie id |
 
 ## 6. Cookies and similar technologies
 
 We use cookies and local storage that are necessary to run the Service (for
 example, to keep you signed in) and, where applicable, to understand usage. You
 can control cookies through your browser; disabling essential cookies may break
-core features. [TODO: describe any consent banner and analytics you add.]
+core features.
+
+We use Google Analytics to measure site traffic. It sets its own `_ga` cookies
+and receives pages viewed, browser/device type and approximate location (derived
+from IP). Google signals and ad personalisation are off, and we send Google no
+name, email or account id. Opt out with Google's opt-out add-on
+(https://tools.google.com/dlpage/gaoptout) or by blocking google-analytics.com
+cookies. We do not run advertising trackers.
 
 ## 7. Data retention
 
@@ -162,6 +170,5 @@ Questions or privacy requests:
 
 - [TODO] Effective date (set at publication)
 - [TODO] Confirm each sub-processor's data region (esp. Supabase) for §5 and §11
-- [TODO] Analytics/cookie-banner description if you add one (§6)
 - Have a Florida-licensed attorney confirm which state privacy laws apply and
   finalize §9/§11, then remove the {...NOTE} markers.

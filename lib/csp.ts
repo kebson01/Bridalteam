@@ -1,4 +1,5 @@
 import { SUPABASE_URL } from "@/lib/supabase";
+import { GA_MEASUREMENT_ID, GA_SCRIPT_HOSTS, GA_CONNECT_HOSTS } from "@/lib/google-analytics";
 
 /**
  * Builds the Content-Security-Policy.
@@ -61,20 +62,32 @@ import { SUPABASE_URL } from "@/lib/supabase";
  *                 blocked mid-redirect. Naming the hosts costs nothing and
  *                 removes the browser-dependent failure.
  *
+ *   Google Analytics — only when NEXT_PUBLIC_GA_MEASUREMENT_ID is set:
+ *                 gtag.js from www.googletagmanager.com (script-src) and its
+ *                 beacons to *.google-analytics.com / *.analytics.google.com
+ *                 (connect-src). Beacon images are already covered by img-src.
+ *                 See components/google-analytics.tsx.
+ *
  * Anything else added later that loads a cross-origin script, iframe, or
  * fetch target needs its own entry here — check before enabling a feature,
  * not after a support ticket.
  */
-export function buildCsp(nonce: string, strict: boolean): string {
+export function buildCsp(
+  nonce: string,
+  strict: boolean,
+  gaId: string | undefined = GA_MEASUREMENT_ID,
+): string {
   const supabaseHttp = SUPABASE_URL;
   const supabaseWss = SUPABASE_URL.replace(/^https:/, "wss:");
   // Cloudflare Turnstile: a script on our page, an iframe for the challenge,
   // and its own XHR back home. Named in script-src, frame-src and connect-src
   // below. Remove all three together if the captcha is ever dropped.
   const turnstile = "https://challenges.cloudflare.com";
+  const gaScript = gaId ? ` ${GA_SCRIPT_HOSTS.join(" ")}` : "";
+  const gaConnect = gaId ? ` ${GA_CONNECT_HOSTS.join(" ")}` : "";
   const scriptSrc = strict
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${turnstile}`
-    : `script-src 'self' 'unsafe-inline' ${turnstile}`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${turnstile}${gaScript}`
+    : `script-src 'self' 'unsafe-inline' ${turnstile}${gaScript}`;
   return [
     `default-src 'self'`,
     scriptSrc,
@@ -82,7 +95,7 @@ export function buildCsp(nonce: string, strict: boolean): string {
     `img-src 'self' blob: data: https:`,
     `font-src 'self' data:`,
     `media-src 'self' https:`,
-    `connect-src 'self' ${supabaseHttp} ${supabaseWss} ${turnstile}`,
+    `connect-src 'self' ${supabaseHttp} ${supabaseWss} ${turnstile}${gaConnect}`,
     `worker-src 'self' blob:`,
     `manifest-src 'self'`,
     `frame-src 'self' https://www.youtube.com https://player.vimeo.com ${turnstile}`,

@@ -29,6 +29,11 @@ const SUBPROCESSORS = [
   { provider: "DigitalOcean", purpose: "Application hosting", data: "Usage / request data" },
   { provider: "Cloudflare", purpose: "CDN, security, DNS", data: "Request metadata, IP address" },
   { provider: "Pexels", purpose: "Inspiration imagery", data: "Image requests" },
+  {
+    provider: "Google (Analytics)",
+    purpose: "Website traffic statistics",
+    data: "Pages viewed, device/browser, approximate location, cookie id",
+  },
 ];
 
 export default function PrivacyPage() {
@@ -37,7 +42,7 @@ export default function PrivacyPage() {
       <PageHero eyebrow="Legal" title="Privacy Policy" />
       <LegalBody>
         <div className="space-y-4">
-          <LastUpdated date="November 2, 2026" />
+          <LastUpdated date="November 22, 2026" />
           <Preamble>
             <P>
               This Privacy Policy explains how <Lead>Bridal Team, LLC</Lead> (&ldquo;Bridal
@@ -128,13 +133,28 @@ export default function PrivacyPage() {
         <Section n={6} title="Cookies and similar technologies">
           <P>
             We use cookies and local storage that are necessary to run the Service &mdash; for
-            example, to keep you signed in and to remember your session. <Lead>We do not run
-            third-party advertising or analytics trackers,</Lead> so there is no consent banner to
-            dismiss. You can control cookies through your browser; disabling essential cookies may
-            break core features such as signing in.
+            example, to keep you signed in and to remember your session. You can control cookies
+            through your browser; disabling essential cookies may break core features such as
+            signing in.
           </P>
           <P>
-            We do count how the site is used &mdash; which pages are visited, how long they stay
+            <Lead>We use Google Analytics</Lead> to understand how many people visit the site and
+            which pages they use. Google Analytics sets its own cookies (named{" "}
+            <code>_ga</code>) and receives the pages you view, your browser and device type, and
+            your approximate location, which Google derives from your IP address. We have turned
+            off Google signals and ad personalisation, so this data is not used to show you ads,
+            and we do not send Google your name, email or account id. Google processes it under{" "}
+            <a href="https://policies.google.com/privacy" className="underline">
+              its own privacy policy
+            </a>
+            . You can opt out with Google&rsquo;s{" "}
+            <a href="https://tools.google.com/dlpage/gaoptout" className="underline">
+              opt-out browser add-on
+            </a>{" "}
+            or by blocking cookies for google-analytics.com. We do not run advertising trackers.
+          </P>
+          <P>
+            Separately, we also count how the site is used &mdash; which pages are visited, how long they stay
             on screen, which page people go to next, how many tried the AI planner and how many
             went on to create an account. Those records are kept on our own servers and contain{" "}
             <Lead>no IP address, no account id, no cookie and no fingerprint.</Lead> To tell one
