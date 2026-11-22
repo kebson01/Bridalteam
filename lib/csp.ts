@@ -1,5 +1,5 @@
 import { SUPABASE_URL } from "@/lib/supabase";
-import { GA_MEASUREMENT_ID, GA_SCRIPT_HOSTS, GA_CONNECT_HOSTS } from "@/lib/google-analytics";
+import { GOOGLE_TAG_ID, GA_SCRIPT_HOSTS, GA_CONNECT_HOSTS } from "@/lib/google-analytics";
 
 /**
  * Builds the Content-Security-Policy.
@@ -62,11 +62,14 @@ import { GA_MEASUREMENT_ID, GA_SCRIPT_HOSTS, GA_CONNECT_HOSTS } from "@/lib/goog
  *                 blocked mid-redirect. Naming the hosts costs nothing and
  *                 removes the browser-dependent failure.
  *
- *   Google Analytics — only when NEXT_PUBLIC_GA_MEASUREMENT_ID is set:
- *                 gtag.js from www.googletagmanager.com (script-src) and its
+ *   Google Analytics — only when NEXT_PUBLIC_GOOGLE_TAG_ID is set:
+ *                 gtm.js / gtag.js from www.googletagmanager.com
+ *                 (script-src) and GA4's
  *                 beacons to *.google-analytics.com / *.analytics.google.com
  *                 (connect-src). Beacon images are already covered by img-src.
- *                 See components/google-analytics.tsx.
+ *                 See components/google-analytics.tsx. A GTM container
+ *                 can be given tags for other vendors in the GTM dashboard;
+ *                 their hosts must be added here too or they are blocked.
  *
  * Anything else added later that loads a cross-origin script, iframe, or
  * fetch target needs its own entry here — check before enabling a feature,
@@ -75,7 +78,7 @@ import { GA_MEASUREMENT_ID, GA_SCRIPT_HOSTS, GA_CONNECT_HOSTS } from "@/lib/goog
 export function buildCsp(
   nonce: string,
   strict: boolean,
-  gaId: string | undefined = GA_MEASUREMENT_ID,
+  gaId: string | undefined = GOOGLE_TAG_ID,
 ): string {
   const supabaseHttp = SUPABASE_URL;
   const supabaseWss = SUPABASE_URL.replace(/^https:/, "wss:");

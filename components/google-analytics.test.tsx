@@ -7,8 +7,9 @@ vi.mock("next/navigation", () => ({ usePathname: () => pathname }));
 vi.mock("next/script", () => ({
   default: (p: { src?: string; id?: string }) => <i data-testid="script" data-src={p.src ?? p.id} />,
 }));
-vi.mock("@/lib/google-analytics", () => ({
-  get GA_MEASUREMENT_ID() {
+vi.mock("@/lib/google-analytics", async (orig) => ({
+  ...(await orig<typeof import("@/lib/google-analytics")>()),
+  get GOOGLE_TAG_ID() {
     return gaId;
   },
 }));
@@ -26,11 +27,20 @@ beforeEach(() => {
 });
 
 describe("GoogleAnalytics", () => {
-  it("loads gtag.js with the measurement id", () => {
+  it("loads gtag.js with a GA4 measurement id", () => {
     const { container } = render(<GoogleAnalytics />);
     expect(scripts(container)).toEqual([
+      "google-tag-init",
       "https://www.googletagmanager.com/gtag/js?id=G-TEST1234",
-      "ga-init",
+    ]);
+  });
+
+  it("loads gtm.js with a Tag Manager container id", () => {
+    gaId = "GTM-N4VPMPR9";
+    const { container } = render(<GoogleAnalytics />);
+    expect(scripts(container)).toEqual([
+      "google-tag-init",
+      "https://www.googletagmanager.com/gtm.js?id=GTM-N4VPMPR9",
     ]);
   });
 
