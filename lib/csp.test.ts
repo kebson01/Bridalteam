@@ -128,4 +128,18 @@ describe("buildCsp", () => {
     // Turnstile still has to survive the strict path.
     expect(strict.get("script-src")).toContain(TURNSTILE);
   });
+
+  it("lists Google Analytics hosts only when a measurement id is set", () => {
+    const off = directives(buildCsp("n", false, undefined));
+    expect(off.get("script-src")).not.toContain("googletagmanager");
+    expect(off.get("connect-src")).not.toContain("google-analytics");
+
+    const on = directives(buildCsp("n", false, "G-TEST1234"));
+    expect(on.get("script-src")).toContain("https://www.googletagmanager.com");
+    expect(on.get("connect-src")).toContain("https://*.google-analytics.com");
+    expect(on.get("connect-src")).toContain("https://*.analytics.google.com");
+    // Strict mode still needs the host for the loader script.
+    const strict = directives(buildCsp("n", true, "G-TEST1234"));
+    expect(strict.get("script-src")).toContain("https://www.googletagmanager.com");
+  });
 });
