@@ -88,6 +88,8 @@ export default function AdminAnalyticsPage() {
         return;
       }
       setData(body as Summary);
+    } catch {
+      setError("Couldn't reach the server to load analytics. Check your connection and try again.");
     } finally {
       setLoading(false);
     }

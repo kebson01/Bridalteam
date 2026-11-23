@@ -35,6 +35,15 @@ describe("POST /api/admin/sites", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 
+  it("won't send a bare \"Other\" as the reason", async () => {
+    for (const reason of ["Other", "other:", " Other: "]) {
+      const res = await POST(post({ wedding_id: ID, action: "takedown", reason }));
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toMatch(/Other/);
+    }
+    // With details it goes through to the takedown itself (covered below).
+  });
+
   it("rejects unknown actions and ids", async () => {
     expect((await POST(post({ wedding_id: "nope", action: "takedown", reason: "x" }))).status).toBe(400);
     expect((await POST(post({ wedding_id: ID, action: "delete", reason: "x" }))).status).toBe(400);

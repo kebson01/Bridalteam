@@ -121,6 +121,8 @@ export default function AdminPromotionsPage() {
   const [claimedOnly, setClaimedOnly] = useState(false);
   const [note, setNote] = useState("");
   const [reach, setReach] = useState<number | null>(null);
+  const [reachFailed, setReachFailed] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
 
   // Changing a promotion's last day
   const [editing, setEditing] = useState<string | null>(null);
@@ -160,12 +162,14 @@ export default function AdminPromotionsPage() {
     void load();
   }, [load]);
 
-  // Live count of who the draft would reach.
+  // Live count of who the draft would reach. A failure says so rather than
+  // leaving "Counting vendors…" up for good.
+  const audienceIncomplete =
+    (mode === "groups" && !pickedCategories.length && !pickedCities.length) || (mode === "picked" && !picked.length);
   useEffect(() => {
     setReach(null);
-    const incomplete =
-      (mode === "groups" && !pickedCategories.length && !pickedCities.length) || (mode === "picked" && !picked.length);
-    if (incomplete) return;
+    setReachFailed(false);
+    if (audienceIncomplete) return;
     const t = setTimeout(async () => {
       try {
         const res = await fetch("/api/admin/promotions", {
@@ -173,17 +177,21 @@ export default function AdminPromotionsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "preview", audience }),
         });
-        if (res.ok) setReach((await res.json()).reach);
+        if (res.status === 401) return expired();
+        const body = await res.json().catch(() => ({}));
+        if (res.ok && typeof body.reach === "number") setReach(body.reach);
+        else setReachFailed(true);
       } catch {
-        // The count is a convenience.
+        setReachFailed(true);
       }
     }, 300);
     return () => clearTimeout(t);
-  }, [audience, mode, pickedCategories.length, pickedCities.length, picked.length]);
+  }, [audience, audienceIncomplete, expired]);
 
   // Vendor search for hand-picking.
   useEffect(() => {
     const q = vendorQuery.trim();
+    setSearchFailed(false);
     if (q.length < 2) {
       setVendorResults([]);
       return;
@@ -191,13 +199,16 @@ export default function AdminPromotionsPage() {
     const t = setTimeout(async () => {
       try {
         const res = await fetch(`/api/admin/promotions?vendors=${encodeURIComponent(q)}`);
-        if (res.ok) setVendorResults((await res.json()).vendors);
+        if (res.status === 401) return expired();
+        const body = await res.json().catch(() => ({}));
+        if (res.ok && Array.isArray(body.vendors)) setVendorResults(body.vendors);
+        else setSearchFailed(true);
       } catch {
-        // Ignore; they can type again.
+        setSearchFailed(true);
       }
     }, 250);
     return () => clearTimeout(t);
-  }, [vendorQuery]);
+  }, [vendorQuery, expired]);
 
   async function post(payload: Record<string, unknown>) {
     setBusy(true);
@@ -418,6 +429,7 @@ export default function AdminPromotionsPage() {
                   aria-label="Search vendors"
                   placeholder="Search vendors by name…"
                 />
+                {searchFailed && <p role="alert" className="text-xs text-red-700">The search didn&rsquo;t work. Type again to retry.</p>}
                 {vendorResults.length > 0 && (
                   <ul className="divide-y divide-stone-2/70 overflow-hidden rounded-2xl border border-stone-2">
                     {vendorResults.map((v) => {
@@ -472,7 +484,11 @@ export default function AdminPromotionsPage() {
               </label>
             </div>
             <div className="rounded-xl bg-brand-wash px-4 py-3 text-sm text-ink" role="status">
-              {reach === null ? (
+              {audienceIncomplete ? (
+                <span className="text-ink-soft/70">Pick who gets it to see how many vendors that is.</span>
+              ) : reachFailed ? (
+                <span className="text-red-700">Couldn&rsquo;t count vendors just now. Change the selection to try again.</span>
+              ) : reach === null ? (
                 <span className="text-ink-soft/70">Counting vendors…</span>
               ) : (
                 <>

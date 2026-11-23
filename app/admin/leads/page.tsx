@@ -60,7 +60,10 @@ export default function AdminLeadsPage() {
   const [leads, setLeads] = useState<Lead[] | null>(null);
   const [summary, setSummary] = useState<Record<string, Record<string, number>>>({});
   const [edits, setEdits] = useState<Record<string, Edits>>({});
-  const [done, setDone] = useState<Record<string, string>>({});
+  // Leads reviewed on this screen since the last load: their new status, and
+  // the listing an import created or matched (the row's own org_id is from
+  // before the import).
+  const [done, setDone] = useState<Record<string, { status: string; orgId: string | null }>>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +108,13 @@ export default function AdminLeadsPage() {
     setError(null);
     try {
       const body = await post({ id: lead.id, action, edits: action === "import" ? edits[lead.id] : undefined });
-      setDone((d) => ({ ...d, [lead.id]: body.status }));
+      if (!body.status) {
+        // The import ran but didn't say how it ended: reload for the truth
+        // rather than leave the row looking untouched.
+        await load();
+        return;
+      }
+      setDone((d) => ({ ...d, [lead.id]: { status: body.status, orgId: body.org_id ?? null } }));
     } catch (e) {
       if (e instanceof SessionExpired) return;
       setError(e instanceof Error ? e.message : "Request failed.");
@@ -226,7 +235,8 @@ export default function AdminLeadsPage() {
           <ul className="space-y-3">
             {leads.map((l) => {
               const open = l.status === "new" && !done[l.id];
-              const shownStatus = done[l.id] ?? l.status;
+              const shownStatus = done[l.id]?.status ?? l.status;
+              const listingId = done[l.id]?.orgId ?? l.org_id;
               return (
                 <li key={l.id} className="rounded-2xl border border-stone-2 bg-white p-4 sm:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -304,8 +314,8 @@ export default function AdminLeadsPage() {
                         <Badge tone={STATUS_TONE[shownStatus] ?? "grey"} dot>
                           <span className="capitalize">{shownStatus}</span>
                         </Badge>
-                        {l.org_id && (
-                          <Link href={`/v/${l.org_id}`} className={btn.small}>
+                        {listingId && (
+                          <Link href={`/v/${listingId}`} className={btn.small}>
                             view listing
                           </Link>
                         )}

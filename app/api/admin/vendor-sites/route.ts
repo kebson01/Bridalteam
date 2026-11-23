@@ -103,6 +103,10 @@ export async function POST(req: Request) {
   if (action === "takedown" && !reason) {
     return NextResponse.json({ error: "Give a reason. The vendor will see it." }, { status: 400 });
   }
+  // "Other" on its own tells the vendor nothing: the page sends "Other: <details>".
+  if (action === "takedown" && /^other:?$/i.test(reason)) {
+    return NextResponse.json({ error: "Say what \"Other\" means. The vendor will see it." }, { status: 400 });
+  }
 
   const who = await adminUsername(admin, req);
   const { data, error } = await admin.rpc(action === "takedown" ? "admin_take_down_vendor_site" : "admin_restore_vendor_site", {
