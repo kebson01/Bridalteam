@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath } from "node:url";
 
 /**
  * Unit and component tests. Deliberately no network, no database and no
@@ -17,7 +18,14 @@ export default defineConfig({
   // Resolves the "@/..." aliases from tsconfig.json. Native in this Vite —
   // the vite-tsconfig-paths plugin the Next guide suggests is no longer needed
   // and warns as much on startup.
-  resolve: { tsconfigPaths: true },
+  //
+  // tsconfigPaths only applies to files tsconfig.json includes, and it
+  // excludes `**/vendor` — so components/vendor/* got no "@/..." resolution
+  // and couldn't be tested. The explicit alias covers those files too.
+  resolve: {
+    tsconfigPaths: true,
+    alias: [{ find: /^@\//, replacement: `${fileURLToPath(new URL(".", import.meta.url))}` }],
+  },
   test: {
     environment: "jsdom",
     globals: true,

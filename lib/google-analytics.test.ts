@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { parseGoogleTagId, googleTagScriptUrl } from "./google-analytics";
 
 describe("parseGoogleTagId", () => {
@@ -24,5 +24,30 @@ describe("googleTagScriptUrl", () => {
     expect(googleTagScriptUrl("G-ABC123XYZ9")).toBe(
       "https://www.googletagmanager.com/gtag/js?id=G-ABC123XYZ9",
     );
+  });
+});
+
+describe("gaEvent", () => {
+  it("sends the event through gtag with beacon transport", async () => {
+    const { gaEvent } = await import("./google-analytics");
+    const gtag = vi.fn();
+    (window as unknown as { gtag?: unknown }).gtag = gtag;
+    gaEvent({ name: "generate_lead", params: { lead_source: "vendor_inquiry", vendor_category: "Florist" } });
+    expect(gtag).toHaveBeenCalledWith("event", "generate_lead", {
+      lead_source: "vendor_inquiry",
+      vendor_category: "Florist",
+      transport_type: "beacon",
+    });
+    delete (window as unknown as { gtag?: unknown }).gtag;
+  });
+
+  it("is a no-op when the tag isn't loaded, and never throws", async () => {
+    const { gaEvent } = await import("./google-analytics");
+    expect(() => gaEvent({ name: "sign_up", params: { method: "email" } })).not.toThrow();
+    (window as unknown as { gtag?: unknown }).gtag = () => {
+      throw new Error("blocked");
+    };
+    expect(() => gaEvent({ name: "sign_up", params: { method: "email" } })).not.toThrow();
+    delete (window as unknown as { gtag?: unknown }).gtag;
   });
 });
