@@ -222,7 +222,7 @@ export default function AdminVendorSitesPage() {
                     </div>
                   </div>
 
-                  {s.block_reason && (
+                  {s.blocked_at && s.block_reason && (
                     <p className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700">Reason: {s.block_reason}</p>
                   )}
 
@@ -230,19 +230,20 @@ export default function AdminVendorSitesPage() {
                     <div className="space-y-3 rounded-2xl border border-stone-2 bg-stone-4/50 p-4">
                       {!s.blocked_at && (
                         <Field label="Reason">
-                          <select value={reason} onChange={(e) => setReason(e.target.value)} className={field}>
+                          <select value={reason} onChange={(e) => setReason(e.target.value)} disabled={busy} className={field}>
                             {REASONS.map((r) => (
                               <option key={r}>{r}</option>
                             ))}
                           </select>
                         </Field>
                       )}
-                      <Field label={s.blocked_at ? "Note for the log (optional)" : "Details the vendor will see (optional)"}>
+                      <Field label={s.blocked_at ? "Note for the log (optional)" : `Details the vendor will see (${reason === "Other" ? "required" : "optional"})`}>
                         <textarea
                           value={detail}
                           onChange={(e) => setDetail(e.target.value)}
                           rows={2}
                           maxLength={400}
+                          disabled={busy}
                           placeholder={s.blocked_at ? "Note for the log (optional)" : "Details the vendor will see (optional)"}
                           className={field}
                         />
@@ -250,7 +251,7 @@ export default function AdminVendorSitesPage() {
                       <div className="flex flex-wrap gap-2 pt-1">
                         <button
                           type="button"
-                          disabled={busy}
+                          disabled={busy || (!s.blocked_at && reason === "Other" && !detail.trim())}
                           onClick={() => act(s, s.blocked_at ? "restore" : "takedown")}
                           className={s.blocked_at ? btn.primary : TAKEDOWN_BTN}
                         >

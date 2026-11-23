@@ -73,12 +73,46 @@ export default function AdminVenuesPage() {
   // Sign-in is the admin shell's job: its httpOnly session cookie rides along
   // on these same-origin fetches and app/api/admin/venues checks it with
   // adminGuard. A 401 means the session ran out, so hand back to sign-in.
+  /**
+   * Every write goes through here: a dropped connection or a reply that isn't
+   * JSON comes back as an error message instead of throwing and leaving the
+   * page stuck on busy. null means the session ran out (already handed back
+   * to sign-in).
+   */
+  async function send(method: "POST" | "PATCH" | "DELETE", payload: unknown): Promise<{ ok: boolean; data: Record<string, unknown> } | null> {
+    try {
+      const res = await fetch("/api/admin/venues", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.status === 401) {
+        expired();
+        return null;
+      }
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      return { ok: res.ok, data };
+    } catch {
+      return { ok: false, data: { error: "Couldn't reach the server. Check your connection and try again." } };
+    }
+  }
+  const errorOf = (data: Record<string, unknown>, fallback: string) => (typeof data.error === "string" ? data.error : fallback);
+
   const load = useCallback(async () => {
-    const res = await fetch("/api/admin/venues");
-    if (res.status === 401) return expired();
-    const data = await res.json();
-    setVenues(data.venues ?? []);
-    setLoaded(true);
+    try {
+      const res = await fetch("/api/admin/venues");
+      if (res.status === 401) return expired();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMsg({ text: data.error ?? "Couldn't load venues.", ok: false });
+        return;
+      }
+      setVenues(data.venues ?? []);
+    } catch {
+      setMsg({ text: "Couldn't reach the server to load venues.", ok: false });
+    } finally {
+      setLoaded(true);
+    }
   }, [expired]);
 
   useEffect(() => {
@@ -101,19 +135,11 @@ export default function AdminVenuesPage() {
     setBusy(true);
     setMsg(null);
     const editing = Boolean(form.id);
-    const res = await fetch("/api/admin/venues", {
-      method: editing ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (res.status === 401) {
-      setBusy(false);
-      return expired();
-    }
-    const data = await res.json();
+    const result = await send(editing ? "PATCH" : "POST", form);
     setBusy(false);
-    if (!res.ok) {
-      setMsg({ text: data.error ?? "Something went wrong.", ok: false });
+    if (!result) return;
+    if (!result.ok) {
+      setMsg({ text: errorOf(result.data, "Something went wrong."), ok: false });
       return;
     }
     setMsg({ text: editing ? "Venue updated." : "Venue added.", ok: true });
@@ -139,23 +165,16 @@ export default function AdminVenuesPage() {
 
     setBusy(true);
     setMsg(null);
-    const res = await fetch("/api/admin/venues", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rows }),
-    });
-    if (res.status === 401) {
-      setBusy(false);
-      return expired();
-    }
-    const data = await res.json();
+    const result = await send("POST", { rows });
     setBusy(false);
-    if (!res.ok) {
-      setMsg({ text: data.error ?? "Import failed.", ok: false });
+    if (!result) return;
+    if (!result.ok) {
+      setMsg({ text: errorOf(result.data, "Import failed."), ok: false });
       return;
     }
+    const { inserted, skipped } = result.data as { inserted?: number; skipped?: number };
     setMsg({
-      text: `Imported ${data.inserted} vendor(s)${data.skipped ? `, skipped ${data.skipped} without a name` : ""}.`,
+      text: `Imported ${inserted ?? 0} vendor(s)${skipped ? `, skipped ${skipped} without a name` : ""}.`,
       ok: true,
     });
     setBulk("");
@@ -164,15 +183,12 @@ export default function AdminVenuesPage() {
 
   async function remove(id: string) {
     if (!confirm("Delete this venue?")) return;
-    const res = await fetch("/api/admin/venues", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    if (res.status === 401) return expired();
-    const data = await res.json();
-    if (!res.ok) {
-      setMsg({ text: data.error ?? "Delete failed.", ok: false });
+    setBusy(true);
+    const result = await send("DELETE", { id });
+    setBusy(false);
+    if (!result) return;
+    if (!result.ok) {
+      setMsg({ text: errorOf(result.data, "Delete failed."), ok: false });
       return;
     }
     setMsg({ text: "Venue deleted.", ok: true });

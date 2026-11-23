@@ -254,7 +254,7 @@ export default function AdminSitesPage() {
                             </select>
                           </Field>
                         )}
-                        <Field label={s.blocked_at ? "Note (optional, for the log)" : "Details for the couple (optional)"}>
+                        <Field label={s.blocked_at ? "Note (optional, for the log)" : `Details for the couple (${reason === "Other" ? "required" : "optional"})`}>
                           <input
                             value={detail}
                             onChange={(e) => setDetail(e.target.value)}
