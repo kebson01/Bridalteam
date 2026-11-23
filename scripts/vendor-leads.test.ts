@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   categoryFromPlaceTypes,
   dedupeLeads,
+  namesAlike,
+  cityKey,
   formatPhone,
   jsonToLeads,
   leadsToSql,
@@ -130,16 +132,36 @@ describe("csv sources", () => {
 });
 
 describe("research json and dedupe", () => {
-  it("keeps one lead per business by phone, domain or name", () => {
+  it("keeps one lead per business: same name plus a shared phone, domain or city", () => {
     const leads = dedupeLeads([
-      { business_name: "A", phone: "954-555-0001", website: null },
-      { business_name: "B", phone: "(954) 555-0001", website: null },
-      { business_name: "C", phone: null, website: "https://c.com" },
-      { business_name: "D", phone: null, website: "http://www.c.com/x" },
-      { business_name: "The E, LLC", phone: null, website: null },
-      { business_name: "E", phone: null, website: null },
+      { business_name: "Bloom & Vine", phone: "954-555-0001", website: null, city: "Miami" },
+      { business_name: "Bloom and Vine, LLC", phone: "(954) 555-0001", website: null, city: "Doral" }, // same phone
+      { business_name: "Sunset Hall", phone: null, website: "https://sunsethall.com", city: "Tampa" },
+      { business_name: "The Sunset Hall", phone: null, website: "http://www.sunsethall.com/x", city: "Clearwater" }, // same site
+      { business_name: "Elegant Events", phone: null, website: null, city: "St. Augustine" },
+      { business_name: "Elegant Events", phone: null, website: null, city: "Saint Augustine" }, // same city
     ]);
-    expect(leads.map((l) => l.business_name)).toEqual(["A", "C", "The E, LLC"]);
+    expect(leads.map((l) => l.business_name)).toEqual(["Bloom & Vine", "Sunset Hall", "Elegant Events"]);
+  });
+
+  it("keeps different venues that share a chain's phone or website", () => {
+    const leads = dedupeLeads([
+      { business_name: "Hilton Naples", phone: "800-445-8667", website: "https://hilton.com/naples", city: "Naples" },
+      { business_name: "Hilton Jacksonville", phone: "800-445-8667", website: "https://hilton.com/jax", city: "Jacksonville" },
+      { business_name: "Lavan Venue", phone: "954-983-6937", website: "lavanvenue.com", city: "Fort Lauderdale" },
+      { business_name: "Broward Catering", phone: "954-983-6937", website: "browardcatering.com", city: "Fort Lauderdale" },
+      { business_name: "Plantation Golf & Country Club", phone: null, website: null, city: "Venice" },
+      { business_name: "The Plantation Golf & Country Club", phone: null, website: null, city: "Fort Myers" },
+    ]);
+    expect(leads).toHaveLength(6);
+  });
+
+  it("matches names whole-word, never a one-word brand", () => {
+    expect(namesAlike("Bloom & Vine", "Bloom and Vine Florals")).toBe(true);
+    expect(namesAlike("Hilton", "Hilton Naples")).toBe(false);
+    expect(namesAlike("Hyatt Regency Coral Gables", "Hyatt Regency Clearwater Beach")).toBe(false);
+    expect(cityKey("Miami (Brickell)")).toBe("miami");
+    expect(cityKey("St. Augustine")).toBe(cityKey("Saint Augustine"));
   });
 
   it("takes a per-item source and falls back to the flag", () => {
