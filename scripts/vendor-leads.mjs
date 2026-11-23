@@ -71,6 +71,33 @@ export function nameKey(value) {
   return k || null;
 }
 
+/**
+ * Do two names belong to the same business? Equal keys, or one contained in
+ * the other as whole words with at least two words and 8 characters on the
+ * shorter side ("Bloom and Vine" / "Bloom and Vine Florals", but "Hilton" never
+ * swallows every Hilton). Mirrors vendor_names_alike in
+ * supabase/migrations/20261124000000_vendor_match_needs_name.sql.
+ */
+export function namesAlike(a, b) {
+  const ka = nameKey(a);
+  const kb = nameKey(b);
+  if (!ka || !kb) return false;
+  if (ka === kb) return true;
+  const [short, long] = ka.length <= kb.length ? [ka, kb] : [kb, ka];
+  return short.length >= 8 && short.includes(" ") && ` ${long} `.includes(` ${short} `);
+}
+
+/** "Miami (Brickell)" -> "miami"; "St. Augustine" and "Saint Augustine" agree. Mirrors vendor_city_key. */
+export function cityKey(value) {
+  const k = String(value ?? "")
+    .toLowerCase()
+    .replace(/\(.*\)/g, " ")
+    .replace(/\b(st|saint)\b\.?/g, "saint")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  return k || null;
+}
+
 /** (954) 721-9911, the way the existing listings store numbers. */
 export function formatPhone(value) {
   const d = phone10(value);
@@ -245,19 +272,28 @@ export function jsonToLeads(items, { source = "web_search" } = {}) {
   );
 }
 
-/** One lead per business within a file: same phone, domain or name. */
+/**
+ * One lead per business within a file. Two leads are the same business only
+ * when their names agree (namesAlike) AND they share a phone, a website domain
+ * or a city (or one has no city). A shared phone or domain alone isn't enough:
+ * hotel chains and venue groups share both, and dropping them here meant
+ * different venues never reached the review queue. Same rule as
+ * find_vendor_match in the database.
+ */
 export function dedupeLeads(leads) {
-  const seen = new Set();
   const out = [];
   for (const l of leads) {
-    const keys = [
-      phone10(l.phone) && `p:${phone10(l.phone)}`,
-      siteDomain(l.website) && `d:${siteDomain(l.website)}`,
-      nameKey(l.business_name) && `n:${nameKey(l.business_name)}`,
-    ].filter(Boolean);
-    if (keys.some((k) => seen.has(k))) continue;
-    keys.forEach((k) => seen.add(k));
-    out.push(l);
+    const phone = phone10(l.phone);
+    const domain = siteDomain(l.website);
+    const city = cityKey(l.city);
+    const dup = out.some((k) => {
+      if (!namesAlike(k.business_name, l.business_name)) return false;
+      if (phone && phone10(k.phone) === phone) return true;
+      if (domain && siteDomain(k.website) === domain) return true;
+      const kc = cityKey(k.city);
+      return !city || !kc || kc === city;
+    });
+    if (!dup) out.push(l);
   }
   return out;
 }
