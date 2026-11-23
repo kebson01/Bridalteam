@@ -493,6 +493,7 @@ export default function VendorProfileView({
                     defaultName={(user?.user_metadata?.full_name as string | undefined) ?? ""}
                     defaultEmail={user?.email ?? ""}
                     loginHref={`/auth/login?next=/v/${vendor.org_id}`}
+                    vendorCategory={vendor.category}
                   />
                 </div>
               )}

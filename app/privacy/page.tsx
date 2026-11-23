@@ -42,7 +42,7 @@ export default function PrivacyPage() {
       <PageHero eyebrow="Legal" title="Privacy Policy" />
       <LegalBody>
         <div className="space-y-4">
-          <LastUpdated date="November 22, 2026" />
+          <LastUpdated date="November 23, 2026" />
           <Preamble>
             <P>
               This Privacy Policy explains how <Lead>Bridal Team, LLC</Lead> (&ldquo;Bridal
@@ -141,9 +141,12 @@ export default function PrivacyPage() {
             <Lead>We use Google Analytics</Lead> to understand how many people visit the site and
             which pages they use. Google Analytics sets its own cookies (named{" "}
             <code>_ga</code>) and receives the pages you view, your browser and device type, and
-            your approximate location, which Google derives from your IP address. We have turned
-            off Google signals and ad personalisation, so this data is not used to show you ads,
-            and we do not send Google your name, email or account id. Google processes it under{" "}
+            your approximate location, which Google derives from your IP address. It is also told
+            when a visit leads to creating an account or sending a vendor an inquiry (and that
+            vendor&rsquo;s category), so we can see which pages and campaigns lead to sign-ups.
+            We have turned off Google signals and ad personalisation, so this data is not used to
+            show you ads, and we do not send Google your name, email, account id or the content of
+            any message. Google processes it under{" "}
             <a href="https://policies.google.com/privacy" className="underline">
               its own privacy policy
             </a>

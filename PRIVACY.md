@@ -93,8 +93,10 @@ core features.
 
 We use Google Analytics to measure site traffic. It sets its own `_ga` cookies
 and receives pages viewed, browser/device type and approximate location (derived
-from IP). Google signals and ad personalisation are off, and we send Google no
-name, email or account id. Opt out with Google's opt-out add-on
+from IP), plus a signal when a visit leads to creating an account or sending a
+vendor inquiry (with the vendor's category). Google signals and ad
+personalisation are off, and we send Google no name, email, account id or
+message content. Opt out with Google's opt-out add-on
 (https://tools.google.com/dlpage/gaoptout) or by blocking google-analytics.com
 cookies. We do not run advertising trackers.
 

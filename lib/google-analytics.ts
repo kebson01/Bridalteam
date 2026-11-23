@@ -34,3 +34,31 @@ export const GA_CONNECT_HOSTS = [
   "https://*.google-analytics.com",
   "https://*.analytics.google.com",
 ];
+
+/**
+ * GA4 events this site sends. Names are GA4's recommended ones, so they slot
+ * into GA's built-in reports; mark them as key events (conversions) in GA ->
+ * Admin -> Key events.
+ *
+ * Never put a name, email or other personal data in params: Google's terms
+ * forbid it and the privacy policy says we send none.
+ */
+export type GaEvent =
+  | { name: "sign_up"; params: { method: "email" } }
+  | { name: "generate_lead"; params: { lead_source: "vendor_inquiry"; vendor_category?: string } };
+
+/**
+ * Sends a GA4 event if the Google tag is on the page. A no-op when it isn't:
+ * no tag id configured, an /admin-excluded browser, or server-side. Beacon
+ * transport so the hit survives the navigation that usually follows.
+ */
+export function gaEvent(event: GaEvent): void {
+  if (typeof window === "undefined") return;
+  const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
+  if (typeof gtag !== "function") return;
+  try {
+    gtag("event", event.name, { ...event.params, transport_type: "beacon" });
+  } catch {
+    // Analytics must never break the action it's counting.
+  }
+}

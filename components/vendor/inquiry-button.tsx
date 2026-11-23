@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { sendInquiry, type InquiryState } from "@/app/vendor/inquiry-actions";
+import { gaEvent } from "@/lib/google-analytics";
 
 const initial: InquiryState = { error: null, sent: false };
 
@@ -16,15 +17,29 @@ export default function VendorInquiryButton({
   defaultName = "",
   defaultEmail = "",
   loginHref,
+  vendorCategory,
 }: {
   vendorOrgId: string;
   signedIn: boolean;
   defaultName?: string;
   defaultEmail?: string;
   loginHref: string;
+  /** Sent to GA with the lead, so inquiries can be broken down by category. */
+  vendorCategory?: string | null;
 }) {
   const [state, action, pending] = useActionState(sendInquiry, initial);
   const [open, setOpen] = useState(false);
+
+  // One GA lead per successful send. `sent` only ever flips false -> true for
+  // this component (the form is replaced by the confirmation), so this fires
+  // once. Never the name, email or message: no personal data goes to Google.
+  useEffect(() => {
+    if (!state.sent) return;
+    gaEvent({
+      name: "generate_lead",
+      params: { lead_source: "vendor_inquiry", ...(vendorCategory ? { vendor_category: vendorCategory } : {}) },
+    });
+  }, [state.sent, vendorCategory]);
 
   if (!signedIn) {
     return (

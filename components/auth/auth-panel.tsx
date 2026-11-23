@@ -7,6 +7,7 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import Captcha from "@/components/auth/captcha";
 import { readAttribution } from "@/lib/attribution";
 import { track } from "@/lib/events";
+import { gaEvent } from "@/lib/google-analytics";
 import { savePendingNext } from "@/lib/pending-next";
 import { CAPTCHA_REQUIRED } from "@/lib/captcha";
 import { authErrorMessage } from "@/lib/auth-errors";
@@ -121,6 +122,7 @@ export default function AuthPanel({ mode, next }: { mode: Mode; next?: string })
       // it only on the session path would undercount every real one.
       const src = attribution?.utm_source ?? attribution?.referrer_host ?? undefined;
       track("signup_success", undefined, src);
+      gaEvent({ name: "sign_up", params: { method: "email" } });
 
       // With email confirmation on, there's a user but no session yet.
       if (!data.session) {
