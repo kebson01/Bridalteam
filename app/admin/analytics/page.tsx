@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useAdmin } from "@/components/admin/admin-shell";
+import { Badge, Card, Empty, Icon, Kpi, Notice, PageHeader, PillSelect, btn, table } from "@/components/admin/ui";
 import { count, duration, pageLabel, pct, shortDay } from "@/lib/analytics-format";
 import { excludeAdminBrowserByDefault, setTrackingDisabled, trackingDisabled } from "@/lib/events";
 
@@ -49,12 +50,16 @@ const RANGES: [number, string][] = [
   [365, "12 months"],
 ];
 
-const card = "rounded-2xl border border-stone-2 bg-white p-5 shadow-card";
-const th = "whitespace-nowrap pb-2 pl-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-soft/60 first:pl-0";
-const td = "py-1.5 pr-3 align-top text-sm text-ink";
-const num = "whitespace-nowrap py-1.5 pl-3 text-right align-top text-sm tabular-nums text-ink";
+// Analytics tables sit two to a row, so they are tighter than the kit's
+// full-width table: smaller padding and a lower minimum width, still scrolling
+// inside table.wrap on phones.
+const th = `${table.th} whitespace-nowrap sm:px-3 sm:first:pl-0 sm:last:pr-0`;
+const td = "px-4 py-2.5 align-top sm:px-3 sm:first:pl-0";
+const num = "whitespace-nowrap px-4 py-2.5 text-right align-top tabular-nums sm:px-3 sm:last:pr-0";
+const tight = "w-full min-w-[420px] border-collapse text-left";
 
 export default function AdminAnalyticsPage() {
+  const { expired } = useAdmin();
   const [days, setDays] = useState(30);
   const [scope, setScope] = useState<"public" | "all">("public");
   const [data, setData] = useState<Summary | null>(null);
@@ -69,21 +74,24 @@ export default function AdminAnalyticsPage() {
     setExcluded(trackingDisabled());
   }, []);
 
+  // The admin session cookie rides along on same-origin fetches; a 401 means
+  // it ran out, so hand back to the shell's sign-in.
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`/api/admin/analytics?days=${days}&scope=${scope}`);
       const body = await res.json().catch(() => ({}));
+      if (res.status === 401) return expired();
       if (!res.ok) {
-        setError(res.status === 401 ? "Sign in on the admin dashboard first." : (body.error ?? "Couldn't load analytics."));
+        setError(body.error ?? "Couldn't load analytics.");
         return;
       }
       setData(body as Summary);
     } finally {
       setLoading(false);
     }
-  }, [days, scope]);
+  }, [days, scope, expired]);
 
   useEffect(() => {
     void load();
@@ -92,70 +100,61 @@ export default function AdminAnalyticsPage() {
   const t = data?.totals;
 
   return (
-    <main className="mx-auto max-w-6xl px-5 py-10">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-light uppercase tracking-wide text-ink">Analytics</h1>
-        <Link href="/admin" className="text-sm text-ink-soft hover:text-brand-text">
-          ← Admin
-        </Link>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Insights"
+        title="Analytics"
+        subtitle="Visits, page views, time on site, where people land, go next and leave, where they came from, and how many sign up."
+        actions={
+          <>
+            {loading && <span className="text-xs text-ink-soft/60">Loading…</span>}
+            {/* Filters: above everything they control. */}
+            <PillSelect aria-label="Date range" value={days} onChange={(e) => setDays(Number(e.target.value))} className="w-36">
+              {RANGES.map(([d, label]) => (
+                <option key={d} value={d}>
+                  {label}
+                </option>
+              ))}
+            </PillSelect>
+            <PillSelect aria-label="Pages included" value={scope} onChange={(e) => setScope(e.target.value as "public" | "all")} className="w-44">
+              <option value="public">Website</option>
+              <option value="all">Website + app</option>
+            </PillSelect>
+          </>
+        }
+      />
 
-      {/* Filters: one row above everything they control. */}
-      <div className="mt-5 flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-1 rounded-full border border-stone-2 bg-white p-1" role="group" aria-label="Date range">
-          {RANGES.map(([d, label]) => (
-            <button
-              key={d}
-              onClick={() => setDays(d)}
-              aria-pressed={days === d}
-              className={`rounded-full px-3 py-1.5 text-sm ${days === d ? "bg-brand text-white" : "text-ink-soft hover:text-ink"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-1 rounded-full border border-stone-2 bg-white p-1" role="group" aria-label="Pages included">
-          {(["public", "all"] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setScope(s)}
-              aria-pressed={scope === s}
-              className={`rounded-full px-3 py-1.5 text-sm ${scope === s ? "bg-ink text-white" : "text-ink-soft hover:text-ink"}`}
-            >
-              {s === "public" ? "Website" : "Website + app"}
-            </button>
-          ))}
-        </div>
-        {loading && <span className="text-sm text-ink-soft/60">Loading…</span>}
-      </div>
+      {error && <Notice tone="error">{error}</Notice>}
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {!t && !error && <Empty>Loading analytics…</Empty>}
 
       {t && data && (
         <>
           {/* Headline numbers */}
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Tile label="Visits" value={count(t.visits)} sub={`${t.pages_per_visit || 0} pages per visit`} />
-            <Tile label="Page views" value={count(t.page_views)} />
-            <Tile label="Avg. time per visit" value={duration(t.avg_visit_seconds)} />
-            <Tile label="Left after one page" value={pct(t.bounce_rate)} sub="bounce rate" />
-            <Tile label="New accounts" value={count(t.new_accounts)} sub={`${count(t.new_weddings)} weddings · ${count(t.new_vendor_accounts)} vendors`} />
-            <Tile label="Visits that signed up" value={count(t.signup_visits)} sub={`${pct(t.visit_to_signup)} of visits`} />
-            <Tile label="AI planner messages" value={count(t.planner_messages)} />
-            <Tile label="Vendor website clicks" value={count(data.vendors.website_clicks)} sub={`${count(data.vendors.profile_views)} profile views`} />
-          </div>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+              <Kpi label="Visits" value={count(t.visits)} sub={`${t.pages_per_visit || 0} pages per visit`} icon="globe" />
+              <Kpi label="Page views" value={count(t.page_views)} icon="sites" />
+              <Kpi label="Avg. time per visit" value={duration(t.avg_visit_seconds)} icon="refresh" />
+              <Kpi label="Left after one page" value={pct(t.bounce_rate)} sub="bounce rate" icon="external" />
+              <Kpi label="New accounts" value={count(t.new_accounts)} sub={`${count(t.new_weddings)} weddings · ${count(t.new_vendor_accounts)} vendors`} icon="heart" />
+              <Kpi label="Visits that signed up" value={count(t.signup_visits)} sub={`${pct(t.visit_to_signup)} of visits`} icon="check" />
+              <Kpi label="AI planner messages" value={count(t.planner_messages)} icon="send" />
+              <Kpi label="Vendor website clicks" value={count(data.vendors.website_clicks)} sub={`${count(data.vendors.profile_views)} profile views`} icon="store" />
+            </div>
 
-          <p className="mt-3 text-xs leading-relaxed text-ink-soft/60">
-            A visit is one browser tab until it closes or sits idle for 30 minutes; someone who comes back later counts as a
-            new visit. Visits and time on site are counted from{" "}
-            {t.visits_tracked_since ? new Date(t.visits_tracked_since).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "the next visit"}
-            ; page views go back further. {scope === "public" ? "Signed-in app pages (dashboard, wedding workspace, vendor tools) are left out." : "Includes signed-in app pages."}
-          </p>
+            <p className="max-w-3xl text-xs leading-relaxed text-ink-soft/60">
+              A visit is one browser tab until it closes or sits idle for 30 minutes; someone who comes back later counts as a
+              new visit. Visits and time on site are counted from{" "}
+              {t.visits_tracked_since ? new Date(t.visits_tracked_since).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "the next visit"}
+              ; page views go back further. {scope === "public" ? "Signed-in app pages (dashboard, wedding workspace, vendor tools) are left out." : "Includes signed-in app pages."}
+            </p>
+          </div>
 
           <DailyChart daily={data.daily} />
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            <section className={card}>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card>
               <Heading title="Most visited pages" note="Share of all page views, and average time on the page." />
               <ShareTable
                 rows={data.top_pages}
@@ -166,9 +165,9 @@ export default function AdminAnalyticsPage() {
                 ]}
                 shareKey="share"
               />
-            </section>
+            </Card>
 
-            <section className={card}>
+            <Card>
               <Heading title="Where visits start" note="The first page of each visit, how many left without a second page, and how many signed up." />
               <ShareTable
                 rows={data.entry_pages}
@@ -179,40 +178,44 @@ export default function AdminAnalyticsPage() {
                 ]}
                 shareKey="share"
               />
-            </section>
+            </Card>
 
-            <section className={card}>
+            <Card>
               <Heading title="Where people go next" note="The most common clicks from one page to another." />
               {data.flows.length === 0 ? (
-                <Empty />
+                <NothingYet />
               ) : (
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      <th className={th}>From</th>
-                      <th className={th}>To</th>
-                      <th className={`${th} text-right`}>Times</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.flows.map((f) => (
-                      <tr key={`${f.from}>${f.to}`} className="border-t border-stone-2/60">
-                        <td className={`${td} break-all`}>{pageLabel(f.from)}</td>
-                        <td className={`${td} break-all`}>→ {pageLabel(f.to)}</td>
-                        <td className={num}>{count(f.count)}</td>
+                <div className={table.wrap}>
+                  <table className={tight}>
+                    <thead>
+                      <tr className={table.headRow}>
+                        <th className={th}>From</th>
+                        <th className={th}>To</th>
+                        <th className={`${th} text-right`}>Times</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className={table.body}>
+                      {data.flows.map((f) => (
+                        <tr key={`${f.from}>${f.to}`} className={table.row}>
+                          <td className={`${td} break-all`}>{pageLabel(f.from)}</td>
+                          <td className={`${td} break-all`}>
+                            <span className="text-brand-text">→</span> {pageLabel(f.to)}
+                          </td>
+                          <td className={num}>{count(f.count)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
-            </section>
+            </Card>
 
-            <section className={card}>
+            <Card>
               <Heading title="Where visits end" note="The last page people saw before leaving." />
               <ShareTable rows={data.exit_pages} cols={[["Visits", (r) => count(r.visits as number)], ["Share", (r) => pct(r.share as number)]]} shareKey="share" />
-            </section>
+            </Card>
 
-            <section className={card}>
+            <Card>
               <Heading title="Where visitors come from" note="Campaign tag (utm_source) or the referring website; (direct) means typed in or bookmarked." />
               <ShareTable
                 rows={data.sources.map((s) => ({ ...s, path: s.source }))}
@@ -224,47 +227,58 @@ export default function AdminAnalyticsPage() {
                 shareKey="share"
                 raw
               />
-            </section>
+            </Card>
 
-            <section className={card}>
+            <Card>
               <Heading title="Most viewed vendors" note="Profile views and clicks through to the vendor's own website." />
               {data.vendors.top.length === 0 ? (
-                <Empty />
+                <NothingYet />
               ) : (
-                <table className="w-full">
-                  <thead>
-                    <tr>
-                      <th className={th}>Vendor</th>
-                      <th className={`${th} text-right`}>Views</th>
-                      <th className={`${th} text-right`}>Clicks</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.vendors.top.map((v) => (
-                      <tr key={v.org_id} className="border-t border-stone-2/60">
-                        <td className={td}>
-                          <a href={`/v/${v.org_id}`} target="_blank" rel="noreferrer" className="hover:text-brand-text">
-                            {v.name}
-                          </a>
-                        </td>
-                        <td className={num}>{count(v.views)}</td>
-                        <td className={num}>{count(v.clicks)}</td>
+                <div className={table.wrap}>
+                  <table className={tight}>
+                    <thead>
+                      <tr className={table.headRow}>
+                        <th className={th}>Vendor</th>
+                        <th className={`${th} text-right`}>Views</th>
+                        <th className={`${th} text-right`}>Clicks</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className={table.body}>
+                      {data.vendors.top.map((v) => (
+                        <tr key={v.org_id} className={table.row}>
+                          <td className={td}>
+                            <a href={`/v/${v.org_id}`} target="_blank" rel="noreferrer" className="font-medium text-ink hover:text-brand-text">
+                              {v.name}
+                            </a>
+                          </td>
+                          <td className={num}>{count(v.views)}</td>
+                          <td className={num}>{count(v.clicks)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
-            </section>
+            </Card>
           </div>
         </>
       )}
 
-      <div className="mt-8 rounded-2xl border border-dashed border-stone-2 p-4 text-sm text-ink-soft/80">
+      {/* Whether this browser's own visits are counted. */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-stone-2 bg-white/60 p-4 text-sm text-ink-soft/80 sm:flex-row sm:items-center sm:justify-between">
         {excluded ? (
           <>
-            This browser is <strong className="text-ink">not counted</strong>, so your own visits don&rsquo;t show up here.{" "}
+            <p className="flex items-center gap-2">
+              <Badge tone="grey" dot>
+                Not counted
+              </Badge>
+              <span>
+                This browser is <strong className="text-ink">not counted</strong>, so your own visits don&rsquo;t show up here.
+              </span>
+            </p>
             <button
-              className="font-semibold text-brand-text"
+              type="button"
+              className={btn.small}
               onClick={() => {
                 setTrackingDisabled(false);
                 setExcluded(false);
@@ -275,9 +289,15 @@ export default function AdminAnalyticsPage() {
           </>
         ) : (
           <>
-            This browser is counted.{" "}
+            <p className="flex items-center gap-2">
+              <Badge tone="green" dot>
+                Counted
+              </Badge>
+              <span>This browser is counted.</span>
+            </p>
             <button
-              className="font-semibold text-brand-text"
+              type="button"
+              className={btn.small}
               onClick={() => {
                 setTrackingDisabled(true);
                 setExcluded(true);
@@ -288,30 +308,20 @@ export default function AdminAnalyticsPage() {
           </>
         )}
       </div>
-    </main>
-  );
-}
-
-function Tile({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className={card}>
-      <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft/60">{label}</p>
-      <p className="mt-1 text-2xl font-light tabular-nums text-ink">{value}</p>
-      {sub && <p className="mt-0.5 text-xs text-ink-soft/60">{sub}</p>}
     </div>
   );
 }
 
 function Heading({ title, note }: { title: string; note: string }) {
   return (
-    <div className="mb-3">
-      <h2 className="text-base font-medium text-ink">{title}</h2>
-      <p className="text-xs text-ink-soft/60">{note}</p>
+    <div className="mb-4">
+      <h2 className="font-display text-lg font-medium text-ink">{title}</h2>
+      <p className="mt-0.5 text-xs leading-relaxed text-ink-soft/60">{note}</p>
     </div>
   );
 }
 
-const Empty = () => <p className="text-sm text-ink-soft/60">Nothing yet for this period.</p>;
+const NothingYet = () => <Empty>Nothing yet for this period.</Empty>;
 
 /** A table whose first column carries a thin bar showing each row's share. */
 function ShareTable({
@@ -325,12 +335,13 @@ function ShareTable({
   shareKey: string;
   raw?: boolean;
 }) {
-  if (rows.length === 0) return <Empty />;
+  if (rows.length === 0) return <NothingYet />;
   const max = Math.max(...rows.map((r) => Number(r[shareKey]) || 0), 0.0001);
   return (
-    <table className="w-full">
+    <div className={table.wrap}>
+    <table className={tight}>
       <thead>
-        <tr>
+        <tr className={table.headRow}>
           <th className={th}>{raw ? "Source" : "Page"}</th>
           {cols.map(([label]) => (
             <th key={label} className={`${th} text-right`}>
@@ -339,13 +350,13 @@ function ShareTable({
           ))}
         </tr>
       </thead>
-      <tbody>
+      <tbody className={table.body}>
         {rows.map((r, i) => (
-          <tr key={`${r.path}-${i}`} className="border-t border-stone-2/60">
+          <tr key={`${r.path}-${i}`} className={table.row}>
             <td className={td}>
               <div className="break-all">{raw ? String(r.path) : pageLabel(r.path as string)}</div>
-              <div className="mt-1 h-1 rounded-full bg-stone-4" aria-hidden>
-                <div className="h-1 rounded-full bg-brand" style={{ width: `${((Number(r[shareKey]) || 0) / max) * 100}%` }} />
+              <div className="mt-1.5 h-1.5 rounded-full bg-stone-4" aria-hidden>
+                <div className="h-1.5 rounded-full bg-gradient-to-r from-brand to-brand-dark" style={{ width: `${((Number(r[shareKey]) || 0) / max) * 100}%` }} />
               </div>
             </td>
             {cols.map(([label, fmt]) => (
@@ -357,6 +368,7 @@ function ShareTable({
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 
@@ -370,35 +382,36 @@ function DailyChart({ daily }: { daily: Summary["daily"] }) {
   const labelEvery = Math.max(1, Math.ceil(daily.length / 8));
 
   return (
-    <section className={`${card} mt-6`}>
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <h2 className="text-base font-medium text-ink">Visits per day</h2>
-          <p className="text-xs text-ink-soft/60">
+    <Card>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="font-display text-lg font-medium text-ink">Visits per day</h2>
+          <p className="mt-0.5 text-xs text-ink-soft/60">
             {active
               ? `${shortDay(active.day)}: ${count(active.visits)} visits · ${count(active.views)} page views · ${count(active.signups)} new accounts`
               : "Hover a day for its visits, page views and new accounts."}
           </p>
         </div>
-        <button onClick={() => setAsTable((v) => !v)} className="text-xs font-semibold text-brand-text">
+        <button type="button" onClick={() => setAsTable((v) => !v)} className={btn.small}>
+          <Icon name={asTable ? "chart" : "menu"} className="size-3.5" />
           {asTable ? "Show chart" : "Show as table"}
         </button>
       </div>
 
       {asTable ? (
-        <div className="mt-3 max-h-80 overflow-y-auto">
-          <table className="w-full">
+        <div className={`${table.wrap} mt-4 max-h-80 overflow-y-auto`}>
+          <table className={tight}>
             <thead>
-              <tr>
+              <tr className={table.headRow}>
                 <th className={th}>Day</th>
                 <th className={`${th} text-right`}>Visits</th>
                 <th className={`${th} text-right`}>Page views</th>
                 <th className={`${th} text-right`}>New accounts</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className={table.body}>
               {daily.map((d) => (
-                <tr key={d.day} className="border-t border-stone-2/60">
+                <tr key={d.day} className={table.row}>
                   <td className={td}>{shortDay(d.day)}</td>
                   <td className={num}>{count(d.visits)}</td>
                   <td className={num}>{count(d.views)}</td>
@@ -409,8 +422,8 @@ function DailyChart({ daily }: { daily: Summary["daily"] }) {
           </table>
         </div>
       ) : (
-        <div className="mt-4">
-          <div className="relative flex h-40 items-end gap-[2px] border-b border-stone-2" onMouseLeave={() => setHover(null)}>
+        <div className="mt-6">
+          <div className="relative flex h-44 items-end gap-[2px] border-b border-stone-2" onMouseLeave={() => setHover(null)}>
             <span className="pointer-events-none absolute -top-1 left-0 text-[10px] tabular-nums text-ink-soft/50">{count(max)}</span>
             {daily.map((d, i) => (
               <button
@@ -423,7 +436,7 @@ function DailyChart({ daily }: { daily: Summary["daily"] }) {
                 className="flex h-full min-w-0 flex-1 items-end justify-center"
               >
                 <span
-                  className={`block w-full max-w-[24px] rounded-t-[4px] ${hover === i ? "bg-brand-dark" : "bg-brand"}`}
+                  className={`block w-full max-w-[24px] rounded-t-[4px] transition-colors ${hover === i ? "bg-brand-dark" : "bg-brand/80"}`}
                   style={{ height: d.visits ? `${Math.max(2, (d.visits / max) * 100)}%` : "0" }}
                 />
               </button>
@@ -438,6 +451,6 @@ function DailyChart({ daily }: { daily: Summary["daily"] }) {
           </div>
         </div>
       )}
-    </section>
+    </Card>
   );
 }

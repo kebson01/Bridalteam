@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAdmin } from "@/components/admin/admin-shell";
+import { Badge, Card, CardTitle, Empty, Field, Icon, Notice, PageHeader, SearchBox, btn, field } from "@/components/admin/ui";
 
 /**
  * Taking down a couple's guest website.
@@ -37,13 +38,18 @@ const REASONS = [
   "Other",
 ];
 
-const field =
-  "w-full rounded-lg border border-stone-2 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-brand disabled:opacity-60";
+/** The panel's main destructive button: the kit's danger colour at full button size. */
+const TAKEDOWN_BTN =
+  "inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50";
+/** The row's outlined "Take down…" opener. */
+const TAKEDOWN_OPEN =
+  "inline-flex items-center justify-center gap-2 rounded-full border border-red-200 px-3 py-1 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50";
 
 const when = (iso: string) =>
   new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
 
 export default function AdminSitesPage() {
+  const { expired } = useAdmin();
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Site[] | null>(null);
   const [heading, setHeading] = useState("Taken down");
@@ -59,9 +65,15 @@ export default function AdminSitesPage() {
     setError(null);
     try {
       const res = await fetch(`/api/admin/sites?q=${encodeURIComponent(query)}`);
+      // A 401 means the admin session ran out: the shell shows sign-in again.
+      if (res.status === 401) {
+        setResults(null);
+        expired();
+        return;
+      }
       const body = await res.json();
       if (!res.ok) {
-        setError(res.status === 401 ? "Sign in on the admin dashboard first." : (body.error ?? "Lookup failed."));
+        setError(body.error ?? "Lookup failed.");
         setResults(null);
       } else {
         setResults(body.results);
@@ -90,6 +102,10 @@ export default function AdminSitesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wedding_id: site.id, action, reason: full }),
       });
+      if (res.status === 401) {
+        expired();
+        return;
+      }
       const body = await res.json();
       if (!res.ok) {
         setError(body.error ?? "That didn't work.");
@@ -110,176 +126,181 @@ export default function AdminSitesPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-5 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-medium text-ink">Guest websites</h1>
-        <Link href="/admin" className="text-sm text-ink-soft hover:text-brand-text">
-          ← Admin
-        </Link>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Couples"
+        title="Guest websites"
+        subtitle="Find a reported guest website, take it down with a reason, or restore it once it's fixed."
+        actions={
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setQ("");
+              void load("");
+            }}
+            className={btn.secondary}
+          >
+            <Icon name="refresh" className="size-4 text-ink-soft/60" />
+            Show taken down
+          </button>
+        }
+      />
 
-      <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft/75">
-        Paste the link someone reported, or search an address or the couple&rsquo;s names. Taking a site down switches it
-        off, stops the couple&rsquo;s AI from republishing it, and emails them your reason. Their draft is kept so they can
-        fix it; restore it here when it&rsquo;s OK.
-      </p>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          void load(q.trim());
-        }}
-        className="mt-6 flex gap-2"
-      >
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="bridalteam.com/wedding/gene-and-john, or Gene"
-          disabled={busy}
-          className={field}
-        />
-        <button
-          type="submit"
-          disabled={busy}
-          className="shrink-0 rounded-full bg-gradient-to-r from-brand to-brand-dark px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+      <Card className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void load(q.trim());
+          }}
+          className="flex flex-col gap-3 sm:flex-row"
         >
-          {busy ? "…" : q.trim() ? "Search" : "Show taken down"}
-        </button>
-      </form>
+          <div className="min-w-0 flex-1">
+            <SearchBox
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              aria-label="Search guest websites"
+              placeholder="bridalteam.com/wedding/gene-and-john, or Gene"
+              disabled={busy}
+            />
+          </div>
+          <button type="submit" disabled={busy} className={`${btn.primary} shrink-0`}>
+            {busy ? "…" : q.trim() ? "Search" : "Show taken down"}
+          </button>
+        </form>
+        <p className="max-w-3xl text-xs leading-relaxed text-ink-soft/65">
+          Paste the link someone reported, or search an address or the couple&rsquo;s names. Taking a site down switches it
+          off, stops the couple&rsquo;s AI from republishing it, and emails them your reason. Their draft is kept so they can
+          fix it; restore it here when it&rsquo;s OK.
+        </p>
+      </Card>
 
-      {error && (
-        <p role="alert" className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </p>
-      )}
-      {notice && (
-        <p role="status" className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
-          {notice}
-        </p>
-      )}
+      {error && <Notice tone="error">{error}</Notice>}
+      {notice && <Notice tone="success">{notice}</Notice>}
 
       {results && (
-        <h2 className="mt-8 text-xs font-semibold uppercase tracking-wide text-ink-soft/60">
-          {heading} ({results.length})
-        </h2>
-      )}
-      {results?.length === 0 && (
-        <p className="mt-3 rounded-lg bg-stone-4 px-4 py-3 text-sm text-ink-soft/80">
-          {heading === "Taken down" ? "No sites are taken down right now." : "No wedding matches that."}
-        </p>
-      )}
+        <section className="space-y-3">
+          <CardTitle count={results.length}>{heading}</CardTitle>
+          {results.length === 0 && (
+            <Empty>{heading === "Taken down" ? "No sites are taken down right now." : "No wedding matches that."}</Empty>
+          )}
+          <ul className="space-y-3">
+            {results.map((s) => {
+              const url = s.slug ? `/wedding/${s.slug}` : null;
+              return (
+                <li key={s.id}>
+                  <Card tone={s.blocked_at ? "danger" : undefined} className="space-y-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-display text-lg font-medium text-ink">{s.names}</h3>
+                          {s.blocked_at ? (
+                            <Badge tone="red" dot>
+                              Taken down
+                            </Badge>
+                          ) : s.published ? (
+                            <Badge tone="green" dot>
+                              Live
+                            </Badge>
+                          ) : (
+                            <Badge tone="grey" dot>
+                              Off
+                            </Badge>
+                          )}
+                          <Badge tone="grey">{s.site_mode === "custom" && s.custom_live_at ? "Custom site" : "Standard page"}</Badge>
+                        </div>
+                        <p className="break-words text-xs text-ink-soft/65">
+                          {url ? `bridalteam.com${url}` : "No address"}
+                          {s.event_date && ` · Wedding ${s.event_date}`}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {url && (
+                          <a href={url} target="_blank" rel="noopener noreferrer" className={btn.small}>
+                            View
+                            <Icon name="external" className="size-3.5" />
+                          </a>
+                        )}
+                        {open !== s.id && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpen(s.id);
+                              setDetail("");
+                              setReason(REASONS[0]);
+                            }}
+                            className={s.blocked_at ? btn.small : TAKEDOWN_OPEN}
+                          >
+                            {s.blocked_at ? "Restore…" : "Take down…"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
 
-      <ul className="mt-3 space-y-3">
-        {(results ?? []).map((s) => {
-          const url = s.slug ? `/wedding/${s.slug}` : null;
-          return (
-            <li key={s.id} className="rounded-2xl border border-stone-2 bg-white p-5 shadow-card">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="text-base font-medium text-ink">{s.names}</h3>
-                <span className="flex flex-wrap gap-1.5 text-xs font-semibold">
-                  {s.blocked_at ? (
-                    <span className="rounded-full bg-red-50 px-2.5 py-1 text-red-700">Taken down</span>
-                  ) : s.published ? (
-                    <span className="rounded-full bg-green-50 px-2.5 py-1 text-green-800">Live</span>
-                  ) : (
-                    <span className="rounded-full bg-stone-4 px-2.5 py-1 text-ink-soft/70">Off</span>
-                  )}
-                  <span className="rounded-full bg-stone-4 px-2.5 py-1 text-ink-soft/70">
-                    {s.site_mode === "custom" && s.custom_live_at ? "Custom site" : "Standard page"}
-                  </span>
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-ink-soft/75">
-                {url ? (
-                  <a href={url} target="_blank" rel="noopener noreferrer" className="text-brand-text hover:underline">
-                    bridalteam.com{url} ↗
-                  </a>
-                ) : (
-                  "No address"
-                )}
-                {s.event_date && ` · Wedding ${s.event_date}`}
-              </p>
-              {s.blocked_at && (
-                <p className="mt-2 text-sm text-red-700">
-                  Taken down {when(s.blocked_at)}: {s.block_reason}
-                </p>
-              )}
-              {s.history.length > 0 && (
-                <ul className="mt-2 space-y-0.5 text-xs text-ink-soft/60">
-                  {s.history.map((h) => (
-                    <li key={h.created_at + h.action}>
-                      {when(h.created_at)} · {h.action === "takedown" ? "Taken down" : "Restored"}
-                      {h.admin ? ` by ${h.admin}` : ""}
-                      {h.reason ? ` · ${h.reason}` : ""}
-                    </li>
-                  ))}
-                </ul>
-              )}
+                    {s.blocked_at && (
+                      <p className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+                        Taken down {when(s.blocked_at)}: {s.block_reason}
+                      </p>
+                    )}
 
-              {open === s.id ? (
-                <div className="mt-4 space-y-2 rounded-xl bg-stone-4 p-4">
-                  {!s.blocked_at && (
-                    <label className="block text-sm font-medium text-ink">
-                      Reason
-                      <select value={reason} onChange={(e) => setReason(e.target.value)} disabled={busy} className={`${field} mt-1`}>
-                        {REASONS.map((r) => (
-                          <option key={r}>{r}</option>
-                        ))}
-                      </select>
-                    </label>
-                  )}
-                  <label className="block text-sm font-medium text-ink">
-                    {s.blocked_at ? "Note (optional, for the log)" : "Details for the couple (optional)"}
-                    <input
-                      value={detail}
-                      onChange={(e) => setDetail(e.target.value)}
-                      maxLength={300}
-                      disabled={busy}
-                      placeholder={s.blocked_at ? "Images replaced" : "The gallery section"}
-                      className={`${field} mt-1`}
-                    />
-                  </label>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => act(s, s.blocked_at ? "restore" : "takedown")}
-                      disabled={busy || (!s.blocked_at && reason === "Other" && !detail.trim())}
-                      className={`rounded-full px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60 ${
-                        s.blocked_at ? "bg-green-700" : "bg-red-700"
-                      }`}
-                    >
-                      {s.blocked_at ? "Restore — let them publish again" : "Take down now"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setOpen(null)}
-                      className="rounded-full border border-stone-2 bg-white px-5 py-2.5 text-sm font-semibold text-ink-soft"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpen(s.id);
-                    setDetail("");
-                    setReason(REASONS[0]);
-                  }}
-                  className={`mt-4 rounded-full border px-5 py-2 text-sm font-semibold ${
-                    s.blocked_at
-                      ? "border-stone-2 text-ink-soft hover:border-green-700 hover:text-green-800"
-                      : "border-red-200 text-red-700 hover:border-red-700"
-                  }`}
-                >
-                  {s.blocked_at ? "Restore…" : "Take down…"}
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </main>
+                    {open === s.id && (
+                      <div className="space-y-3 rounded-2xl border border-stone-2 bg-stone-4/50 p-4">
+                        {!s.blocked_at && (
+                          <Field label="Reason">
+                            <select value={reason} onChange={(e) => setReason(e.target.value)} disabled={busy} className={field}>
+                              {REASONS.map((r) => (
+                                <option key={r}>{r}</option>
+                              ))}
+                            </select>
+                          </Field>
+                        )}
+                        <Field label={s.blocked_at ? "Note (optional, for the log)" : "Details for the couple (optional)"}>
+                          <input
+                            value={detail}
+                            onChange={(e) => setDetail(e.target.value)}
+                            maxLength={300}
+                            disabled={busy}
+                            placeholder={s.blocked_at ? "Images replaced" : "The gallery section"}
+                            className={field}
+                          />
+                        </Field>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => act(s, s.blocked_at ? "restore" : "takedown")}
+                            disabled={busy || (!s.blocked_at && reason === "Other" && !detail.trim())}
+                            className={s.blocked_at ? btn.primary : TAKEDOWN_BTN}
+                          >
+                            {s.blocked_at ? "Restore — let them publish again" : "Take down now"}
+                          </button>
+                          <button type="button" onClick={() => setOpen(null)} className={btn.secondary}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {s.history.length > 0 && (
+                      <div className="border-t border-stone-2 pt-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-soft/50">History</p>
+                        <ul className="mt-1.5 space-y-0.5 text-xs text-ink-soft/60">
+                          {s.history.map((h) => (
+                            <li key={h.created_at + h.action}>
+                              {when(h.created_at)} · {h.action === "takedown" ? "Taken down" : "Restored"}
+                              {h.admin ? ` by ${h.admin}` : ""}
+                              {h.reason ? ` · ${h.reason}` : ""}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </Card>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+    </div>
   );
 }
